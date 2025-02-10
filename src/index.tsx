@@ -33,7 +33,7 @@ export function Index() {
 
     return (
         <Routes>
-            <Route path="/" element={<BaseIndex/>} />
+            <Route path="/" element={<BaseIndex/>}/>
         </Routes>
     )
 }
