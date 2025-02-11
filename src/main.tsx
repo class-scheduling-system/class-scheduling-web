@@ -26,8 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/tailwind.css";
-import "./assets/css/daisyui.css";
+import "./assets/css/style.css";
 
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'

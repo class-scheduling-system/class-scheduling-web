@@ -28,12 +28,14 @@
 
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
+import {BaseInit} from "./views/base_init.tsx";
 
 export function Index() {
 
     return (
         <Routes>
-            <Route path="/" element={<BaseIndex/>}/>
+            <Route path={"/"} element={<BaseIndex/>}/>
+            <Route path={"/init"} element={<BaseInit/>}/>
         </Routes>
     )
 }

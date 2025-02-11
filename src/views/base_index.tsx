@@ -26,7 +26,39 @@
  * --------------------------------------------------------------------------------
  */
 
+import {useEffect} from "react";
+import {useNavigate} from "react-router";
+
+// 主页，会根据逻辑判断跳转页面
 export function BaseIndex() {
+    const navigate = useNavigate();
+
+    // 用于判断用户应该跳转到哪里
+    useEffect(() => {
+        const func = async () => {
+            if (!localStorage.getItem("user-token")) {
+                navigate("/auth/login");
+            }
+        }
+
+        func().then();
+    }, [navigate]);
+
+    // 用于检查是否是初始化模式
+    useEffect(() => {
+        const func = async () => {
+            if (localStorage.getItem("has_init")) {
+                // 获取初始化接口
+                localStorage.setItem("has_init", "1");
+                navigate("/init");
+            } else {
+                localStorage.setItem("has_init", "0");
+            }
+        }
+
+        func().then();
+    }, [navigate]);
+
 
     return (
         <div className="flex justify-center items-center h-screen">

@@ -26,6 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-@plugin "daisyui" {
-    themes: emerald --default;
+/**
+ * 系统初始化数据传输对象（DTO）。
+ * 此类型用于在系统初始化过程中，传递必要的用户账户信息。
+ *
+ * @typedef {Object} SystemInitDTO
+ * @property {string} email - 用户的电子邮件地址。
+ * @property {string} password - 用户的密码。
+ * @property {string} phone - 用户的联系电话。
+ * @property {string} username - 用户的用户名。
+ */
+export type SystemInitDTO = {
+    email: string;
+    password: string;
+    phone: string;
+    username: string;
 }
