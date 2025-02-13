@@ -26,21 +26,31 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {BaseResponse} from "../models/base_response.ts";
+import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
+/**
+ * 初始化系统API
+ *
+ * @async
+ * @param {SystemInitDTO} data - 系统初始化所需的数据对象
+ * @returns {Promise<BaseResponse<void> | undefined>} - 包含初始化结果的Promise，成功时返回BaseResponse对象，失败或异常时可能返回undefined
+ *
+ * 调用此函数以发起一个异步请求，用于系统的初始化过程。它向服务器的/api/v1/init端点发送POST请求，并传入数据data。
+ * 返回的Promise解析为一个BaseResponse对象，表示操作的结果；如果发生错误或异常，则可能返回undefined。
+ */
+const InitAPI = async (data: SystemInitDTO): Promise<BaseResponse<void> | undefined> => {
+    return BaseApi<void>(
+        MethodType.POST,
+        "/api/v1/init",
+        data,
+        null,
+        null,
+        null
+    );
+}
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+export {
+    InitAPI,
+}

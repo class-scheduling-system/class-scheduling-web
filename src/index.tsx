@@ -29,13 +29,31 @@
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
+import {OvalLoveTwo} from "@icon-park/react";
+import {useSelector} from "react-redux";
+import {ToastStore} from "./models/store/toast_store.ts";
 
 export function Index() {
+    const toast = useSelector((state: { toast: ToastStore[] }) => state.toast);
 
     return (
-        <Routes>
-            <Route path={"/"} element={<BaseIndex/>}/>
-            <Route path={"/init"} element={<BaseInit/>}/>
-        </Routes>
+        <>
+            {/* Toast Message */}
+            <div className="toast toast-top toast-center z-50">
+                <div className="alert alert-success flex transition shadow-md hover:shadow-lg text-success-content">
+                    <OvalLoveTwo theme="outline" size="16"/>
+                    <span>New mail arrived.</span>
+                </div>
+                <div className="alert alert-success">
+                    <span>Message sent successfully.</span>
+                </div>
+            </div>
+
+            {/* Route Info */}
+            <Routes>
+                <Route path={"/"} element={<BaseIndex/>}/>
+                <Route path={"/init"} element={<BaseInit/>}/>
+            </Routes>
+        </>
     )
 }
