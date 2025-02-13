@@ -26,32 +26,22 @@
  * --------------------------------------------------------------------------------
  */
 
-import {useDispatch, useSelector} from 'react-redux';
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
-import {useEffect} from "react";
-import {Message} from "./components/utils/message_toast_util.ts";
 import {ToastComponent} from "./components/toast_component.tsx";
-import {ToastStore} from "./models/store/toast_store.ts";
+import {JSX} from "react";
 
-export function Index() {
-    const toast = useSelector((state: { toast: ToastStore }) => state.toast);
-
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        Message(dispatch, "info", "测试");
-    }, [dispatch]);
-
-    useEffect(() => {
-        console.log(toast)
-    }, [toast]);
-
+/**
+ * 页面入口组件，用于布局和路由配置。
+ *
+ * @return {JSX.Element} 页面渲染内容，包含Toast消息组件与路由配置。
+ */
+export function Index(): JSX.Element {
     return (
         <>
+            {/* Toast Message */}
             <ToastComponent/>
-
             {/* Route Info */}
             <Routes>
                 <Route path={"/"} element={<BaseIndex/>}/>

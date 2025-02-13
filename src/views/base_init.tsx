@@ -33,6 +33,7 @@ import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 import backgroundImage from "../assets/images/init_background.jpg";
 import {InitAPI} from "../apis/init_api.ts";
 import {useNavigate} from "react-router";
+import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
 
 export function BaseInit() {
     const navigate = useNavigate();
@@ -41,6 +42,10 @@ export function BaseInit() {
     const [rePassword, setRePassword] = useState<string>("" as string);
     const [checkPasswordClass, setCheckPasswordClass] = useState<string>("" as string);
     const [checkPasswordWord, setCheckPasswordWord] = useState<string>("" as string);
+
+    useEffect(() => {
+        document.title = `系统初始化 | XXX系统`;
+    });
 
     useEffect(() => {
         // TODO-[25021103] 检查是否已经完成初始化（接口）
@@ -80,19 +85,28 @@ export function BaseInit() {
     return (
         <div className={"w-full h-dvh grid grid-cols-2 bg-base-100"}>
             <div className={"w-full h-lvh relative"}>
-                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"} draggable={false}/>
+                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}
+                     draggable={false}/>
             </div>
             <form onSubmit={onSubmit} className={"flex justify-center h-dvh items-center"}>
                 <div className={"flex flex-col gap-3 w-3/5"}>
                     <span className={"text-4xl font-bold pb-6 text-center"}>系统初始化</span>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
-                            <span className="label">用户名</span>
+                            <div className="label">
+                                <div className={"flex"}>
+                                    <span>用户名</span>
+                                    <span className={"opacity-0"}>空</span>
+                                </div>
+                            </div>
                             <input autoComplete={"name"} type="text" placeholder="xiao_lfeng" required
                                    pattern={"^[0-9A-Za-z\\-_]+$"}
                                    minLength={4} maxLength={32}
                                    onChange={(e) => setData({...data, username: e.target.value})}
                             />
+                            <span className={"label"}>
+                                <User theme="outline" size="20"/>
+                            </span>
                         </label>
                         <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
@@ -103,11 +117,19 @@ export function BaseInit() {
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
-                            <span className="label">邮箱</span>
+                            <div className="label">
+                                <div className={"flex"}>
+                                    <span>邮箱</span>
+                                    <span className={"opacity-0"}>空空</span>
+                                </div>
+                            </div>
                             <input autoComplete={"email"} type="email" placeholder="example@x-lf.cn" required
                                    pattern={"^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"}
                                    onChange={(e) => setData({...data, email: e.target.value})}
                             />
+                            <span className={"label"}>
+                                <Mail theme="outline" size="20"/>
+                            </span>
                         </label>
                         <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
@@ -117,12 +139,20 @@ export function BaseInit() {
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
-                            <span className="label">手机</span>
+                            <div className="label">
+                                <div className={"flex"}>
+                                    <span>手机号</span>
+                                    <span className={"opacity-0"}>空</span>
+                                </div>
+                            </div>
                             <input autoComplete={"mobile tel"} type="tel" placeholder="13388888888" required
                                    pattern={"^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$"}
                                    minLength={11} maxLength={11}
                                    onChange={(e) => setData({...data, phone: e.target.value})}
                             />
+                            <span className={"label"}>
+                                <PhoneTelephone theme="outline" size="20"/>
+                            </span>
                         </label>
                         <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
@@ -132,11 +162,19 @@ export function BaseInit() {
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
-                            <span className="label">密码</span>
+                            <div className="label">
+                                <div className={"flex"}>
+                                    <span>密码</span>
+                                    <span className={"opacity-0"}>空空</span>
+                                </div>
+                            </div>
                             <input autoComplete={"new-password"} type="password" placeholder="******" required
                                    pattern={"^(?=.*[0-9])(?=.*[a-zA-Z])[A-Za-z0-9]{6,}$"}
                                    onChange={(e) => setData({...data, password: e.target.value})}
                             />
+                            <span className={"label"}>
+                                <Key theme="outline" size="20"/>
+                            </span>
                         </label>
                         <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
@@ -148,10 +186,17 @@ export function BaseInit() {
                     </div>
                     <div className={"w-full"}>
                         <label className={"input w-full input-lg transition " + checkPasswordClass}>
-                            <span className="label">重复密码</span>
+                            <div className="label">
+                                <div className={"flex"}>
+                                    <span>重复密码</span>
+                                </div>
+                            </div>
                             <input autoComplete={"new-password"} type="password" placeholder="******" required
                                    onChange={(e) => setRePassword(e.target.value)}
                             />
+                            <span className={"label"}>
+                            <Inspection theme="outline" size="20"/>
+                        </span>
                         </label>
                         <div className={"text-error text-xs pt-2 " + checkPasswordWord}>
                             <div className={"flex flex-col"}>
