@@ -26,28 +26,31 @@
  * --------------------------------------------------------------------------------
  */
 
+import {useDispatch, useSelector} from 'react-redux';
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
-import {OvalLoveTwo} from "@icon-park/react";
-import {useSelector} from "react-redux";
+import {useEffect} from "react";
+import {Message} from "./components/utils/message_toast_util.ts";
+import {ToastComponent} from "./components/toast_component.tsx";
 import {ToastStore} from "./models/store/toast_store.ts";
 
 export function Index() {
-    const toast = useSelector((state: { toast: ToastStore[] }) => state.toast);
+    const toast = useSelector((state: { toast: ToastStore }) => state.toast);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        Message(dispatch, "info", "测试");
+    }, [dispatch]);
+
+    useEffect(() => {
+        console.log(toast)
+    }, [toast]);
 
     return (
         <>
-            {/* Toast Message */}
-            <div className="toast toast-top toast-center z-50">
-                <div className="alert alert-success flex transition shadow-md hover:shadow-lg text-success-content">
-                    <OvalLoveTwo theme="outline" size="16"/>
-                    <span>New mail arrived.</span>
-                </div>
-                <div className="alert alert-success">
-                    <span>Message sent successfully.</span>
-                </div>
-            </div>
+            <ToastComponent/>
 
             {/* Route Info */}
             <Routes>
@@ -55,5 +58,5 @@ export function Index() {
                 <Route path={"/init"} element={<BaseInit/>}/>
             </Routes>
         </>
-    )
+    );
 }

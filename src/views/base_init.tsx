@@ -88,76 +88,76 @@ export function BaseInit() {
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
                             <span className="label">用户名</span>
-                            <input type="text" placeholder="xiao_lfeng" required
+                            <input autoComplete={"name"} type="text" placeholder="xiao_lfeng" required
                                    pattern={"^[0-9A-Za-z\\-_]+$"}
                                    minLength={4} maxLength={32}
                                    onChange={(e) => setData({...data, username: e.target.value})}
                             />
                         </label>
-                        <p className="validator-hint hidden">
+                        <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
                                 <span>用户名长度在 <b>4</b> 至 <b>32</b> 之间</span>
                                 <span>用户名只允许键入 <kbd>0-9,A-Z,a-z</kbd> 以及 <kbd>-</kbd> 和 <kbd>_</kbd></span>
                             </div>
-                        </p>
+                        </div>
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
                             <span className="label">邮箱</span>
-                            <input type="email" placeholder="example@x-lf.cn" required
+                            <input autoComplete={"email"} type="email" placeholder="example@x-lf.cn" required
                                    pattern={"^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"}
                                    onChange={(e) => setData({...data, email: e.target.value})}
                             />
                         </label>
-                        <p className="validator-hint hidden">
+                        <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
                                 <span>邮箱格式不正确</span>
                             </div>
-                        </p>
+                        </div>
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
                             <span className="label">手机</span>
-                            <input type="text" placeholder="13388888888" required
+                            <input autoComplete={"mobile tel"} type="tel" placeholder="13388888888" required
                                    pattern={"^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$"}
                                    minLength={11} maxLength={11}
                                    onChange={(e) => setData({...data, phone: e.target.value})}
                             />
                         </label>
-                        <p className="validator-hint hidden">
+                        <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
                                 <span>手机号格式不正确</span>
                             </div>
-                        </p>
+                        </div>
                     </div>
                     <div className={"w-full"}>
                         <label className="input validator w-full input-lg transition">
                             <span className="label">密码</span>
-                            <input type="password" placeholder="******" required
+                            <input autoComplete={"new-password"} type="password" placeholder="******" required
                                    pattern={"^(?=.*[0-9])(?=.*[a-zA-Z])[A-Za-z0-9]{6,}$"}
                                    onChange={(e) => setData({...data, password: e.target.value})}
                             />
                         </label>
-                        <p className="validator-hint hidden">
+                        <div className="validator-hint hidden">
                             <div className={"flex flex-col"}>
                                 <span>密码强度要求不符合</span>
                                 <span>必须包含 <b>大小写字母</b> 和 <b>数字</b> 的组合，可以使用 <b>特殊字符</b></span>
                                 <span>长度在 <b>6</b> 位数以上</span>
                             </div>
-                        </p>
+                        </div>
                     </div>
                     <div className={"w-full"}>
                         <label className={"input w-full input-lg transition " + checkPasswordClass}>
                             <span className="label">重复密码</span>
-                            <input type="password" placeholder="******" required
+                            <input autoComplete={"new-password"} type="password" placeholder="******" required
                                    onChange={(e) => setRePassword(e.target.value)}
                             />
                         </label>
-                        <p className={"text-error text-xs pt-2 " + checkPasswordWord}>
+                        <div className={"text-error text-xs pt-2 " + checkPasswordWord}>
                             <div className={"flex flex-col"}>
                                 <span>两次密码不一致</span>
                             </div>
-                        </p>
+                        </div>
                     </div>
                     <div className={"w-full flex justify-center"}>
                         <button className={"btn btn-primary btn-lg"} type={"submit"}>初始化</button>

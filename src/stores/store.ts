@@ -27,10 +27,10 @@
  */
 
 import {configureStore} from "@reduxjs/toolkit";
-import {toasterStore} from "./toaster_store.ts";
+import {toastStore} from "./toast_store.ts";
 
 export default configureStore({
     reducer: {
-        toasters: toasterStore.reducer,
+        toast: toastStore.reducer,
     }
 })
