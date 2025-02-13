@@ -26,21 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {JSX} from "react";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * 定义了一个名为`ToastStore`的类型，用于存储 toast 通知的相关信息。
+ * Toast 通知常用于向用户显示短暂的操作反馈或提示信息。
+ *
+ * @property {("success" | "error" | "warning" | "info" | "normal")} type - 提示的类型。可选值包括："success"（成功）、"error"（错误）、"warning"（警告）、"info"（信息）和"normal"（普通）。
+ * @property {string} message - 显示给用户的文本消息。
+ * @property {number} [time] - 可选参数，表示 toast 通知自动消失的时间（单位：毫秒）。如果不设置，默认可能由实现决定。
+ * @property {JSX.Element} [icon] - 可选参数，用于展示在消息前的图标元素，通常是 JSX 格式的 React 组件。
+ */
+export type ToastStore = {
+    type: "success" | "error" | "warning" | "info" | "normal",
+    message: string,
+    time?: number,
+    icon?: JSX.Element,
+}

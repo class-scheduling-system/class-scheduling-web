@@ -31,13 +31,21 @@ import {useEffect, useState} from "react";
 import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 
 import backgroundImage from "../assets/images/init_background.jpg";
+import {InitAPI} from "../apis/init_api.ts";
+import {useNavigate} from "react-router";
 
 export function BaseInit() {
+    const navigate = useNavigate();
 
     const [data, setData] = useState<SystemInitDTO>({} as SystemInitDTO);
     const [rePassword, setRePassword] = useState<string>("" as string);
     const [checkPasswordClass, setCheckPasswordClass] = useState<string>("" as string);
     const [checkPasswordWord, setCheckPasswordWord] = useState<string>("" as string);
+
+    useEffect(() => {
+        // TODO-[25021103] 检查是否已经完成初始化（接口）
+        // 如果检查通过禁止访问当前页面
+    }, []);
 
     useEffect(() => {
         if (rePassword) {
@@ -57,14 +65,22 @@ export function BaseInit() {
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (rePassword !== data.password) {
+            // TODO-[25021101] Tocast
             console.log("密码不正确");
+        }
+
+        const getResp = await InitAPI(data);
+        if (getResp?.output === "Success") {
+            navigate("/");
+        } else {
+            // TODO-[25021102] Tocast
         }
     }
 
     return (
         <div className={"w-full h-dvh grid grid-cols-2 bg-base-100"}>
             <div className={"w-full h-lvh relative"}>
-                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}/>
+                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"} draggable={false}/>
             </div>
             <form onSubmit={onSubmit} className={"flex justify-center h-dvh items-center"}>
                 <div className={"flex flex-col gap-3 w-3/5"}>

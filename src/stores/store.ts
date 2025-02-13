@@ -26,21 +26,11 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {configureStore} from "@reduxjs/toolkit";
+import {toasterStore} from "./toaster_store.ts";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+export default configureStore({
+    reducer: {
+        toasters: toasterStore.reducer,
+    }
+})
