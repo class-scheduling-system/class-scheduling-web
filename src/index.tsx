@@ -29,6 +29,8 @@
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
+import {BaseLogin} from "./views/base_login.tsx";
+
 
 export function Index() {
 
@@ -36,6 +38,7 @@ export function Index() {
         <Routes>
             <Route path={"/"} element={<BaseIndex/>}/>
             <Route path={"/init"} element={<BaseInit/>}/>
+            <Route path={"/login"} element={<BaseLogin/>}/>
         </Routes>
     )
 }
