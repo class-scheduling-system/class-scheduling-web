@@ -27,44 +27,19 @@
  */
 
 import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
 import {BaseResponse} from "../models/base_response.ts";
-import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
-import {SystemInitCheckEntity} from "../models/entity/system_init_check_entity.ts";
 
 /**
- * InitAPI
- * 异步初始化系统接口
+ * 获取站点信息的异步API调用。
+ * 该函数通过发送GET请求到"/api/v1/web/info"来获取站点的相关信息。
  *
- * @param {SystemInitDTO} data - 系统初始化数据传输对象，包含初始化所需参数
- * @returns {Promise<BaseResponse<void> | undefined>} - 初始化操作的响应，成功时返回BaseResponse对象，失败或异常时可能返回undefined
- *
- * 该函数通过POST请求调用`/api/v1/init`端点，用于系统初始化过程，传入的data将用于配置或设置系统。
+ * @returns {Promise<BaseResponse<SiteInfoEntity> | undefined>} 返回一个Promise，解析为包含站点信息实体的BaseResponse对象，或在失败时返回undefined。
  */
-const InitAPI = async (data: SystemInitDTO): Promise<BaseResponse<void> | undefined> => {
-    return BaseApi<void>(
-        MethodType.POST,
-        "/api/v1/init",
-        data,
-        null,
-        null,
-        null
-    );
-}
-
-/**
- * InitCheckAPI
- *
- * 异步函数，用于检查系统初始化状态。
- * 发起GET请求到"/api/v1/init/check"接口，获取系统初始化检查的结果。
- * 返回值为一个Promise， resolve时包含BaseResponse<SystemInitCheckDTO>对象，表示系统初始化检查的响应详情；
- * 在某些情况下，可能resolve为undefined，请调用时注意处理此情况。
- *
- * @returns {Promise<BaseResponse<SystemInitCheckEntity> | undefined>} - 系统初始化检查的响应结果Promise
- */
-const InitCheckAPI = async (): Promise<BaseResponse<SystemInitCheckEntity> | undefined> => {
-    return BaseApi<SystemInitCheckEntity>(
+const GetSiteInfoAPI = async (): Promise<BaseResponse<SiteInfoEntity> | undefined> => {
+    return BaseApi<SiteInfoEntity>(
         MethodType.GET,
-        "/api/v1/init/check",
+        "/api/v1/web/info",
         null,
         null,
         null,
@@ -73,6 +48,5 @@ const InitCheckAPI = async (): Promise<BaseResponse<SystemInitCheckEntity> | und
 }
 
 export {
-    InitAPI,
-    InitCheckAPI
+    GetSiteInfoAPI
 }

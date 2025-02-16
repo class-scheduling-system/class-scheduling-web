@@ -26,14 +26,6 @@
  * --------------------------------------------------------------------------------
  */
 
-/**
- * SystemInitCheckDTO 类型定义
- *
- * 该类型用于表示系统初始化检查的结果数据传输对象（Data Transfer Object）。
- * 主要包含一个属性，用于指示系统初始化是否已完成。
- *
- * @property {boolean} [system_init] - 表示系统是否已完成初始化的布尔值。`true` 表示已初始化，`false` 或者不存在表示未初始化。
- */
-export type SystemInitCheckDTO = {
+export type SystemInitCheckEntity = {
     system_init?: boolean;
 }

@@ -30,7 +30,12 @@ import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
 import {ToastComponent} from "./components/toast_component.tsx";
-import {JSX} from "react";
+import {JSX, useEffect} from "react";
+import {GetSiteInfoAPI} from "./apis/public_api.ts";
+import {useDispatch} from "react-redux";
+import {setSiteStore} from "./stores/site_store.ts";
+import {addToast} from "./stores/toast_store.ts";
+import {Toast} from "./models/store/toast_store.ts";
 
 /**
  * 页面入口组件，用于布局和路由配置。
@@ -38,6 +43,25 @@ import {JSX} from "react";
  * @return {JSX.Element} 页面渲染内容，包含Toast消息组件与路由配置。
  */
 export function Index(): JSX.Element {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const func = async () => {
+            if (localStorage.getItem("has_init") === "0") {
+                const getResp = await GetSiteInfoAPI();
+                if (getResp?.output === "Success") {
+                    dispatch(setSiteStore(getResp.data!));
+                } else {
+                    dispatch(addToast({
+                        type: "error",
+                        message: "获取系统信息失败"
+                    } as Toast));
+                }
+            }
+        }
+        func().then();
+    }, [dispatch]);
+
     return (
         <>
             {/* Toast Message */}

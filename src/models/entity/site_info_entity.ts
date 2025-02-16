@@ -26,13 +26,44 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {toastStore} from "./toast_store.ts";
-import {siteStore} from "./site_store.ts";
-
-export default configureStore({
-    reducer: {
-        toast: toastStore.reducer,
-        site: siteStore.reducer
-    }
-})
+/**
+ * 代表站点信息的实体类型。
+ * 包含了站点的基础信息、联系与社交方式、备案与版权信息以及高级元数据等属性。
+ * 允许存在未定义的其他属性，以提供灵活性。
+ */
+export type SiteInfoEntity = {
+    /**
+     * 站点联系与社交
+     */
+    contact_email?: string;
+    contact_phone?: string;
+    copyright_status?: string;
+    description?: string;
+    founder?: string;
+    icon_url?: string;
+    icp_link?: string;
+    /**
+     * 站点备案与版权
+     */
+    icp_number?: string;
+    keywords?: string;
+    launch_date?: string;
+    logo_url?: string;
+    /**
+     * 站点基础信息
+     */
+    name?: string;
+    office_address?: string;
+    open_source_license?: string;
+    /**
+     * 站点高级元数据
+     */
+    owner?: string;
+    security_record?: string;
+    security_record_link?: string;
+    sub_title?: string;
+    technology_stack?: string;
+    title?: string;
+    wechat_office_account?: string;
+    weibo_url?: string;
+}

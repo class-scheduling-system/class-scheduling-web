@@ -47,29 +47,21 @@ export function BaseIndex(): JSX.Element {
     // 用于检查是否是初始化模式
     useEffect(() => {
         const func = async () => {
-            if (localStorage.getItem("has_init")) {
-                if (localStorage.getItem("has_init") === "1") {
-                    navigate("/init");
-                } else {
-                    navigate("/auth/login");
-                }
-            } else {
-                try {
-                    const getResp = await InitCheckAPI();
-                    if (getResp?.output === "Success") {
-                        if (getResp.data!.system_init) {
-                            localStorage.setItem("has_init", "1");
-                            navigate("/init");
-                        } else {
-                            localStorage.setItem("has_init", "0");
-                            navigate("/auth/login");
-                        }
+            try {
+                const getResp = await InitCheckAPI();
+                if (getResp?.output === "Success") {
+                    if (getResp.data!.system_init) {
+                        localStorage.setItem("has_init", "1");
+                        navigate("/init");
                     } else {
-                        Message(dispatch, "error", "系统初始化检查失败，请联系管理员!");
+                        localStorage.setItem("has_init", "0");
+                        navigate("/auth/login");
                     }
-                } catch (e) {
-                    console.error(e);
+                } else {
+                    Message(dispatch, "error", "系统初始化检查失败，请联系管理员!");
                 }
+            } catch (e) {
+                console.error(e);
             }
         }
 

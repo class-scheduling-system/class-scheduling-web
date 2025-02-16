@@ -31,12 +31,15 @@ import {useEffect, useState} from "react";
 import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 
 import backgroundImage from "../assets/images/init_background.jpg";
-import {InitAPI} from "../apis/init_api.ts";
+import {InitAPI, InitCheckAPI} from "../apis/init_api.ts";
 import {useNavigate} from "react-router";
 import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
+import {Message} from "../components/utils/message_toast_util.ts";
+import {useDispatch} from "react-redux";
 
 export function BaseInit() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [data, setData] = useState<SystemInitDTO>({} as SystemInitDTO);
     const [rePassword, setRePassword] = useState<string>("" as string);
@@ -44,13 +47,24 @@ export function BaseInit() {
     const [checkPasswordWord, setCheckPasswordWord] = useState<string>("" as string);
 
     useEffect(() => {
-        document.title = `系统初始化 | XXX系统`;
+        document.title = `系统初始化 | 智课方舟`;
     });
 
     useEffect(() => {
-        // TODO-[25021103] 检查是否已经完成初始化（接口）
-        // 如果检查通过禁止访问当前页面
-    }, []);
+        const func = async () => {
+            const getResp = await InitCheckAPI();
+            if (getResp?.output === "Success") {
+                if (!getResp.data!.system_init) {
+                    localStorage.setItem("has_init", "0");
+                    Message(dispatch, "warning", "请勿重复初始化系统");
+                    navigate("/auth/login");
+                }
+            } else {
+                Message(dispatch, "error", "系统初始化状态检查失败");
+            }
+        }
+        func().then();
+    }, [dispatch, navigate]);
 
     useEffect(() => {
         if (rePassword) {
@@ -70,15 +84,16 @@ export function BaseInit() {
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (rePassword !== data.password) {
-            // TODO-[25021101] Tocast
+            Message(dispatch, "info", "两次密码不一致");
             console.log("密码不正确");
         }
 
         const getResp = await InitAPI(data);
         if (getResp?.output === "Success") {
+            Message(dispatch, "success", "系统初始化成功");
             navigate("/");
         } else {
-            // TODO-[25021102] Tocast
+            Message(dispatch, "error", "系统初始化失败，请联系管理员");
         }
     }
 
