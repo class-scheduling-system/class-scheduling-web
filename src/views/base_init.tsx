@@ -27,17 +27,23 @@
  */
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {JSX, useEffect, useState} from "react";
 import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
-
-import backgroundImage from "../assets/images/init_background.jpg";
 import {InitAPI, InitCheckAPI} from "../apis/init_api.ts";
 import {useNavigate} from "react-router";
 import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
 import {Message} from "../components/utils/message_toast_util.ts";
 import {useDispatch} from "react-redux";
 
-export function BaseInit() {
+import backgroundImage from "../assets/images/init_background.jpg";
+
+/**
+ * 初始化系统的基础设置页面。
+ * 该函数会检查系统是否已经被初始化，并提供表单让用户输入必要的信息（如用户名、邮箱、手机号和密码）来完成系统的初始化。
+ *
+ * @return {JSX.Element} 返回一个React组件，包含了系统初始化的表单界面。
+ */
+export function BaseInit(): JSX.Element {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 

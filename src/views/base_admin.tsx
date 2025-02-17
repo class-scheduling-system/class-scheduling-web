@@ -27,51 +27,46 @@
  */
 
 import {JSX, useEffect} from "react";
-import {useNavigate} from "react-router";
-import {InitCheckAPI} from "../apis/init_api.ts";
-import {Message} from "../components/utils/message_toast_util.ts";
-import {useDispatch} from "react-redux";
+import {useSelector} from "react-redux";
+import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
+import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
+import {Route, Routes, useLocation, useNavigate} from "react-router";
+import {AdminDashboard} from "./admin/admin_dashboard.tsx";
+import {AdminUser} from "./admin/admin_user.tsx";
 
 /**
- * 基础索引组件
- *
- * 此组件负责在应用启动时检查系统初始化状态，并根据检查结果导航到相应的页面（初始化页面或登录页面）。
- * 它利用 `useDispatch` 和 `useNavigate` 钩子函数来触发 Redux 动作和页面导航。
- *
- * @return {JSX.Element} 返回一个加载中的动画界面，直到系统完成初始化状态检查并进行页面跳转。
+ * 生成一个基础的控制台组件。
+ * 该函数返回一个包含标题为"Base Console"的div元素。
+ * @return {JSX.Element} 包含基础控制台标题的div元素
  */
-export function BaseIndex(): JSX.Element {
-    const dispatch = useDispatch();
+export function BaseAdmin(): JSX.Element {
+    const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
+    const location = useLocation();
     const navigate = useNavigate();
 
-    // 检查系统初始化状态
     useEffect(() => {
-        const func = async () => {
-            try {
-                const getResp = await InitCheckAPI();
-                if (getResp?.output === "Success") {
-                    if (getResp.data!.system_init) {
-                        localStorage.setItem("has_init", "1");
-                        navigate("/init");
-                    } else {
-                        localStorage.setItem("has_init", "0");
-                        navigate("/auth/login");
-                    }
-                } else {
-                    Message(dispatch, "error", "系统初始化检查失败，请联系管理员!");
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        if (location.pathname === "/admin") {
+            navigate("/admin/dashboard");
         }
-
-        func().then();
-    }, [dispatch, navigate]);
-
+    }, [location.pathname, navigate]);
 
     return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"/>
+        <div className={"h-lvh flex"}>
+            <div className={"w-64 h-full bg-base-200 shadow-lg"}>
+                <AdminNavComponent/>
+            </div>
+            <div className={"w-full flex flex-col flex-1"}>
+                <div className={"w-full bg-base-100 p-4 shadow flex justify-between"}>
+                    <div>面包屑导航</div>
+                    <div>用户信息</div>
+                </div>
+                <div className={"p-6 flex-1 overflow-auto"}>
+                    <Routes>
+                        <Route path={"/dashboard"} element={<AdminDashboard site={site}/>}/>
+                        <Route path={"/user"} element={<AdminUser site={site}/>}/>
+                    </Routes>
+                </div>
+            </div>
         </div>
     );
 }

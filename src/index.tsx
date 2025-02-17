@@ -36,6 +36,7 @@ import {useDispatch} from "react-redux";
 import {setSiteStore} from "./stores/site_store.ts";
 import {addToast} from "./stores/toast_store.ts";
 import {Toast} from "./models/store/toast_store.ts";
+import {BaseAdmin} from "./views/base_admin.tsx";
 
 /**
  * 页面入口组件，用于布局和路由配置。
@@ -70,6 +71,7 @@ export function Index(): JSX.Element {
             <Routes>
                 <Route path={"/"} element={<BaseIndex/>}/>
                 <Route path={"/init"} element={<BaseInit/>}/>
+                <Route path={"/admin/*"} element={<BaseAdmin/>}/>
             </Routes>
         </>
     );
