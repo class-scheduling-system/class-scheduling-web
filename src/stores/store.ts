@@ -27,7 +27,7 @@
  */
 
 import {configureStore} from "@reduxjs/toolkit";
-import {toasterStore} from "./toaster_store.ts";
+import {toasterStore} from "./toaster_store.tsx";
 
 export default configureStore({
     reducer: {

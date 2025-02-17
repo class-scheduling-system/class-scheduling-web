@@ -27,18 +27,20 @@
  */
 
 import {Route, Routes} from "react-router";
-import {BaseIndex} from "./views/base_index.tsx";
-import {BaseInit} from "./views/base_init.tsx";
-import {SystemAdmin} from "./views/admin/admin.tsx";
+import {AuthLogin} from "./auth/auth_login.tsx";
+import {AuthRegister} from "./auth/auth_register.tsx";
+import {AuthAlterPassword} from "./auth/auth_change_password.tsx";
+import {AuthForgetPassword} from "./auth/auth_forget_password.tsx";
 
 
-export function Index() {
+export function BaseAuth() {
 
     return (
         <Routes>
-            <Route path={"/"} element={<BaseIndex/>}/>
-            <Route path={"/init"} element={<BaseInit/>}/>
-            <Route path={"/admin"} element={<SystemAdmin/>}/>
+            <Route path={"/login"} element={<AuthLogin/>}/>
+            <Route path={"/register"} element={<AuthRegister/>}/>
+            <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
+            <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
         </Routes>
     )
 }

@@ -26,9 +26,10 @@
  * --------------------------------------------------------------------------------
  */
 
-import backgroundImage from "../assets/images/init_background.jpg";
+import backgroundImage from "../../assets/images/init_background.jpg";
 
-export function BaseLogin() {
+
+export function AuthAlterPassword() {
 
     return (
         <div className={"w-full h-dvh grid grid-cols-2 bg-gray-50"}>
@@ -38,25 +39,28 @@ export function BaseLogin() {
             <form className="flex justify-center h-dvh items-center">
                 <div className="card bg-base-100 shadow-md flex flex-col gap-6 w-3/5 p-8 items-center">
                     <span className="text-3xl text-gray-700 font-bold text-center"></span>
-                    <span className="text-2xl text-gray-700 font-bold pb-4 text-center">请登录您的账户</span>
+                    <span className="text-2xl text-gray-700 font-bold pb-4 text-center">修改密码</span>
 
                     {/* 输入框部分 */}
                     <div className="flex flex-col gap-4 w-4/5 items-center">
                         <label className="bg-gray-50 input input-md transition flex items-center w-full">
-                            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="24" cy="12" r="8" fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 opacity-70">
+                                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
                             </svg>
-                            <input type="text" className="grow text-md px-4 self-center" placeholder="用户名/邮箱/手机号/学号/工号" />
+                            <input type="text" className="grow text-md px-4 self-center" placeholder="旧密码" />
                         </label>
 
                         <label className="bg-gray-50 input input-md transition flex items-center w-full">
-                            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22.8682 24.2982C25.4105 26.7935 26.4138 30.4526 25.4971 33.8863C24.5805 37.32 21.8844 40.0019 18.4325 40.9137C14.9806 41.8256 11.3022 40.8276 8.79375 38.2986C5.02208 34.4141 5.07602 28.2394 8.91499 24.4206C12.754 20.6019 18.9613 20.5482 22.8664 24.3L22.8682 24.2982Z" fill="none" stroke="#333" strokeWidth="4" strokeLinejoin="round"/>
-                                <path d="M23 24L40 7" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M30.3052 16.9001L35.7337 22.3001L42.0671 16.0001L36.6385 10.6001L30.3052 16.9001Z" fill="none" stroke="#333" strokeWidth="4" strokeLinejoin="round"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 opacity-70">
+                                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
                             </svg>
-                            <input type="password" className="grow text-md px-4 self-center" placeholder="密码" />
+                            <input type="password" className="grow text-md px-4 self-center" placeholder="新密码" />
+                        </label>
+                        <label className="bg-gray-50 input input-md transition flex items-center w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 opacity-70">
+                                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
+                            </svg>
+                            <input type="password" className="grow text-md px-4 self-center" placeholder="再次输入新密码" />
                         </label>
 
                         <p className="validator-hint hidden text-red-500 text-sm text-center">
@@ -68,18 +72,13 @@ export function BaseLogin() {
                         </p>
                     </div>
 
-                    {/* 登录按钮 */}
-                    <div className="w-full flex justify-center mt-2"> {/* 减少上边距 */}
-                        <button className="btn btn-primary btn-lg w-48 text-gray-100">登录</button>
-                    </div>
-
-                    {/* 分割线 */}
-                    <div className="divider my-1"></div> {/* 减少分割线的上下边距 */}
-
-                    {/* 重置密码和修改密码 */}
-                    <div className="flex gap-4"> {/* 减少上边距，增加按钮之间的水平间距 */}
-                        <button className="hover:text-green-600">重置密码？</button>
-                        <button className="hover:text-green-600">修改密码？</button>
+                    <div className="flex justify-center gap-2 items-center">
+                        <div className="w-full flex justify-center mt-2"> {/* 减少上边距 */}
+                            <button className="btn btn-primary btn-md w-36">确认修改</button>
+                        </div>
+                        <div className="w-full flex justify-center mt-2"> {/* 减少上边距 */}
+                            <button className="btn  btn-md w-36">取消修改</button>
+                        </div>
                     </div>
                 </div>
             </form>

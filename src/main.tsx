@@ -34,12 +34,14 @@ import {BrowserRouter} from "react-router";
 import {Index} from "./index.tsx";
 import store from "./stores/store.ts";
 import {Provider} from 'react-redux';
+import {BaseAuth} from "./views/base_auth.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
             <BrowserRouter>
                 <Index/>
+                <BaseAuth/>
             </BrowserRouter>
         </Provider>
     </StrictMode>,
