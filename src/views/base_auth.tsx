@@ -26,23 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {Route, Routes} from "react-router";
+import {AuthLogin} from "./auth/auth_login.tsx";
+import {AuthRegister} from "./auth/auth_register.tsx";
+import {AuthAlterPassword} from "./auth/auth_change_password.tsx";
+import {AuthForgetPassword} from "./auth/auth_forget_password.tsx";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-import {BaseAuth} from "./views/base_auth.tsx";
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-                <BaseAuth/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+export function BaseAuth() {
+
+    return (
+        <Routes>
+            <Route path={"/login"} element={<AuthLogin/>}/>
+            <Route path={"/register"} element={<AuthRegister/>}/>
+            <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
+            <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
+        </Routes>
+    )
+}
