@@ -26,39 +26,56 @@
  * --------------------------------------------------------------------------------
  */
 
-import {createSlice} from "@reduxjs/toolkit";
-import {ToastStore} from "../models/store/toast_store.ts";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {Toast, ToastStore} from "../models/store/toast_store.ts";
 
 /**
  * 用于管理 toaster 相关状态的 Redux slice。
  */
-export const toasterStore = createSlice({
-    name: "toaster",
-    initialState: [{
-        type: "normal",
-        message: "",
-    }] as ToastStore[],
+export const toastStore = createSlice({
+    name: "toast",
+    initialState: {
+        toasts: []
+    } as ToastStore,
     reducers: {
         /**
-         * 向 toaster 状态添加新的通知。
+         * 向 Redux store 中添加一个新的 toast 通知。
          *
-         * @param state - 当前的 toaster 状态数组。
-         * @param action - 指示添加通知动作的对象，其 `payload` 包含：
-         * {
-         *   message: string,          // 显示的消息文本内容。
-         *   type: "success" | "error" | "warning" | "info" | "normal", // 通知类型。
-         *   time?: number,            // 通知展示时长（毫秒），默认为5000毫秒。
-         *   icon?: JSX.Element,       // 可选的图标组件用于增强通知视觉效果。
-         * }
+         * @param state - 当前的 Redux store 状态。
+         * @param action - 包含新 toast 信息的 action 对象，结构为 {payload: {type: string, message: string, icon?: JSX.Element, time?: number}}。
          */
-        addToast: (state, action) => {
+        addToast: (state, action: PayloadAction<Toast>) => {
             const newToast = {
+                id: Date.now(),
                 type: action.payload.type,
                 message: action.payload.message,
-                icon: action.payload.icon || <></>,
-                time: action.payload.time || 5000,
+                icon: action.payload.icon,
+                time: action.payload.time ?? 3000,
+                leave: true
             };
-            state.push(newToast);
+
+            // 检查是否已有相同的通知
+            const isDuplicate = state.toasts.some(toast =>
+                toast.type === newToast.type &&
+                toast.message === newToast.message
+            );
+
+            // 如果不是重复的通知，将其添加到列表中
+            if (!isDuplicate) {
+                state.toasts.push(newToast);
+            }
+        },
+
+
+        /**
+         * 删除指定 ID 的 toast 通知。
+         *
+         * @param state - Redux store 中的当前状态。
+         * @param action - 包含要删除的 toast ID 的 action 对象。
+         */
+        delToast: (state, action) => {
+            // 使用 filter 方法移除匹配的 toast，避免直接修改 state.toasts 在迭代中的问题
+            state.toasts = state.toasts.filter(toast => toast.id !== action.payload);
         },
 
         /**
@@ -67,10 +84,9 @@ export const toasterStore = createSlice({
          * @param state - 当前的 toaster 状态对象。
          */
         resetToast: (state) => {
-            state.splice(0, state.length); // 清空当前所有 toast 记录
-            state.push({type: "normal", message: ""}); // 添加一个默认的空 toast 以保持非空状态
+            state.toasts.splice(0, state.toasts.length); // 清空当前所有 toast 记录
         }
     }
 });
 
-export const {addToast, resetToast} = toasterStore.actions;
+export const {addToast, resetToast, delToast} = toastStore.actions;

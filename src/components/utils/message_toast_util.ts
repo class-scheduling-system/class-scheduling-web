@@ -26,35 +26,46 @@
  * --------------------------------------------------------------------------------
  */
 
+import {addToast, delToast, resetToast} from "../../stores/toast_store.ts";
 import {JSX} from "react";
+import {Toast} from "../../models/store/toast_store.ts";
+import {Dispatch} from "@reduxjs/toolkit";
+
 
 /**
- * 定义了一个名为`ToastStore`的类型，用于存储 toast 通知的相关信息。
- * Toast 通知常用于向用户显示短暂的操作反馈或提示信息。
+ * 显示消息提示的函数。
  *
- * @property {("success" | "error" | "warning" | "info" | "normal")} type - 提示的类型。可选值包括："success"（成功）、"error"（错误）、"warning"（警告）、"info"（信息）和"normal"（普通）。
- * @property {string} message - 显示给用户的文本消息。
- * @property {number} [time] - 可选参数，表示 toast 通知自动消失的时间（单位：毫秒）。如果不设置，默认可能由实现决定。
- * @property {JSX.Element} [icon] - 可选参数，用于展示在消息前的图标元素，通常是 JSX 格式的 React 组件。
- */
-export type ToastStore = {
-    toasts: Toast[]
-}
-
-/**
- * 定义了一个名为`Toasts`的类型，用于存储单个 toast 通知的具体信息。
- * 每个 toast 项包含以下属性：
+ * @param {Dispatch} dispatch - Redux中的调度函数，用于触发状态更新。
+ * @param {"success" | "error" | "warning" | "info" | "normal"} type - 消息的类型，决定展示样式。
+ * @param {string} message - 要显示的消息内容。
+ * @param {number} [time=2000] - 消息自动消失的时间（毫秒），默认为2000毫秒。
+ * @param {JSX.Element} [icon] - 自定义图标元素，可选。
  *
- * @property {"success" | "error" | "warning" | "info" | "normal"} type - 提示的类型，涵盖成功、错误、警告、信息和普通通知。
- * @property {string} message - 要向用户展示的文本消息内容。
- * @property {number} [time] - 可选属性，定义 toast 通知自动消失的时间（单位：毫秒）。默认行为可能由实现决定，如未提供此值。
- * @property {JSX.Element} [icon] - 可选属性，用于在消息前展示的图标元素，通常为一个 JSX 格式的 React 组件。
+ * 此函数创建一个具有唯一ID的消息，并使用调度函数将其添加到应用状态中。根据提供的`time`，
+ * 它还设置了一个定时器，在指定时间后通过调用`dispatch(delToast)`来自动删除该消息。
  */
-export type Toast = {
-    id: number
+function Message(
+    dispatch: Dispatch,
     type: "success" | "error" | "warning" | "info" | "normal",
     message: string,
     time?: number,
-    icon?: JSX.Element,
-    leave: boolean
+    icon?: JSX.Element
+) {
+    const newId = Date.now();
+
+    dispatch(resetToast());
+
+    dispatch(addToast({
+        id: newId,
+        type: type,
+        message: message,
+        time: time,
+        icon: icon
+    } as Toast));
+
+    setTimeout(() => {
+        dispatch(delToast(newId));
+    }, time ?? 3000);
 }
+
+export {Message};

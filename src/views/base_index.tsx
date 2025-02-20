@@ -26,38 +26,47 @@
  * --------------------------------------------------------------------------------
  */
 
-import {useEffect} from "react";
+import {JSX, useEffect} from "react";
 import {useNavigate} from "react-router";
+import {InitCheckAPI} from "../apis/init_api.ts";
+import {Message} from "../components/utils/message_toast_util.ts";
+import {useDispatch} from "react-redux";
 
-// 主页，会根据逻辑判断跳转页面
-export function BaseIndex() {
+/**
+ * 基础索引组件
+ *
+ * 此组件负责在应用启动时检查系统初始化状态，并根据检查结果导航到相应的页面（初始化页面或登录页面）。
+ * 它利用 `useDispatch` 和 `useNavigate` 钩子函数来触发 Redux 动作和页面导航。
+ *
+ * @return {JSX.Element} 返回一个加载中的动画界面，直到系统完成初始化状态检查并进行页面跳转。
+ */
+export function BaseIndex(): JSX.Element {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // 用于判断用户应该跳转到哪里
+    // 检查系统初始化状态
     useEffect(() => {
         const func = async () => {
-            if (!localStorage.getItem("user-token")) {
-                navigate("/auth/login");
+            try {
+                const getResp = await InitCheckAPI();
+                if (getResp?.output === "Success") {
+                    if (getResp.data!.system_init) {
+                        localStorage.setItem("has_init", "1");
+                        navigate("/init");
+                    } else {
+                        localStorage.setItem("has_init", "0");
+                        navigate("/auth/login");
+                    }
+                } else {
+                    Message(dispatch, "error", "系统初始化检查失败，请联系管理员!");
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
 
         func().then();
-    }, [navigate]);
-
-    // 用于检查是否是初始化模式
-    useEffect(() => {
-        const func = async () => {
-            if (localStorage.getItem("has_init")) {
-                // 获取初始化接口
-                localStorage.setItem("has_init", "1");
-                navigate("/init");
-            } else {
-                localStorage.setItem("has_init", "0");
-            }
-        }
-
-        func().then();
-    }, [navigate]);
+    }, [dispatch, navigate]);
 
 
     return (

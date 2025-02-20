@@ -26,13 +26,6 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {toastStore} from "./toast_store.ts";
-import {siteStore} from "./site_store.ts";
-
-export default configureStore({
-    reducer: {
-        toast: toastStore.reducer,
-        site: siteStore.reducer
-    }
-})
+export type SystemInitCheckEntity = {
+    system_init?: boolean;
+}

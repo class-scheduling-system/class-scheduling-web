@@ -26,13 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {toastStore} from "./toast_store.ts";
-import {siteStore} from "./site_store.ts";
+import {useEffect} from "react";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 
-export default configureStore({
-    reducer: {
-        toast: toastStore.reducer,
-        site: siteStore.reducer
-    }
-})
+export function AdminDashboard({site}: Readonly<{
+    site: SiteInfoEntity
+}>) {
+
+    useEffect(() => {
+        document.title = `管理员看板 | ${site.name ?? "Frontleaves Technology"}`;
+    }, [site.name]);
+
+    return (
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p>Welcome to the admin dashboard!</p>
+        </div>
+    );
+}

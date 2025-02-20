@@ -26,13 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {toastStore} from "./toast_store.ts";
-import {siteStore} from "./site_store.ts";
+import {Dashboard, User} from "@icon-park/react";
+import {JSX} from "react";
+import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 
-export default configureStore({
-    reducer: {
-        toast: toastStore.reducer,
-        site: siteStore.reducer
-    }
-})
+/**
+ * 生成管理员导航组件。
+ *
+ * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中site属性为SiteInfoEntity类型，提供站点名称等信息。
+ * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
+ */
+export function AdminNavComponent(): JSX.Element {
+
+    return (
+        <div className={"flex flex-col"}>
+            <div className={"px-4 py-8 text-center w-full"}>
+                <h1 className={"text-2xl font-bold"}>管理员面板</h1>
+            </div>
+            <div className={"px-4 grid gap-1"}>
+                <AdminNavLinkComponent title={"看板"} icon={<Dashboard theme="outline" size="16"/>}
+                                       path={"/admin/dashboard"}/>
+                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
+                                       path={"/admin/user"}/>
+            </div>
+        </div>
+    );
+}

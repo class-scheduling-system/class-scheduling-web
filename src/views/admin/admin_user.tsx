@@ -26,13 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {toastStore} from "./toast_store.ts";
-import {siteStore} from "./site_store.ts";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import {useEffect} from "react";
 
-export default configureStore({
-    reducer: {
-        toast: toastStore.reducer,
-        site: siteStore.reducer
-    }
-})
+export function AdminUser({site}: Readonly<{
+    site: SiteInfoEntity
+}>) {
+
+    useEffect(() => {
+        document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
+    }, [site.name]);
+
+    return (
+        <div>
+            <h1>Admin User</h1>
+            <p>Welcome to the admin user page!</p>
+        </div>
+    );
+}
