@@ -26,21 +26,32 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {RoleEntity} from "./role_entity.ts";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * # UserEntity
+ * > 代表用户实体的数据结构，用于存储用户的详细信息，包括但不限于用户的联系方式、权限以及角色等。
+ *
+ * @param {number} ban - 用户是否被禁止的标志，通常0表示未被禁止，1表示已被禁止。
+ * @param {number} created_at - 用户账户创建的时间戳。
+ * @param {string} email - 用户注册时使用的电子邮件地址。
+ * @param {string} name - 用户的名字或昵称。
+ * @param {string[]} [permission] - 可选参数，用户所拥有的权限列表。
+ * @param {string} phone - 用户的联系电话。
+ * @param {RoleEntity} role - 用户的角色对象，定义了用户在系统中的角色。
+ * @param {number} status - 用户当前的状态代码，具体的含义依赖于应用上下文。
+ * @param {number} updated_at - 用户信息最后一次更新的时间戳。
+ * @param {string} user_uuid - 用户的唯一标识符。
+ */
+export type UserEntity = {
+    ban: number;
+    created_at: number;
+    email: string;
+    name: string;
+    permission?: string[];
+    phone: string;
+    role: RoleEntity;
+    status: number;
+    updated_at: number;
+    user_uuid: string;
+}

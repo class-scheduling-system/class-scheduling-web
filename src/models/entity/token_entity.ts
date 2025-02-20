@@ -26,21 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
-
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * # TokenEntity
+ *
+ * > 代表一个令牌实体，包含创建时间、过期时间、刷新令牌的过期时间、刷新令牌、访问令牌以及用户唯一标识符等信息。
+ *
+ * 该类型主要用于封装与认证相关的令牌信息，便于在应用程序中传递和使用。
+ *
+ * @param {number} created_at - 令牌创建的时间戳。
+ * @param {number} expire_time - 令牌的过期时间戳。
+ * @param {number} refresh_expire_time - 刷新令牌的过期时间戳。
+ * @param {string} refresh_token - 用于获取新访问令牌的刷新令牌字符串。
+ * @param {string} token - 访问令牌字符串。
+ * @param {string} user_uuid - 用户的唯一标识符字符串。
+ */
+export type TokenEntity = {
+    created_at: number;
+    expire_time: number;
+    refresh_expire_time: number;
+    refresh_token: string;
+    token: string;
+    user_uuid: string;
+}

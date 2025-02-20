@@ -26,62 +26,98 @@
  * --------------------------------------------------------------------------------
  */
 
-import backgroundImage from "../../assets/images/init_background.jpg";
+import * as React from "react";
+import {JSX, useEffect, useState} from "react";
+import {DoubleLeft, DoubleRight, Key, User} from "@icon-park/react";
+import {useDispatch, useSelector} from "react-redux";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import {AuthLoginAPI} from "../../apis/auth_api.ts";
+import {AuthLoginDTO} from "../../models/dto/auth_login_dto.ts";
+import {Message} from "../../components/utils/message_toast_util.ts";
+import {Link, useNavigate} from "react-router";
 
 
-export function AuthLogin() {
+/**
+ * # 函数描述
+ * > `AuthLogin` 函数用于渲染一个登录界面，用户可以通过该界面输入用户名和密码进行登录。
+ *
+ * @returns {JSX.Element} 返回一个包含登录表单的 JSX 元素。
+ */
+export function AuthLogin(): JSX.Element {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
+
+    const [formData, setFormData] = useState<AuthLoginDTO>({} as AuthLoginDTO);
+
+    useEffect(() => {
+        document.title = `登录 | ${site.title}`;
+    }, [site.title]);
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const getResp = await AuthLoginAPI(formData);
+        if (getResp?.output === "Success") {
+            if (getResp.data!.initialization) {
+                Message(dispatch, "success", `登录成功`);
+                navigate("/auth/register");
+            } else {
+                Message(dispatch, "success", `你好 ${getResp.data!.user?.name}，欢迎回来！`);
+                navigate("/auth/register");
+            }
+        } else {
+            Message(dispatch, "error", getResp?.error_message ?? "未知错误");
+        }
+    }
 
     return (
-        <div className={"w-full h-dvh grid grid-cols-2 bg-gray-50"}>
-            <div className={"w-full h-lvh relative"}>
-                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}/>
-            </div>
-            <form className="flex justify-center h-dvh items-center">
-                <div className="card bg-base-100 shadow-md flex flex-col gap-6 w-3/5 p-8 items-center">
-                    <span className="text-3xl text-gray-700 font-bold text-center"></span>
-                    <span className="text-2xl text-gray-700 font-bold pb-4 text-center">请登录您的账户</span>
-
-                    {/* 输入框部分 */}
-                    <div className="flex flex-col gap-4 w-4/5 items-center">
-                        <label className="bg-gray-50 input input-md transition flex items-center w-full">
-                            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="24" cy="12" r="8" fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            <input type="text" className="grow text-md px-4 self-center" placeholder="用户名/邮箱/手机号/学号/工号" />
-                        </label>
-
-                        <label className="bg-gray-50 input input-md transition flex items-center w-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 opacity-70">
-                                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
-                            </svg>
-                            <input type="password" className="grow text-md px-4 self-center" placeholder="密码" />
-                        </label>
-
-                        <p className="validator-hint hidden text-red-500 text-sm text-center">
-                            <div className="flex flex-col">
-                                <span>密码强度要求不符合</span>
-                                <span>必须包含 <b>大小写字母</b> 和 <b>数字</b> 的组合，可以使用 <b>特殊字符</b></span>
-                                <span>长度在 <b>6</b> 位数以上</span>
-                            </div>
-                        </p>
-                    </div>
-
-                    {/* 登录按钮 */}
-                    <div className="w-full flex justify-center mt-2"> {/* 减少上边距 */}
-                        <button className="btn btn-primary btn-md w-48">登录</button>
-                    </div>
-
-                    {/* 分割线 */}
-                    <div className="divider my-1"></div> {/* 减少分割线的上下边距 */}
-
-                    {/* 重置密码和修改密码 */}
-                    <div className="flex gap-4"> {/* 减少上边距，增加按钮之间的水平间距 */}
-                        <button className="hover:text-green-600">忘记密码？</button>
-                        <button className="hover:text-green-600">修改密码？</button>
+        <form onSubmit={handleSubmit}
+              className="flex justify-center h-dvh items-center">
+            <div className="card bg-base-100 shadow-md flex flex-col gap-3 w-9/10 md:w-3/5 p-6 items-center">
+                <div className={"w-full flex flex-col"}>
+                    <span className="text-2xl text-gray-700 font-bold text-center">{site.title}</span>
+                    <div className="text-xl text-gray-700 font-bold text-center flex justify-center items-center">
+                        <DoubleRight theme="outline" size="20"/>
+                        <span>登录</span>
+                        <DoubleLeft theme="outline" size="20"/>
                     </div>
                 </div>
-            </form>
-        </div>
+
+                <div className="flex flex-col gap-4 w-4/5 items-center">
+                    <div className={"w-full"}>
+                        <label className="input input-md transition flex items-center w-full validator">
+                            <User theme="outline" size="16"/>
+                            <input type="text" required
+                                   onChange={(e) => setFormData({...formData, user: e.target.value})}
+                                   className="grow ps-1"
+                                   placeholder="用户名/邮箱/手机号/学号/工号"/>
+                        </label>
+                    </div>
+                    <div className={"w-full"}>
+                        <label className="input input-md transition flex items-center w-full validator">
+                            <Key theme="outline" size="16"/>
+                            <input type="password" required
+                                   onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                   className="grow ps-1" placeholder="密码"/>
+                        </label>
+                    </div>
+                </div>
+                <div className="w-full flex justify-center mt-2"> {/* 减少上边距 */}
+                    <button className="btn btn-primary btn-md w-48">登录</button>
+                </div>
+                <div className="flex justify-end w-full pt-3">
+                    <button type="button"
+                            className="transition text-primary hover:text-primary-content">
+                        新用户
+                    </button>
+                    <div className={"px-2"}>|</div>
+                    <Link to={"/auth/forget-password"}
+                          className="transition text-primary hover:text-primary-content">
+                        忘记密码？
+                    </Link>
+                </div>
+            </div>
+        </form>
     );
 }

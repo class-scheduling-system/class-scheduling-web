@@ -26,21 +26,30 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
+import {BaseResponse} from "../models/base_response.ts";
+import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {AuthLoginDTO} from "../models/dto/auth_login_dto.ts";
+import {UserLoginEntity} from "../models/entity/user_login_entity.ts";
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
+/**
+ * # AuthLoginAPI
+ * > 该函数用于处理用户登录请求，通过向指定的后端接口发送包含登录信息的数据包，获取用户的登录状态。
+ *
+ * @param data - {AuthLoginDTO} 用户提供的登录凭据，如用户名和密码等信息。
+ * @returns {Promise<BaseResponse<UserLoginEntity> | undefined>} - 返回一个 Promise 对象，解析为 BaseResponse<UserLoginEntity> 类型或者 undefined。其中包含了用户登录后的相关信息或登录失败的原因。
+ * @throws 当网络请求失败、服务器响应异常或传入参数不符合要求时，可能会抛出错误。
+ */
+const AuthLoginAPI = async (data: AuthLoginDTO): Promise<BaseResponse<UserLoginEntity> | undefined> => {
+    return BaseApi<UserLoginEntity>(
+        MethodType.POST,
+        "/api/v1/user/login",
+        data,
+        null,
+        null,
+        null
+    );
+}
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+export {
+    AuthLoginAPI
+}

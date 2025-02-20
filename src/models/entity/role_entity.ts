@@ -26,21 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
-
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * # RoleEntity
+ *
+ * > 代表系统中的角色实体，包含角色名称、状态、唯一标识符以及权限等信息。
+ *
+ * 此类型用于定义系统内角色的基本属性和状态。它主要用于数据传输对象（DTO）或作为数据库模型的一部分。
+ *
+ * @param {number} created_at - 角色创建的时间戳。
+ * @param {string[]} [permission] - 可选参数，角色所拥有的权限列表。
+ * @param {string} role_name - 角色的名称。
+ * @param {number} role_status - 角色的状态码，用于表示角色是否激活等状态。
+ * @param {string} role_uuid - 角色的全局唯一标识符。
+ * @param {number} updated_at - 角色信息最后一次更新的时间戳。
+ *
+ * @returns 无直接返回值；该类型定义了一种结构，用于在应用程序的不同部分之间传递角色相关信息。
+ *
+ * @throws 无直接抛出异常；但根据使用上下文，在处理RoleEntity实例时可能会遇到类型错误或其他运行时异常。
+ */
+export type RoleEntity = {
+    created_at: number;
+    permission?: string[];
+    role_name: string;
+    role_status: number;
+    role_uuid: string;
+    updated_at: number;
+}

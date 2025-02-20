@@ -26,21 +26,61 @@
  * --------------------------------------------------------------------------------
  */
 
-import {Route, Routes} from "react-router";
+import {Route, Routes, useLocation, useNavigate} from "react-router";
 import {AuthLogin} from "./auth/auth_login.tsx";
 import {AuthRegister} from "./auth/auth_register.tsx";
 import {AuthAlterPassword} from "./auth/auth_change_password.tsx";
 import {AuthForgetPassword} from "./auth/auth_forget_password.tsx";
+import {JSX, useEffect} from "react";
+import {animated, useTransition} from "@react-spring/web";
+import backgroundImage from "../assets/images/init_background.jpg";
 
 
-export function BaseAuth() {
+/**
+ * # 函数描述
+ * > 该函数用于设置基础认证路由，包括登录、注册、修改密码和忘记密码等页面的路由配置。
+ *
+ * @returns {JSX.Element} 返回一个包含多个认证相关页面路由配置的React组件。
+ *
+ * @throws {Error} 如果在路由配置过程中遇到任何错误（例如无效的路径或元素），则可能抛出异常。
+ */
+export function BaseAuth(): JSX.Element {
+    const location = useLocation();  // 获取当前路径
+    const navigate = useNavigate();
+
+    const transitions = useTransition(location, {
+        key: location.pathname,
+        from: {opacity: 0, transform: 'translateY(-50px)'},
+        enter: {opacity: 1, transform: 'translateY(0%)'},
+        config: {
+            tension: 170,
+            friction: 26,
+        },
+    });
+
+    useEffect(() => {
+        if (location.pathname === "/auth") {
+            navigate("/auth/login");
+        }
+    }, [location.pathname, navigate]);
 
     return (
-        <Routes>
-            <Route path={"/login"} element={<AuthLogin/>}/>
-            <Route path={"/register"} element={<AuthRegister/>}/>
-            <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
-            <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
-        </Routes>
-    )
+        <div className={"w-full grid grid-cols-2 bg-gray-50"}>
+            <div className={"w-full h-lvh relative"}>
+                <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}/>
+            </div>
+            <div className={"col-span-full md:col-span-1 overflow-hidden"}>
+                {transitions((style, item) => (
+                    <animated.div style={style} className={"w-full h-full"}>
+                        <Routes location={item}>
+                            <Route path={"/login"} element={<AuthLogin/>}/>
+                            <Route path={"/register"} element={<AuthRegister/>}/>
+                            <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
+                            <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
+                        </Routes>
+                    </animated.div>
+                ))}
+            </div>
+        </div>
+    );
 }

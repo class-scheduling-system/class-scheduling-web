@@ -26,21 +26,14 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
-
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * # AuthLoginDTO
+ * > 用于身份验证登录的数据传输对象。它封装了用户登录所需的基本信息，包括用户名和密码。
+ *
+ * @param {string} user - 用户名，用于标识用户的唯一字符串。
+ * @param {string} password - 密码，用户账户的认证密钥。
+ */
+export type AuthLoginDTO = {
+    password: string;
+    user: string;
+}

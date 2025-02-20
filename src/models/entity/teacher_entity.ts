@@ -26,21 +26,68 @@
  * --------------------------------------------------------------------------------
  */
 
-import "./assets/css/style.css";
-
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter} from "react-router";
-import {Index} from "./index.tsx";
-import store from "./stores/store.ts";
-import {Provider} from 'react-redux';
-
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BrowserRouter>
-                <Index/>
-            </BrowserRouter>
-        </Provider>
-    </StrictMode>,
-)
+/**
+ * # TeacherEntity
+ *
+ * > 代表教师实体的数据结构，用于存储和传输关于教师的基本信息。
+ *
+ * 此类型定义了教师相关的各种属性，包括个人基本信息、联系方式以及在系统中的唯一标识等。
+ */
+export type TeacherEntity = {
+    /**
+     * 创建时间（单位：毫秒时间戳）
+     */
+    created_at?: number;
+    /**
+     * 教师描述
+     */
+    desc?: string;
+    /**
+     * 教师邮箱
+     */
+    email?: string;
+    /**
+     * 教师英文名
+     */
+    english_name?: string;
+    /**
+     * 教师民族
+     */
+    ethnic?: string;
+    /**
+     * 教师工号
+     */
+    id?: string;
+    /**
+     * 教师职称
+     */
+    job_title?: string;
+    /**
+     * 教师姓名
+     */
+    name?: string;
+    /**
+     * 教师电话
+     */
+    phone?: string;
+    /**
+     * 教师性别（0：女，1：男）
+     */
+    sex?: number;
+    /**
+     * 教师主键
+     */
+    teacher_uuid?: string;
+    /**
+     * 单位主键
+     */
+    unit_uuid?: string;
+    /**
+     * 更新时间（单位：毫秒时间戳）
+     */
+    updated_at?: number;
+    /**
+     * 用户主键
+     */
+    user_uuid?: string;
+}
