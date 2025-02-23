@@ -92,8 +92,6 @@ export function ToastComponent() {
 
     return (
         toastTransition((style, item) => (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             <animated.div
                 key={item.id} // 为每个 toast 添加唯一 key
                 style={style} // 应用动画样式

@@ -64,7 +64,17 @@ export function AuthLogin(): JSX.Element {
                 navigate("/auth/register");
             } else {
                 Message(dispatch, "success", `你好 ${getResp.data!.user?.name}，欢迎回来！`);
-                navigate("/auth/register");
+                switch (getResp.data!.user?.role.role_name) {
+                    case "管理员":
+                        navigate("/admin/dashboard");
+                        break;
+                    case "用户":
+                        navigate("/user/dashboard");
+                        break;
+                    default:
+                        navigate("/register");
+                        break;
+                }
             }
         } else {
             Message(dispatch, "error", getResp?.error_message ?? "未知错误");
@@ -75,7 +85,7 @@ export function AuthLogin(): JSX.Element {
         <form onSubmit={handleSubmit}
               className="flex justify-center h-dvh items-center">
             <div className="card bg-base-100 shadow-md flex flex-col gap-3 w-9/10 md:w-3/5 p-6 items-center">
-                <div className={"w-full flex flex-col"}>
+                <div className={"w-full flex flex-col space-y-0.5"}>
                     <span className="text-2xl text-gray-700 font-bold text-center">{site.title}</span>
                     <div className="text-xl text-gray-700 font-bold text-center flex justify-center items-center">
                         <DoubleRight theme="outline" size="20"/>

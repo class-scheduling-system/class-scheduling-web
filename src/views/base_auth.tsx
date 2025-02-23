@@ -31,10 +31,9 @@ import {AuthLogin} from "./auth/auth_login.tsx";
 import {AuthRegister} from "./auth/auth_register.tsx";
 import {AuthAlterPassword} from "./auth/auth_change_password.tsx";
 import {AuthForgetPassword} from "./auth/auth_forget_password.tsx";
-import {JSX, useEffect} from "react";
-import {animated, useTransition} from "@react-spring/web";
+import {JSX, useEffect, useState} from "react";
+import {animated, useSpring, useTransition} from "@react-spring/web";
 import backgroundImage from "../assets/images/init_background.jpg";
-
 
 /**
  * # 函数描述
@@ -48,6 +47,18 @@ export function BaseAuth(): JSX.Element {
     const location = useLocation();  // 获取当前路径
     const navigate = useNavigate();
 
+    // 用来控制图片动画只在第一次加载时执行
+    const [hasLoaded, setHasLoaded] = useState(false);
+
+    // 图片背景的 useSpring 动画，仅在页面加载时触发
+    const imageSpring = useSpring({
+        opacity: hasLoaded ? 1 : 0,
+        config: {
+            tension: 64,
+            friction: 26,
+        },
+    });
+
     const transitions = useTransition(location, {
         key: location.pathname,
         from: {opacity: 0, transform: 'translateY(-50px)'},
@@ -56,6 +67,7 @@ export function BaseAuth(): JSX.Element {
             tension: 170,
             friction: 26,
         },
+        delay: 150,
     });
 
     useEffect(() => {
@@ -64,22 +76,30 @@ export function BaseAuth(): JSX.Element {
         }
     }, [location.pathname, navigate]);
 
+    useEffect(() => {
+        setHasLoaded(true);
+    }, []);
+
     return (
-        <div className={"w-full grid grid-cols-2 bg-gray-50"}>
-            <div className={"w-full h-lvh relative"}>
+        <div className={"w-full grid grid-cols-2 bg-gray-50 overflow-hidden"}>
+            {/* 图片背景使用单独的 useSpring 动画 */}
+            <animated.div style={imageSpring} className={"w-full h-lvh relative hidden md:block"}>
                 <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}/>
-            </div>
+            </animated.div>
+            {/* 路由内容的动画 */}
             <div className={"col-span-full md:col-span-1 overflow-hidden"}>
-                {transitions((style, item) => (
-                    <animated.div style={style} className={"w-full h-full"}>
-                        <Routes location={item}>
-                            <Route path={"/login"} element={<AuthLogin/>}/>
-                            <Route path={"/register"} element={<AuthRegister/>}/>
-                            <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
-                            <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
-                        </Routes>
-                    </animated.div>
-                ))}
+                {
+                    transitions((style, item) => (
+                        <animated.div style={style} className={"w-full h-full"}>
+                            <Routes location={item}>
+                                <Route path={"/login"} element={<AuthLogin/>}/>
+                                <Route path={"/register"} element={<AuthRegister/>}/>
+                                <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
+                                <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
+                            </Routes>
+                        </animated.div>
+                    ))
+                }
             </div>
         </div>
     );
