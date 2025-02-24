@@ -26,31 +26,31 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, User} from "@icon-park/react";
-import {JSX} from "react";
-import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
+import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {BaseResponse} from "../models/base_response.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
+import {BuildingEntity} from "../models/entity/building_entity.ts";
 
 /**
- * 生成管理员导航组件。
+ * # 获取建筑列表 API
+ * > 该函数用于通过指定的搜索条件异步获取建筑列表。它封装了对后端API的调用，返回的数据包括分页信息和具体的建筑实体。
  *
- * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中site属性为SiteInfoEntity类型，提供站点名称等信息。
- * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
+ * @param {PageSearchDTO} data - 包含搜索条件的对象，例如页码、每页显示条数等信息。
+ * @returns {Promise<BaseResponse<PageEntity<BuildingEntity>> | undefined>} - 返回一个 Promise 对象，解析后得到的是一个包含分页信息及建筑实体列表的响应对象或 undefined。
+ * @throws {Error} 当网络请求失败或服务器返回错误时抛出异常。
  */
-export function AdminNavComponent(): JSX.Element {
-
-    return (
-        <div className={"flex flex-col"}>
-            <div className={"px-4 py-8 text-center w-full"}>
-                <h1 className={"text-2xl font-bold"}>管理员面板</h1>
-            </div>
-            <div className={"px-4 grid gap-1"}>
-                <AdminNavLinkComponent title={"看板"} icon={<Dashboard theme="outline" size="16"/>}
-                                       path={"/admin/dashboard"}/>
-                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
-                                       path={"/admin/user"}/>
-                <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="16"/>}
-                                       path={"/admin/building"}/>
-            </div>
-        </div>
+const GetBuildingListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<BuildingEntity>> | undefined> => {
+    return BaseApi<PageEntity<BuildingEntity>>(
+        MethodType.GET,
+        "/api/v1/building/list",
+        null,
+        data,
+        null,
+        null
     );
+}
+
+export {
+    GetBuildingListAPI
 }

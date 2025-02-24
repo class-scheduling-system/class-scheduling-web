@@ -26,31 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, User} from "@icon-park/react";
-import {JSX} from "react";
-import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
-
 /**
- * 生成管理员导航组件。
+ * # PageEntity
+ * > 代表分页查询的结果实体，封装了分页相关的属性和数据列表。
  *
- * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中site属性为SiteInfoEntity类型，提供站点名称等信息。
- * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
+ * 该类主要用于处理从服务器获取的分页数据，提供统一的数据结构来表示当前页、每页大小、总记录数以及实际的数据列表。
+ *
+ * @template T - 泛型参数，代表分页结果中的数据类型。
  */
-export function AdminNavComponent(): JSX.Element {
-
-    return (
-        <div className={"flex flex-col"}>
-            <div className={"px-4 py-8 text-center w-full"}>
-                <h1 className={"text-2xl font-bold"}>管理员面板</h1>
-            </div>
-            <div className={"px-4 grid gap-1"}>
-                <AdminNavLinkComponent title={"看板"} icon={<Dashboard theme="outline" size="16"/>}
-                                       path={"/admin/dashboard"}/>
-                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
-                                       path={"/admin/user"}/>
-                <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="16"/>}
-                                       path={"/admin/building"}/>
-            </div>
-        </div>
-    );
+export type PageEntity<T> = {
+    /**
+     * 当前页
+     */
+    current: number;
+    /**
+     * 查询数据列表
+     */
+    records: T[];
+    /**
+     * 每页显示条数，默认 10
+     */
+    size: number;
+    /**
+     * 总数
+     */
+    total: number;
 }

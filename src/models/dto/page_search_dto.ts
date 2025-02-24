@@ -26,31 +26,31 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, User} from "@icon-park/react";
-import {JSX} from "react";
-import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
-
 /**
- * 生成管理员导航组件。
+ * # PageSearchDTO
  *
- * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中site属性为SiteInfoEntity类型，提供站点名称等信息。
- * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
+ * > 用于页面搜索请求的数据传输对象，包含了排序方式、关键词、页码以及每页显示条目数等信息。
+ *
+ * @param {boolean} is_desc - 是否按降序排列，默认值为 true
+ * @param {string} [keyword] - 可选的搜索关键词
+ * @param {number} page - 当前页码，默认值为 1
+ * @param {number} size - 每页显示的条目数，默认值为 20，最大值为 200
  */
-export function AdminNavComponent(): JSX.Element {
-
-    return (
-        <div className={"flex flex-col"}>
-            <div className={"px-4 py-8 text-center w-full"}>
-                <h1 className={"text-2xl font-bold"}>管理员面板</h1>
-            </div>
-            <div className={"px-4 grid gap-1"}>
-                <AdminNavLinkComponent title={"看板"} icon={<Dashboard theme="outline" size="16"/>}
-                                       path={"/admin/dashboard"}/>
-                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
-                                       path={"/admin/user"}/>
-                <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="16"/>}
-                                       path={"/admin/building"}/>
-            </div>
-        </div>
-    );
+export type PageSearchDTO = {
+    /**
+     * 是否按降序排列，默认值为 true
+     */
+    is_desc: boolean;
+    /**
+     * 可选的搜索关键词
+     */
+    keyword?: string;
+    /**
+     * 当前页码，默认值为 1
+     */
+    page: number;
+    /**
+     * 每页显示的条目数，默认值为 20，最大值为 200
+     */
+    size: number;
 }

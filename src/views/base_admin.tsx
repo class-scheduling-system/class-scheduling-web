@@ -33,6 +33,7 @@ import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
 import {Route, Routes, useLocation, useNavigate} from "react-router";
 import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {AdminUser} from "./admin/admin_user.tsx";
+import {AdminBuilding} from "./admin/admin_building.tsx";
 
 /**
  * 生成一个基础的控制台组件。
@@ -64,6 +65,7 @@ export function BaseAdmin(): JSX.Element {
                     <Routes>
                         <Route path={"/dashboard"} element={<AdminDashboard site={site}/>}/>
                         <Route path={"/user"} element={<AdminUser site={site}/>}/>
+                        <Route path={"/building"} element={<AdminBuilding site={site}/>}/>
                     </Routes>
                 </div>
             </div>
