@@ -29,12 +29,11 @@
 import * as React from "react";
 import {JSX, useEffect, useState} from "react";
 import {DoubleLeft, DoubleRight, Key, User} from "@icon-park/react";
-import {useDispatch, useSelector} from "react-redux";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {AuthLoginAPI} from "../../apis/auth_api.ts";
 import {AuthLoginDTO} from "../../models/dto/auth_login_dto.ts";
-import {Message} from "../../components/utils/message_toast_util.ts";
 import {Link, useNavigate} from "react-router";
+import {message} from "antd";
 
 
 /**
@@ -44,7 +43,6 @@ import {Link, useNavigate} from "react-router";
  * @returns {JSX.Element} 返回一个包含登录表单的 JSX 元素。
  */
 export function AuthLogin(): JSX.Element {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
@@ -60,10 +58,15 @@ export function AuthLogin(): JSX.Element {
         const getResp = await AuthLoginAPI(formData);
         if (getResp?.output === "Success") {
             if (getResp.data!.initialization) {
-                Message(dispatch, "success", `登录成功`);
+                message.success(`登录成功`);
                 navigate("/auth/register");
             } else {
-                Message(dispatch, "success", `你好 ${getResp.data!.user?.name}，欢迎回来！`);
+                message.success(`你好 ${getResp.data!.user?.name}，欢迎回来！`);
+                if (getResp.data!.token!.token) {
+                    localStorage.setItem("UserToken", getResp.data!.token!.token);
+                } else {
+                    message.warning("无法获取用户Token");
+                }
                 switch (getResp.data!.user?.role.role_name) {
                     case "管理员":
                         navigate("/admin/dashboard");
@@ -77,7 +80,7 @@ export function AuthLogin(): JSX.Element {
                 }
             }
         } else {
-            Message(dispatch, "error", getResp?.error_message ?? "未知错误");
+            message.error(getResp?.error_message ?? "未知错误");
         }
     }
 

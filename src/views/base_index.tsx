@@ -29,8 +29,8 @@
 import {JSX, useEffect} from "react";
 import {useNavigate} from "react-router";
 import {InitCheckAPI} from "../apis/init_api.ts";
-import {Message} from "../components/utils/message_toast_util.ts";
 import {useDispatch} from "react-redux";
+import {message} from "antd";
 
 /**
  * 基础索引组件
@@ -58,7 +58,7 @@ export function BaseIndex(): JSX.Element {
                         navigate("/auth/login");
                     }
                 } else {
-                    Message(dispatch, "error", "系统初始化检查失败，请联系管理员!");
+                    message.error("系统初始化检查失败，请联系管理员!");
                 }
             } catch (e) {
                 console.error(e);

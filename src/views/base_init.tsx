@@ -32,10 +32,10 @@ import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 import {InitAPI, InitCheckAPI} from "../apis/init_api.ts";
 import {useNavigate} from "react-router";
 import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
-import {Message} from "../components/utils/message_toast_util.ts";
 import {useDispatch} from "react-redux";
 
 import backgroundImage from "../assets/images/init_background.jpg";
+import {message} from "antd";
 
 /**
  * 初始化系统的基础设置页面。
@@ -62,11 +62,11 @@ export function BaseInit(): JSX.Element {
             if (getResp?.output === "Success") {
                 if (!getResp.data!.system_init) {
                     localStorage.setItem("has_init", "0");
-                    Message(dispatch, "warning", "请勿重复初始化系统");
+                    message.warning("请勿重复初始化系统");
                     navigate("/auth/login");
                 }
             } else {
-                Message(dispatch, "error", "系统初始化状态检查失败");
+                message.error("系统初始化状态检查失败");
             }
         }
         func().then();
@@ -90,16 +90,16 @@ export function BaseInit(): JSX.Element {
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (rePassword !== data.password) {
-            Message(dispatch, "info", "两次密码不一致");
+            message.info("两次密码不一致");
             console.log("密码不正确");
         }
 
         const getResp = await InitAPI(data);
         if (getResp?.output === "Success") {
-            Message(dispatch, "success", "系统初始化成功");
+            message.success("系统初始化成功");
             navigate("/");
         } else {
-            Message(dispatch, "error", "系统初始化失败，请联系管理员");
+            message.error("系统初始化失败，请联系管理员");
         }
     }
 
