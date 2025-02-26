@@ -79,7 +79,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     const transition = useTransition(buildingList.size ?? 0, {
         from: {opacity: 0},
         enter: {opacity: 1},
-        config: {duration: 200},
+        config: {duration: 100},
     });
 
     return (
