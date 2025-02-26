@@ -26,10 +26,11 @@
  * --------------------------------------------------------------------------------
  */
 
+import {AdminRightCardComponent} from "../../components/admin/admin_reveal_component.tsx";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {useEffect} from "react";
-import {User} from "@icon-park/react";
-import * as React from "react";
+import {Delete, Editor} from "@icon-park/react";
+import {AdminUserDialog} from "../../components/admin/admin_user_dialog.tsx";
 
 export function AdminUser({site}: Readonly<{
     site: SiteInfoEntity
@@ -41,90 +42,52 @@ export function AdminUser({site}: Readonly<{
 
     return (
         <>
-            <div className={"grid grid-cols-10 gap-7"}>
-                <div className="overflow-x-auto col-span-7 border border-gray-100 rounded-lg shadow-lg">
-                    <table className="table table-zebra">
-                        {/* 表头 */}
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>用户名</th>
-                            <th>角色</th>
-                            <th>邮箱</th>
-                            <th>操作</th> {/* 新增操作列 */}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {/* 使用循环动态生成表格行 */}
-                        {[
-                            { id: 1, name: "Cy Ganderton", role: "Quality Control Specialist", email: "Blue" },
-                            { id: 2, name: "Hart Hagerty", role: "Desktop Support Technician", email: "Purple" },
-                            { id: 3, name: "Brice Swyre", role: "Tax Accountant", email: "Red" },
-                        ].map((row, index) => (
-                            <tr key={row.id}>
-                                <th>{index + 1}</th>
-                                <td>{row.name}</td>
-                                <td>{row.role}</td>
-                                <td>{row.email}</td>
-                                <td>
-                                    <div className="flex gap-2">
-                                        <button className={"text-xs font-medium text-sky-500 inline-flex items-center"}>
-                                            <svg className="w-4 h-4 text-sky-500" aria-hidden="true"
-                                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                                 viewBox="0 0 24 24">
-                                                <path stroke="currentColor" stroke-linecap="round"
-                                                      stroke-linejoin="round" stroke-width="2"
-                                                      d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-                                            </svg>
-                                            <span>编辑</span>
-                                        </button>
-                                        <button
-                                            className={"text-xs font-medium  text-red-400 inline-flex items-center"}>
-                                            <svg className={"w-4 h-4 text-red-400"} aria-hidden="true"
-                                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                                 viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                            </svg>
-                                            <span>删除</span>
-                                        </button>
-                                    </div>
-                                </td>
+            <div className={"grid grid-cols-10 gap-6"}>
+                <div className={"col-span-7 space-y-6"}>
+                    <div className="overflow-x-auto border border-gray-100 rounded-lg shadow-lg">
+                        <table className="table table-zebra">
+                            {/* 表头 */}
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>用户名</th>
+                                <th>角色</th>
+                                <th>邮箱</th>
+                                <th className={"text-end"}>操作</th>
+                                {/* 新增操作列 */}
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className={"flex flex-col space-y-4 col-span-3"}>
-                    <div className={"border border-gray-100 rounded-lg shadow-lg p-6"}>
-                        <div className={"flex flex-col space-y-4  gap-2"}>
-                            <div className="join">
-                                <div>
-                                    <label className="input validator join-item">
-                                        <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/>
-                                            <path d="M26.657 14.3431C25.2093 12.8954 23.2093 12 21.0001 12C18.791 12 16.791 12.8954 15.3433 14.3431" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M33.2216 33.2217L41.7069 41.707" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                        <input type="text" placeholder="请输入用户名或角色" required/>
-                                    </label>
-                                    <div className="validator-hint hidden">Enter valid email address</div>
-                                </div>
-                                <button className="btn btn-neutral join-item">搜索</button>
-                            </div>
-                            <div>
-                                <button className="btn" onClick={()=>document.getElementById('my_modal_1').showModal()}>
-                                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M24.0605 10L24.0239 38" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M10 24L38 24" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    添加用户
-                                </button>
-                            </div>
-                        </div>
+                            </thead>
+                            <tbody>
+                            {/* 使用循环动态生成表格行 */}
+                            {[
+                                {id: 1, name: "Cy Ganderton", role: "Quality Control Specialist", email: "Blue"},
+                                {id: 2, name: "Hart Hagerty", role: "Desktop Support Technician", email: "Purple"},
+                                {id: 3, name: "Brice Swyre", role: "Tax Accountant", email: "Red"},
+                            ].map((row, index) => (
+                                <tr key={row.id}>
+                                    <th>{index + 1}</th>
+                                    <td>{row.name}</td>
+                                    <td>{row.role}</td>
+                                    <td>{row.email}</td>
+                                    <td>
+                                        <div className="flex gap-2 justify-end">
+                                            <button className={"text-xs flex items-center font-medium text-info space-x-0.5"}>
+                                                <Editor theme="outline" size="14"/>
+                                                <span>编辑</span>
+                                            </button>
+                                            <button
+                                                className={"text-xs font-medium text-error flex items-center space-x-0.5"}>
+                                                <Delete theme="outline" size="14"/>
+                                                <span>删除</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                <div className={"flex col-span-8 justify-center items-center"}>
-                    <nav aria-label="Page navigation example">
+                    <nav aria-label="Page navigation example" className={"w-full flex justify-center"}>
                         <ul className="flex items-center -space-x-px h-8 text-sm">
                             <li>
                                 <a href="#"
@@ -171,79 +134,10 @@ export function AdminUser({site}: Readonly<{
                         </ul>
                     </nav>
                 </div>
+                <AdminRightCardComponent/>
             </div>
 
-            {/*对话框*/}
-            <dialog id="my_modal_1" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">添加用户</h3>
-                    <div className="mt-3">
-                        <form method="dialog" className="flex flex-col space-y-4 p-4">
-                            {/* 输入框容器 */}
-                            <div className="flex flex-col space-y-3">
-                                <label className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
-                                    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="24" cy="12" r="8" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="grow ps-1"
-                                        placeholder="用户名"
-                                    />
-                                </label>
-                                <label className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
-                                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="24" cy="16" r="6" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M36 36C36 29.3726 30.6274 24 24 24C17.3726 24 12 29.3726 12 36" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M36 4H44V12" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M12 4H4V12" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M36 44H44V36" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M12 44H4V36" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    <input
-                                        type="email"
-                                        required
-                                        className="grow"
-                                        placeholder="角色"
-                                    />
-                                </label>
-                                <label className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
-                                    <svg
-                                        className="w-6 h-6 text-gray-700"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeWidth="2"
-                                            d="m3.5 5.5 7.893 6.036a1 1 0 0 0 1.214 0L20.5 5.5M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"
-                                        />
-                                    </svg>
-                                    <input
-                                        type="email"
-                                        required
-                                        className="grow ps-1"
-                                        placeholder="邮箱"
-                                    />
-                                </label>
-                            </div>
-
-                            {/* 按钮容器 */}
-                            <div className="flex justify-end gap-2 w-full"> {/* 添加 w-full 和 justify-end */}
-                                <button className="btn btn-neutral">添加</button>
-                                <button className="btn">取消</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </dialog>
+            <AdminUserDialog/>
         </>
     );
 }
