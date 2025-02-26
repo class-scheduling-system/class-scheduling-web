@@ -29,15 +29,13 @@
 import {Route, Routes} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
-import {ToastComponent} from "./components/toast_component.tsx";
 import {JSX, useEffect} from "react";
 import {GetSiteInfoAPI} from "./apis/public_api.ts";
 import {useDispatch} from "react-redux";
 import {setSiteStore} from "./stores/site_store.ts";
-import {addToast} from "./stores/toast_store.ts";
-import {Toast} from "./models/store/toast_store.ts";
 import {BaseAdmin} from "./views/base_admin.tsx";
 import {BaseAuth} from "./views/base_auth.tsx";
+import {message} from "antd";
 
 /**
  * 页面入口组件，用于布局和路由配置。
@@ -54,10 +52,7 @@ export function Index(): JSX.Element {
                 if (getResp?.output === "Success") {
                     dispatch(setSiteStore(getResp.data!));
                 } else {
-                    dispatch(addToast({
-                        type: "error",
-                        message: "获取系统信息失败"
-                    } as Toast));
+                    message.error("获取系统信息失败");
                 }
             }
         }
@@ -66,8 +61,6 @@ export function Index(): JSX.Element {
 
     return (
         <>
-            {/* Toast Message */}
-            <ToastComponent/>
             {/* Route Info */}
             <Routes>
                 <Route path={"/"} element={<BaseIndex/>}/>

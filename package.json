@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@icon-park/react": "^1.4.2",
     "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "^2.5.1",
     "@tailwindcss/vite": "^4.0.5",
+    "antd": "^5.24.2",
     "axios": "^1.7.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

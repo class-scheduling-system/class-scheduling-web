@@ -42,7 +42,7 @@ import {UserLoginEntity} from "../models/entity/user_login_entity.ts";
 const AuthLoginAPI = async (data: AuthLoginDTO): Promise<BaseResponse<UserLoginEntity> | undefined> => {
     return BaseApi<UserLoginEntity>(
         MethodType.POST,
-        "/api/v1/user/login",
+        "/api/v1/auth/login",
         data,
         null,
         null,

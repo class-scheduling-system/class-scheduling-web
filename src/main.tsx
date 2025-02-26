@@ -32,6 +32,7 @@ import {BrowserRouter} from "react-router";
 import {Index} from "./index.tsx";
 import store from "./stores/store.ts";
 import {Provider} from 'react-redux';
+import '@ant-design/v5-patch-for-react-19';
 
 createRoot(document.getElementById('root')!).render(
     <Provider store={store}>

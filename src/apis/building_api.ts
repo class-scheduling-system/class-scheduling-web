@@ -27,7 +27,7 @@
  */
 
 import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
-import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {BuildingEntity} from "../models/entity/building_entity.ts";
@@ -47,7 +47,7 @@ const GetBuildingListAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
         null,
         data,
         null,
-        null
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
     );
 }
 

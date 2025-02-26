@@ -34,6 +34,7 @@ import {Route, Routes, useLocation, useNavigate} from "react-router";
 import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {AdminUser} from "./admin/admin_user.tsx";
 import {AdminBuilding} from "./admin/admin_building.tsx";
+import {animated, useTransition} from "@react-spring/web";
 
 /**
  * 生成一个基础的控制台组件。
@@ -51,10 +52,21 @@ export function BaseAdmin(): JSX.Element {
         }
     }, [location.pathname, navigate]);
 
+    // 设置路由切换动画
+    const transitions = useTransition(location, {
+        from: { opacity: 0, transform: 'translateX(20px)' },
+        enter: { opacity: 1, transform: 'translateX(0)' },
+        config: {
+            tension: 170,
+            friction: 26,
+        },
+        key: location.pathname,
+    });
+
     return (
-        <div className={"h-lvh flex"}>
-            <div className={"w-64 h-full bg-base-200 shadow-lg"}>
-                <AdminNavComponent/>
+        <div className="h-lvh flex">
+            <div className="w-64 h-full bg-base-200 shadow-lg">
+                <AdminNavComponent />
             </div>
             <div className={"w-full flex flex-col flex-1"}>
                 <div className={"w-full bg-base-100 p-2 shadow flex justify-between"}>
@@ -87,12 +99,16 @@ export function BaseAdmin(): JSX.Element {
                         </div>
                     </div>
                 </div>
-                <div className={"p-6 flex-1 overflow-auto"}>
-                    <Routes>
-                        <Route path={"/dashboard"} element={<AdminDashboard site={site}/>}/>
-                        <Route path={"/user"} element={<AdminUser site={site}/>}/>
-                        <Route path={"/building"} element={<AdminBuilding site={site}/>}/>
-                    </Routes>
+                <div className="p-6 flex-1 overflow-auto">
+                    {transitions((style, item) => (
+                        <animated.div style={style}>
+                            <Routes location={item}>
+                                <Route path="/dashboard" element={<AdminDashboard site={site} />} />
+                                <Route path="/user" element={<AdminUser site={site} />} />
+                                <Route path="/building" element={<AdminBuilding site={site} />} />
+                            </Routes>
+                        </animated.div>
+                    ))}
                 </div>
             </div>
         </div>
