@@ -29,7 +29,7 @@
 import axios, {type AxiosResponse} from "axios";
 import type {BaseResponse} from "../../models/base_response.ts";
 
-const BASE_API_URL: string = "http://localhost:8888";
+const BASE_API_URL: string = import.meta.env.VITE_BASE_API_URL;
 
 /**
  * Http 方法类型枚举

@@ -26,13 +26,32 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
+import {StudentEntity} from "./student_entity.ts";
+import {TeacherEntity} from "./teacher_entity.ts";
+import {UserEntity} from "./user_entity.ts";
 
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer
-    }
-})
+/**
+ * # UserInfoEntity
+ *
+ * > `UserInfoEntity` 是一个用于封装用户信息的数据传输对象。它包含了用户的基本信息以及根据登录身份（学生或教师）可能包含的额外信息。
+ *
+ * 该实体主要用于系统内部传递用户数据，确保不同身份的用户能够访问到与之相关的特定信息。
+ *
+ * @param {null | StudentEntity} [student] - 学生数据传输对象，仅在学生登录时有效，其他身份登录则为`null`
+ * @param {null | TeacherEntity} [teacher] - 教师数据传输对象，仅在教师登录时有效，其他身份登录则为`null`
+ * @param {UserEntity} user - 用户数据传输对象，若用户未注册则为`null`
+ */
+export type UserInfoEntity = {
+    /**
+     * 学生数据传输对象，仅在学生登录时有效，其他身份登录则为{@code null}
+     */
+    student?: null | StudentEntity;
+    /**
+     * 教师数据传输对象，仅在教师登录时有效，其他身份登录则为{@code null}
+     */
+    teacher?: null | TeacherEntity;
+    /**
+     * 用户数据传输对象，若用户未注册则为{@code null}
+     */
+    user: UserEntity;
+}

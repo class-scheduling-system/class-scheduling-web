@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import {Route, Routes} from "react-router";
+import {Route, Routes, useLocation, useNavigate} from "react-router";
 import {BaseIndex} from "./views/base_index.tsx";
 import {BaseInit} from "./views/base_init.tsx";
 import {JSX, useEffect} from "react";
@@ -36,15 +36,22 @@ import {setSiteStore} from "./stores/site_store.ts";
 import {BaseAdmin} from "./views/base_admin.tsx";
 import {BaseAuth} from "./views/base_auth.tsx";
 import {message} from "antd";
+import {GetUserCurrentAPI} from "./apis/user_api.ts";
+import {setUserInfo} from "./stores/user_store.ts";
 
 /**
- * 页面入口组件，用于布局和路由配置。
+ * # Index
  *
- * @return {JSX.Element} 页面渲染内容，包含Toast消息组件与路由配置。
+ * > 该函数作为应用的入口点，负责初始化系统信息和用户信息，并根据状态渲染不同的路由页面。它通过检查本地存储来决定是否需要获取最新的站点信息，并且验证当前用户的登录状态。
+ *
+ * @returns {JSX.Element} 返回一个包含多个路由定义的React组件，这些路由指向不同的页面视图。
  */
 export function Index(): JSX.Element {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
 
+    // 检查系统是否正在初始化
     useEffect(() => {
         const func = async () => {
             if (localStorage.getItem("has_init") === "0") {
@@ -59,15 +66,28 @@ export function Index(): JSX.Element {
         func().then();
     }, [dispatch]);
 
+    // 获取用户信息
+    useEffect(() => {
+        const func = async () => {
+            if (location.pathname !== "/auth/login") {
+                const getResp = await GetUserCurrentAPI();
+                if (getResp?.output === "Success") {
+                    dispatch(setUserInfo(getResp.data!));
+                } else {
+                    message.error("登录已失效");
+                    navigate("/auth/login");
+                }
+            }
+        }
+        func().then();
+    }, [dispatch, location.pathname, navigate]);
+
     return (
-        <>
-            {/* Route Info */}
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"/init"} element={<BaseInit/>}/>
-                <Route path={"/auth/*"} element={<BaseAuth/>}/>
-                <Route path={"/admin/*"} element={<BaseAdmin/>}/>
-            </Routes>
-        </>
+        <Routes>
+            <Route path={"/"} element={<BaseIndex/>}/>
+            <Route path={"/init"} element={<BaseInit/>}/>
+            <Route path={"/auth/*"} element={<BaseAuth/>}/>
+            <Route path={"/admin/*"} element={<BaseAdmin/>}/>
+        </Routes>
     );
 }

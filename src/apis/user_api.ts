@@ -26,13 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+import {BaseResponse} from "../models/base_response.ts";
+import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer
-    }
-})
+/**
+ * # 获取当前用户信息
+ * > 该函数用于通过API请求获取当前登录用户的信息。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.GET,
+        "/api/v1/user/current",
+        null,
+        null,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+        )
+}
+
+export {
+    GetUserCurrentAPI
+}
