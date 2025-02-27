@@ -30,7 +30,9 @@ import {AdminRightCardComponent} from "../../components/admin/admin_reveal_compo
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {useEffect} from "react";
 import {Delete, Editor} from "@icon-park/react";
-import {AdminUserDialog} from "../../components/admin/admin_user_dialog.tsx";
+import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
+import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
+import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
 
 export function AdminUser({site}: Readonly<{
     site: SiteInfoEntity
@@ -71,12 +73,18 @@ export function AdminUser({site}: Readonly<{
                                     <td>{row.email}</td>
                                     <td>
                                         <div className="flex gap-2 justify-end">
-                                            <button className={"text-xs flex items-center font-medium text-info space-x-0.5"}>
+                                            <button
+                                                onClick={() => document.getElementById('my_modal_2').showModal()}
+                                                className={"text-xs flex items-center font-medium text-info hover:text-secondary space-x-0.5 cursor-pointer"}
+                                            >
                                                 <Editor theme="outline" size="14"/>
                                                 <span>编辑</span>
                                             </button>
+
                                             <button
-                                                className={"text-xs font-medium text-error flex items-center space-x-0.5"}>
+                                                onClick={() => document.getElementById('my_modal_3').showModal()}
+                                                className={"text-xs font-medium text-accent hover:text-error" +
+                                                    " flex items-center space-x-0.5 cursor-pointer"}>
                                                 <Delete theme="outline" size="14"/>
                                                 <span>删除</span>
                                             </button>
@@ -136,8 +144,9 @@ export function AdminUser({site}: Readonly<{
                 </div>
                 <AdminRightCardComponent/>
             </div>
-
-            <AdminUserDialog/>
+            <AdminEditUserDialog/>
+            <AdminAddUserDialog/>
+            <AdminDeleteUserDialog/>
         </>
     );
 }

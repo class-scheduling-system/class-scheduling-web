@@ -26,9 +26,14 @@
  * --------------------------------------------------------------------------------
  */
 
-export function AdminUserDialog() {
-
-
+export function AdminAddUserDialog() {
+    // 关闭对话框的函数
+    const handleCloseDialog = () => {
+        const dialog = document.getElementById('my_modal_1');
+        if (dialog) {
+            dialog.close(); // 关闭对话框
+        }
+    };
 
     return (
         <dialog id="my_modal_1" className="modal">
@@ -39,7 +44,7 @@ export function AdminUserDialog() {
                         {/* 输入框容器 */}
                         <div className="flex flex-col space-y-3">
                             <label
-                                className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
+                                className="input input-md transition flex items-center validator w-full">
                                 <svg width="20" height="20" viewBox="0 0 48 48" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="24" cy="12" r="8" fill="none" stroke="#333" stroke-width="4"
@@ -56,7 +61,7 @@ export function AdminUserDialog() {
                                 />
                             </label>
                             <label
-                                className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
+                                className="input input-md transition flex items-center validator w-full">
                                 <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="24" cy="16" r="6" fill="none" stroke="#333" stroke-width="4"
@@ -81,7 +86,7 @@ export function AdminUserDialog() {
                                 />
                             </label>
                             <label
-                                className="input input-md transition flex items-center validator w-full"> {/* 添加 w-full */}
+                                className="input input-md transition flex items-center validator w-full">
                                 <svg
                                     className="w-6 h-6 text-gray-700"
                                     aria-hidden="true"
@@ -108,13 +113,19 @@ export function AdminUserDialog() {
                         </div>
 
                         {/* 按钮容器 */}
-                        <div className="flex justify-end gap-2 w-full"> {/* 添加 w-full 和 justify-end */}
+                        <div className="flex justify-end gap-2 w-full">
                             <button type={"submit"} className="btn btn-neutral">添加</button>
-                            <button type={"button"} className="btn">取消</button>
+                            <button
+                                type={"button"} // 注意：这里 type 为 "button"，避免触发表单提交
+                                className="btn"
+                                onClick={handleCloseDialog} // 绑定点击事件
+                            >
+                                取消
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </dialog>
-    )
+    );
 }

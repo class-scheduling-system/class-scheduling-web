@@ -27,6 +27,7 @@
  */
 
 import CardBackground from "../../assets/images/card-background.webp";
+import {Plus} from "@icon-park/react";
 
 function AdminRightCardComponent() {
     return (
@@ -34,57 +35,48 @@ function AdminRightCardComponent() {
             <div className={"border border-gray-100 rounded-lg shadow-lg"}>
                 <img src={CardBackground} alt={"CardBackground"} className={"rounded-t-lg"}/>
                 <div className={"flex flex-col p-4 gap-4"}>
-                    <div className="join w-full">
-                        <div className={"w-full"}>
-                            <label className="input validator join-item">
+                    <div className="join w-full px-4"> {/* 添加 px-4 使搜索框左右两边离卡片距离一样 */}
+                        <div className={"w-full"}> {/* 设置宽度为 100% */}
+                            <label className="input validator join-item w-full"> {/* 设置宽度为 100% */}
                                 <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z"
-                                        fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/>
+                                        fill="none" stroke="#333" strokeWidth="4" strokeLinejoin="round"/>
                                     <path
                                         d="M26.657 14.3431C25.2093 12.8954 23.2093 12 21.0001 12C18.791 12 16.791 12.8954 15.3433 14.3431"
-                                        stroke="#333" stroke-width="4" stroke-linecap="round"
-                                        stroke-linejoin="round"/>
-                                    <path d="M33.2216 33.2217L41.7069 41.707" stroke="#333" stroke-width="4"
-                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                        stroke="#333" strokeWidth="4" strokeLinecap="round"
+                                        strokeLinejoin="round"/>
+                                    <path d="M33.2216 33.2217L41.7069 41.707" stroke="#333" strokeWidth="4"
+                                          strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <input type="text" placeholder="请输入用户名或角色" required/>
+                                <input type="text" placeholder="请输入用户名或角色" required className={"w-full"}/> {/* 设置宽度为 100% */}
                             </label>
                             <div className="validator-hint hidden">Enter valid email address</div>
                         </div>
                         <button className="btn btn-neutral join-item">搜索</button>
                     </div>
-                    <div className={"flex justify-between"}>
-                        <div>
-                            <button className="btn"
+
+                    {/* 按钮容器 */}
+                    <div className={"flex gap-4 px-4 w-full"}> {/* 添加 gap-4 使按钮之间的间距与边距一致 */}
+                        <div className="w-full"> {/* 让按钮占满容器宽度 */}
+                            <button className="btn w-full"
                                     onClick={() => document.getElementById('my_modal_1').showModal()}>
-                                <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M24.0605 10L24.0239 38" stroke="#333" stroke-width="4"
-                                          stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M10 24L38 24" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                </svg>
+                                <Plus theme="outline" size="22"/>
                                 添加用户
                             </button>
                         </div>
-                        <div>
-                            <button className="btn"
+                        <div className="w-full"> {/* 让按钮占满容器宽度 */}
+                            <button className="btn w-full"
                                     onClick={() => document.getElementById('my_modal_1').showModal()}>
-                                <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M24.0605 10L24.0239 38" stroke="#333" stroke-width="4"
-                                          stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M10 24L38 24" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                </svg>
+                                <Plus theme="outline" size="22"/>
                                 添加用户
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 }
