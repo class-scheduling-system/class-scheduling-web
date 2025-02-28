@@ -36,6 +36,7 @@ import {AdminUser} from "./admin/admin_user.tsx";
 import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useTransition} from "@react-spring/web";
 import {AdminRole} from "./admin/admin_role.tsx";
+import {HomeTwo, User} from "@icon-park/react";
 
 /**
  * 生成一个基础的控制台组件。
@@ -75,20 +76,13 @@ export function BaseAdmin(): JSX.Element {
                         <ul>
                             <li>
                                 <a>
-                                    <svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M19 29V42H29V29H19Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/>
-                                        <path d="M9 42H39" stroke="#333" stroke-width="4" stroke-linecap="round"/>
-                                    </svg>
+                                    <HomeTwo theme="outline" size="16" fill="#333"/>
                                     首页
                                 </a>
                             </li>
                             <li>
                                 <a>
-                                    <svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="24" cy="12" r="8" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
+                                    <User theme="outline" size="16" fill="#333"/>
                                     用户管理
                                 </a>
                             </li>

@@ -29,7 +29,7 @@
 import {AdminRightCardComponent} from "../../components/admin/admin_reveal_component.tsx";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {useEffect} from "react";
-import {Delete, Editor} from "@icon-park/react";
+import {Delete, Editor, Left, Right} from "@icon-park/react";
 import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
 import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
 import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
@@ -101,11 +101,7 @@ export function AdminUser({site}: Readonly<{
                                 <a href="#"
                                    className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">
                                     <span className="sr-only">Previous</span>
-                                    <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true"
-                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                              stroke-width="2" d="M5 1 1 5l4 4"/>
-                                    </svg>
+                                    <Left theme="outline" size="16" fill="#333"/>
                                 </a>
                             </li>
                             <li>
@@ -132,11 +128,7 @@ export function AdminUser({site}: Readonly<{
                                 <a href="#"
                                    className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">
                                     <span className="sr-only">Next</span>
-                                    <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true"
-                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                              stroke-width="2" d="m1 9 4-4-4-4"/>
-                                    </svg>
+                                    <Right theme="outline" size="16" fill="#333"/>
                                 </a>
                             </li>
                         </ul>

@@ -27,7 +27,7 @@
  */
 
 import CardBackground from "../../assets/images/card-background.webp";
-import {Plus} from "@icon-park/react";
+import {Plus, Search} from "@icon-park/react";
 
 function AdminRightCardComponent() {
     return (
@@ -38,18 +38,7 @@ function AdminRightCardComponent() {
                     <div className="join w-full px-4"> {/* 添加 px-4 使搜索框左右两边离卡片距离一样 */}
                         <div className={"w-full"}> {/* 设置宽度为 100% */}
                             <label className="input validator join-item w-full"> {/* 设置宽度为 100% */}
-                                <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z"
-                                        fill="none" stroke="#333" strokeWidth="4" strokeLinejoin="round"/>
-                                    <path
-                                        d="M26.657 14.3431C25.2093 12.8954 23.2093 12 21.0001 12C18.791 12 16.791 12.8954 15.3433 14.3431"
-                                        stroke="#333" strokeWidth="4" strokeLinecap="round"
-                                        strokeLinejoin="round"/>
-                                    <path d="M33.2216 33.2217L41.7069 41.707" stroke="#333" strokeWidth="4"
-                                          strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                <Search theme="outline" size="24" fill="#333"/>
                                 <input type="text" placeholder="请输入用户名或角色" required className={"w-full"}/> {/* 设置宽度为 100% */}
                             </label>
                             <div className="validator-hint hidden">Enter valid email address</div>

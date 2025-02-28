@@ -26,6 +26,8 @@
  * --------------------------------------------------------------------------------
  */
 
+import {Envelope, User, UserPositioning} from "@icon-park/react";
+
 export function AdminAddUserDialog() {
     // 关闭对话框的函数
     const handleCloseDialog = () => {
@@ -45,41 +47,19 @@ export function AdminAddUserDialog() {
                         <div className="flex flex-col space-y-3">
                             <label
                                 className="input input-md transition flex items-center validator w-full">
-                                <svg width="20" height="20" viewBox="0 0 48 48" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="24" cy="12" r="8" fill="none" stroke="#333" stroke-width="4"
-                                            stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44"
-                                          stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                </svg>
+                                <User theme="outline" size="18" fill="#333"/>
                                 <input
                                     type="text"
                                     required
-                                    className="grow ps-1"
+                                    className="grow"
                                     placeholder="用户名"
                                 />
                             </label>
                             <label
                                 className="input input-md transition flex items-center validator w-full">
-                                <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="24" cy="16" r="6" fill="none" stroke="#333" stroke-width="4"
-                                            stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M36 36C36 29.3726 30.6274 24 24 24C17.3726 24 12 29.3726 12 36"
-                                          stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M36 4H44V12" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M12 4H4V12" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M36 44H44V36" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M12 44H4V36" stroke="#333" stroke-width="4" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                </svg>
+                                <UserPositioning theme="outline" size="18" fill="#333"/>
                                 <input
-                                    type="email"
+                                    type="text"
                                     required
                                     className="grow"
                                     placeholder="角色"
@@ -87,26 +67,11 @@ export function AdminAddUserDialog() {
                             </label>
                             <label
                                 className="input input-md transition flex items-center validator w-full">
-                                <svg
-                                    className="w-6 h-6 text-gray-700"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeWidth="2"
-                                        d="m3.5 5.5 7.893 6.036a1 1 0 0 0 1.214 0L20.5 5.5M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"
-                                    />
-                                </svg>
+                                <Envelope theme="outline" size="18" fill="#333"/>
                                 <input
                                     type="email"
                                     required
-                                    className="grow ps-1"
+                                    className="grow"
                                     placeholder="邮箱"
                                 />
                             </label>
