@@ -48,6 +48,18 @@ const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
         )
 }
 
+const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity[]>> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.GET,
+        "/api/v1/user/list",
+        null,
+        null,
+        null,
+        {Authorization: `Bear ${GetAuthorizationToken()}`},
+    )
+}
+
 export {
-    GetUserCurrentAPI
+    GetUserCurrentAPI,
+    GetUserListAPI,
 }
