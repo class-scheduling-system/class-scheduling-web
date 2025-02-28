@@ -32,7 +32,6 @@ import {SystemInitDTO} from "../models/dto/system_init_dto.ts";
 import {InitAPI, InitCheckAPI} from "../apis/init_api.ts";
 import {useNavigate} from "react-router";
 import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
-import {useDispatch} from "react-redux";
 
 import backgroundImage from "../assets/images/init_background.jpg";
 import {message} from "antd";
@@ -45,7 +44,6 @@ import {message} from "antd";
  */
 export function BaseInit(): JSX.Element {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const [data, setData] = useState<SystemInitDTO>({} as SystemInitDTO);
     const [rePassword, setRePassword] = useState<string>("" as string);
@@ -61,7 +59,6 @@ export function BaseInit(): JSX.Element {
             const getResp = await InitCheckAPI();
             if (getResp?.output === "Success") {
                 if (!getResp.data!.system_init) {
-                    localStorage.setItem("has_init", "0");
                     message.warning("请勿重复初始化系统");
                     navigate("/auth/login");
                 }
@@ -70,7 +67,7 @@ export function BaseInit(): JSX.Element {
             }
         }
         func().then();
-    }, [dispatch, navigate]);
+    }, [navigate]);
 
     useEffect(() => {
         if (rePassword) {
