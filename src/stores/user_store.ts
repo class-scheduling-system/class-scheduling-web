@@ -26,13 +26,33 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer
+/**
+ * # setUserInfo
+ * > 该函数用于更新用户信息，包括用户的基本信息、学生信息以及教师信息。通过接收新的用户实体对象来覆盖当前存储的状态。
+ *
+ * @param state - 当前的用户信息状态，类型为 `UserInfoEntity`。
+ * @param action - 包含新用户信息的动作对象，类型为 `PayloadAction<UserInfoEntity>`。
+ */
+export const userStore = createSlice({
+    name: "user",
+    initialState: {} as UserInfoEntity,
+    reducers: {
+        /**
+         * # setUserInfo
+         * > 该函数用于更新用户信息，包括用户的基本信息、学生信息以及教师信息。通过接收新的用户实体对象来覆盖当前存储的状态。
+         *
+         * @param state - UserInfoEntity 类型，表示当前的用户信息状态。
+         * @param action - PayloadAction<UserInfoEntity> 类型，包含新的用户信息数据，用以更新现有状态。
+         */
+        setUserInfo: (state: UserInfoEntity, action: PayloadAction<UserInfoEntity>) => {
+            state.user = action.payload.user;
+            state.student = action.payload.student;
+            state.teacher = action.payload.teacher;
+        },
     }
-})
+});
+
+export const {setUserInfo} = userStore.actions;

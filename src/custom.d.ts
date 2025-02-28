@@ -26,13 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
+import reactSpring from "@react-spring/web";
+import * as React from "react";
 
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer
-    }
-})
+declare module "@react-spring/web" {
+    const animated = {
+        children: React.ReactNode,
+        ...reactSpring.animated,
+    };
+}
