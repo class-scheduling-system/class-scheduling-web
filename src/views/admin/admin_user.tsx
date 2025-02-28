@@ -51,7 +51,7 @@ export function AdminUser({site}: Readonly<{
                             {/* 表头 */}
                             <thead>
                             <tr>
-                                <th></th>
+                                <th>序号</th>
                                 <th>用户名</th>
                                 <th>角色</th>
                                 <th>邮箱</th>

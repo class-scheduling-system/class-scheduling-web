@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, System, User} from "@icon-park/react";
+import {BuildingTwo, Dashboard, System, User, UserPositioning} from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 import {AdminSystemInfo} from "../../views/admin/admin_systemInfo.tsx";
@@ -49,6 +49,8 @@ export function AdminNavComponent(): JSX.Element {
                                        path={"/admin/dashboard"}/>
                 <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
                                        path={"/admin/user"}/>
+                <AdminNavLinkComponent title={"角色管理"} icon={<UserPositioning theme="outline" size="16"/>}
+                                       path={"/admin/role"}/>
                 <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="16"/>}
                                        path={"/admin/building"}/>
                 <AdminNavLinkComponent title={"系统信息"} icon={<System theme="outline" size="16" />}
