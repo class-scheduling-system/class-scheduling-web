@@ -69,7 +69,7 @@ export function Index(): JSX.Element {
     // 获取用户信息
     useEffect(() => {
         const func = async () => {
-            if (location.pathname !== "/auth/login") {
+            if (location.pathname !== "/auth/login" && localStorage.getItem("has_init") === "0") {
                 const getResp = await GetUserCurrentAPI();
                 if (getResp?.output === "Success") {
                     dispatch(setUserInfo(getResp.data!));

@@ -34,6 +34,8 @@ import {AuthForgetPassword} from "./auth/auth_forget_password.tsx";
 import {JSX, useEffect, useState} from "react";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import backgroundImage from "../assets/images/init_background.jpg";
+import {InitCheckAPI} from "../apis/init_api.ts";
+import {message} from "antd";
 
 /**
  * # 函数描述
@@ -71,14 +73,33 @@ export function BaseAuth(): JSX.Element {
     });
 
     useEffect(() => {
-        if (location.pathname === "/auth") {
-            navigate("/auth/login");
-        }
-    }, [location.pathname, navigate]);
-
-    useEffect(() => {
         setHasLoaded(true);
     }, []);
+
+    // 检查系统初始化状态
+    useEffect(() => {
+        const func = async () => {
+            try {
+                const getResp = await InitCheckAPI();
+                if (getResp?.output === "Success") {
+                    if (getResp.data!.system_init) {
+                        localStorage.setItem("has_init", "1");
+                        navigate("/init");
+                    } else {
+                        localStorage.setItem("has_init", "0");
+                        if (location.pathname === "/auth") {
+                            navigate("/auth/login");
+                        }
+                    }
+                } else {
+                    message.error("系统初始化检查失败，请联系管理员!");
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        func().then();
+    }, [location.pathname, navigate]);
 
     return (
         <div className={"w-full grid grid-cols-2 bg-gray-50 overflow-hidden"}>
