@@ -65,7 +65,6 @@ export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">系统信息</h1>
 
             {/* 系统概览 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

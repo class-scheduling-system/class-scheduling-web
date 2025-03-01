@@ -6,7 +6,7 @@ import { AdminDeleteUserDialog } from "../../components/admin/admin_user_delete_
 import { GetUserListAPI, DeleteUserAPI } from "../../apis/user_api.ts";
 import { AdminRightCardComponent } from "../../components/admin/admin_reveal_component.tsx";
 import { animated, useTransition } from "@react-spring/web";
-import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
 
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
     // 用户列表
@@ -14,23 +14,28 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
     // 加载中状态
     const [loading, setLoading] = useState(true);
 
-    // 分页相关的状态
-    const [currentPage, setCurrentPage] = useState(1);  // 当前页
-    const [pageSize, setPageSize] = useState(20);       // 每页数量
-    const [total, setTotal] = useState(0);              // 总记录数
-    const [totalPages, setTotalPages] = useState(1);    // 总页数
+    // 分页相关状态
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
-    // 删除用户相关
+    // 删除用户相关状态
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
+
+    // 编辑用户数据状态
+    // 这里保存的是一个对象，包含 name、role、email 三个字段
+    const [editUser, setEditUser] = useState<{
+        name: string;
+        role: string;
+        email: string;
+    } | null>(null);
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
-
-        // 获取用户列表
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                // 调用接口时传入当前页、页大小等参数
                 const response = await GetUserListAPI({
                     page: currentPage,
                     size: pageSize,
@@ -39,11 +44,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                 });
                 if (response?.data?.records) {
                     setUserList(response.data.records);
-
-                    // 从响应里获取总记录数、当前页、每页大小等信息
                     setTotal(response.data.total);
-                    // 也可以直接使用后端返回的 current
-                    // setCurrentPage(response.data.current);
                     setTotalPages(Math.ceil(response.data.total / response.data.size));
                 }
             } catch (error) {
@@ -54,10 +55,9 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
         };
 
         fetchUsers();
-        // 当 currentPage 或 pageSize 改变时重新获取列表
     }, [site.name, currentPage, pageSize]);
 
-    // 删除用户
+    // 删除用户方法
     const deleteUser = async (userUuid: string) => {
         try {
             await DeleteUserAPI(userUuid);
@@ -69,14 +69,23 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
         }
     };
 
-    // 点击分页器时更新当前页
+    // 分页切换
     const handlePageChange = (newPage: number) => {
-        // 边界处理
         if (newPage < 1 || newPage > totalPages) return;
         setCurrentPage(newPage);
     };
 
-    // 如果正在加载，就给一个虚拟数量给 useTransition
+    // 设置编辑用户数据，并打开编辑对话框
+    const handleEdit = (user: any) => {
+        // 注意这里将 role 处理为字符串（例如从 role 对象中取 role_name）
+        setEditUser({
+            name: user.name,
+            role: user.role.role_name,
+            email: user.email,
+        });
+        document.getElementById('my_modal_2')?.showModal();
+    };
+
     const transition = useTransition(loading ? 10 : userList.length, {
         from: { opacity: 0 },
         enter: { opacity: 1 },
@@ -102,7 +111,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                             {transition((style, item) =>
                                 item ? (
                                     loading ? (
-                                        // 加载状态下的骨架屏
                                         <animated.tr key={item} style={style}>
                                             {[...Array(5)].map((_, i) => (
                                                 <td key={i}>
@@ -120,7 +128,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                                 <td>
                                                     <div className="flex gap-2 justify-end">
                                                         <button
-                                                            onClick={() => document.getElementById('my_modal_2')?.showModal()}
+                                                            onClick={() => handleEdit(record.user)}
                                                             className="text-xs flex items-center font-medium text-info hover:text-secondary space-x-0.5 cursor-pointer"
                                                         >
                                                             <Editor theme="outline" size="14" />
@@ -150,7 +158,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                     {/* 分页导航 */}
                     <nav aria-label="Page navigation example" className="w-full flex justify-center">
                         <ul className="flex items-center -space-x-px h-8 text-sm">
-                            {/* 上一页 */}
                             <li>
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
@@ -160,8 +167,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                     <Left theme="outline" size="16" fill="#333" />
                                 </button>
                             </li>
-
-                            {/* 渲染页码 */}
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                 <li key={page}>
                                     <button
@@ -177,8 +182,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                     </button>
                                 </li>
                             ))}
-
-                            {/* 下一页 */}
                             <li>
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
@@ -191,7 +194,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                         </ul>
                     </nav>
                 </div>
-
                 <AdminRightCardComponent />
             </div>
 
@@ -200,7 +202,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                 onDelete={deleteUser}
                 onCancel={() => document.getElementById('my_modal_3')?.close()}
             />
-            <AdminEditUserDialog />
+            {/* 将编辑对话框传入默认数据 */}
+            <AdminEditUserDialog defaultData={editUser} />
             <AdminAddUserDialog />
         </>
     );
