@@ -59,7 +59,19 @@ const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity[]>> => {
     )
 }
 
+const DeleteUserAPI = async (): Promise<void> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.DELETE,
+        "/api/v1/user/{user_uuid}",
+        null,
+        null,
+        null,
+        {Authorization: `Bear ${GetAuthorizationToken()}`},
+    )
+}
+
 export {
     GetUserCurrentAPI,
     GetUserListAPI,
+    DeleteUserAPI
 }

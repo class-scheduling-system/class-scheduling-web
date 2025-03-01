@@ -37,6 +37,7 @@ import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useTransition} from "@react-spring/web";
 import {AdminRole} from "./admin/admin_role.tsx";
 import {HomeTwo, User} from "@icon-park/react";
+import {AdminSystemInfo} from "./admin/admin_systemInfo.tsx";
 
 /**
  * 生成一个基础的控制台组件。
@@ -102,6 +103,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/user" element={<AdminUser site={site} />} />
                                 <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
+                                <Route path="/system-info" element={<AdminSystemInfo site={site} />} />
                             </Routes>
                         </animated.div>
                     ))}
