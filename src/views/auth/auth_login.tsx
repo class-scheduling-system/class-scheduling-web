@@ -35,6 +35,7 @@ import {AuthLoginDTO} from "../../models/dto/auth_login_dto.ts";
 import {Link, useNavigate} from "react-router";
 import {message} from "antd";
 import {useSelector} from "react-redux";
+import cookie from "react-cookies";
 
 
 /**
@@ -64,7 +65,14 @@ export function AuthLogin(): JSX.Element {
             } else {
                 message.success(`你好 ${getResp.data!.user?.name}，欢迎回来！`);
                 if (getResp.data!.token!.token) {
-                    localStorage.setItem("UserToken", getResp.data!.token!.token);
+                    cookie.save("token", getResp.data!.token!.token, {
+                        path: "/",
+                        expires: new Date(new Date().getTime() + 3600000)
+                    });
+                    cookie.save("refresh_token", getResp.data!.token!.refresh_token, {
+                        path: "/",
+                        expires: new Date(new Date().getTime() + 86400000)
+                    });
                 } else {
                     message.warning("无法获取用户Token");
                 }

@@ -36,6 +36,7 @@ import {animated, useSpring, useTransition} from "@react-spring/web";
 import backgroundImage from "../assets/images/init_background.jpg";
 import {InitCheckAPI} from "../apis/init_api.ts";
 import {message} from "antd";
+import {SimplePageNotFoundHasButton} from "./404/simple_page_not_found_has_button.tsx";
 
 /**
  * # 函数描述
@@ -101,8 +102,14 @@ export function BaseAuth(): JSX.Element {
         func().then();
     }, [location.pathname, navigate]);
 
+    const fade = useSpring({
+        opacity: 1,
+        from: {opacity: 0},
+        config: {tension: 120, friction: 26},
+    });
+
     return (
-        <div className={"w-full grid grid-cols-2 bg-gray-50 overflow-hidden"}>
+        <animated.div style={fade} className={"w-full grid grid-cols-2 bg-gray-50 overflow-hidden"}>
             {/* 图片背景使用单独的 useSpring 动画 */}
             <animated.div style={imageSpring} className={"w-full h-lvh relative hidden md:block"}>
                 <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}/>
@@ -117,11 +124,12 @@ export function BaseAuth(): JSX.Element {
                                 <Route path={"/register"} element={<AuthRegister/>}/>
                                 <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
                                 <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
+                                <Route path={"/*"} element={<SimplePageNotFoundHasButton/>}/>
                             </Routes>
                         </animated.div>
                     ))
                 }
             </div>
-        </div>
+        </animated.div>
     );
 }

@@ -26,28 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {BaseResponse} from "../models/base_response.ts";
-import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
+import {animated, useSpring} from "@react-spring/web";
+import {JSX} from "react";
 
 /**
- * # 获取当前用户信息
- * > 该函数用于通过API请求获取当前登录用户的信息。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ * # SimplePageNotFound
  *
- * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
- * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ * > 该函数用于渲染一个简单的404页面未找到的组件。当用户访问不存在的页面时，此组件将显示一个动画效果以及“404 | Not Found”的提示信息。
+ *
+ * @returns {JSX.Element} 返回一个React JSX元素，包含一个带有淡入动画效果的404错误页面。
  */
-const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
-        MethodType.GET,
-        "/api/v1/user/current",
-        null,
-        null,
-        null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
-    )
-}
+export function SimplePageNotFound(): JSX.Element {
 
-export {
-    GetUserCurrentAPI
+    const fade = useSpring({
+        opacity: 1,
+        from: { opacity: 0 },
+        config: { tension: 120, friction: 26 },
+    });
+
+    return(
+        <animated.div style={fade} className="grid h-screen place-content-center bg-white px-4">
+            <h1 className="transition duration-1000 uppercase tracking-widest text-gray-500 hover:text-primary-content active:text-primary select-none">
+                404 | Page Not Found
+            </h1>
+        </animated.div>
+    );
 }

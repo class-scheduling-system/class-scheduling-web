@@ -35,6 +35,7 @@ import {Inspection, Key, Mail, PhoneTelephone, User} from "@icon-park/react";
 
 import backgroundImage from "../assets/images/init_background.jpg";
 import {message} from "antd";
+import {animated, useSpring} from "@react-spring/web";
 
 /**
  * 初始化系统的基础设置页面。
@@ -100,8 +101,14 @@ export function BaseInit(): JSX.Element {
         }
     }
 
+    const fade = useSpring({
+        opacity: 1,
+        from: {opacity: 0},
+        config: {tension: 120, friction: 26},
+    });
+
     return (
-        <div className={"w-full h-dvh grid grid-cols-2 bg-base-100"}>
+        <animated.div style={fade} className={"w-full h-dvh grid grid-cols-2 bg-base-100"}>
             <div className={"w-full h-lvh relative"}>
                 <img src={backgroundImage} className={"w-full h-full object-cover"} alt={"init-background"}
                      draggable={false}/>
@@ -227,6 +234,6 @@ export function BaseInit(): JSX.Element {
                     </div>
                 </div>
             </form>
-        </div>
+        </animated.div>
     );
 }

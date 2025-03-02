@@ -26,28 +26,39 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {BaseResponse} from "../models/base_response.ts";
-import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
+import {useNavigate} from "react-router";
+import {JSX} from "react";
+import {animated, useSpring} from "@react-spring/web";
 
 /**
- * # 获取当前用户信息
- * > 该函数用于通过API请求获取当前登录用户的信息。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ * # PageNotFound
+ * > 该函数用于在用户访问不存在的页面时显示404错误页面。它提供了一个友好的用户界面，告知用户请求的页面无法找到，并提供一个按钮让用户可以返回到上一个页面。
  *
- * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
- * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ * @returns {JSX.Element} 返回一个React组件，展示404错误页面，包括错误信息和一个返回上一页的按钮。
  */
-const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
-        MethodType.GET,
-        "/api/v1/user/current",
-        null,
-        null,
-        null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
-    )
-}
+export function PageNotFound(): JSX.Element {
+    const navigate = useNavigate();
 
-export {
-    GetUserCurrentAPI
+    const fade = useSpring({
+        opacity: 1,
+        from: { opacity: 0 },
+        config: { tension: 120, friction: 26 },
+    });
+
+    return (
+        <animated.div style={fade} className="grid h-screen place-content-center bg-white px-4">
+            <div className="text-center">
+                <h1 className="text-9xl font-black text-gray-200 selec select-none">404</h1>
+                <p className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl select-none">Uh-oh!</p>
+                <p className="mt-4 text-gray-500 select-none">我们找不到该页面。</p>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="btn btn-primary btn-lg mt-6 select-none"
+
+                >
+                    返回上一页
+                </button>
+            </div>
+        </animated.div>
+    );
 }

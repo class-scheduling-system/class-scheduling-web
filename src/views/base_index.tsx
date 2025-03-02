@@ -31,6 +31,7 @@ import {useNavigate} from "react-router";
 import {InitCheckAPI} from "../apis/init_api.ts";
 import {useDispatch} from "react-redux";
 import {message} from "antd";
+import {animated, useSpring} from "@react-spring/web";
 
 /**
  * 基础索引组件
@@ -68,10 +69,15 @@ export function BaseIndex(): JSX.Element {
         func().then();
     }, [dispatch, navigate]);
 
+    const fade = useSpring({
+        opacity: 1,
+        from: { opacity: 0 },
+        config: { tension: 120, friction: 26 },
+    });
 
     return (
-        <div className="flex justify-center items-center h-screen">
+        <animated.div style={fade} className="flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"/>
-        </div>
+        </animated.div>
     );
 }
