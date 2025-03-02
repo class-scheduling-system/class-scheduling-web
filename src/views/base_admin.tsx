@@ -99,11 +99,11 @@ export function BaseAdmin(): JSX.Element {
 
     return (
         <animated.div style={fade} className="h-lvh flex">
-            <animated.div style={navFade} className="w-64 h-full bg-base-200 shadow-lg">
+            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 h-full bg-base-200 shadow-lg">
                 <AdminNavComponent />
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 p-4 shadow flex justify-between">
+                <animated.div style={topFade} className="w-full bg-base-100 p-4 shadow flex justify-between z-50">
                     <div>面包屑导航</div>
                     <div>{getUser.user?.name ?? ""}</div>
                 </animated.div>
