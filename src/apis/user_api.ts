@@ -48,27 +48,27 @@ const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
         )
 }
 
-const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity[]>> => {
+const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
     return BaseApi<UserInfoEntity>(
         MethodType.GET,
         "/api/v1/user/list",
         null,
         null,
         null,
-        {Authorization: `Bear ${GetAuthorizationToken()}`},
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
     )
 }
 
-const DeleteUserAPI = async (): Promise<void> => {
+const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
     return BaseApi<UserInfoEntity>(
         MethodType.DELETE,
-        "/api/v1/user/{user_uuid}",
+        "/api/v1/user",
         null,
         null,
-        null,
-        {Authorization: `Bear ${GetAuthorizationToken()}`},
-    )
-}
+        user_uuid,
+        { Authorization: `Bearer ${GetAuthorizationToken()}` }
+    );
+};
 
 export {
     GetUserCurrentAPI,

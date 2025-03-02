@@ -3,7 +3,7 @@ import { Delete, Editor, Left, Right } from "@icon-park/react";
 import { AdminAddUserDialog } from "../../components/admin/admin_user_add_dialog.tsx";
 import { AdminEditUserDialog } from "../../components/admin/admin_user_edit_dialog.tsx";
 import { AdminDeleteUserDialog } from "../../components/admin/admin_user_delete_dialog.tsx";
-import { GetUserListAPI, DeleteUserAPI } from "../../apis/user_api.ts";
+import { GetUserListAPI } from "../../apis/user_api.ts";
 import { AdminRightCardComponent } from "../../components/admin/admin_reveal_component.tsx";
 import { animated, useTransition } from "@react-spring/web";
 import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
@@ -11,7 +11,6 @@ import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
     // 用户列表
     const [userList, setUserList] = useState([]);
-    // 加载中状态
     const [loading, setLoading] = useState(true);
 
     // 分页相关状态
@@ -24,50 +23,38 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
 
     // 编辑用户数据状态
-    // 这里保存的是一个对象，包含 name、role、email 三个字段
     const [editUser, setEditUser] = useState<{
         name: string;
         role: string;
         email: string;
     } | null>(null);
 
-    useEffect(() => {
-        document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const response = await GetUserListAPI({
-                    page: currentPage,
-                    size: pageSize,
-                    keyword: "",
-                    is_desc: true
-                });
-                if (response?.data?.records) {
-                    setUserList(response.data.records);
-                    setTotal(response.data.total);
-                    setTotalPages(Math.ceil(response.data.total / response.data.size));
-                }
-            } catch (error) {
-                console.error("获取用户列表失败: ", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUsers();
-    }, [site.name, currentPage, pageSize]);
-
-    // 删除用户方法
-    const deleteUser = async (userUuid: string) => {
+    // 获取用户列表
+    const fetchUsers = async () => {
         try {
-            await DeleteUserAPI(userUuid);
-            setUserList((prevUsers) => prevUsers.filter((user) => user.user.user_uuid !== userUuid));
-            alert("用户删除成功");
+            setLoading(true);
+            const response = await GetUserListAPI({
+                page: currentPage,
+                size: pageSize,
+                keyword: "",
+                is_desc: true
+            });
+            if (response?.data?.records) {
+                setUserList(response.data.records);
+                setTotal(response.data.total);
+                setTotalPages(Math.ceil(response.data.total / pageSize));
+            }
         } catch (error) {
-            console.error("删除用户失败: ", error);
-            alert("删除用户失败");
+            console.error("获取用户列表失败: ", error);
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
+        fetchUsers();
+    }, [site.name, currentPage, pageSize]);
 
     // 分页切换
     const handlePageChange = (newPage: number) => {
@@ -77,13 +64,18 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
 
     // 设置编辑用户数据，并打开编辑对话框
     const handleEdit = (user: any) => {
-        // 注意这里将 role 处理为字符串（例如从 role 对象中取 role_name）
         setEditUser({
             name: user.name,
             role: user.role.role_name,
             email: user.email,
         });
         document.getElementById('my_modal_2')?.showModal();
+    };
+
+    // 触发删除对话框
+    const confirmDelete = (userUuid: string) => {
+        setDeleteUserUuid(userUuid);
+        document.getElementById('my_modal_3')?.showModal();
     };
 
     const transition = useTransition(loading ? 10 : userList.length, {
@@ -135,10 +127,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                                             <span>编辑</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => {
-                                                                setDeleteUserUuid(record.user.user_uuid);
-                                                                document.getElementById('my_modal_3')?.showModal();
-                                                            }}
+                                                            onClick={() => confirmDelete(record.user.user_uuid)}
                                                             className="text-xs font-medium text-accent hover:text-error flex items-center space-x-0.5 cursor-pointer"
                                                         >
                                                             <Delete theme="outline" size="14" />
@@ -197,13 +186,15 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                 <AdminRightCardComponent />
             </div>
 
+            {/* 删除用户对话框 */}
             <AdminDeleteUserDialog
                 userUuid={deleteUserUuid}
-                onDelete={deleteUser}
+                onUserDeleted={fetchUsers} // 删除后刷新列表
                 onCancel={() => document.getElementById('my_modal_3')?.close()}
             />
-            {/* 将编辑对话框传入默认数据 */}
+            {/* 编辑用户 */}
             <AdminEditUserDialog defaultData={editUser} />
+            {/* 添加用户 */}
             <AdminAddUserDialog />
         </>
     );
