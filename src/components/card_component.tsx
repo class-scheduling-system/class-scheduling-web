@@ -26,29 +26,32 @@
  * --------------------------------------------------------------------------------
  */
 
+import * as React from "react";
 import {JSX, useEffect, useState} from "react";
 
 /**
  * # CardComponent
+ * > 一个用于创建响应式卡片组件的函数。该组件支持自定义列宽、不同屏幕尺寸下的显示与隐藏规则以及样式大小等属性。
  *
- * > 用于创建一个响应式的卡片组件，支持自定义列宽、屏幕尺寸下的显示/隐藏行为以及卡片大小。该组件可以接受子元素作为其内容，并允许设置内边距。
- *
- * @param col - 可选参数，类型为1到12的数字之一，表示在网格布局中的列跨度，默认值为空（即不指定列跨度）。
- * @param howScreenFull - 可选参数，类型为"sm", "md", "lg", "xl", "2xl", "3xl", 或 "4xl"之一，指定了从哪个屏幕尺寸开始卡片将占据全列宽度。
- * @param howScreenHide - 可选参数，类型同`howScreenFull`，但功能相反，指定了从哪个屏幕尺寸起卡片将被隐藏。
- * @param children - 必需参数，类型为JSX.Element | string | number，代表要放置在卡片内部的内容。
- * @param padding - 可选参数，类型为number，用来设置卡片内的内边距，默认值为12px。
- * @param size - 可选参数，类型为"sm", "md", 或 "lg"之一，控制卡片的整体大小样式。
- *
- * @returns JSX.Element - 配置好的卡片组件。
+ * @param col - 列宽度，可以是1到12之间的整数，默认值为空。
+ * @param howScreenFull - 在指定屏幕尺寸下占据全部宽度的断点，默认值为空。
+ * @param howScreenHide - 在指定屏幕尺寸下隐藏组件的断点，默认值为空。
+ * @param children - 卡片内包含的内容，可以是JSX元素、元素数组或简单文本/数字。
+ * @param padding - 卡片内容区域的内边距，默认为12px。
+ * @param size - 卡片的预设尺寸，可选值有 "sm", "md", 和 "lg"，默认值为空。
+ * @param clazz - 应用到最外层div上的额外CSS类名，默认值为空。
+ * @param style - 应用到最外层div上的额外内联样式，默认值为空。
+ * @returns JSX.Element - 返回一个配置了所需样式的JSX.Element类型的卡片组件。
  */
-export function CardComponent({col, howScreenFull, howScreenHide, children, padding, size}: Readonly<{
+export function CardComponent({col, howScreenFull, howScreenHide, children, padding, size, clazz, style}: Readonly<{
     col?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     howScreenHide?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
     howScreenFull?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
-    children: JSX.Element | string | number,
+    children: JSX.Element | JSX.Element[] | string | number,
     padding?: number,
     size?: "sm" | "md" | "lg",
+    clazz?: string,
+    style?: React.CSSProperties
 }>): JSX.Element {
     const screenHide = howScreenHide ? `hidden ${howScreenHide}:block` : "";
     const [colSpan, setColSpan] = useState<string>("");
@@ -76,10 +79,10 @@ export function CardComponent({col, howScreenFull, howScreenHide, children, padd
             default:
                 setSizeOf("");
         }
-    }, []);
+    }, [size]);
 
     return (
-        <div className={`${colSpan} ${screenHide}`}>
+        <div className={`${colSpan} ${screenHide} ${clazz ?? ""}`} style={style}>
             <div
                 className={`transition card ${sizeOf} bg-base-100 border border-base-200 shadow-sm hover:shadow-lg`}
                 style={{padding: (padding ?? 3 * 4) + "px"}}
