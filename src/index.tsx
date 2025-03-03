@@ -38,6 +38,7 @@ import {BaseAuth} from "./views/base_auth.tsx";
 import {message} from "antd";
 import {GetUserCurrentAPI} from "./apis/user_api.ts";
 import {setUserInfo} from "./stores/user_store.ts";
+import {PageNotFound} from "./views/404/page_not_found.tsx";
 
 /**
  * # Index
@@ -69,11 +70,25 @@ export function Index(): JSX.Element {
     // 获取用户信息
     useEffect(() => {
         const func = async () => {
-            if (location.pathname !== "/auth/login" && localStorage.getItem("has_init") === "0") {
+            if (localStorage.getItem("has_init") === "0") {
                 const getResp = await GetUserCurrentAPI();
                 if (getResp?.output === "Success") {
                     dispatch(setUserInfo(getResp.data!));
-                } else {
+                    if (location.pathname.startsWith("/auth")) {
+                        message.info("您已登录，正在为您跳转...");
+                        // 根据角色跳转不同页面
+                        switch (getResp.data!.user?.role.role_name) {
+                            case "管理员":
+                                navigate("/admin/dashboard");
+                                break;
+                            case "老师":
+                                navigate("/teacher/dashboard");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                } else if (location.pathname !== "/auth/login") {
                     message.error("登录已失效");
                     navigate("/auth/login");
                 }
@@ -83,11 +98,12 @@ export function Index(): JSX.Element {
     }, [dispatch, location.pathname, navigate]);
 
     return (
-        <Routes>
+        <Routes location={location}>
             <Route path={"/"} element={<BaseIndex/>}/>
             <Route path={"/init"} element={<BaseInit/>}/>
             <Route path={"/auth/*"} element={<BaseAuth/>}/>
             <Route path={"/admin/*"} element={<BaseAdmin/>}/>
+            <Route path={"/*"} element={<PageNotFound/>}/>
         </Routes>
     );
 }

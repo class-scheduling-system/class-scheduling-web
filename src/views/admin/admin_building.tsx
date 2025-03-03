@@ -26,6 +26,8 @@
  * --------------------------------------------------------------------------------
  */
 
+import cardImage from "../../assets/images/card-background.webp";
+
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useState} from "react";
 import {PageEntity} from "../../models/entity/page_entity.ts";
@@ -35,6 +37,9 @@ import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 import {useDispatch} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
+import {CardComponent} from "../../components/card_component.tsx";
+import {LabelComponent} from "../../components/label_component.tsx";
+import {Correct, Error} from "@icon-park/react";
 
 /**
  * # AdminBuilding
@@ -82,73 +87,119 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         config: {duration: 100},
     });
 
+    function getPageInfo(): JSX.Element[] {
+        const pageInfo: JSX.Element[] = [];
+        for (let i = 0; i < Math.ceil(buildingList.total / buildingList.size); i++) {
+            if (i + 1 === buildingList.current) {
+                pageInfo.push(
+                    <button key={i} className="transition shadow btn btn-sm join-item btn-primary">{i + 1}</button>
+                );
+            } else {
+                pageInfo.push(
+                    <button key={i} className="transition shadow btn btn-sm join-item">{i + 1}</button>
+                );
+            }
+        }
+        return pageInfo;
+    }
+
     return (
-        <div>
-            <div className="overflow-x-auto">
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>名字</th>
-                        <th>状态</th>
-                        <th>新建时间</th>
-                        <th>修改时间</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {transition((style, item) =>
-                        item ? (
-                            buildingList.records.map((building, index) => (
-                                <animated.tr
-                                    key={building.building_uuid}
-                                    style={style}
-                                    className="transition hover:bg-base-200"
-                                >
-                                    <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
-                                    <td>{building?.building_name}</td>
-                                    <td>{building?.status}</td>
-                                    <td>{new Date(building.created_at).toLocaleString()}</td>
-                                    <td>{new Date(building.updated_at).toLocaleString()}</td>
-                                    <td>
-                                        <div className="flex gap-2">
-                                            <button className="btn btn-xs btn-outline">编辑</button>
-                                            <button className="btn btn-xs btn-outline">删除</button>
-                                        </div>
-                                    </td>
-                                </animated.tr>
-                            ))
-                        ) : (
-                            buildingList.records.map((_, index) => (
-                                <animated.tr
-                                    key={"building-" + index}
-                                    style={style}
-                                    className="transition hover:bg-base-200"
-                                >
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton h-4 w-full"></div>
-                                    </td>
-                                </animated.tr>
-                            ))
-                        ))}
-                    </tbody>
-                </table>
+        <div className={"grid grid-cols-10 gap-4"}>
+            <div className={"col-span-full md:col-span-7 flex flex-col gap-4"}>
+                <CardComponent padding={0}>
+                    <div className={"overflow-x-auto overflow-y-auto"}>
+                        <table className="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>名字</th>
+                                <th>状态</th>
+                                <th>新建时间</th>
+                                <th>修改时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {transition((style, item) =>
+                                item ? (
+                                    buildingList.records.map((building, index) => (
+                                        <animated.tr
+                                            key={building.building_uuid}
+                                            style={style}
+                                            className="transition hover:bg-base-200"
+                                        >
+                                            <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
+                                            <td>{building?.building_name}</td>
+                                            <td>{building?.status ? (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                type={"success"} text={"启用"}
+                                                                icon={<Correct theme="outline" size="12"/>}/>
+                                            ) : (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"} type={"error"}
+                                                                text={"禁用"}
+                                                                icon={<Error theme="outline" size="12"/>}/>
+                                            )}</td>
+                                            <td>{new Date(building.created_at).toLocaleString()}</td>
+                                            <td>{new Date(building.updated_at).toLocaleString()}</td>
+                                            <td>
+                                                <div className="flex gap-2">
+                                                    <button className="btn btn-xs btn-outline">编辑</button>
+                                                    <button className="btn btn-xs btn-outline">删除</button>
+                                                </div>
+                                            </td>
+                                        </animated.tr>
+                                    ))
+                                ) : (
+                                    buildingList.records.map((_, index) => (
+                                        <animated.tr
+                                            key={"building-" + index}
+                                            style={style}
+                                            className="transition hover:bg-base-200"
+                                        >
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                            <td>
+                                                <div className="skeleton h-4 w-full"></div>
+                                            </td>
+                                        </animated.tr>
+                                    ))
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardComponent>
+                <div className="join join-horizontal flex-1 justify-center">
+                    <button className="transition shadow btn btn-sm join-item"
+                            disabled={buildingList.current === 1}>
+                        上一页
+                    </button>
+                    {getPageInfo()}
+                    <button className="transition shadow btn btn-sm join-item"
+                            disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
+                        下一页
+                    </button>
+                </div>
             </div>
+            <CardComponent col={3} padding={0} howScreenHide={"md"}>
+                <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
+                <div className="p-4 flex flex-col gap-3">
+                    <h2 className="text-xl font-bold">教学楼列表</h2>
+                    <p className="text-base-content">这里是教学楼列表的描述信息。</p>
+                </div>
+            </CardComponent>
         </div>
     );
 }

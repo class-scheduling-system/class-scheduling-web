@@ -46,7 +46,7 @@ const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
         null,
         null,
         {Authorization: `Bearer ${GetAuthorizationToken()}`},
-        )
+    )
 }
 
 const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {

@@ -26,48 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-import {JSX, useEffect} from "react";
-import {useNavigate} from "react-router";
-import {InitCheckAPI} from "../apis/init_api.ts";
-import {useDispatch} from "react-redux";
-import {message} from "antd";
 import {animated, useSpring} from "@react-spring/web";
+import {JSX} from "react";
+import {useNavigate} from "react-router";
 
 /**
- * 基础索引组件
+ * # SimplePageNotFoundHasButton
  *
- * 此组件负责在应用启动时检查系统初始化状态，并根据检查结果导航到相应的页面（初始化页面或登录页面）。
- * 它利用 `useDispatch` 和 `useNavigate` 钩子函数来触发 Redux 动作和页面导航。
+ * > 该函数用于在页面未找到时显示一个404错误页面，并提供一个返回上一页的按钮。
  *
- * @return {JSX.Element} 返回一个加载中的动画界面，直到系统完成初始化状态检查并进行页面跳转。
+ * @returns {JSX.Element} 返回一个包含404错误信息和返回按钮的React组件。
  */
-export function BaseIndex(): JSX.Element {
-    const dispatch = useDispatch();
+export function SimplePageNotFoundHasButton(): JSX.Element {
     const navigate = useNavigate();
-
-    // 检查系统初始化状态
-    useEffect(() => {
-        const func = async () => {
-            try {
-                const getResp = await InitCheckAPI();
-                if (getResp?.output === "Success") {
-                    if (getResp.data!.system_init) {
-                        localStorage.setItem("has_init", "1");
-                        navigate("/init");
-                    } else {
-                        localStorage.setItem("has_init", "0");
-                        navigate("/auth/login");
-                    }
-                } else {
-                    message.error("系统初始化检查失败，请联系管理员!");
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        func().then();
-    }, [dispatch, navigate]);
 
     const fade = useSpring({
         opacity: 1,
@@ -75,9 +46,19 @@ export function BaseIndex(): JSX.Element {
         config: { tension: 120, friction: 26 },
     });
 
-    return (
-        <animated.div style={fade} className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"/>
+    return(
+        <animated.div style={fade} className="grid h-screen place-content-center bg-white px-4">
+            <div className={"flex flex-col items-center"}>
+                <h1 className="transition duration-1000 text-lg uppercase tracking-widest text-gray-500 hover:text-primary-content active:text-primary select-none">404 | Page Not Found</h1>
+                <div className={"mt-3"}>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="btn btn-primary select-none"
+                    >
+                        返回上一页
+                    </button>
+                </div>
+            </div>
         </animated.div>
     );
 }

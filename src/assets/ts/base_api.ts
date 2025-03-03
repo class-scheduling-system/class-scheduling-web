@@ -27,6 +27,7 @@
  */
 
 import axios, {type AxiosResponse} from "axios";
+import cookie from 'react-cookies';
 import type {BaseResponse} from "../../models/base_response.ts";
 
 const BASE_API_URL: string = import.meta.env.VITE_BASE_API_URL;
@@ -130,7 +131,7 @@ const pushHeader = (headers: Record<string, string> | null): Record<string, stri
 }
 
 function GetAuthorizationToken(): string {
-    const token = localStorage.getItem("UserToken");
+    const token = cookie.load("token");
     if (token) {
         return token.replace("Bearer ", "");
     } else {
