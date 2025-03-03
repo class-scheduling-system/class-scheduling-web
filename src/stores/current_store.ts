@@ -26,15 +26,13 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
-import {currentStore} from "./current_store.ts";
+import {createSlice,} from "@reduxjs/toolkit";
+import {CurrentInfoStore} from "../models/store/current_info_store.ts";
 
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer
-    }
-})
+export const currentStore = createSlice({
+    name: "current",
+    initialState: {
+        system: navigator.userAgent.toLowerCase().includes("mac")
+    } as CurrentInfoStore,
+    reducers: {}
+});

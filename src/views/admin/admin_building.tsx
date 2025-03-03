@@ -29,17 +29,18 @@
 import cardImage from "../../assets/images/card-background.webp";
 
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
-import {JSX, useEffect, useState} from "react";
+import {JSX, useEffect, useRef, useState} from "react";
 import {PageEntity} from "../../models/entity/page_entity.ts";
 import {BuildingEntity} from "../../models/entity/building_entity.ts";
 import {GetBuildingListAPI} from "../../apis/building_api.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
-import {Correct, Delete, Editor, Error} from "@icon-park/react";
+import {Correct, Delete, Editor, Error, Search} from "@icon-park/react";
+import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 
 /**
  * # AdminBuilding
@@ -54,6 +55,10 @@ import {Correct, Delete, Editor, Error} from "@icon-park/react";
 export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
 
+    const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
+
+    const inputFocus = useRef<HTMLInputElement | null>(null);
+
     const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({
         records: new Array(5).fill({}) as BuildingEntity[],
     } as PageEntity<BuildingEntity>);
@@ -62,15 +67,40 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
+    const [search, setSearch] = useState<string>("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
     useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (getCurrent.system) {
+                if (event.metaKey && event.key === "k") {
+                    event.preventDefault();
+                    inputFocus.current?.focus();
+                }
+            } else if (event.ctrlKey && event.key === "k") {
+                event.preventDefault();
+                inputFocus.current?.focus();
+            }
+        };
+
+        // 在组件加载时添加事件监听
+        window.addEventListener("keydown", handleKeyDown);
+
+        // 组件卸载时移除事件监听
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [getCurrent.system]);
+
+    useEffect(() => {
         const func = async () => {
             const getResp = await GetBuildingListAPI(searchRequest);
             if (getResp?.output === "Success") {
+                setLoading(false);
                 setBuildingList(getResp.data!);
             } else {
                 console.log(getResp);
@@ -82,6 +112,12 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
     // 为每个 building 应用 useSpring 动画
     const transition = useTransition(buildingList.size ?? 0, {
+        from: {opacity: 0},
+        enter: {opacity: 1},
+        config: {duration: 100},
+    });
+
+    const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
         enter: {opacity: 1},
         config: {duration: 100},
@@ -99,122 +135,173 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         for (let i = 0; i < Math.ceil(buildingList.total / buildingList.size); i++) {
             if (i + 1 === buildingList.current) {
                 pageInfo.push(
-                    <button key={i} className="transition shadow btn btn-sm join-item btn-primary">{i + 1}</button>
+                    <button key={i}
+                            className="transition shadow btn btn-sm join-item btn-primary">
+                        {i + 1}
+                    </button>
                 );
             } else {
                 pageInfo.push(
-                    <button key={i} className="transition shadow btn btn-sm join-item">{i + 1}</button>
+                    <button key={i}
+                            onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
+                            className="transition shadow btn btn-sm join-item">
+                        {i + 1}
+                    </button>
                 );
             }
         }
         return pageInfo;
     }
 
+    // 搜索防抖动(500毫秒，输入字符串）
+    useEffect(() => {
+        setLoading(true);
+        const timer = setTimeout(() => {
+            setSearchRequest({...searchRequest, keyword: search});
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
     return (
         <div className={"grid grid-cols-10 gap-4"}>
-            <div className={"col-span-full md:col-span-7 flex flex-col gap-4 h-[calc(100vh-104px)]"}>
+            <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-104px)]"}>
                 <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
-                    <div className={"overflow-x-auto overflow-y-auto"}>
-                        <table className="table">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>名字</th>
-                                <th>状态</th>
-                                <th>新建时间</th>
-                                <th>修改时间</th>
-                                <th className={"text-end"}>操作</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {transition((style, item) =>
-                                item ? (
-                                    buildingList.records.map((building, index) => (
-                                        <animated.tr
-                                            key={building.building_uuid}
-                                            style={style}
-                                            className="transition hover:bg-base-200"
-                                        >
-                                            <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
-                                            <td>{building?.building_name}</td>
-                                            <td>{building?.status ? (
-                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                type={"success"} text={"启用"}
-                                                                icon={<Correct theme="outline" size="12"/>}/>
-                                            ) : (
-                                                <LabelComponent size={"badge-sm"} style={"badge-outline"} type={"error"}
-                                                                text={"禁用"}
-                                                                icon={<Error theme="outline" size="12"/>}/>
-                                            )}</td>
-                                            <td>{new Date(building.created_at).toLocaleString()}</td>
-                                            <td>{new Date(building.updated_at).toLocaleString()}</td>
-                                            <td className={"flex justify-end"}>
-                                                <div className="join">
-                                                    <button
-                                                        onClick={() => {}}
-                                                        className="join-item btn btn-sm btn-soft btn-info inline-flex">
-                                                        <Editor theme="outline" size="12"/>
-                                                        <span>编辑</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {}}
-                                                        className="join-item btn btn-sm btn-soft btn-error inline-flex">
-                                                        <Delete theme="outline" size="12"/>
-                                                        <span>删除</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </animated.tr>
-                                    ))
-                                ) : (
-                                    buildingList.records.map((_, index) => (
-                                        <animated.tr
-                                            key={"building-" + index}
-                                            style={style}
-                                            className="transition hover:bg-base-200"
-                                        >
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                            <td>
-                                                <div className="skeleton h-4 w-full"></div>
-                                            </td>
-                                        </animated.tr>
-                                    ))
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    {transitionSearch((style, item) => item ? (
+                        <animated.div style={style} className={"flex h-full justify-center"}>
+                            <div className={"flex items-center"}>
+                                <span className="loading loading-bars loading-xl"></span>
+                            </div>
+                        </animated.div>
+                    ) : (
+                        <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
+                            <table className="table">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>名字</th>
+                                    <th>状态</th>
+                                    <th>新建时间</th>
+                                    <th>修改时间</th>
+                                    <th className={"text-end"}>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {transition((style, item) =>
+                                    item ? (
+                                        buildingList.records.map((building, index) => (
+                                            <animated.tr
+                                                key={building.building_uuid}
+                                                style={style}
+                                                className="transition hover:bg-base-200"
+                                            >
+                                                <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
+                                                <td>{building?.building_name}</td>
+                                                <td>{building?.status ? (
+                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                    type={"success"} text={"启用"}
+                                                                    icon={<Correct theme="outline" size="12"/>}/>
+                                                ) : (
+                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                    type={"error"}
+                                                                    text={"禁用"}
+                                                                    icon={<Error theme="outline" size="12"/>}/>
+                                                )}</td>
+                                                <td>{new Date(building.created_at).toLocaleString()}</td>
+                                                <td>{new Date(building.updated_at).toLocaleString()}</td>
+                                                <td className={"flex justify-end"}>
+                                                    <div className="join">
+                                                        <button
+                                                            onClick={() => {
+                                                            }}
+                                                            className="join-item btn btn-sm btn-soft btn-info inline-flex">
+                                                            <Editor theme="outline" size="12"/>
+                                                            <span>编辑</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                            }}
+                                                            className="join-item btn btn-sm btn-soft btn-error inline-flex">
+                                                            <Delete theme="outline" size="12"/>
+                                                            <span>删除</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </animated.tr>
+                                        ))
+                                    ) : (
+                                        buildingList.records.map((_, index) => (
+                                            <animated.tr
+                                                key={"building-" + index}
+                                                style={style}
+                                                className="transition hover:bg-base-200"
+                                            >
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                                <td>
+                                                    <div className="skeleton h-4 w-full"></div>
+                                                </td>
+                                            </animated.tr>
+                                        ))
+                                    ))}
+                                </tbody>
+                            </table>
+                        </animated.div>
+                    ))}
                 </CardComponent>
-                <div className="join join-horizontal justify-center">
-                    <button className="transition shadow btn btn-sm join-item"
-                            disabled={buildingList.current === 1}>
-                        上一页
-                    </button>
-                    {getPageInfo()}
-                    <button className="transition shadow btn btn-sm join-item"
-                            disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
-                        下一页
-                    </button>
+                <div className="flex justify-center">
+                    <div className={"join join-horizontal"}>
+                        <button className="transition shadow btn btn-sm join-item"
+                                onClick={() => setSearchRequest({...searchRequest, page: buildingList.current - 1})}
+                                disabled={buildingList.current === 1}>
+                            上一页
+                        </button>
+                        {getPageInfo()}
+                        <button className="transition shadow btn btn-sm join-item"
+                                onClick={() => setSearchRequest({...searchRequest, page: buildingList.current + 1})}
+                                disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
+                            下一页
+                        </button>
+                        <select className="join-item transition shadow select select-sm mx-1"
+                                value={searchRequest.size}
+                                onChange={(e) => setSearchRequest({...searchRequest, size: Number(e.target.value)})}>
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={20}>30</option>
+                            <option value={20}>50</option>
+                            <option value={20}>100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
                 <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
-                <div className="p-4 flex flex-col gap-3">
+                <div className="p-4 flex flex-col gap-1">
                     <h2 className="text-xl font-bold">教学楼列表</h2>
-                    <p className="text-base-content">这里是教学楼列表的描述信息。</p>
+                    <p className="text-base-300 text-sm border-l-4 border-base-300 ps-2">这里是所有教学楼的列表，你可以在这里查看、编辑和删除教学楼信息。</p>
+                </div>
+                <div className="px-4 pb-4 flex flex-col gap-1">
+                    <label className="input transition w-full">
+                        <Search theme="outline" size="12"/>
+                        <input ref={inputFocus} type="search" className="grow" placeholder="查询"
+                               onChange={(event) => setSearch(event.target.value)}/>
+                        <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
+                        <kbd className="kbd kbd-sm">K</kbd>
+                    </label>
                 </div>
             </CardComponent>
         </div>
