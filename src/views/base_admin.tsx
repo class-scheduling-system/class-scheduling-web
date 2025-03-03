@@ -37,6 +37,8 @@ import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
+import {BuildingTwo, Dashboard, HomeTwo, System, User, UserPositioning} from "@icon-park/react";
+import {AdminRole} from "./admin/admin_role.tsx";
 
 /**
  * 生成一个基础的控制台组件。
@@ -54,6 +56,18 @@ export function BaseAdmin(): JSX.Element {
             navigate("/admin/dashboard");
         }
     }, [location.pathname, navigate]);
+
+    // 定义路由与面包屑标题及图标的映射关系
+    const breadcrumbMap: Record<string, { title: string; icon: JSX.Element }> = {
+        "/admin/dashboard": { title: "看板", icon: <Dashboard theme="outline" size="16" /> },
+        "/admin/user": { title: "用户管理", icon: <User theme="outline" size="16" /> },
+        "/admin/role": { title: "角色管理", icon: <UserPositioning theme="outline" size="16" /> },
+        "/admin/building": { title: "教学楼管理", icon: <BuildingTwo theme="outline" size="16" /> },
+        "/admin/system-info": { title: "系统信息", icon: <System theme="outline" size="16" /> },
+    };
+
+    // 根据当前路径获取对应的面包屑信息，如果没有匹配则默认显示首页
+    const currentBreadcrumb = breadcrumbMap[location.pathname] || { title: "首页", icon: <HomeTwo theme="outline" size="16" fill="#333" /> };
 
     // 设置路由切换动画
     const transitions = useTransition(location, {
@@ -104,8 +118,22 @@ export function BaseAdmin(): JSX.Element {
             </animated.div>
             <div className="w-full flex flex-col flex-1">
                 <animated.div style={topFade} className="w-full bg-base-100 p-4 shadow flex justify-between z-50">
-                    <div>面包屑导航</div>
-                    <div>{getUser.user?.name ?? ""}</div>
+                    <div className="breadcrumbs text-sm">
+                        <ul>
+                            <li>
+                                <a>
+                                    <HomeTwo theme="outline" size="16" fill="#333" />
+                                    首页
+                                </a>
+                            </li>
+                            <li>
+                                <a>
+                                    {currentBreadcrumb.icon}
+                                    {currentBreadcrumb.title}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </animated.div>
                 <animated.div style={bottomFade} className="p-6 flex-1 overflow-auto flex">
                     {transitions((style, item) => (
@@ -113,6 +141,7 @@ export function BaseAdmin(): JSX.Element {
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
+                                <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
