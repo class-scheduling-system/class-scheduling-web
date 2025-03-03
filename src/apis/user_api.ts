@@ -29,6 +29,7 @@
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
+import {data} from "react-router";
 
 /**
  * # 获取当前用户信息
@@ -59,6 +60,28 @@ const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefine
     )
 }
 
+const AddUserAPI = async (data: {
+    role_uuid: string;
+    name: string;
+    password?: string;
+    email: string;
+    phone: string;
+    permission?: string[];
+}): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.POST,
+        "/api/v1/user",
+        data,  // 传递 bodyData
+        null,  // 没有 query 参数
+        null,  // 没有 path 参数
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
+
 const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
     return BaseApi<UserInfoEntity>(
         MethodType.DELETE,
@@ -73,5 +96,6 @@ const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEn
 export {
     GetUserCurrentAPI,
     GetUserListAPI,
+    AddUserAPI,
     DeleteUserAPI
 }

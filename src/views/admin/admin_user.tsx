@@ -195,7 +195,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
             {/* 编辑用户 */}
             <AdminEditUserDialog defaultData={editUser} />
             {/* 添加用户 */}
-            <AdminAddUserDialog />
+            <AdminAddUserDialog onUserAdded={fetchUsers} />
+
         </>
     );
 }

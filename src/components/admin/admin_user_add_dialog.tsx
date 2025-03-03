@@ -1,90 +1,145 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2022-NOW(至今) 锋楪技术团队
- * Author: 锋楪技术团队 (https://www.frontleaves.com)
- *
- * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
- * --------------------------------------------------------------------------------
- * 许可证声明：
- *
- * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
- *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
- * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
- * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
- * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
- *
- * 使用本软件即表示您了解此声明并同意其条款。
- *
- * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- * 免责声明：
- *
- * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
- * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
- * --------------------------------------------------------------------------------
- */
+import { useState, useEffect } from "react";
+import { Down, Envelope, Key, PhoneTelephone, User, UserPositioning } from "@icon-park/react";
+import { AddUserAPI } from "../../apis/user_api.ts";
 
-import {Envelope, User, UserPositioning} from "@icon-park/react";
+export function AdminAddUserDialog({ onUserAdded }) {
+    // 表单数据状态
+    const [formData, setFormData] = useState({
+        role_uuid: "",
+        name: "",
+        password: "",
+        email: "",
+        phone: "",
+        permission: "",
+    });
 
-export function AdminAddUserDialog() {
-    // 关闭对话框的函数
-    const handleCloseDialog = () => {
-        const dialog = document.getElementById('my_modal_1');
-        if (dialog) {
-            dialog.close(); // 关闭对话框
+    const [loading, setLoading] = useState(false);
+
+    // 角色列表
+    const roles = [
+        { role_uuid: "33257a18893a46919fd255a730cb1508", name: "管理员", icon: <UserPositioning theme="outline" size="18" fill="#333" /> },
+        { role_uuid: "4d58ff23ce494b5d83d2bcad9eed30d7", name: "教务", icon: <UserPositioning theme="outline" size="18" fill="#333" /> },
+        { role_uuid: "60c4d7ce00af44f0a382aa73f64aa3c2", name: "老师", icon: <UserPositioning theme="outline" size="18" fill="#555" /> },
+        { role_uuid: "e02425859d904c5bacde77401be48cc9", name: "学生", icon: <UserPositioning theme="outline" size="18" fill="#777" /> },
+    ];
+
+    // 初始化角色
+    const [selectedRole, setSelectedRole] = useState(roles[0].role_uuid);
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            role_uuid: roles[0].role_uuid, // ✅ 确保 role_uuid 正确
+        }));
+    }, []);
+
+
+    // 处理输入框变化
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === "permission") {
+            setFormData({ ...formData, permission: value.split(",") }); // ✅ 逗号分隔，转为数组
+        } else {
+            setFormData({ ...formData, [name]: value });
         }
     };
+
+
+    // 处理角色选择
+    const handleSelect = (role) => {
+        setSelectedRole(role.role_uuid);
+        setFormData((prev) => ({
+            ...prev,
+            role_uuid: role.role_uuid, // ✅ 直接更新 formData
+        }));
+    };
+
+    // 关闭对话框的函数
+    const handleCloseDialog = () => {
+        document.getElementById("my_modal_1")?.close();
+    };
+
+    // 提交表单
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // 🚀 打印最终的请求数据
+        console.log("最终提交的表单数据:", JSON.stringify(formData, null, 2));
+
+        setLoading(true);
+        try {
+            const response = await AddUserAPI(formData);
+            console.log(response);
+            if (response) {
+                alert("用户添加成功");
+                handleCloseDialog();
+                onUserAdded();
+            } else {
+                alert("添加用户失败");
+            }
+        } catch (error) {
+            console.error("添加用户失败:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     return (
         <dialog id="my_modal_1" className="modal">
             <div className="modal-box">
                 <h3 className="font-bold text-lg">添加用户</h3>
                 <div className="mt-3">
-                    <form method="dialog" className="flex flex-col space-y-4 p-4">
-                        {/* 输入框容器 */}
-                        <div className="flex flex-col space-y-3">
-                            <label
-                                className="input input-md transition flex items-center validator w-full">
-                                <User theme="outline" size="18" fill="#333"/>
-                                <input
-                                    type="text"
-                                    required
-                                    className="grow"
-                                    placeholder="用户名"
-                                />
-                            </label>
-                            <label
-                                className="input input-md transition flex items-center validator w-full">
-                                <UserPositioning theme="outline" size="18" fill="#333"/>
-                                <input
-                                    type="text"
-                                    required
-                                    className="grow"
-                                    placeholder="角色"
-                                />
-                            </label>
-                            <label
-                                className="input input-md transition flex items-center validator w-full">
-                                <Envelope theme="outline" size="18" fill="#333"/>
-                                <input
-                                    type="email"
-                                    required
-                                    className="grow"
-                                    placeholder="邮箱"
-                                />
-                            </label>
-                        </div>
+                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4 p-4">
+                        <label className="input input-md flex items-center w-full">
+                            <User theme="outline" size="18" fill="#333" />
+                            <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="用户名" className="grow" />
+                        </label>
 
-                        {/* 按钮容器 */}
+                        <label className="input input-md flex items-center w-full">
+                            <Key theme="outline" size="18" fill="#333" />
+                            <input type="password" name="password" value={formData.password} onChange={handleChange} required placeholder="密码" className="grow" />
+                        </label>
+
+                        {/* 角色选择下拉框 */}
+                        <div className="dropdown w-full">
+                            <label tabIndex={0} className="input input-md flex items-center justify-between w-full cursor-pointer border border-gray-300 rounded-md focus-within:border-blue-500">
+                                <div className="flex items-center">
+                                    {roles.find((r) => r.role_uuid === selectedRole)?.icon}
+                                    <span className="ml-2">{roles.find((r) => r.role_uuid === selectedRole)?.name}</span>
+                                </div>
+                                <Down theme="outline" size="24" fill="#333" />
+                            </label>
+
+                            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-md w-full border border-gray-300">
+                                {roles.map((role) => (
+                                    <li key={role.role_uuid} onClick={() => handleSelect(role)}>
+                                        <a className="flex items-center">
+                                            {role.icon} <span className="ml-2">{role.name}</span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <label className="input input-md flex items-center w-full">
+                            <Envelope theme="outline" size="18" fill="#333" />
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="邮箱" className="grow" />
+                        </label>
+
+                        <label className="input input-md flex items-center w-full">
+                            <PhoneTelephone theme="outline" size="18" fill="#333" />
+                            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder="手机号" className="grow" />
+                        </label>
+                        <label className="input input-md flex items-center w-full">
+                            <PhoneTelephone theme="outline" size="18" fill="#333" />
+                            <input type="text" name="permission" value={formData.permission} onChange={handleChange} required placeholder="权限" className="grow" />
+                        </label>
                         <div className="flex justify-end gap-2 w-full">
-                            <button type={"submit"} className="btn btn-neutral">添加</button>
-                            <button
-                                type={"button"} // 注意：这里 type 为 "button"，避免触发表单提交
-                                className="btn"
-                                onClick={handleCloseDialog} // 绑定点击事件
-                            >
+                            <button type="submit" className="btn btn-neutral" disabled={loading}>
+                                {loading ? "添加中..." : "添加"}
+                            </button>
+                            <button type="button" className="btn" onClick={handleCloseDialog} disabled={loading}>
                                 取消
                             </button>
                         </div>
