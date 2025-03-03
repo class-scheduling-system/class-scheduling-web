@@ -32,7 +32,7 @@ import {DoubleLeft, DoubleRight, Key, User} from "@icon-park/react";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {AuthLoginAPI} from "../../apis/auth_api.ts";
 import {AuthLoginDTO} from "../../models/dto/auth_login_dto.ts";
-import {Link, useNavigate} from "react-router";
+import {Link, useNavigate, useSearchParams} from "react-router";
 import {message} from "antd";
 import {useSelector} from "react-redux";
 import cookie from "react-cookies";
@@ -45,9 +45,10 @@ import cookie from "react-cookies";
  * @returns {JSX.Element} 返回一个包含登录表单的 JSX 元素。
  */
 export function AuthLogin(): JSX.Element {
-    const navigate = useNavigate();
-
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
+
+    const navigate = useNavigate();
+    const [params] = useSearchParams();
 
     const [formData, setFormData] = useState<AuthLoginDTO>({} as AuthLoginDTO);
 
@@ -75,6 +76,10 @@ export function AuthLogin(): JSX.Element {
                     });
                 } else {
                     message.warning("无法获取用户Token");
+                }
+                if (params.get("fallback") !== null || params.get("fallback") !== undefined) {
+                    navigate(params.get("fallback")!);
+                    return;
                 }
                 switch (getResp.data!.user?.role.role_name) {
                     case "管理员":

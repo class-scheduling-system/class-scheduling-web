@@ -26,15 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
-import {currentStore} from "./current_store.ts";
-
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer
-    }
-})
+/**
+ * # BuildingAddDTO
+ * > 用于表示添加教学楼所需数据的数据传输对象。它包含了教学楼的基本信息，如名称、所属校区以及其状态。
+ *
+ * @param {string} building_name - 教学楼的名称。
+ * @param {string} campus_uuid - 校区的唯一标识符（UUID），用来关联该教学楼属于哪个校区。
+ * @param {boolean} status - 教学楼的状态标志，`true` 表示启用，`false` 表示禁用。
+ */
+export type BuildingAddDTO = {
+    /**
+     * 教学楼名称
+     */
+    building_name: string;
+    /**
+     * 校区主键
+     */
+    campus_uuid: string;
+    /**
+     * 教学楼状态（0:禁用，1:启用）
+     */
+    status: boolean;
+}

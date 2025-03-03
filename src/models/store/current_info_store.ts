@@ -26,15 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-import {configureStore} from "@reduxjs/toolkit";
-import {siteStore} from "./site_store.ts";
-import {userStore} from "./user_store.ts";
-import {currentStore} from "./current_store.ts";
-
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer
-    }
-})
+/**
+ * # CurrentInfoStore
+ * > 代表当前系统信息存储的类型，主要用来保存系统的相关信息。
+ *
+ * @param {string} system - 如果是 mac 系统则为 true，否则为 false。
+ */
+export type CurrentInfoStore = {
+    system: boolean
+}
