@@ -155,7 +155,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
             setSearchRequest({...searchRequest, keyword: search});
         }, 500);
         return () => clearTimeout(timer);
-    }, [search, searchRequest]);
+    }, [search]);
 
     return (
         <>
