@@ -71,9 +71,9 @@ const AddUserAPI = async (data: {
     return BaseApi<UserInfoEntity>(
         MethodType.POST,
         "/api/v1/user",
-        data,  // 传递 bodyData
-        null,  // 没有 query 参数
-        null,  // 没有 path 参数
+        data,
+        null,
+        null,
         {
             Authorization: `Bearer ${GetAuthorizationToken()}`,
             "Content-Type": "application/json"
@@ -93,9 +93,34 @@ const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEn
     );
 };
 
+const EditUserAPI = async (user_uuid: string, data: {
+    name: string;
+    password?: string;
+    email: string;
+    phone: string;
+    status?: number;  // 可选字段
+    ban?: number;  // 可选字段
+    role_uuid: string;
+    permission?: string[];
+}): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.PUT,  // 🔹 使用 PUT 方法
+        `/api/v1/user`,  // 🔹 直接拼接 user_uuid
+        data,
+        null,  // 无 query 参数
+        user_uuid,  // 无 path 参数
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
+
 export {
     GetUserCurrentAPI,
     GetUserListAPI,
     AddUserAPI,
-    DeleteUserAPI
+    DeleteUserAPI,
+    EditUserAPI,
 }

@@ -64,13 +64,24 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
 
     // 设置编辑用户数据，并打开编辑对话框
     const handleEdit = (user: any) => {
+        if (!user || !user.user_uuid) {
+            console.error("❌ 用户数据不完整", user);
+            return;
+        }
+
         setEditUser({
+            user_uuid: user.user_uuid,  // ✅ 确保 user_uuid 存在
             name: user.name,
-            role: user.role.role_name,
+            role_uuid: user.role.role_uuid,  // ✅ 确保 role_uuid 存在
             email: user.email,
+            phone: user.phone || "",  // 避免 undefined
+            status: user.status ?? 1, // 默认 1
+            ban: user.ban ?? 0,       // 默认 0
+            permission: user.permission ?? [] // 默认空数组
         });
         document.getElementById('my_modal_2')?.showModal();
     };
+
 
     // 触发删除对话框
     const confirmDelete = (userUuid: string) => {
@@ -193,7 +204,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>) {
                 onCancel={() => document.getElementById('my_modal_3')?.close()}
             />
             {/* 编辑用户 */}
-            <AdminEditUserDialog defaultData={editUser} />
+            <AdminEditUserDialog defaultData={editUser} onUserEdited={fetchUsers} />
             {/* 添加用户 */}
             <AdminAddUserDialog onUserAdded={fetchUsers} />
 
