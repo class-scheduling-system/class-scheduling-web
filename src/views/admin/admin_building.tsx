@@ -39,7 +39,7 @@ import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
-import {Correct, Error} from "@icon-park/react";
+import {Correct, Delete, Editor, Error} from "@icon-park/react";
 
 /**
  * # AdminBuilding
@@ -87,6 +87,13 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         config: {duration: 100},
     });
 
+    /**
+     * # getPageInfo
+     * > 该函数用于生成页面信息的按钮列表，根据给定的数据来创建代表不同页码的按钮。当前页的按钮会以不同的样式突出显示。
+     *
+     * @returns {JSX.Element[]} 返回一个包含多个表示页码按钮的 JSX 元素数组。每个元素都是一个按钮，其文本内容为对应的页码数字。当前选中的页面按钮会有特别的样式（通过添加额外的 CSS 类实现）。
+     * @throws {void} 该函数不抛出异常。
+     */
     function getPageInfo(): JSX.Element[] {
         const pageInfo: JSX.Element[] = [];
         for (let i = 0; i < Math.ceil(buildingList.total / buildingList.size); i++) {
@@ -105,8 +112,8 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
     return (
         <div className={"grid grid-cols-10 gap-4"}>
-            <div className={"col-span-full md:col-span-7 flex flex-col gap-4"}>
-                <CardComponent padding={0}>
+            <div className={"col-span-full md:col-span-7 flex flex-col gap-4 h-[calc(100vh-104px)]"}>
+                <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                     <div className={"overflow-x-auto overflow-y-auto"}>
                         <table className="table">
                             <thead>
@@ -116,7 +123,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                 <th>状态</th>
                                 <th>新建时间</th>
                                 <th>修改时间</th>
-                                <th>操作</th>
+                                <th className={"text-end"}>操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -141,10 +148,20 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                             )}</td>
                                             <td>{new Date(building.created_at).toLocaleString()}</td>
                                             <td>{new Date(building.updated_at).toLocaleString()}</td>
-                                            <td>
-                                                <div className="flex gap-2">
-                                                    <button className="btn btn-xs btn-outline">编辑</button>
-                                                    <button className="btn btn-xs btn-outline">删除</button>
+                                            <td className={"flex justify-end"}>
+                                                <div className="join">
+                                                    <button
+                                                        onClick={() => {}}
+                                                        className="join-item btn btn-sm btn-soft btn-info inline-flex">
+                                                        <Editor theme="outline" size="12"/>
+                                                        <span>编辑</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {}}
+                                                        className="join-item btn btn-sm btn-soft btn-error inline-flex">
+                                                        <Delete theme="outline" size="12"/>
+                                                        <span>删除</span>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </animated.tr>
@@ -181,7 +198,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                         </table>
                     </div>
                 </CardComponent>
-                <div className="join join-horizontal flex-1 justify-center">
+                <div className="join join-horizontal justify-center">
                     <button className="transition shadow btn btn-sm join-item"
                             disabled={buildingList.current === 1}>
                         上一页
@@ -193,7 +210,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                     </button>
                 </div>
             </div>
-            <CardComponent col={3} padding={0} howScreenHide={"md"}>
+            <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
                 <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                 <div className="p-4 flex flex-col gap-3">
                     <h2 className="text-xl font-bold">教学楼列表</h2>

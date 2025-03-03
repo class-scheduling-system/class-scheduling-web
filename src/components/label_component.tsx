@@ -77,7 +77,7 @@ export function LabelComponent({type, icon, text, style, size}: Readonly<{
     }, [type]);
 
     return (
-        <span className={`inline-flex items-center rounded-full select-none ${size} ${style} ${selectedStyle}`}>
+        <span className={`inline-flex items-center whitespace-nowrap rounded-full select-none ${size} ${style} ${selectedStyle}`}>
             {icon}
             {text}
         </span>

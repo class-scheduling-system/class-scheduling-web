@@ -90,7 +90,7 @@ export function Index(): JSX.Element {
                     }
                 } else if (location.pathname !== "/auth/login") {
                     message.error("登录已失效");
-                    navigate("/auth/login");
+                    navigate("/auth/login?fallback=" + location.pathname);
                 }
             }
         }

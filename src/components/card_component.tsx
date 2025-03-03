@@ -43,14 +43,14 @@ import {JSX, useEffect, useState} from "react";
  * @param style - 应用到最外层div上的额外内联样式，默认值为空。
  * @returns JSX.Element - 返回一个配置了所需样式的JSX.Element类型的卡片组件。
  */
-export function CardComponent({col, howScreenFull, howScreenHide, children, padding, size, clazz, style}: Readonly<{
+export function CardComponent({col, howScreenFull, howScreenHide, children, padding, size, className, style}: Readonly<{
     col?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     howScreenHide?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
     howScreenFull?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
     children: JSX.Element | JSX.Element[] | string | number,
     padding?: number,
     size?: "sm" | "md" | "lg",
-    clazz?: string,
+    className?: string,
     style?: React.CSSProperties
 }>): JSX.Element {
     const screenHide = howScreenHide ? `hidden ${howScreenHide}:block` : "";
@@ -82,9 +82,9 @@ export function CardComponent({col, howScreenFull, howScreenHide, children, padd
     }, [size]);
 
     return (
-        <div className={`${colSpan} ${screenHide} ${clazz ?? ""}`} style={style}>
+        <div className={`${colSpan} ${screenHide} ${className ?? ""}`} style={style}>
             <div
-                className={`transition card ${sizeOf} bg-base-100 border border-base-200 shadow-sm hover:shadow-lg`}
+                className={`transition card ${sizeOf} bg-base-100 border border-base-200 shadow-sm hover:shadow-md flex-1 overflow-hidden`}
                 style={{padding: (padding ?? 3 * 4) + "px"}}
             >
                 {children}
