@@ -31,6 +31,7 @@ import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.
 import {BaseResponse} from "../models/base_response.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {BuildingEntity} from "../models/entity/building_entity.ts";
+import {BuildingAddDTO} from "../models/dto/building_add_dto.ts";
 
 /**
  * # 获取建筑列表 API
@@ -51,6 +52,26 @@ const GetBuildingListAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
     );
 }
 
+/**
+ # AddBuildingAPI
+ > 该函数用于通过API向系统中添加新的建筑信息。它接受一个包含新建筑详细数据的对象，并将其发送到指定的后端接口，以完成数据的持久化存储。
+
+ @param {BuildingAddDTO} data - 包含待添加建筑的所有必要信息的数据传输对象。
+
+ @returns {Promise<BaseResponse<null> | undefined>} - 如果操作成功，则返回一个BaseResponse对象，其中不包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const AddBuildingAPI = async (data: BuildingAddDTO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.POST,
+        "/api/v1/building",
+        data,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
 export {
-    GetBuildingListAPI
+    GetBuildingListAPI,
+    AddBuildingAPI
 }

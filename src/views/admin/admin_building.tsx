@@ -39,8 +39,9 @@ import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
-import {Correct, Delete, Editor, Error, Search} from "@icon-park/react";
+import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
+import {AdminBuildingAddDialog} from "../../components/admin/building/admin_building_add_dialog.tsx";
 
 /**
  * # AdminBuilding
@@ -69,6 +70,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     } as PageSearchDTO);
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(true);
+    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -110,13 +112,6 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         func().then();
     }, [dispatch, searchRequest]);
 
-    // 为每个 building 应用 useSpring 动画
-    const transition = useTransition(buildingList.size ?? 0, {
-        from: {opacity: 0},
-        enter: {opacity: 1},
-        config: {duration: 100},
-    });
-
     const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
         enter: {opacity: 1},
@@ -136,7 +131,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
             if (i + 1 === buildingList.current) {
                 pageInfo.push(
                     <button key={i}
-                            className="transition shadow btn btn-sm join-item btn-primary">
+                            className="transition shadow btn btn-sm join-item btn-primary border">
                         {i + 1}
                     </button>
                 );
@@ -144,7 +139,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                 pageInfo.push(
                     <button key={i}
                             onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
-                            className="transition shadow btn btn-sm join-item">
+                            className="transition shadow btn btn-sm join-item border">
                         {i + 1}
                     </button>
                 );
@@ -160,38 +155,37 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
             setSearchRequest({...searchRequest, keyword: search});
         }, 500);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [search, searchRequest]);
 
     return (
-        <div className={"grid grid-cols-10 gap-4"}>
-            <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-104px)]"}>
-                <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
-                    {transitionSearch((style, item) => item ? (
-                        <animated.div style={style} className={"flex h-full justify-center"}>
-                            <div className={"flex items-center"}>
-                                <span className="loading loading-bars loading-xl"></span>
-                            </div>
-                        </animated.div>
-                    ) : (
-                        <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
-                            <table className="table">
-                                <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>名字</th>
-                                    <th>状态</th>
-                                    <th>新建时间</th>
-                                    <th>修改时间</th>
-                                    <th className={"text-end"}>操作</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {transition((style, item) =>
-                                    item ? (
+        <>
+            <div className={"grid grid-cols-10 gap-4"}>
+                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-104px)]"}>
+                    <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
+                        {transitionSearch((style, item) => item ? (
+                            <animated.div style={style} className={"flex h-full justify-center"}>
+                                <div className={"flex items-center"}>
+                                    <span className="loading loading-bars loading-xl"></span>
+                                </div>
+                            </animated.div>
+                        ) : (
+                            <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
+                                <table className="table">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>名字</th>
+                                        <th>状态</th>
+                                        <th>新建时间</th>
+                                        <th>修改时间</th>
+                                        <th className={"text-end"}>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {
                                         buildingList.records.map((building, index) => (
-                                            <animated.tr
+                                            <tr
                                                 key={building.building_uuid}
-                                                style={style}
                                                 className="transition hover:bg-base-200"
                                             >
                                                 <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
@@ -226,84 +220,71 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                         </button>
                                                     </div>
                                                 </td>
-                                            </animated.tr>
-                                        ))
-                                    ) : (
-                                        buildingList.records.map((_, index) => (
-                                            <animated.tr
-                                                key={"building-" + index}
-                                                style={style}
-                                                className="transition hover:bg-base-200"
-                                            >
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                                <td>
-                                                    <div className="skeleton h-4 w-full"></div>
-                                                </td>
-                                            </animated.tr>
-                                        ))
-                                    ))}
-                                </tbody>
-                            </table>
-                        </animated.div>
-                    ))}
-                </CardComponent>
-                <div className="flex justify-center">
-                    <div className={"join join-horizontal"}>
-                        <button className="transition shadow btn btn-sm join-item"
-                                onClick={() => setSearchRequest({...searchRequest, page: buildingList.current - 1})}
-                                disabled={buildingList.current === 1}>
-                            上一页
-                        </button>
-                        {getPageInfo()}
-                        <button className="transition shadow btn btn-sm join-item"
-                                onClick={() => setSearchRequest({...searchRequest, page: buildingList.current + 1})}
-                                disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
-                            下一页
-                        </button>
-                        <select className="join-item transition shadow select select-sm mx-1"
-                                value={searchRequest.size}
-                                onChange={(e) => setSearchRequest({...searchRequest, size: Number(e.target.value)})}>
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={15}>15</option>
-                            <option value={20}>20</option>
-                            <option value={20}>30</option>
-                            <option value={20}>50</option>
-                            <option value={20}>100</option>
-                        </select>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </animated.div>
+                        ))}
+                    </CardComponent>
+                    <div className="flex justify-center">
+                        <div className={"join join-horizontal"}>
+                            <button className="transition shadow btn btn-sm join-item border"
+                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current - 1})}
+                                    disabled={buildingList.current === 1}>
+                                上一页
+                            </button>
+                            {getPageInfo()}
+                            <button className="transition shadow btn btn-sm join-item border"
+                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current + 1})}
+                                    disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
+                                下一页
+                            </button>
+                            <select className="join-item transition select select-sm mx-1 border-l-0"
+                                    value={searchRequest.size}
+                                    onChange={(e) => setSearchRequest({...searchRequest, size: Number(e.target.value)})}>
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={15}>15</option>
+                                <option value={20}>20</option>
+                                <option value={20}>30</option>
+                                <option value={20}>50</option>
+                                <option value={20}>100</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+                <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
+                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
+                    <div className="p-4 flex flex-col gap-1">
+                        <h2 className="text-xl font-bold">教学楼列表</h2>
+                        <p className="text-base-content text-sm border-l-4 border-base-content ps-2">这里是所有教学楼的列表，你可以在这里查看、编辑和删除教学楼信息。</p>
+                    </div>
+                    <div className="px-4 pb-4 flex flex-col gap-3">
+                        <div>
+                            <label className="input transition w-full">
+                                <Search theme="outline" size="12"/>
+                                <input ref={inputFocus} type="search" className="grow" placeholder="查询"
+                                       onChange={(event) => setSearch(event.target.value)}/>
+                                <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
+                                <kbd className="kbd kbd-sm">K</kbd>
+                            </label>
+                        </div>
+                        <div className={"grid grid-cols-2 gap-3"}>
+                            <button onClick={() => setDialogAdd(true)}
+                                    className="transition shadow btn btn-outline btn-primary">
+                                <Add theme="outline" size="16"/>
+                                <span>添加</span>
+                            </button>
+                            <button className="transition shadow btn btn-outline btn-secondary">
+                                <Newlybuild theme="outline" size="16"/>
+                                <span>批量导入</span>
+                            </button>
+                        </div>
+                    </div>
+                </CardComponent>
             </div>
-            <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
-                <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
-                <div className="p-4 flex flex-col gap-1">
-                    <h2 className="text-xl font-bold">教学楼列表</h2>
-                    <p className="text-base-300 text-sm border-l-4 border-base-300 ps-2">这里是所有教学楼的列表，你可以在这里查看、编辑和删除教学楼信息。</p>
-                </div>
-                <div className="px-4 pb-4 flex flex-col gap-1">
-                    <label className="input transition w-full">
-                        <Search theme="outline" size="12"/>
-                        <input ref={inputFocus} type="search" className="grow" placeholder="查询"
-                               onChange={(event) => setSearch(event.target.value)}/>
-                        <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
-                        <kbd className="kbd kbd-sm">K</kbd>
-                    </label>
-                </div>
-            </CardComponent>
-        </div>
+            <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd}/>
+        </>
     );
 }
