@@ -61,9 +61,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
     const inputFocus = useRef<HTMLInputElement | null>(null);
 
-    const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({
-        records: new Array(5).fill({}) as BuildingEntity[],
-    } as PageEntity<BuildingEntity>);
+    const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({} as PageEntity<BuildingEntity>);
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
         page: 1,
         size: 20,
@@ -256,19 +254,28 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                     <div className="flex justify-center">
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current - 1})}
+                                    onClick={() => {
+                                        setSearchRequest({...searchRequest, page: buildingList.current - 1});
+                                        setRefreshOperate(true);
+                                    }}
                                     disabled={buildingList.current === 1}>
                                 上一页
                             </button>
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current + 1})}
+                                    onClick={() => {
+                                        setSearchRequest({...searchRequest, page: buildingList.current + 1});
+                                        setRefreshOperate(true);
+                                    }}
                                     disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size) || Math.ceil(buildingList.total / buildingList.size) === 0}>
                                 下一页
                             </button>
                             <select className="join-item transition select select-sm mx-1 border-l-0"
                                     value={searchRequest.size}
-                                    onChange={(e) => setSearchRequest({...searchRequest, size: Number(e.target.value)})}>
+                                    onChange={(e) => {
+                                        setSearchRequest({...searchRequest, size: Number(e.target.value)});
+                                        setRefreshOperate(true);
+                                    }}>
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
                                 <option value={15}>15</option>

@@ -84,10 +84,8 @@ export function BaseAuth(): JSX.Element {
                 const getResp = await InitCheckAPI();
                 if (getResp?.output === "Success") {
                     if (getResp.data!.system_init) {
-                        localStorage.setItem("has_init", "1");
                         navigate("/init");
                     } else {
-                        localStorage.setItem("has_init", "0");
                         if (location.pathname === "/auth") {
                             navigate("/auth/login");
                         }

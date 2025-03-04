@@ -101,15 +101,26 @@ export function AdminBuildingDeleteDialog({building, show, emit, requestRefresh}
                    </div>
                }>
             <div className="flex flex-col space-y-4">
-                <h3 className="font-bold text-lg flex items-center space-x-2">
+                <h3 className="font-bold text-lg flex items-center space-x-1">
                     <BuildingOne theme="outline" size="20"/>
                     <span>删除教学楼</span>
                 </h3>
                 <form id={"building_add"} onSubmit={onSubmit} className="py-2 grid space-y-2">
-                    <div className="label-text text-gray-700 flex space-x-0.5">
+                    <div className="text-base-content flex space-x-0.5">
                         <span>是否确认删除</span>
-                        <strong className={"text-error font-bold"}>{building.building_name}</strong>
-                        <span>教学楼？</span>
+                        <strong className={"text-primary font-bold"}>{building.building_name}</strong>
+                        <span>？</span>
+                    </div>
+                    <div className="text-error flex space-x-0.5">
+                        <span>删除后将无法恢复，请谨慎操作！</span>
+                    </div>
+                    <div className={"text-base-content grid"}>
+                        您删除{building.building_name}，还会删除被依赖项：
+                        <ul className={"list-disc list-inside ps-4"}>
+                            <li>该教学楼下的所有教室</li>
+                            <li>该教学楼下的所有课程</li>
+                            <li>该教学楼下的所有考场</li>
+                        </ul>
                     </div>
                 </form>
             </div>

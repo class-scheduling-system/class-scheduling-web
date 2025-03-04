@@ -65,19 +65,15 @@ export function AuthLogin(): JSX.Element {
                 navigate("/auth/register");
             } else {
                 message.success(`你好 ${getResp.data!.user?.name}，欢迎回来！`);
-                if (getResp.data!.token!.token) {
-                    cookie.save("token", getResp.data!.token!.token, {
-                        path: "/",
-                        expires: new Date(new Date().getTime() + 3600000)
-                    });
-                    cookie.save("refresh_token", getResp.data!.token!.refresh_token, {
-                        path: "/",
-                        expires: new Date(new Date().getTime() + 86400000)
-                    });
-                } else {
-                    message.warning("无法获取用户Token");
-                }
-                if (params.get("fallback") !== null || params.get("fallback") !== undefined) {
+                cookie.save("token", getResp.data!.token!.token, {
+                    path: "/",
+                    expires: new Date(new Date().getTime() + 3600000)
+                });
+                cookie.save("refresh_token", getResp.data!.token!.refresh_token, {
+                    path: "/",
+                    expires: new Date(new Date().getTime() + 86400000)
+                });
+                if (params.get("fallback") !== null && params.get("fallback") !== undefined && params.get("fallback") !== "") {
                     navigate(params.get("fallback")!);
                     return;
                 }
