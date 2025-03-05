@@ -18,9 +18,10 @@ import {RoleEntity} from "../../models/entity/role_entity.ts";
 import {GetRoleListAPI} from "../../apis/role_api.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 
-export function AdminAddUserDialog({ show, emit }: Readonly<{
+export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
+    onAddSuccess?: () => void
 }>): JSX.Element {
     const EDU_ROLE_UUID = "2d6a56f805844b1691ab25afbb6eb47d"; // 教务角色的UUID
 
@@ -85,6 +86,7 @@ export function AdminAddUserDialog({ show, emit }: Readonly<{
             const getResp = await AddUserAPI(payload);
             if (getResp?.output === "Success") {
                 message.success("添加成功");
+                onAddSuccess?.();
                 handleClose();
             } else {
                 message.error(getResp?.error_message ?? "添加失败");

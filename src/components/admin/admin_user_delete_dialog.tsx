@@ -9,10 +9,11 @@ import * as React from "react";
 import {message, Modal} from "antd";
 
 
-export function AdminDeleteUserDialog({show, emit,userUuid}: Readonly<{
+export function AdminDeleteUserDialog({show, emit,userUuid, onDeletedSuccess}: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
     userUuid: string;
+    onDeletedSuccess?: () => void;
 }>) : JSX.Element {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,20 +47,14 @@ export function AdminDeleteUserDialog({show, emit,userUuid}: Readonly<{
             message.error("用户 UUID 为空，无法删除！");
             return;
         }
-
         try {
             const getResp = await DeleteUserAPI(userUuid);
             if (getResp?.output === "Success") {
                 message.success("删除成功");
-
+                onDeletedSuccess?.();
                 // 关闭弹窗
                 handleOk();
                 emit(false);
-
-                // 直接刷新页面
-                setTimeout(() => {
-                    window.location.reload();
-                }, 500); // 延迟 500ms，确保 UI 有反馈
             } else {
                 message.error(getResp?.message ?? "删除失败");
             }

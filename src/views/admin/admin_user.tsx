@@ -255,7 +255,11 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                 userUuid={deleteUserUuid}
                 onDeletedSuccess={refreshUserList}
             />
-            <AdminAddUserDialog show={dialogAdd} emit={setDialogAdd} />
+            <AdminAddUserDialog
+                show={dialogAdd}
+                emit={setDialogAdd}
+                onAddSuccess={refreshUserList}
+            />
 
             <AdminEditUserDialog
                 show={dialogEdit}
