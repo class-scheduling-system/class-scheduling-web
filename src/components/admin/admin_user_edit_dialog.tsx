@@ -1,153 +1,203 @@
-import {useState, useEffect, JSX} from "react";
-import { Envelope, User, UserPositioning } from "@icon-park/react";
+import { useState, useEffect, JSX } from "react";
+import {
+    AddUser,
+    CheckOne,
+    CloseOne,
+    Envelope,
+    Key,
+    PhoneTelephone,
+    User,
+    UserPositioning
+} from "@icon-park/react";
 import { EditUserAPI } from "../../apis/user_api.ts";
+import { message, Modal } from "antd";
+import * as React from "react";
+import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
+import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
+import { GetRoleListAPI } from "../../apis/role_api.ts";
+import { RoleEntity } from "../../models/entity/role_entity.ts";
 
-interface EditUserData {
-    user_uuid: string;
-    name: string;
-    role_uuid: string;
-    email: string;
-    phone: string;
-    status?: number;
-    ban?: number;
-    permission?: string[];
-}
 
-export function AdminEditUserDialog({show, emit,userUuid}: Readonly<{
+export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
     userUuid: string;
-}>) : JSX.Element {
-    const [formData, setFormData] = useState<EditUserData>({
-        user_uuid: "",
-        name: "",
-        role_uuid: "",
-        email: "",
-        phone: "",
-        status: 1,  // 默认正常状态
-        ban: 0,  // 默认不封禁
-        permission: []
-    });
+    defaultData?: UserAddDTO | null;
+    onEditSuccess?: () => void;
+}>): JSX.Element {
+    // 使用 defaultData 初始化表单数据
+    const [data, setData] = useState<UserAddDTO>(defaultData || {} as UserAddDTO);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [roleList, setRoleList] = useState<RoleEntity[]>([]);
+    const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
+        page: 1,
+        size: 20,
+        is_desc: true,
+    } as PageSearchDTO);
 
-    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        setIsModalOpen(show);
+    }, [show]);
 
-    // 角色列表
-    const roles = [
-        { role_uuid: "33257a18893a46919fd255a730cb1508", name: "管理员", icon: <UserPositioning theme="outline" size="18" fill="#333" /> },
-        { role_uuid: "4d58ff23ce494b5d83d2bcad9eed30d7", name: "教务", icon: <UserPositioning theme="outline" size="18" fill="#333" /> },
-        { role_uuid: "60c4d7ce00af44f0a382aa73f64aa3c2", name: "老师", icon: <UserPositioning theme="outline" size="18" fill="#555" /> },
-        { role_uuid: "e02425859d904c5bacde77401be48cc9", name: "学生", icon: <UserPositioning theme="outline" size="18" fill="#777" /> },
-    ];
+    useEffect(() => {
+        emit(isModalOpen);
+    }, [emit, isModalOpen]);
 
+    // 当对话框打开且有 defaultData 时，同步到本地状态中
+    useEffect(() => {
+        if (show && defaultData) {
+            setData(defaultData);
+        }
+    }, [show, defaultData]);
 
-    const handleCloseDialog = () => {
-        document.getElementById("my_modal_2")?.close();
+    // 关闭对话框
+    const handleClose = () => {
+        setIsModalOpen(false);
     };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSelectRole = (role_uuid: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            role_uuid,
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+    // 提交表单
+    async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         try {
-            const response = await EditUserAPI(formData.user_uuid, formData);
-            if (response) {
-                alert("✅ 用户修改成功");
-                handleCloseDialog();
+            const getResp = await EditUserAPI(userUuid, data);
+            if (getResp?.output === "Success") {
+                message.success("编辑成功");
+
+                // 调用父组件传来的回调，刷新用户列表
+                onEditSuccess?.();
+
+                handleClose();
             } else {
-                alert("❌ 修改用户失败");
+                message.error(getResp?.error_message ?? "编辑失败");
             }
         } catch (error) {
-            console.error("❌ 修改用户失败:", error);
-        } finally {
-            setLoading(false);
+            console.error("编辑用户失败:", error);
+            message.error("编辑失败");
         }
-    };
+    }
+
+    // 获取角色列表
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const response = await GetRoleListAPI(searchRequest);
+                if (response?.output === "Success") {
+                    setRoleList(response.data.records);
+                } else {
+                    message.error(response?.message ?? "获取角色列表失败");
+                }
+            } catch (error) {
+                console.error("角色列表请求失败:", error);
+                message.error("获取角色列表失败");
+            }
+        };
+        fetchRoles();
+    }, [searchRequest]);
 
     return (
-        <dialog id="my_modal_2" className="modal">
-            <div className="modal-box">
-                <h3 className="font-bold text-lg">编辑用户</h3>
-                <div className="mt-3">
-                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4 p-4">
-                        <label className="input input-md flex items-center w-full">
-                            <User theme="outline" size="18" fill="#333" />
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                                placeholder="用户名"
-                                className="grow"
-                            />
-                        </label>
-
-                        <div className="dropdown w-full">
-                            <label tabIndex={0} className="input input-md flex items-center justify-between w-full cursor-pointer border border-gray-300 rounded-md focus-within:border-blue-500">
-                                <div className="flex items-center">
-                                    {roles.find((r) => r.role_uuid === formData.role_uuid)?.icon}
-                                    <span className="ml-2">{roles.find((r) => r.role_uuid === formData.role_uuid)?.name}</span>
-                                </div>
-                            </label>
-
-                            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-md w-full border border-gray-300">
-                                {roles.map((role) => (
-                                    <li key={role.role_uuid} onClick={() => handleSelectRole(role.role_uuid)}>
-                                        <a className="flex items-center">
-                                            {role.icon} <span className="ml-2">{role.name}</span>
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <label className="input input-md flex items-center w-full">
-                            <Envelope theme="outline" size="18" fill="#333" />
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                placeholder="邮箱"
-                                className="grow"
-                            />
-                        </label>
-
-                        <label className="input input-md flex items-center w-full">
-                            <Envelope theme="outline" size="18" fill="#333" />
-                            <input
-                                type="text"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                required
-                                placeholder="手机号"
-                                className="grow"
-                            />
-                        </label>
-
-                        <div className="flex justify-end gap-2 w-full">
-                            <button type="submit" className="btn btn-neutral" disabled={loading}>
-                                {loading ? "修改中..." : "修改"}
-                            </button>
-                            <button type="button" className="btn" onClick={handleCloseDialog}>
-                                取消
-                            </button>
-                        </div>
-                    </form>
+        <Modal
+            open={isModalOpen}
+            onCancel={handleClose}
+            footer={
+                <div className="modal-action">
+                    <div className={"flex space-x-3"}>
+                        <button type={"button"} onClick={handleClose} className={"btn btn-error"}>
+                            <CloseOne theme="outline" size="16" />
+                            <span>取消</span>
+                        </button>
+                        <button type={"submit"} form={"user_edit"} className={"btn btn-success"}>
+                            <CheckOne theme="outline" size="16" />
+                            <span>提交</span>
+                        </button>
+                    </div>
                 </div>
+            }
+        >
+            <div className="flex flex-col space-y-4">
+                <h3 className="font-bold text-lg flex items-center space-x-2">
+                    <AddUser theme="outline" size="20" fill="#333" />
+                    <span>编辑用户</span>
+                </h3>
+                <form id={"user_edit"} onSubmit={onSubmit} className="py-2 grid space-y-2">
+                    {/* 用户名 */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <User theme="outline" size="16" fill="#333" />
+                            <span>用户名</span>
+                        </legend>
+                        <input
+                            type="text"
+                            className="input w-full validator"
+                            required
+                            value={data.name || ""}
+                            onChange={(e) => setData({ ...data, name: e.target.value })}
+                        />
+                    </fieldset>
+                    {/* 密码（留空表示不修改） */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <Key theme="outline" size="16" fill="#333" />
+                            <span>密码</span>
+                        </legend>
+                        <input
+                            type="password"
+                            className="input w-full validator"
+                            placeholder="如需修改密码，请输入新密码"
+                            onChange={(e) => setData({ ...data, password: e.target.value })}
+                        />
+                    </fieldset>
+                    {/* 邮箱 */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <Envelope theme="outline" size="16" fill="#333" />
+                            <span>邮箱</span>
+                        </legend>
+                        <input
+                            type="email"
+                            className="input w-full validator"
+                            required
+                            value={data.email || ""}
+                            onChange={(e) => setData({ ...data, email: e.target.value })}
+                        />
+                    </fieldset>
+                    {/* 手机号 */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <PhoneTelephone theme="outline" size="16" fill="#333" />
+                            <span>手机号</span>
+                        </legend>
+                        <input
+                            type="text"
+                            className="input w-full validator"
+                            required
+                            value={data.phone || ""}
+                            onChange={(e) => setData({ ...data, phone: e.target.value })}
+                        />
+                    </fieldset>
+                    {/* 角色选择 */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <UserPositioning theme="outline" size="16" fill="#333" />
+                            <span>角色</span>
+                        </legend>
+                        <select
+                            className="select w-full validator"
+                            value={data.role_uuid || ""}
+                            onChange={(e) => setData({ ...data, role_uuid: e.target.value })}
+                            required
+                        >
+                            <option value="" disabled>
+                                请选择角色
+                            </option>
+                            {roleList.map((role) => (
+                                <option key={role.role_uuid} value={role.role_uuid}>
+                                    {role.role_name}
+                                </option>
+                            ))}
+                        </select>
+                    </fieldset>
+                </form>
             </div>
-        </dialog>
+        </Modal>
     );
 }
