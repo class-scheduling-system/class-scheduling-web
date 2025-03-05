@@ -26,9 +26,7 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
     defaultData?: UserAddDTO | null;
     onEditSuccess?: () => void;
 }>): JSX.Element {
-    // 使用 defaultData 初始化表单数据
     const [data, setData] = useState<UserEditDTO>(defaultData || {} as UserEditDTO);
-    const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
