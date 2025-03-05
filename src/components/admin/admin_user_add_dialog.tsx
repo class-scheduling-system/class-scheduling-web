@@ -7,7 +7,7 @@ import {
     PhoneTelephone,
     User,
     Permissions,
-    UserPositioning
+    UserPositioning, GreenHouse, HamburgerButton
 } from "@icon-park/react";
 import * as React from "react";
 import {JSX, useEffect, useState} from "react";
@@ -250,7 +250,7 @@ export function AdminAddUserDialog({ show, emit }: Readonly<{
                             {/* 部门 */}
                             <fieldset className="flex flex-col">
                                 <legend className="flex items-center space-x-1 mb-1">
-                                    <PhoneTelephone theme="outline" size="16" fill="#333" />
+                                    <GreenHouse theme="outline" size="16" fill="#333"/>
                                     <span>部门</span>
                                 </legend>
                                 <input
@@ -267,7 +267,7 @@ export function AdminAddUserDialog({ show, emit }: Readonly<{
                             {/* 权限类型 */}
                             <fieldset className="flex flex-col">
                                 <legend className="flex items-center space-x-1 mb-1">
-                                    <PhoneTelephone theme="outline" size="16" fill="#333" />
+                                    <HamburgerButton theme="outline" size="16" fill="#333"/>
                                     <span>权限类型</span>
                                 </legend>
                                 <select
