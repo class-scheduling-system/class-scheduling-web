@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, JSX} from "react";
 import { Envelope, User, UserPositioning } from "@icon-park/react";
 import { EditUserAPI } from "../../apis/user_api.ts";
 
@@ -13,7 +13,11 @@ interface EditUserData {
     permission?: string[];
 }
 
-export function AdminEditUserDialog({ defaultData, onUserEdited }: { defaultData: EditUserData | null; onUserEdited: () => void }) {
+export function AdminEditUserDialog({show, emit,userUuid}: Readonly<{
+    show: boolean;
+    emit: (data: boolean) => void;
+    userUuid: string;
+}>) : JSX.Element {
     const [formData, setFormData] = useState<EditUserData>({
         user_uuid: "",
         name: "",
@@ -35,11 +39,6 @@ export function AdminEditUserDialog({ defaultData, onUserEdited }: { defaultData
         { role_uuid: "e02425859d904c5bacde77401be48cc9", name: "学生", icon: <UserPositioning theme="outline" size="18" fill="#777" /> },
     ];
 
-    useEffect(() => {
-        if (defaultData) {
-            setFormData(defaultData);
-        }
-    }, [defaultData]);
 
     const handleCloseDialog = () => {
         document.getElementById("my_modal_2")?.close();
@@ -64,7 +63,6 @@ export function AdminEditUserDialog({ defaultData, onUserEdited }: { defaultData
             if (response) {
                 alert("✅ 用户修改成功");
                 handleCloseDialog();
-                onUserEdited();
             } else {
                 alert("❌ 修改用户失败");
             }

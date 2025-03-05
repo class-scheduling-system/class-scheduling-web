@@ -39,6 +39,8 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     // 删除用户相关状态
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
+    const [dialogEdit,setDialogEdit] = useState<boolean>(false);
+    const [editUserUuid, setEditUserUuid] = useState("");
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -175,6 +177,8 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                     <div className="join">
                                                         <button
                                                             onClick={() => {
+                                                                setEditUserUuid(record.user.user_uuid);
+                                                                setDialogEdit(true);
                                                             }}
                                                             className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                             <Editor theme="outline" size="12"/>
@@ -182,7 +186,6 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                         </button>
                                                         <button
                                                             onClick={() => {
-                                                                console.log("即将删除的用户UUID:", record.user.user_uuid); // 调试日志
                                                                 setDeleteUserUuid(record.user.user_uuid);  // 先设置 userUuid
                                                                 setDialogDelete(true);  // 打开对话框
                                                             }}
@@ -265,9 +268,8 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 onUserDeleted={refreshUserList}  // 传递刷新方法
             />
 
-
-
             <AdminAddUserDialog show={dialogAdd} emit={setDialogAdd}/>
+            <AdminEditUserDialog show={dialogEdit} emit={setDialogEdit} userUuid={editUserUuid}/>
         </>
     );
 }

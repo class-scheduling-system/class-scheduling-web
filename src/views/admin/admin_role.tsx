@@ -79,8 +79,7 @@ export function AdminRole({ site }: { site: { name?: string } }) {
                         </table>
                     </div>
                     <AdminRolePermissionDialog />
-                    <AdminAddUserDialog />
-                    <AdminDeleteUserDialog />
+
                 </div>
             </div>
         </>
