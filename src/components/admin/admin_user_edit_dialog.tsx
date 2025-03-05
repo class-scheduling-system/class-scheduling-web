@@ -1,10 +1,10 @@
 import { useState, useEffect, JSX } from "react";
 import {
-    AddUser,
+    AddUser, ApplicationEffect,
     CheckOne,
     CloseOne,
-    Envelope,
-    Key,
+    Envelope, Forbid,
+    Key, Permissions,
     PhoneTelephone,
     User,
     UserPositioning
@@ -16,6 +16,7 @@ import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
 import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 import { GetRoleListAPI } from "../../apis/role_api.ts";
 import { RoleEntity } from "../../models/entity/role_entity.ts";
+import { UserEditDTO } from "../../models/dto/user_edit_dto.ts";
 
 
 export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSuccess }: Readonly<{
@@ -26,7 +27,8 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
     onEditSuccess?: () => void;
 }>): JSX.Element {
     // 使用 defaultData 初始化表单数据
-    const [data, setData] = useState<UserAddDTO>(defaultData || {} as UserAddDTO);
+    const [data, setData] = useState<UserEditDTO>(defaultData || {} as UserEditDTO);
+    const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
@@ -62,6 +64,8 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
             const getResp = await EditUserAPI(userUuid, data);
             if (getResp?.output === "Success") {
                 message.success("编辑成功");
+
+                // 调用父组件传来的回调，刷新用户列表
                 onEditSuccess?.();
 
                 handleClose();
@@ -194,6 +198,64 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
                             ))}
                         </select>
                     </fieldset>
+                    {/* 权限选择（可选多选） */}
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <Permissions theme="outline" size="16" fill="#333" />
+                            <span>权限</span>
+                        </legend>
+                        <select
+                            className="select w-full validator"
+                            value={data.permission && data.permission.length ? data.permission[0] : ""}
+                            onChange={(e) => setData({ ...data, permission: [e.target.value] })}
+                            required
+                        >
+                            <option value="" disabled>
+                                请选择权限
+                            </option>
+                            <option value="user">user</option>
+                            <option value="admin">admin</option>
+                            <option value="super">super</option>
+                        </select>
+                    </fieldset>
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <ApplicationEffect theme="outline" size="16" fill="#333"/>
+                            <span>状态</span>
+                        </legend>
+                        <select
+                            className="select w-full validator"
+                            value={data.status !== undefined ? data.status : ""}
+                            onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
+                            required
+                        >
+                            <option value="" disabled>
+                                请选择状态
+                            </option>
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </fieldset>
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <Forbid theme="outline" size="16" fill="#333"/>
+                            <span>封禁</span>
+                        </legend>
+                        <select
+                            className="select w-full validator"
+                            value={data.ban !== undefined ? data.ban : ""}
+                            onChange={(e) => setData({ ...data, ban: Number(e.target.value) })}
+                            required
+                        >
+                            <option value="" disabled>
+                                请选择封禁状态
+                            </option>
+                            <option value="0">未封禁</option>
+                            <option value="1">封禁</option>
+                        </select>
+                    </fieldset>
+
+
                 </form>
             </div>
         </Modal>

@@ -1,5 +1,5 @@
 import { useState, useEffect, JSX, useRef } from "react";
-import { Add, Correct, Delete, Editor, Error, Left, Newlybuild, Right, Search } from "@icon-park/react";
+import {Add, Correct, Delete, Editor, Error, Newlybuild, Harm, Search, Forbid, CheckSmall} from "@icon-park/react";
 import { AdminAddUserDialog } from "../../components/admin/admin_user_add_dialog.tsx";
 import { AdminEditUserDialog } from "../../components/admin/admin_user_edit_dialog.tsx";
 import { AdminDeleteUserDialog } from "../../components/admin/admin_user_delete_dialog.tsx";
@@ -148,6 +148,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                         <th>用户名</th>
                                         <th>角色</th>
                                         <th>邮箱</th>
+                                        <th>状态</th>
+                                        <th>封禁</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
                                     </thead>
@@ -158,6 +160,26 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                             <td>{record.user.name}</td>
                                             <td>{record.user.role.role_name}</td>
                                             <td>{record.user.email}</td>
+                                            <td>{record.user.status ? (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                type={"success"} text={"启用"}
+                                                                icon={<Correct theme="outline" size="12"/>}/>
+                                            ) : (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                type={"error"}
+                                                                text={"禁用"}
+                                                                icon={<Error theme="outline" size="12"/>}/>
+                                            )}</td>
+                                            <td>{record.user.ban ? (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                type={"error"}
+                                                                text={"已封禁"}
+                                                                icon={<Forbid theme="outline" size="12" />}/>
+                                            ) : (
+                                                <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                type={"success"} text={"未封禁"}
+                                                                icon={<CheckSmall theme="outline" size="12" />}/>
+                                            )}</td>
                                             <td className={"flex justify-end"}>
                                                 <div className="join">
                                                     <button
