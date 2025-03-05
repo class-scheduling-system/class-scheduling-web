@@ -30,6 +30,9 @@ import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.
 import {BaseResponse} from "../models/base_response.ts";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 import {data} from "react-router";
+import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
+import {BuildingEntity} from "../models/entity/building_entity.ts";
 
 /**
  * # 获取当前用户信息
@@ -49,12 +52,12 @@ const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
     )
 }
 
-const GetUserListAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
+const GetUserListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<UserInfoEntity>> | undefined> => {
+    return BaseApi<PageEntity<UserInfoEntity>>(
         MethodType.GET,
         "/api/v1/user/list",
         null,
-        null,
+        data,
         null,
         {Authorization: `Bearer ${GetAuthorizationToken()}`},
     )

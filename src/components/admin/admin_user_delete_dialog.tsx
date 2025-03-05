@@ -1,63 +1,108 @@
-import { useState } from "react";
-import { Attention } from "@icon-park/react";
-import { DeleteUserAPI } from "../../apis/user_api.ts";
+import {JSX, useEffect, useState} from "react";
+import {
+    AddUser,
+    CheckOne,
+    CloseOne,
+} from "@icon-park/react";
+import {DeleteUserAPI} from "../../apis/user_api.ts";
+import * as React from "react";
+import {message, Modal} from "antd";
 
-export function AdminDeleteUserDialog({ userUuid, onUserDeleted, onCancel }) {
-    const [loading, setLoading] = useState(false);
 
-    const handleDelete = async () => {
-        if (!userUuid) return;
+export function AdminDeleteUserDialog({show, emit,userUuid}: Readonly<{
+    show: boolean;
+    emit: (data: boolean) => void;
+    userUuid: string;
+}>) : JSX.Element {
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-        setLoading(true);
-        try {
-            console.log("123")
-            await DeleteUserAPI(userUuid);
-            console.log(userUuid);
-            alert("✅ 用户删除成功");
 
-            // 关闭对话框
-            document.getElementById("my_modal_3")?.close();
+    useEffect(() => {
+        setIsModalOpen(show);
+    }, [show]);
 
-            // 通知 `AdminUser` 组件重新获取用户列表
-            if (onUserDeleted) {
-                onUserDeleted();
-            }
-        } catch (error) {
-            console.error("❌ 删除用户失败:", error);
-            alert("❌ 删除用户失败");
-        } finally {
-            setLoading(false);
-        }
+    useEffect(() => {
+        emit(isModalOpen);
+    }, [emit, isModalOpen]);
+
+    const handleOk = () => {
+        setIsModalOpen(false);
     };
 
-    return (
-        <dialog id="my_modal_3" className="modal">
-            <div className="modal-box">
-                <h3 className="font-bold text-lg mb-2">删除用户</h3>
-                <div className={"flex items-center"}>
-                    <Attention theme="outline" size="24" fill="#FFD700" />
-                    <p className="text-error ml-2">删除后将不可恢复，确定要删除吗？</p>
-                </div>
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
-                <div className="modal-action">
-                    <form method="dialog">
-                        <div className="flex justify-end gap-2 w-full">
-                            {/* 绑定 onClick 事件，点击后执行删除 */}
-                            <button
-                                type="button"
-                                className="btn btn-neutral"
-                                onClick={handleDelete}
-                                disabled={loading}
-                            >
-                                {loading ? "删除中..." : "删除"}
-                            </button>
-                            <button type="button" className="btn" onClick={onCancel} disabled={loading}>
-                                取消
-                            </button>
-                        </div>
+    const handleClose = () => {
+        setIsModalOpen(false);
+    }
+
+    async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        console.log("执行删除操作, userUuid:", userUuid); // 调试日志
+
+        if (!userUuid) {
+            message.error("用户 UUID 为空，无法删除！");
+            return;
+        }
+
+        try {
+            const getResp = await DeleteUserAPI(userUuid);
+            if (getResp?.output === "Success") {
+                message.success("删除成功");
+
+                // 关闭弹窗
+                handleOk();
+                emit(false);
+
+                // 直接刷新页面
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500); // 延迟 500ms，确保 UI 有反馈
+            } else {
+                message.error(getResp?.message ?? "删除失败");
+            }
+        } catch (error) {
+            console.error("删除用户失败:", error);
+            message.error("删除失败");
+        }
+    }
+
+
+
+    return (
+        <>
+            <Modal open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
+                   footer={
+                       <div className="modal-action">
+                           <div className={"flex space-x-3"}>
+                               <button type={"button"}
+                                       onClick={handleClose}
+                                       className={"btn btn-error"}>
+                                   <CloseOne theme="outline" size="16"/>
+                                   <span>取消</span>
+                               </button>
+                               <button
+                                       type={"submit"} form={"user_delete"}
+                                       className={"btn btn-success"}>
+                                   <CheckOne theme="outline" size="16"/>
+                                   <span>确定</span>
+                               </button>
+                           </div>
+                       </div>
+                   }>
+                <div className="flex flex-col space-y-4">
+                    <h3 className="font-bold text-lg flex items-center space-x-2">
+                        <AddUser theme="outline" size="20" fill="#333"/>
+                        <span>删除用户</span>
+                    </h3>
+                    <form id={"user_delete"} onSubmit={onSubmit}  className="py-2 grid space-y-2">
+                        <p>确定要删除该用户吗？</p>
                     </form>
                 </div>
-            </div>
-        </dialog>
-    );
+            </Modal>
+        </>
+    )
+
 }
