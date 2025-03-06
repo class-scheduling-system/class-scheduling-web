@@ -7,24 +7,24 @@ import {
     PhoneTelephone,
     User,
     Permissions,
-    UserPositioning, GreenHouse, HamburgerButton
+    UserPositioning,
+    GreenHouse,
+    HamburgerButton
 } from "@icon-park/react";
 import * as React from "react";
-import {JSX, useEffect, useState} from "react";
-import {message, Modal} from "antd";
-import {AddUserAPI} from "../../apis/user_api.ts";
-import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
-import {RoleEntity} from "../../models/entity/role_entity.ts";
-import {GetRoleListAPI} from "../../apis/role_api.ts";
-import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import { JSX, useEffect, useState } from "react";
+import { message, Modal } from "antd";
+import { AddUserAPI } from "../../apis/user_api.ts";
+import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
+import { RoleEntity } from "../../models/entity/role_entity.ts";
+import { GetRoleListAPI } from "../../apis/role_api.ts";
+import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 
 export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
     onAddSuccess?: () => void
 }>): JSX.Element {
-    const EDU_ROLE_UUID = "2d6a56f805844b1691ab25afbb6eb47d"; // 教务角色的UUID
-
     const [data, setData] = useState<UserAddDTO>({
         permission: []
     } as UserAddDTO);
@@ -36,6 +36,9 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
+
+    // 根据角色名称判断教务角色：假设角色名称包含"教务"的即为教务角色
+    const teachingRole = roleList.find(role => role.role_name.includes("教务"));
 
     useEffect(() => {
         setIsModalOpen(show);
@@ -76,8 +79,8 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
 
         // 根据角色判断是否需要保留 department、type
         const payload = { ...data };
-        if (payload.role_uuid !== EDU_ROLE_UUID) {
-            // 不是教务就把这俩删掉
+        if (payload.role_uuid !== (teachingRole ? teachingRole.role_uuid : "")) {
+            // 如果选中的角色不是教务角色，则移除部门和权限类型字段
             delete payload.department;
             delete payload.type;
         }
@@ -96,7 +99,6 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
             message.error("添加失败");
         }
     }
-
 
     return (
         <Modal
@@ -149,16 +151,16 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                             value={data.role_uuid || ""}
                             onChange={(e) => {
                                 const selectedRoleUuid = e.target.value;
-                                // 角色为教务 => 保留并显示部门和权限类型
-                                // 角色不是教务 => 清空并隐藏部门和权限类型
-                                if (selectedRoleUuid === EDU_ROLE_UUID) {
+                                if (selectedRoleUuid === (teachingRole ? teachingRole.role_uuid : "")) {
+                                    // 如果选中的是教务角色，则保留并显示部门和权限类型
                                     setData({
                                         ...data,
                                         role_uuid: selectedRoleUuid,
-                                        department: data.department ?? "", // 保留或初始化
+                                        department: data.department ?? "",
                                         type: data.type ?? undefined
                                     });
                                 } else {
+                                    // 否则清空部门和权限类型字段
                                     setData({
                                         ...data,
                                         role_uuid: selectedRoleUuid,
@@ -247,7 +249,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                     </fieldset>
 
                     {/* 仅当角色为教务时才显示部门和权限类型 */}
-                    {data.role_uuid === EDU_ROLE_UUID && (
+                    {data.role_uuid === (teachingRole ? teachingRole.role_uuid : "") && (
                         <>
                             {/* 部门 */}
                             <fieldset className="flex flex-col">
