@@ -35,10 +35,9 @@ import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {AdminUser} from "./admin/admin_user.tsx";
 import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
-import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
 import {BuildingTwo, Dashboard, HomeTwo, System, User, UserPositioning} from "@icon-park/react";
-import {AdminRole} from "./admin/admin_role.tsx";
+
 
 /**
  * 生成一个基础的控制台组件。
@@ -47,7 +46,6 @@ import {AdminRole} from "./admin/admin_role.tsx";
  */
 export function BaseAdmin(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
-    const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -141,7 +139,6 @@ export function BaseAdmin(): JSX.Element {
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
-                                <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
