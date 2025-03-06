@@ -39,7 +39,7 @@ export type UserAddDTO = {
     password: string;
     email: string;
     phone: string;
-    permission: Array<string>;
-    department: string;
-    type: number
+    permission: string[];
+    department?: string;
+    type?: number
 }
