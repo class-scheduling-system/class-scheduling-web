@@ -52,5 +52,5 @@ const GetRoleListAPI = async (data: PageSearchDTO):Promise<BaseResponse<PageEnti
 }
 
 export{
-    GetRoleListAPI,
+    GetRoleListAPI
 }

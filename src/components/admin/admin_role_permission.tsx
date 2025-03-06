@@ -26,67 +26,57 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState } from "react";
+import {JSX, useEffect, useState} from "react";
+import {
+    CloseOne, MoreApp,
+} from "@icon-park/react";
+import {Modal} from "antd";
 
-export function AdminRolePermissionDialog() {
-    const [formData, setFormData] = useState({
-        name: '',
-        role: '',
-        email: '',
-        permissions: [],
-    });
 
-    const permissionsList = [
-        "查看用户", "编辑用户", "删除用户", "管理角色", "查看报表"
-    ];
+export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
+    show: boolean;
+    emit: (data: boolean) => void;
+    roleUuid: string;
+}>): JSX.Element  {
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 关闭对话框的函数
-    const handleCloseDialog = () => {
-        const dialog = document.getElementById('my_modal_2');
-        if (dialog) {
-            dialog.close(); // 关闭对话框
-        }
-    };
+    useEffect(() => {
+        setIsModalOpen(show);
+    }, [show]);
 
-    // 处理权限勾选
-    const handlePermissionChange = (permission) => {
-        setFormData((prev) => {
-            const newPermissions = prev.permissions.includes(permission)
-                ? prev.permissions.filter((p) => p !== permission)
-                : [...prev.permissions, permission];
-            return { ...prev, permissions: newPermissions };
-        });
-    };
+    useEffect(() => {
+        emit(isModalOpen);
+    }, [emit, isModalOpen]);
+
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+    }
 
     return (
         <>
-            <dialog id="my_modal_2" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">权限列表</h3>
-                    <div className="mt-3">
-                        <form method="dialog" className="flex flex-col space-y-4 p-4">
-                            {/* 权限选择列表 */}
-                            <div className="flex flex-col space-y-2">
-                                {permissionsList.map((permission) => (
-                                    <label key={permission} className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.permissions.includes(permission)}
-                                            onChange={() => handlePermissionChange(permission)}
-                                        />
-                                        <span>{permission}</span>
-                                    </label>
-                                ))}
-                            </div>
-
-                            <div className="flex justify-end gap-2 w-full">
-                                <button type="submit" className="btn btn-neutral">修改</button>
-                                <button type="button" className="btn" onClick={handleCloseDialog}>取消</button>
-                            </div>
-                        </form>
+            <Modal
+                open={isModalOpen}
+                onCancel={handleClose}
+                footer={
+                    <div className="modal-action">
+                        <div className={"flex space-x-3"}>
+                            <button type={"button"} onClick={handleClose} className={"btn btn-soft btn-secondary"}>
+                                <CloseOne theme="outline" size="16" />
+                                <span>关闭</span>
+                            </button>
+                        </div>
                     </div>
+                }
+            >
+                <div className="flex flex-col space-y-4">
+                    <h3 className="font-bold text-lg flex items-center space-x-2">
+                        <MoreApp theme="outline" size="20"/>
+                        <span>角色详情</span>
+                    </h3>
+
                 </div>
-            </dialog>
+            </Modal>
         </>
     );
 }

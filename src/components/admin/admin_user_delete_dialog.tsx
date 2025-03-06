@@ -26,7 +26,6 @@ export function AdminDeleteUserDialog({show, emit,userUuid, onDeletedSuccess}: R
 }>) : JSX.Element {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-
     useEffect(() => {
         setIsModalOpen(show);
     }, [show]);
