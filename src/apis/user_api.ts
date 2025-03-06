@@ -29,6 +29,8 @@
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
+import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
 
 /**
  * # 获取当前用户信息
@@ -37,7 +39,7 @@ import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
  * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+const GetCurrentUserAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
     return BaseApi<UserInfoEntity>(
         MethodType.GET,
         "/api/v1/user/current",
@@ -48,6 +50,131 @@ const GetUserCurrentAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
     )
 }
 
+/**
+ * # 获取用户信息
+ * > 该函数用于通过API请求获取用户的信息。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetUserInfoAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.GET,
+        "/api/v1/user",
+        null,
+        null,
+        user_uuid,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
+
+
+/**
+ * # 获取用户列表
+ * > 该函数用于通过API请求获取用户列表。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetUserListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<UserInfoEntity>> | undefined> => {
+    return BaseApi<PageEntity<UserInfoEntity>>(
+        MethodType.GET,
+        "/api/v1/user/list",
+        null,
+        data,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
+
+
+/**
+ * # 增加用户
+ * > 该函数用于通过API请求添加用户。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const AddUserAPI = async (data: {
+    role_uuid: string;
+    name: string;
+    password?: string;
+    email: string;
+    phone: string;
+    permission?: string[];
+}): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.POST,
+        "/api/v1/user",
+        data,
+        null,
+        null,
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
+
+
+/**
+ * # 删除用户
+ * > 该函数用于通过API请求删除用户。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.DELETE,
+        "/api/v1/user",
+        null,
+        null,
+        user_uuid,
+        { Authorization: `Bearer ${GetAuthorizationToken()}` }
+    );
+};
+
+
+/**
+ * # 编辑用户
+ * > 该函数用于通过API请求编辑用户。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const EditUserAPI = async (user_uuid: string, data: {
+    name?: string;
+    password?: string;
+    email?: string;
+    phone?: string;
+    status?: number;
+    ban?: number;
+    role_uuid?: string;
+    permission?: string[];
+}): Promise<BaseResponse<UserInfoEntity> | undefined> => {
+    return BaseApi<UserInfoEntity>(
+        MethodType.PUT,  // 🔹 使用 PUT 方法
+        `/api/v1/user`,  // 🔹 直接拼接 user_uuid
+        data,
+        null,  // 无 query 参数
+        user_uuid,  // 无 path 参数
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
+
 export {
-    GetUserCurrentAPI
+    GetCurrentUserAPI,
+    GetUserInfoAPI,
+    GetUserListAPI,
+    AddUserAPI,
+    DeleteUserAPI,
+    EditUserAPI,
 }
