@@ -147,13 +147,13 @@ const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEn
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const EditUserAPI = async (user_uuid: string, data: {
-    name: string;
+    name?: string;
     password?: string;
-    email: string;
-    phone: string;
-    status?: number;  // 可选字段
-    ban?: number;  // 可选字段
-    role_uuid: string;
+    email?: string;
+    phone?: string;
+    status?: number;
+    ban?: number;
+    role_uuid?: string;
     permission?: string[];
 }): Promise<BaseResponse<UserInfoEntity> | undefined> => {
     return BaseApi<UserInfoEntity>(

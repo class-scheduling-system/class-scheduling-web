@@ -27,12 +27,12 @@
  */
 
 export type UserEditDTO = {
-    name: string;
-    password: string;
-    email: string;
-    phone: string;
-    status: number;
-    ban: number;
-    role_uuid: string;
-    permission: Array<string>;
+    ban?: number;
+    email?: string;
+    name?: string;
+    password?: string;
+    permission?: string[];
+    phone?: string;
+    role_uuid?: string;
+    status?: number;
 }

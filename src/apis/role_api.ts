@@ -30,9 +30,18 @@ import {BaseResponse} from "../models/base_response.ts";
 import {RoleEntity} from "../models/entity/role_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
 
-const GetRoleListAPI = async (data: PageSearchDTO):Promise<BaseResponse<RoleEntity>  | undefined> => {
-    return BaseApi<RoleEntity>(
+
+/**
+ * # 获取角色列表
+ * > 该函数用于通过API请求获取角色列表。它利用了Bearer令牌认证方式来确保安全地访问角色数据。
+ *
+ * @returns {Promise<BaseResponse<Page<UserInfoEntity>> | undefined>} - 返回一个Promise，解析为包含角色信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetRoleListAPI = async (data: PageSearchDTO):Promise<BaseResponse<PageEntity<RoleEntity>>  | undefined> => {
+    return BaseApi<PageEntity<RoleEntity>>(
         MethodType.GET,
         "/api/v1/role/list",
         null,

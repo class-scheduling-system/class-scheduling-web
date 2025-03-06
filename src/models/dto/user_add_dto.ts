@@ -34,12 +34,24 @@
  */
 
 export type UserAddDTO = {
-    role_uuid: string;
-    name: string;
-    password: string;
+    /**
+     * 用户部门UUID,若选为教务，则必需，若角色不为教务，这应该为删除此字段
+     */
+    department?: string;
     email: string;
+    name: string;
+    password?: string;
+    /**
+     * 用户权限
+     */
+    permission?: string[];
     phone: string;
-    permission: Array<string>;
-    department: string;
-    type: number
+    /**
+     * 用户角色除了学生和老师的UUID
+     */
+    role_uuid: string;
+    /**
+     * 权限类型，若选为教务，则必需，1代表所有权限，2代表教务权限，若角色不为教务，这应该删除此字段
+     */
+    type?: number;
 }

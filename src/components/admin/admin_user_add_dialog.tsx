@@ -35,12 +35,18 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
     onAddSuccess?: () => void
 }>): JSX.Element {
     const [data, setData] = useState<UserAddDTO>({
+        name: "",
+        email: "",
+        phone: "",
+        role_uuid: "",
+        password: "",
+        department: "",
         permission: []
-    } as UserAddDTO);
+    });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
-    const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
+    const [searchRequest] = useState<PageSearchDTO>({
         page: 1,
         size: 20,
         is_desc: true,
@@ -59,22 +65,21 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
 
     // 获取角色列表
     useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const response = await GetRoleListAPI(searchRequest);
+        GetRoleListAPI(searchRequest)
+            .then(response => {
                 if (response?.output === "Success") {
                     console.log("获取角色列表成功:", response.data);
-                    setRoleList(response.data.records);
+                    setRoleList(response.data!.records);
                 } else {
-                    message.error(response?.error_message?? "获取角色列表失败");
+                    message.error(response?.error_message ?? "获取角色列表失败");
                 }
-            } catch (error) {
+            })
+            .catch(error => {
                 console.error("角色列表请求失败:", error);
                 message.error("获取角色列表失败");
-            }
-        };
-        fetchRoles();
+            });
     }, [searchRequest]);
+
 
     // 关闭对话框
     const handleClose = () => {
