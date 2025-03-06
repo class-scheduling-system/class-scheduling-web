@@ -92,7 +92,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                 const response = await GetRoleListAPI(searchRequest);
                 if (response?.output === "Success") {
                     console.log("获取角色列表成功:", response.data);
-                    setRoleList(response.data.records);
+                    setRoleList(response.data!.records);
                 } else {
                     message.error(response?.error_message?? "获取角色列表失败");
                 }
