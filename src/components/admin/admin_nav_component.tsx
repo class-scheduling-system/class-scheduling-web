@@ -29,7 +29,7 @@
 import {BuildingTwo, Dashboard, System, User, UserPositioning} from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
-import {AdminSystemInfo} from "../../views/admin/admin_systemInfo.tsx";
+
 
 /**
  * 生成管理员导航组件。

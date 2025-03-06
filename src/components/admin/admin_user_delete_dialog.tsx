@@ -9,6 +9,15 @@ import * as React from "react";
 import {message, Modal} from "antd";
 
 
+/**
+ * # 管理员删除用户 dialog
+ * > 该函数用于创建一个对话框，管理员可以通过该对话框删除用户
+ * @param show  控制该对话框是否显示
+ * @param emit  控制该对话框是否提交
+ * @param userUuid  用户uuid
+ * @param onDeletedSuccess  成功删除用户后的操作
+ * @constructor
+ */
 export function AdminDeleteUserDialog({show, emit,userUuid, onDeletedSuccess}: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
@@ -56,7 +65,7 @@ export function AdminDeleteUserDialog({show, emit,userUuid, onDeletedSuccess}: R
                 handleOk();
                 emit(false);
             } else {
-                message.error(getResp?.message ?? "删除失败");
+                message.error(getResp?.error_message ?? "删除失败");
             }
         } catch (error) {
             console.error("删除用户失败:", error);

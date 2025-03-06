@@ -41,7 +41,6 @@ function AdminRightCardComponent() {
                                 <Search theme="outline" size="24" fill="#333"/>
                                 <input type="text" placeholder="请输入用户名或角色" required className={"w-full"}/> {/* 设置宽度为 100% */}
                             </label>
-                            <div className="validator-hint hidden">Enter valid email address</div>
                         </div>
                         <button className="btn btn-neutral join-item">搜索</button>
                     </div>

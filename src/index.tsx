@@ -36,7 +36,7 @@ import {setSiteStore} from "./stores/site_store.ts";
 import {BaseAdmin} from "./views/base_admin.tsx";
 import {BaseAuth} from "./views/base_auth.tsx";
 import {message} from "antd";
-import {GetUserCurrentAPI} from "./apis/user_api.ts";
+import {GetCurrentUserAPI} from "./apis/user_api.ts";
 import {setUserInfo} from "./stores/user_store.ts";
 import {PageNotFound} from "./views/404/page_not_found.tsx";
 
@@ -71,7 +71,7 @@ export function Index(): JSX.Element {
     useEffect(() => {
         const func = async () => {
             if (localStorage.getItem("has_init") === "0") {
-                const getResp = await GetUserCurrentAPI();
+                const getResp = await GetCurrentUserAPI();
                 if (getResp?.output === "Success") {
                     dispatch(setUserInfo(getResp.data!));
                     if (location.pathname.startsWith("/auth")) {

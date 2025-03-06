@@ -18,7 +18,16 @@ import { GetRoleListAPI } from "../../apis/role_api.ts";
 import { RoleEntity } from "../../models/entity/role_entity.ts";
 import { UserEditDTO } from "../../models/dto/user_edit_dto.ts";
 
-
+/**
+ * # 编辑用户 dialog
+ * > 该函数用于创建一个对话框，管理员可以通过该对话框编辑用户，修改用户的信息
+ * @param show  控制该对话框是否显示
+ * @param emit  控制该对话框是否提交
+ * @param userUuid  用户uuid
+ * @param defaultData   对话框的默认用户数据
+ * @param onEditSuccess     编辑成功后的操作
+ * @constructor
+ */
 export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
@@ -84,7 +93,7 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
                 if (response?.output === "Success") {
                     setRoleList(response.data.records);
                 } else {
-                    message.error(response?.message ?? "获取角色列表失败");
+                    message.error(response?.error_message ?? "获取角色列表失败");
                 }
             } catch (error) {
                 console.error("角色列表请求失败:", error);

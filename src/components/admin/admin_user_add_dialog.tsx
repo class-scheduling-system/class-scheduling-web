@@ -20,6 +20,15 @@ import { RoleEntity } from "../../models/entity/role_entity.ts";
 import { GetRoleListAPI } from "../../apis/role_api.ts";
 import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 
+/**
+ * # 管理员添加用户 Dialog
+ * > 该函数用户创建一个添加用户对话框，管理员可以在该对话框中添加用户
+ *
+ * @param show - 控制该对话框是否显示
+ * @param emit - 控制该对话框是否提交
+ * @param onAddSuccess - 成功添加用户后的操作
+ * @constructor
+ */
 export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
@@ -57,7 +66,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                     console.log("获取角色列表成功:", response.data);
                     setRoleList(response.data.records);
                 } else {
-                    message.error(response?.message ?? "获取角色列表失败");
+                    message.error(response?.error_message?? "获取角色列表失败");
                 }
             } catch (error) {
                 console.error("角色列表请求失败:", error);
@@ -130,6 +139,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         <legend className="flex items-center space-x-1 mb-1">
                             <User theme="outline" size="16" fill="#333" />
                             <span>用户名</span>
+                            <span className="text-red-500">*</span>
                         </legend>
                         <input
                             type="text"
@@ -145,6 +155,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         <legend className="flex items-center space-x-1 mb-1">
                             <UserPositioning theme="outline" size="16" fill="#333" />
                             <span>角色</span>
+                            <span className="text-red-500">*</span>
                         </legend>
                         <select
                             className="select w-full validator"
@@ -191,7 +202,6 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         <input
                             type="password"
                             className="input w-full validator"
-                            required
                             value={data.password || ""}
                             onChange={(e) => setData({ ...data, password: e.target.value })}
                         />
@@ -202,6 +212,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         <legend className="flex items-center space-x-1 mb-1">
                             <Envelope theme="outline" size="16" fill="#333" />
                             <span>邮箱</span>
+                            <span className="text-red-500">*</span>
                         </legend>
                         <input
                             type="email"
@@ -217,6 +228,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         <legend className="flex items-center space-x-1 mb-1">
                             <PhoneTelephone theme="outline" size="16" fill="#333" />
                             <span>手机号</span>
+                            <span className="text-red-500">*</span>
                         </legend>
                         <input
                             type="tel"
@@ -227,25 +239,62 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         />
                     </fieldset>
 
-                    {/* 权限选择（可选多选） */}
+                    {/* 权限选择（多选按钮，可为空） */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
                             <Permissions theme="outline" size="16" fill="#333" />
                             <span>权限</span>
                         </legend>
-                        <select
-                            className="select w-full validator"
-                            value={data.permission && data.permission.length ? data.permission[0] : ""}
-                            onChange={(e) => setData({ ...data, permission: [e.target.value] })}
-                            required
-                        >
-                            <option value="" disabled>
-                                请选择权限
-                            </option>
-                            <option value="user">user</option>
-                            <option value="admin">admin</option>
-                            <option value="super">super</option>
-                        </select>
+                        <div className="flex space-x-4">
+                            <label className="flex items-center space-x-1">
+                                <input
+                                    type="checkbox"
+                                    checked={data.permission?.includes("user") || false}
+                                    onChange={(e) => {
+                                        let newPermissions = data.permission ? [...data.permission] : [];
+                                        if (e.target.checked) {
+                                            newPermissions.push("user");
+                                        } else {
+                                            newPermissions = newPermissions.filter(item => item !== "user");
+                                        }
+                                        setData({ ...data, permission: newPermissions });
+                                    }}
+                                />
+                                <span>user</span>
+                            </label>
+                            <label className="flex items-center space-x-1">
+                                <input
+                                    type="checkbox"
+                                    checked={data.permission?.includes("admin") || false}
+                                    onChange={(e) => {
+                                        let newPermissions = data.permission ? [...data.permission] : [];
+                                        if (e.target.checked) {
+                                            newPermissions.push("admin");
+                                        } else {
+                                            newPermissions = newPermissions.filter(item => item !== "admin");
+                                        }
+                                        setData({ ...data, permission: newPermissions });
+                                    }}
+                                />
+                                <span>admin</span>
+                            </label>
+                            <label className="flex items-center space-x-1">
+                                <input
+                                    type="checkbox"
+                                    checked={data.permission?.includes("super") || false}
+                                    onChange={(e) => {
+                                        let newPermissions = data.permission ? [...data.permission] : [];
+                                        if (e.target.checked) {
+                                            newPermissions.push("super");
+                                        } else {
+                                            newPermissions = newPermissions.filter(item => item !== "super");
+                                        }
+                                        setData({ ...data, permission: newPermissions });
+                                    }}
+                                />
+                                <span>super</span>
+                            </label>
+                        </div>
                     </fieldset>
 
                     {/* 仅当角色为教务时才显示部门和权限类型 */}
@@ -254,8 +303,9 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                             {/* 部门 */}
                             <fieldset className="flex flex-col">
                                 <legend className="flex items-center space-x-1 mb-1">
-                                    <GreenHouse theme="outline" size="16" fill="#333"/>
+                                    <GreenHouse theme="outline" size="16" fill="#333" />
                                     <span>部门</span>
+                                    <span className="text-red-500">*</span>
                                 </legend>
                                 <input
                                     type="text"
@@ -271,8 +321,9 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                             {/* 权限类型 */}
                             <fieldset className="flex flex-col">
                                 <legend className="flex items-center space-x-1 mb-1">
-                                    <HamburgerButton theme="outline" size="16" fill="#333"/>
+                                    <HamburgerButton theme="outline" size="16" fill="#333" />
                                     <span>权限类型</span>
+                                    <span className="text-red-500">*</span>
                                 </legend>
                                 <select
                                     className="select w-full validator"
@@ -294,5 +345,6 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                 </form>
             </div>
         </Modal>
+
     );
 }
