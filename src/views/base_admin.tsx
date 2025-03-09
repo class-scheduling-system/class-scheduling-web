@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -37,7 +37,8 @@ import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
-
+import {Link} from "react-router";
+import {People} from "@icon-park/react";
 
 /**
  * 生成一个基础的控制台组件。
@@ -58,7 +59,7 @@ export function BaseAdmin(): JSX.Element {
 
     // 设置路由切换动画
     const transitions = useTransition(location, {
-        from: {opacity: 0, transform: 'translateX(20px)'},
+        from: {opacity: 0, transform: 'translateX(10px)'},
         enter: {opacity: 1, transform: 'translateX(0)'},
         config: {
             tension: 170,
@@ -78,7 +79,7 @@ export function BaseAdmin(): JSX.Element {
     const navFade = useSpring({
         opacity: 1,
         transform: 'translateX(0)',
-        from: {opacity: 0, transform: 'translateX(-50px)'},
+        from: {opacity: 0, transform: 'translateX(-30px)'},
         config: {tension: 150, friction: 26},
     });
 
@@ -86,7 +87,7 @@ export function BaseAdmin(): JSX.Element {
     const topFade = useSpring({
         opacity: 1,
         transform: 'translateY(0)',
-        from: {opacity: 0, transform: 'translateY(-50px)'},
+        from: {opacity: 0, transform: 'translateY(-30px)'},
         config: {tension: 150, friction: 26},
     });
 
@@ -94,19 +95,105 @@ export function BaseAdmin(): JSX.Element {
     const bottomFade = useSpring({
         opacity: 1,
         transform: 'translateY(0)',
-        from: {opacity: 0, transform: 'translateY(50px)'},
+        from: {opacity: 0, transform: 'translateY(30px)'},
         config: {tension: 150, friction: 26},
     });
 
+    // 自动生成面包屑
+    const generateBreadcrumbs = () => {
+        const pathSegments = location.pathname.split('/').filter(segment => segment);
+        const breadcrumbItems = [];
+
+        // 从路径中提取面包屑项
+        if (pathSegments.length > 1) {
+            // 第一级：主要管理页面（如"用户管理"、"教学楼管理"等）
+            const mainSection = pathSegments[1];
+            let mainTitle = '';
+
+            switch (mainSection) {
+                case 'dashboard':
+                    mainTitle = '看板';
+                    break;
+                case 'user':
+                    mainTitle = '用户管理';
+                    break;
+                case 'building':
+                    mainTitle = '教学楼管理';
+                    break;
+                case 'role':
+                    mainTitle = '角色管理';
+                    break;
+                case 'system-info':
+                    mainTitle = '系统信息';
+                    break;
+                default:
+                    mainTitle = mainSection;
+            }
+
+            breadcrumbItems.push(
+                <li key={mainSection}>
+                    <Link to={`/admin/${mainSection}`}>{mainTitle}</Link>
+                </li>
+            );
+
+            // 第二级及更深层级：如果存在，添加到面包屑
+            if (pathSegments.length > 2) {
+                for (let i = 2; i < pathSegments.length; i++) {
+                    const subPath = pathSegments[i];
+                    let subTitle = '';
+
+                    // 尝试将路径转换为更友好的显示名称
+                    if (subPath.includes('add')) {
+                        subTitle = '添加';
+                    } else if (subPath.includes('edit')) {
+                        subTitle = '编辑';
+                    } else if (subPath.includes('view')) {
+                        subTitle = '查看';
+                    } else if (subPath.includes('delete')) {
+                        subTitle = '删除';
+                    } else {
+                        // 将路径格式转为显示友好的格式
+                        // 如 'user-detail' 转为 '用户详情'
+                        subTitle = subPath.replace(/-/g, ' ');
+                    }
+
+                    breadcrumbItems.push(
+                        <li key={subPath}>
+                            <Link to={`/admin/${pathSegments.slice(1, i+1).join('/')}`}>
+                                {subTitle}
+                            </Link>
+                        </li>
+                    );
+                }
+            }
+        }
+
+        return breadcrumbItems;
+    };
+
     return (
-        <animated.div style={fade} className="h-lvh flex">
-            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 h-full bg-base-200 shadow-lg">
+        <animated.div style={fade} className="h-lvh flex bg-gray-50">
+            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 shadow-md border-r border-gray-100">
                 <AdminNavComponent/>
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 p-4 shadow flex justify-between z-50">
-                    <div>面包屑导航</div>
-                    <div>{getUser.user?.name ?? ""}</div>
+                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm border-b border-gray-100 flex justify-between items-center z-10">
+                    <div className="breadcrumbs text-sm">
+                        <ul>
+                            {generateBreadcrumbs()}
+                        </ul>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                        <div className="flex items-center">
+                            <div className="hidden md:flex flex-col items-end mr-3">
+                                <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
+                                <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
+                            </div>
+                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
+                                <People theme="filled" size="20" fill="#FFFFFF" />
+                            </div>
+                        </div>
+                    </div>
                 </animated.div>
                 <animated.div style={bottomFade} className="p-6 flex-1 overflow-auto flex">
                     {transitions((style, item) => (
