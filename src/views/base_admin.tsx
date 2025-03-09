@@ -36,7 +36,8 @@ import {AdminUser} from "./admin/admin_user.tsx";
 import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
-import {BuildingTwo, Dashboard, HomeTwo, System, User, UserPositioning} from "@icon-park/react";
+import {Bookshelf, BuildingTwo, Dashboard, HomeTwo, System, User, UserPositioning} from "@icon-park/react";
+import {AdminEducation} from "./admin/admin_education.tsx";
 
 
 /**
@@ -61,6 +62,7 @@ export function BaseAdmin(): JSX.Element {
         "/admin/user": { title: "用户管理", icon: <User theme="outline" size="16" /> },
         "/admin/role": { title: "角色管理", icon: <UserPositioning theme="outline" size="16" /> },
         "/admin/building": { title: "教学楼管理", icon: <BuildingTwo theme="outline" size="16" /> },
+        "/admin/education": {title: "教务管理", icon: <Bookshelf theme="outline" size="16"/>},
         "/admin/system-info": { title: "系统信息", icon: <System theme="outline" size="16" /> },
     };
 
@@ -140,6 +142,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
+                                <Route path="/education" element={<AdminEducation site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>
