@@ -105,8 +105,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            // 注意 API 文档里的字段可能叫 search 或 keyword，需确认后端怎么写
-            setSearchRequest({ ...searchRequest, search });
+            setSearchRequest({ ...searchRequest, keyword: search });
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
