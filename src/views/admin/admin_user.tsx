@@ -158,7 +158,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     return (
         <>
             <div className={"grid grid-cols-10 gap-4"}>
-                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-104px)]"}>
+                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) => item ? (
                             <animated.div style={style} className={"flex h-full justify-center"}>
