@@ -26,9 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {useEffect, useRef, useState} from "react";
+import {JSX, useEffect, useRef, useState} from "react";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {AddOne, ChartGraph, Delete, EditTwo, PeopleDeleteOne, PreviewOpen, Search} from "@icon-park/react";
+import {TeacherAddDTO} from "../../models/dto/teacher_add_dto.ts";
+import {AdminAddTeacherDialog} from "../../components/academic/academic_teacher_add_dialog.tsx";
+import {GetTeacherListAPI} from "../../apis/teacher_api.ts";
+import {message} from "antd";
+import {useDispatch, useSelector} from "react-redux";
+import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
+import {PageEntity} from "../../models/entity/page_entity.ts";
+import {TeacherEntity} from "../../models/entity/teacher_entity.ts";
+import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {useTransition} from "@react-spring/web";
+import {AcademicDeleteTeacherDialog} from "../../components/academic/academic_teacher_delete_dialog.tsx";
+import { AcademicEditTeacherDialog } from "../../components/academic/academic_teacher_edit_dialog.tsx";
 
 export function AcademicTeacher({site}: Readonly<{
     site: SiteInfoEntity
@@ -39,6 +51,31 @@ export function AcademicTeacher({site}: Readonly<{
     const [isDescending, setIsDescending] = useState(true);
     const [showStats, setShowStats] = useState(false);
     const inputFocus = useRef<HTMLInputElement | null>(null);
+
+    const dispatch = useDispatch();
+    const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
+    const inputFocus = useRef<HTMLInputElement | null>(null);
+
+    const [teacherList, setTeacherList] = useState<PageEntity<TeacherEntity>>({
+        records: new Array(5).fill({}) as TeacherEntity[],
+    } as PageEntity<TeacherEntity>);
+    const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
+        page: 1,
+        size: 20,
+        is_desc: true,
+    } as PageSearchDTO);
+    const [search, setSearch] = useState<string>("");
+    const [loading, setLoading] = useState(true);
+    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
+    const [dialogDelete, setDialogDelete] = useState<boolean>(false);
+    // 删除用户相关状态
+    const [deleteTeacherUuid, setDeleteTeacherUuid] = useState("");
+    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
+    const [editTeacherUuid, setEditTeacherUuid] = useState("");
+    // 新增状态：保存编辑时对应的用户数据
+    const [editTeacherData, setEditTeacherData] = useState<TeacherAddDTO | null>(null);
+
+
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,6 +90,38 @@ export function AcademicTeacher({site}: Readonly<{
             window.removeEventListener("keydown", handleKeyDown);
         };
     }, []);
+
+    useEffect(() => {
+        const func = async () => {
+            const getResp = await GetTeacherListAPI(searchRequest);
+            if (getResp?.output === "Success") {
+                setLoading(false);
+                setTeacherList(getResp.data!);
+            } else {
+                console.log(getResp);
+                message.error(getResp?.error_message ?? "获取用户列表失败");
+            }
+        };
+        func().then();
+    }, [dispatch, searchRequest]);
+
+    const transitionSearch = useTransition(loading ?? 0, {
+        from: { opacity: 0 },
+        enter: { opacity: 1 },
+        config: { duration: 100 },
+    });
+
+    // 定义刷新用户列表的方法
+    const refreshTeacherList = async () => {
+        setLoading(true);
+        const getResp = await GetTeacherListAPI(searchRequest);
+        if (getResp?.output === "Success") {
+            setTeacherList(getResp.data!);
+        } else {
+            message.error(getResp?.error_message ?? "获取用户列表失败");
+        }
+        setLoading(false);
+    };
 
     // 模拟教师数据
     const [teachers] = useState([
@@ -105,228 +174,244 @@ export function AcademicTeacher({site}: Readonly<{
         sortedTeachers.sort((a, b) => a.id - b.id); // 升序
     }
 
-    // 分页逻辑
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = sortedTeachers.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+    function getPageInfo(): JSX.Element[] {
+        const pageInfo: JSX.Element[] = [];
+        for (let i = 0; i < Math.ceil(userList.total / userList.size); i++) {
+            if (i + 1 === userList.current) {
+                pageInfo.push(
+                    <button key={i} className="transition shadow btn btn-sm join-item btn-primary border">
+                        {i + 1}
+                    </button>
+                );
+            } else {
+                pageInfo.push(
+                    <button key={i}
+                            onClick={() => setSearchRequest({ ...searchRequest, page: i + 1 })}
+                            className="transition shadow btn btn-sm join-item border">
+                        {i + 1}
+                    </button>
+                );
+            }
+        }
+        return pageInfo;
+    }
 
-    // 分页控制
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
-    };
+    // 搜索防抖动
+    useEffect(() => {
+        setLoading(true);
+        const timer = setTimeout(() => {
+            setSearchRequest({ ...searchRequest, keyword: search });
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
 
     return (
-        <div className="space-y-6 w-full">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                    <PeopleDeleteOne theme="outline" size="24" />
-                    教师管理
-                </h1>
+        <>
+            <div className="space-y-6 w-full">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <PeopleDeleteOne theme="outline" size="24" />
+                        教师管理
+                    </h1>
 
-                <div className="flex gap-2">
-                    <button
-                        className="btn btn-outline btn-info flex items-center gap-1"
-                        onClick={() => setShowStats(!showStats)}
-                    >
-                        <ChartGraph theme="outline" size="18" />
-                        {showStats ? "隐藏统计" : "显示统计"}
-                    </button>
-
-                    <div className="relative">
-                        <input
-                            ref={inputFocus}
-                            type="text"
-                            placeholder="搜索教师..."
-                            className="input input-bordered pr-10"
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setCurrentPage(1); // 重置页码
-                            }}
-                        />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Search theme="outline" size="18" />
-                            <kbd className="hidden sm:inline kbd kbd-sm ml-1">Ctrl</kbd>
-                            <kbd className="hidden sm:inline kbd kbd-sm">K</kbd>
-                        </div>
-                    </div>
-
-                    <button className="btn btn-primary flex items-center gap-1">
-                        <AddOne theme="outline" size="18" />
-                        <span className="hidden sm:inline">添加教师</span>
-                        <span className="sm:hidden">添加</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* 统计信息卡片 */}
-            {showStats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="card bg-base-100 shadow-md">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">教师总数</h3>
-                            <p className="text-3xl font-bold text-primary">{teacherStats.total}</p>
-                        </div>
-                    </div>
-
-                    <div className="card bg-base-100 shadow-md">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">职称分布</h3>
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                                <div>
-                                    <div className="badge badge-primary">{teacherStats.byTitle.professor}</div>
-                                    <p className="text-sm mt-1">教授</p>
-                                </div>
-                                <div>
-                                    <div className="badge badge-secondary">{teacherStats.byTitle.associateProf}</div>
-                                    <p className="text-sm mt-1">副教授</p>
-                                </div>
-                                <div>
-                                    <div className="badge badge-accent">{teacherStats.byTitle.lecturer}</div>
-                                    <p className="text-sm mt-1">讲师</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="card bg-base-100 shadow-md">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">院系分布</h3>
-                            <div className="space-y-1">
-                                {Object.entries(teacherStats.byDepartment).map(([dept, count]) => (
-                                    <div key={dept} className="flex justify-between">
-                                        <span>{dept}:</span>
-                                        <span className="font-semibold">{count}人</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="card bg-base-100 shadow-md">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">状态分布</h3>
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                                <div>
-                                    <div className="radial-progress text-success" style={{"--value": (teacherStats.byStatus.active / teacherStats.total) * 100} as any}>
-                                        {teacherStats.byStatus.active}
-                                    </div>
-                                    <p className="text-sm mt-2">在职</p>
-                                </div>
-                                <div>
-                                    <div className="radial-progress text-warning" style={{"--value": (teacherStats.byStatus.onLeave / teacherStats.total) * 100} as any}>
-                                        {teacherStats.byStatus.onLeave}
-                                    </div>
-                                    <p className="text-sm mt-2">休假</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="card bg-base-100 shadow-md overflow-hidden">
-                <div className="card-body p-0">
-                    <div className="overflow-x-auto overflow-hidden">
-                        <table className="table table-zebra">
-                            <thead className="bg-base-200">
-                                <tr>
-                                    <th>姓名</th>
-                                    <th>性别</th>
-                                    <th>职称</th>
-                                    <th>所属院系</th>
-                                    <th>联系电话</th>
-                                    <th>电子邮箱</th>
-                                    <th>状态</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentItems.map(teacher => (
-                                    <tr key={teacher.id}>
-                                        <td>{teacher.name}</td>
-                                        <td>{teacher.gender}</td>
-                                        <td>{teacher.title}</td>
-                                        <td>{teacher.department}</td>
-                                        <td>{teacher.phone}</td>
-                                        <td>{teacher.email}</td>
-                                        <td>
-                                            <div className={`badge ${teacher.status === '在职' ? 'badge-success' : 'badge-warning'}`}>
-                                                {teacher.status}
-                                            </div>
-                                        </td>
-                                        <td className="space-x-1">
-                                            <button className="btn btn-xs btn-primary" title="查看">
-                                                <PreviewOpen theme="outline" size="16" />
-                                            </button>
-                                            <button className="btn btn-xs btn-warning" title="编辑">
-                                                <EditTwo theme="outline" size="16" />
-                                            </button>
-                                            <button className="btn btn-xs btn-error" title="删除">
-                                                <Delete theme="outline" size="16" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {/* 移动分页控制到卡片外部 */}
-            <div className="flex justify-center">
-                <div className="join">
-                    <button
-                        className="btn btn-sm join-item"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        上一页
-                    </button>
-
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                    <div className="flex gap-2">
                         <button
-                            key={number}
-                            className={`join-item btn btn-sm ${currentPage === number ? 'btn-active' : ''}`}
-                            onClick={() => handlePageChange(number)}
+                            className="btn btn-outline btn-info flex items-center gap-1"
+                            onClick={() => setShowStats(!showStats)}
                         >
-                            {number}
+                            <ChartGraph theme="outline" size="18" />
+                            {showStats ? "隐藏统计" : "显示统计"}
                         </button>
-                    ))}
 
-                    <button
-                        className="btn btn-sm join-item"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        下一页
-                    </button>
+                        <div className="relative">
+                            <input
+                                ref={inputFocus}
+                                type="text"
+                                placeholder="搜索教师..."
+                                className="input input-bordered pr-10"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setCurrentPage(1); // 重置页码
+                                }}
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Search theme="outline" size="18" />
+                                <kbd className="hidden sm:inline kbd kbd-sm ml-1">Ctrl</kbd>
+                                <kbd className="hidden sm:inline kbd kbd-sm">K</kbd>
+                            </div>
+                        </div>
 
-                    <select
-                        className="select select-sm join-item border-l-0"
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value));
-                            setCurrentPage(1); // 重置页码
-                        }}
-                    >
-                        <option value={5}>5条/页</option>
-                        <option value={10}>10条/页</option>
-                        <option value={15}>15条/页</option>
-                        <option value={20}>20条/页</option>
-                        <option value={50}>50条/页</option>
-                    </select>
+                        <button className="btn btn-primary flex items-center gap-1">
+                            <AddOne theme="outline" size="18" />
+                            <span className="hidden sm:inline">添加教师</span>
+                            <span className="sm:hidden">添加</span>
+                        </button>
+                    </div>
+                </div>
 
-                    <button
-                        className={`btn btn-sm join-item ${isDescending ? 'btn-active' : ''}`}
-                        onClick={() => setIsDescending(!isDescending)}
-                        title={isDescending ? "当前为降序" : "当前为升序"}
-                    >
-                        {isDescending ? "↓" : "↑"}
-                    </button>
+                {/* 统计信息卡片 */}
+                {showStats && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="card bg-base-100 shadow-md">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">教师总数</h3>
+                                <p className="text-3xl font-bold text-primary">{teacherStats.total}</p>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow-md">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">职称分布</h3>
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                    <div>
+                                        <div className="badge badge-primary">{teacherStats.byTitle.professor}</div>
+                                        <p className="text-sm mt-1">教授</p>
+                                    </div>
+                                    <div>
+                                        <div className="badge badge-secondary">{teacherStats.byTitle.associateProf}</div>
+                                        <p className="text-sm mt-1">副教授</p>
+                                    </div>
+                                    <div>
+                                        <div className="badge badge-accent">{teacherStats.byTitle.lecturer}</div>
+                                        <p className="text-sm mt-1">讲师</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow-md">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">院系分布</h3>
+                                <div className="space-y-1">
+                                    {Object.entries(teacherStats.byDepartment).map(([dept, count]) => (
+                                        <div key={dept} className="flex justify-between">
+                                            <span>{dept}:</span>
+                                            <span className="font-semibold">{count}人</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow-md">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">状态分布</h3>
+                                <div className="grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <div className="radial-progress text-success" style={{"--value": (teacherStats.byStatus.active / teacherStats.total) * 100} as any}>
+                                            {teacherStats.byStatus.active}
+                                        </div>
+                                        <p className="text-sm mt-2">在职</p>
+                                    </div>
+                                    <div>
+                                        <div className="radial-progress text-warning" style={{"--value": (teacherStats.byStatus.onLeave / teacherStats.total) * 100} as any}>
+                                            {teacherStats.byStatus.onLeave}
+                                        </div>
+                                        <p className="text-sm mt-2">休假</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="card bg-base-100 shadow-md overflow-hidden">
+                    <div className="card-body p-0">
+                        <div className="overflow-x-auto overflow-hidden">
+                            <table className="table table-zebra">
+                                <thead className="bg-base-200">
+                                    <tr>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>职称</th>
+                                        <th>所属院系</th>
+                                        <th>联系电话</th>
+                                        <th>电子邮箱</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentItems.map(teacher => (
+                                        <tr key={teacher.id}>
+                                            <td>{teacher.name}</td>
+                                            <td>{teacher.gender}</td>
+                                            <td>{teacher.title}</td>
+                                            <td>{teacher.department}</td>
+                                            <td>{teacher.phone}</td>
+                                            <td>{teacher.email}</td>
+                                            <td>
+                                                <div className={`badge ${teacher.status === '在职' ? 'badge-success' : 'badge-warning'}`}>
+                                                    {teacher.status}
+                                                </div>
+                                            </td>
+                                            <td className="space-x-1">
+                                                <button className="btn btn-xs btn-primary" title="查看">
+                                                    <PreviewOpen theme="outline" size="16" />
+                                                </button>
+                                                <button className="btn btn-xs btn-warning" title="编辑">
+                                                    <EditTwo theme="outline" size="16" />
+                                                </button>
+                                                <button className="btn btn-xs btn-error" title="删除">
+                                                    <Delete theme="outline" size="16" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-center">
+                    <div className={"join join-horizontal"}>
+                        <button className="transition shadow btn btn-sm join-item border"
+                                onClick={() => setSearchRequest({ ...searchRequest, page: userList.current - 1 })}
+                                disabled={userList.current === 1}>
+                            上一页
+                        </button>
+                        {getPageInfo()}
+                        <button className="transition shadow btn btn-sm join-item border"
+                                onClick={() => setSearchRequest({ ...searchRequest, page: userList.current + 1 })}
+                                disabled={userList.current === Math.ceil(userList.total / userList.size)}>
+                            下一页
+                        </button>
+                        <select className="join-item transition select select-sm mx-1 border-l-0"
+                                value={searchRequest.size}
+                                onChange={(e) => setSearchRequest({ ...searchRequest, size: Number(e.target.value) })}>
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={30}>30</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
+        {/* 删除用户对话框 */}
+        <AcademicDeleteTeacherDialog
+            show={dialogDelete}
+            emit={setDialogDelete}
+            userUuid={deleteTeacherUuid}
+            onDeletedSuccess={refreshTeacherList}
+        />
+        <AdminAddTeacherDialog
+            show={dialogAdd}
+            emit={setDialogAdd}
+            onAddSuccess={refreshTeacherList}
+        />
+
+        <AcademicEditTeacherDialog
+            show={dialogEdit}
+            emit={setDialogEdit}
+            userUuid={editTeacherUuid}
+            defaultData={editTeacherData}
+            onEditSuccess={refreshTeacherList}
+        />
+    </>
     );
 }
