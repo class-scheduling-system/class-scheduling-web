@@ -42,6 +42,7 @@ import {LabelComponent} from "../../components/label_component.tsx";
 import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {AdminBuildingAddDialog} from "../../components/admin/building/admin_building_add_dialog.tsx";
+import {AdminBuildingDeleteDialog} from "../../components/admin/building/admin_building_delete_dialog.tsx";
 
 /**
  * # AdminBuilding
@@ -60,22 +61,25 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
     const inputFocus = useRef<HTMLInputElement | null>(null);
 
-    const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({
-        records: new Array(5).fill({}) as BuildingEntity[],
-    } as PageEntity<BuildingEntity>);
+    const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({} as PageEntity<BuildingEntity>);
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
         page: 1,
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
-    const [search, setSearch] = useState<string>("");
+    const [search, setSearch] = useState<string>();
     const [loading, setLoading] = useState(true);
+    const [building, setBuilding] = useState<BuildingEntity>({} as BuildingEntity);
+
     const [dialogAdd, setDialogAdd] = useState<boolean>(false);
+    const [dialogDelete, setDialogDelete] = useState<boolean>(false);
+    const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
+    // 快捷键映射查询
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (getCurrent.system) {
@@ -98,6 +102,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         };
     }, [getCurrent.system]);
 
+    // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
             const getResp = await GetBuildingListAPI(searchRequest);
@@ -109,8 +114,24 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                 message.error(getResp?.message ?? "获取教学楼列表失败");
             }
         };
-        func().then();
-    }, [dispatch, searchRequest]);
+        if (refreshOperate) {
+            func().then();
+            setRefreshOperate(false);
+        }
+    }, [dispatch, searchRequest, refreshOperate]);
+
+    // 搜索防抖动(500毫秒，输入字符串）
+    useEffect(() => {
+        setLoading(true);
+        if (search != undefined) {
+            console.log(search);
+            const timer = setTimeout(() => {
+                setSearchRequest({...searchRequest, keyword: search});
+                setRefreshOperate(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [search]);
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
@@ -148,14 +169,18 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         return pageInfo;
     }
 
-    // 搜索防抖动(500毫秒，输入字符串）
-    useEffect(() => {
-        setLoading(true);
-        const timer = setTimeout(() => {
-            setSearchRequest({...searchRequest, keyword: search});
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [search]);
+    /**
+     * # selectedBuildingDelete
+     * > 该函数用于设置将要被删除的建筑实体，并打开确认删除对话框。
+     *
+     * @param {BuildingEntity} building - 将要被删除的建筑实体。
+     * @returns {void}
+     * @throws {TypeError} 如果传入的参数不是 BuildingEntity 类型，则抛出此异常。
+     */
+    function selectedBuildingDelete(building: BuildingEntity): void {
+        setBuilding(building);
+        setDialogDelete(true);
+    }
 
     return (
         <>
@@ -212,8 +237,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                             <span>编辑</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => {
-                                                            }}
+                                                            onClick={() => selectedBuildingDelete(building)}
                                                             className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                             <Delete theme="outline" size="12"/>
                                                             <span>删除</span>
@@ -230,26 +254,35 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                     <div className="flex justify-center">
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current - 1})}
+                                    onClick={() => {
+                                        setSearchRequest({...searchRequest, page: buildingList.current - 1});
+                                        setRefreshOperate(true);
+                                    }}
                                     disabled={buildingList.current === 1}>
                                 上一页
                             </button>
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({...searchRequest, page: buildingList.current + 1})}
-                                    disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size)}>
+                                    onClick={() => {
+                                        setSearchRequest({...searchRequest, page: buildingList.current + 1});
+                                        setRefreshOperate(true);
+                                    }}
+                                    disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size) || Math.ceil(buildingList.total / buildingList.size) === 0}>
                                 下一页
                             </button>
                             <select className="join-item transition select select-sm mx-1 border-l-0"
                                     value={searchRequest.size}
-                                    onChange={(e) => setSearchRequest({...searchRequest, size: Number(e.target.value)})}>
+                                    onChange={(e) => {
+                                        setSearchRequest({...searchRequest, size: Number(e.target.value)});
+                                        setRefreshOperate(true);
+                                    }}>
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
                                 <option value={15}>15</option>
                                 <option value={20}>20</option>
-                                <option value={20}>30</option>
-                                <option value={20}>50</option>
-                                <option value={20}>100</option>
+                                <option value={30}>30</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
                             </select>
                         </div>
                     </div>
@@ -284,7 +317,8 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                     </div>
                 </CardComponent>
             </div>
-            <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd}/>
+            <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd} requestRefresh={setRefreshOperate}/>
+            <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete} requestRefresh={setRefreshOperate}/>
         </>
     );
 }

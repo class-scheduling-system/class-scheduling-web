@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import { Delete, DocDetail, Editor } from "@icon-park/react";
-import { AdminAddUserDialog } from "../../components/admin/admin_user_add_dialog.tsx";
-import { AdminEditUserDialog } from "../../components/admin/admin_user_edit_dialog.tsx";
-import { AdminDeleteUserDialog } from "../../components/admin/admin_user_delete_dialog.tsx";
+import { DocDetail} from "@icon-park/react";
 import {AdminRolePermissionDialog} from "../../components/admin/admin_role_permission.tsx";
 
 interface User {

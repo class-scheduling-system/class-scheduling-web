@@ -71,7 +71,27 @@ const AddBuildingAPI = async (data: BuildingAddDTO): Promise<BaseResponse<null> 
     );
 }
 
+/**
+ # DeleteBuildingAPI
+ > 该函数用于通过API从系统中删除指定的建筑信息。它接受一个包含待删除建筑唯一标识符的字符串，并将其发送到指定的后端接口，以完成数据的删除操作。
+
+ @param {string} data - 包含待删除建筑唯一标识符的字符串。
+
+ @returns {Promise<BaseResponse<null> | undefined>} - 如果操作成功，则返回一个BaseResponse对象，其中不包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const DeleteBuildingAPI = async (data: string): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.DELETE,
+        "/api/v1/building/",
+        null,
+        null,
+        data,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
 export {
     GetBuildingListAPI,
-    AddBuildingAPI
+    AddBuildingAPI,
+    DeleteBuildingAPI
 }

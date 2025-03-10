@@ -44,7 +44,7 @@ export type PageSearchDTO = {
     /**
      * 可选的搜索关键词
      */
-    keyword?: string;
+    search?: string;
     /**
      * 当前页码，默认值为 1
      */
