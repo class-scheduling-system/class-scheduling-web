@@ -43,7 +43,7 @@ import {PageEntity} from "../models/entity/page_entity.ts";
 const GetRoleListAPI = async (data: PageSearchDTO):Promise<BaseResponse<PageEntity<RoleEntity>>  | undefined> => {
     return BaseApi<PageEntity<RoleEntity>>(
         MethodType.GET,
-        "/api/v1/role/list",
+        "/api/v1/role/page",
         null,
         data,
         null,
