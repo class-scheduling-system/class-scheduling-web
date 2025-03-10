@@ -38,7 +38,7 @@ export function AcademicSchedule({site}: Readonly<{
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isDescending, setIsDescending] = useState(true);
     const [activeTab, setActiveTab] = useState("schedule");
-    const inputFocus = useRef<HTMLInputElement | null>(null);
+    const inputFocus = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -95,7 +95,7 @@ export function AcademicSchedule({site}: Readonly<{
           );
 
     // 使用排序方向重新排序
-    let sortedData = [...filteredData];
+    const sortedData = [...filteredData];
     if (isDescending) {
         sortedData.sort((a, b) => b.id - a.id); // 降序
     } else {
@@ -190,7 +190,7 @@ export function AcademicSchedule({site}: Readonly<{
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentItems.map((schedule) => (
+                                    {currentItems.map((schedule: any) => (
                                         <tr key={schedule.id}>
                                             <td>{schedule.course}</td>
                                             <td>{schedule.teacher}</td>

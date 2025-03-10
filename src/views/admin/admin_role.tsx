@@ -140,7 +140,7 @@ export function AdminRole({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
 
     return (
         <>
-            <div className={"grid grid-cols-10 gap-4"}>
+            <div className={"grid grid-cols-10 gap-4 pb-4"}>
                 <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) =>

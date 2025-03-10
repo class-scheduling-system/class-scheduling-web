@@ -26,22 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-    UserOutlined,
-    TeamOutlined,
-    BuildOutlined,
-    SettingOutlined,
-    BookOutlined
-} from '@ant-design/icons';
-import { SiteInfoEntity } from '../../models/entity/site_info_entity';
-import { GetUserListAPI } from '../../apis/user_api';
-import { GetBuildingListAPI } from '../../apis/building_api';
-import { GetRoleListAPI } from '../../apis/role_api';
+import {useEffect, useState} from 'react';
+import {SiteInfoEntity} from '../../models/entity/site_info_entity';
+import {BuildingTwo, People, Setting, User} from "@icon-park/react";
+import {GetUserListAPI} from '../../apis/user_api';
+import {GetBuildingListAPI} from '../../apis/building_api';
+import {GetRoleListAPI} from '../../apis/role_api';
+import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
+import {useSelector} from "react-redux";
 
 export function AdminDashboard({ site }: Readonly<{
     site: SiteInfoEntity
 }>) {
+    const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [summary, setSummary] = useState({
         userCount: 0,
@@ -71,14 +68,25 @@ export function AdminDashboard({ site }: Readonly<{
 
             setSummary({
                 userCount: userResp?.data?.total || 0,
-                activeUserCount: userResp?.data?.records.filter(u => u.user.status).length || 0,
+                activeUserCount: userResp?.data?.records.filter(u => u.user!.status).length || 0,
                 buildingCount: buildingResp?.data?.total || 0,
                 roleCount: roleResp?.data?.total || 0
             });
         };
 
-        fetchSummaryData();
+        fetchSummaryData().then();
     }, []);
+
+    // 根据时间获取问候语
+    const getGreeting = () => {
+        const hour = currentTime.getHours();
+        if (hour < 6) return '深夜了，注意休息';
+        if (hour < 9) return '早上好';
+        if (hour < 12) return '上午好';
+        if (hour < 14) return '中午好';
+        if (hour < 18) return '下午好';
+        return '晚上好';
+    };
 
     const statistics = {
         systemLogs: [
@@ -96,11 +104,32 @@ export function AdminDashboard({ site }: Readonly<{
     return (
         <div className="space-y-6 w-full">
             {/* 顶部欢迎信息和时间 */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl">
-                <div className="card-body">
-                    <h2 className="card-title text-2xl">欢迎使用管理系统</h2>
-                    <p>当前时间: {currentTime.toLocaleTimeString()} {currentTime.toLocaleDateString()}</p>
-                    <p>系统运行正常</p>
+            <div className="bg-gradient-to-r from-primary/90 to-secondary/90 rounded-xl shadow-lg overflow-hidden">
+                <div className="p-6 flex items-center justify-between">
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-white">
+                            {getGreeting()}，{getUser.user?.name ?? '管理员'}
+                        </h2>
+                        <p className="text-white/80 text-sm">
+                            {getUser.user?.email ? `${getUser.user.email} | ` : ''}祝你今天工作顺利，系统运行状态良好
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-3xl font-bold text-white">
+                            {currentTime.toLocaleTimeString('zh-CN', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            })}
+                        </div>
+                        <div className="text-sm text-white/80">
+                            {currentTime.toLocaleDateString('zh-CN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -113,13 +142,14 @@ export function AdminDashboard({ site }: Readonly<{
                                 <h2 className="text-xl font-semibold">用户总数</h2>
                                 <p className="text-3xl font-bold text-primary mt-2">{summary.userCount}</p>
                             </div>
-                            <div className="bg-primary-content p-3 rounded-lg">
-                                <UserOutlined className="text-2xl text-primary" />
+                            <div className="bg-blue-100 p-3 rounded-lg">
+                                <User theme="outline" size="24" className="text-blue-500" />
                             </div>
                         </div>
                     </div>
                 </div>
 
+                {/* 其他卡片保持不变 */}
                 <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
                     <div className="card-body p-4">
                         <div className="flex justify-between items-center">
@@ -127,8 +157,8 @@ export function AdminDashboard({ site }: Readonly<{
                                 <h2 className="text-xl font-semibold">活跃用户</h2>
                                 <p className="text-3xl font-bold text-secondary mt-2">{summary.activeUserCount}</p>
                             </div>
-                            <div className="bg-secondary-content p-3 rounded-lg">
-                                <TeamOutlined className="text-2xl text-secondary" />
+                            <div className="bg-green-100 p-3 rounded-lg">
+                                <People theme="outline" size="24" className="text-green-500" />
                             </div>
                         </div>
                     </div>
@@ -141,8 +171,8 @@ export function AdminDashboard({ site }: Readonly<{
                                 <h2 className="text-xl font-semibold">建筑数量</h2>
                                 <p className="text-3xl font-bold text-accent mt-2">{summary.buildingCount}</p>
                             </div>
-                            <div className="bg-accent-content p-3 rounded-lg">
-                                <BuildOutlined className="text-2xl text-accent" />
+                            <div className="bg-purple-100 p-3 rounded-lg">
+                                <BuildingTwo theme="outline" size="24" className="text-purple-500" />
                             </div>
                         </div>
                     </div>
@@ -155,8 +185,8 @@ export function AdminDashboard({ site }: Readonly<{
                                 <h2 className="text-xl font-semibold">角色数量</h2>
                                 <p className="text-3xl font-bold text-info mt-2">{summary.roleCount}</p>
                             </div>
-                            <div className="bg-info-content p-3 rounded-lg">
-                                <SettingOutlined className="text-2xl text-info" />
+                            <div className="bg-orange-100 p-3 rounded-lg">
+                                <Setting theme="outline" size="24" className="text-orange-500" />
                             </div>
                         </div>
                     </div>
@@ -166,10 +196,7 @@ export function AdminDashboard({ site }: Readonly<{
             {/* 系统日志 */}
             <div className="card bg-base-100 shadow-md overflow-hidden">
                 <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">
-                        <BookOutlined />
-                        系统日志
-                    </h2>
+                    <h2 className="card-title flex items-center gap-2">系统日志</h2>
                     <div className="overflow-x-auto overflow-hidden">
                         <table className="table table-zebra">
                             <thead>
@@ -196,10 +223,7 @@ export function AdminDashboard({ site }: Readonly<{
             {/* 最近操作 */}
             <div className="card bg-base-100 shadow-md overflow-hidden">
                 <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">
-                        <SettingOutlined />
-                        最近操作
-                    </h2>
+                    <h2 className="card-title flex items-center gap-2">最近操作</h2>
                     <div className="overflow-x-auto overflow-hidden">
                         <table className="table table-zebra">
                             <thead>

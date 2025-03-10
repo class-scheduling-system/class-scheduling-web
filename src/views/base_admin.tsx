@@ -214,7 +214,7 @@ export function BaseAdmin(): JSX.Element {
                         </div>
                     </div>
                 </animated.div>
-                <animated.div style={bottomFade} className="mb-6 pt-6 px-6 flex-1 overflow-auto overflow-y-scroll flex">
+                <animated.div style={bottomFade} className="pt-6 px-6 flex-1 overflow-auto overflow-y-scroll flex">
                     {transitions((style, item) => (
                         <animated.div style={{...style, flex: 1}}>
                             <Routes location={item}>
