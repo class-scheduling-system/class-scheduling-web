@@ -26,31 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
+import {ListOfCampusEntity} from "../models/entity/list_of_campus_entity.ts";
+import {BaseResponse} from "../models/base_response.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+
 /**
- * # PageSearchDTO
+ * # GetCampusListAPI
+ * > 该函数用于从服务器获取校园列表。通过发送一个GET请求到指定的API端点，返回校园列表数据。
  *
- * > 用于页面搜索请求的数据传输对象，包含了排序方式、关键词、页码以及每页显示条目数等信息。
- *
- * @param {boolean} is_desc - 是否按降序排列，默认值为 true
- * @param {string} [keyword] - 可选的搜索关键词
- * @param {number} page - 当前页码，默认值为 1
- * @param {number} size - 每页显示的条目数，默认值为 20，最大值为 200
+ * @returns {Promise<BaseResponse<ListOfCampusEntity[]> | undefined>} - 返回包含校园列表的BaseResponse对象或undefined。
+ * @throws {Error} - 如果请求过程中出现网络错误或者服务器响应异常时抛出。
  */
-export type PageSearchDTO = {
-    /**
-     * 是否按降序排列，默认值为 true
-     */
-    is_desc: boolean;
-    /**
-     * 可选的搜索关键词
-     */
-    keyword?: string;
-    /**
-     * 当前页码，默认值为 1
-     */
-    page: number;
-    /**
-     * 每页显示的条目数，默认值为 20，最大值为 200
-     */
-    size: number;
+const GetCampusListAPI = async (): Promise<BaseResponse<ListOfCampusEntity[]> | undefined> => {
+    return BaseApi<ListOfCampusEntity[]>(
+        MethodType.GET,
+        "/api/v1/campus/list",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+export {
+    GetCampusListAPI
 }
