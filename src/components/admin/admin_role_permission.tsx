@@ -130,7 +130,6 @@ export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
                                     <th>#</th>
                                     <th>权限名称</th>
                                     <th>权限描述</th>
-                                    <th>状态</th>
                                 </tr>
                                 </thead>
                                 <tbody>
