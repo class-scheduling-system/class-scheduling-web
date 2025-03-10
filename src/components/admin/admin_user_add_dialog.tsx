@@ -50,7 +50,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
     } as PageSearchDTO);
 
     // 根据角色名称判断教务角色：假设角色名称包含"教务"的即为教务角色
-    const teachingRole = roleList.find(role => role.role_name.includes("教务"));
+    const teachingRole = roleList?.find(role => role?.role_name?.includes("教务"));
 
     useEffect(() => {
         setIsModalOpen(show);
@@ -240,11 +240,11 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                             <option value="" disabled>
                                 请选择角色
                             </option>
-                            {roleList.map((role) => (
+                            {roleList?.map((role) => (
                                 <option key={role.role_uuid} value={role.role_uuid}>
                                     {role.role_name}
                                 </option>
-                            ))}
+                            ))|| []}
                         </select>
                     </fieldset>
 
