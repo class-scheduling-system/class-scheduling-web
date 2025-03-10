@@ -1,31 +1,3 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2022-NOW(至今) 锋楪技术团队
- * Author: 锋楪技术团队 (https://www.frontleaves.com)
- *
- * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
- * --------------------------------------------------------------------------------
- * 许可证声明：
- *
- * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
- *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
- * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
- * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
- * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
- *
- * 使用本软件即表示您了解此声明并同意其条款。
- *
- * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- * 免责声明：
- *
- * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
- * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
- * --------------------------------------------------------------------------------
- */
-
 import {
     AddUser,
     CheckOne,
@@ -41,11 +13,12 @@ import {
 } from "@icon-park/react";
 import * as React from "react";
 import { JSX, useEffect, useState } from "react";
-import { message, Modal } from "antd";
+import { message, Modal, Transfer } from "antd";
 import { AddUserAPI } from "../../apis/user_api.ts";
 import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
 import { RoleEntity } from "../../models/entity/role_entity.ts";
 import { GetRoleListAPI } from "../../apis/role_api.ts";
+import { GetPermissionListAPI } from "../../apis/permission_api.ts";
 import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 
 /**
@@ -68,6 +41,8 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
+    const [permissionList, setPermissionList] = useState<any[]>([]);
+    const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [searchRequest] = useState<PageSearchDTO>({
         page: 1,
         size: 20,
@@ -104,9 +79,36 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         fetchRoles().then();
     }, [searchRequest]);
 
+    // 获取权限列表
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            try {
+                const response = await GetPermissionListAPI();
+                if (response?.output === "Success") {
+                    console.log("获取权限列表成功:", response.data);
+                    // 转换权限列表为Transfer需要的格式
+                    const permissionData = response.data.map(item => ({
+                        key: item.permission_key,
+                        title: item.name,
+                        description: item.permission_key,
+                        disabled: false
+                    }));
+                    setPermissionList(permissionData);
+                } else {
+                    message.error(response?.error_message ?? "获取权限列表失败");
+                }
+            } catch (error) {
+                console.error("权限列表请求失败:", error);
+                message.error("获取权限列表失败");
+            }
+        };
+        fetchPermissions().then();
+    }, []);
+
     // 关闭对话框
     const handleClose = () => {
         setData({} as UserAddDTO);
+        setTargetKeys([]);
         setIsModalOpen(false);
     };
 
@@ -115,7 +117,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         event.preventDefault();
 
         // 根据角色判断是否需要保留 department、type
-        const payload = { ...data } as UserAddDTO;
+        const payload = { ...data, permission: targetKeys } as UserAddDTO;
         if (payload.role_uuid !== (teachingRole ? teachingRole.role_uuid : "")) {
             // 如果选中的角色不是教务角色，则移除部门和权限类型字段
             payload.department = undefined;
@@ -137,10 +139,35 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         }
     }
 
+    // 穿梭框变更处理
+    const handleTransferChange = (newTargetKeys: string[]) => {
+        setTargetKeys(newTargetKeys);
+    };
+
+    // 穿梭框过滤函数
+    const filterOption = (inputValue: string, option: any) =>
+        option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
+        option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
+
+    // 穿梭框渲染项
+    const renderItem = (item: any) => {
+        const customLabel = (
+            <div className="custom-item">
+                <span className="custom-item-title">{item.title}</span>
+                <span className="custom-item-description">{item.description}</span>
+            </div>
+        );
+        return {
+            label: customLabel,
+            value: item.title,
+        };
+    };
+
     return (
         <Modal
             open={isModalOpen}
             onCancel={handleClose}
+            width={700}
             footer={
                 <div className="modal-action">
                     <div className={"flex space-x-3"}>
@@ -267,62 +294,25 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                         />
                     </fieldset>
 
-                    {/* 权限选择（多选按钮，可为空） */}
+                    {/* 权限选择（穿梭框） */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
                             <Permissions theme="outline" size="16" fill="#333" />
                             <span>权限</span>
                         </legend>
-                        <div className="flex space-x-4">
-                            <label className="flex items-center space-x-1">
-                                <input
-                                    type="checkbox"
-                                    checked={data.permission?.includes("user") || false}
-                                    onChange={(e) => {
-                                        let newPermissions = data.permission ? [...data.permission] : [];
-                                        if (e.target.checked) {
-                                            newPermissions.push("user");
-                                        } else {
-                                            newPermissions = newPermissions.filter(item => item !== "user");
-                                        }
-                                        setData({ ...data, permission: newPermissions });
-                                    }}
-                                />
-                                <span>user</span>
-                            </label>
-                            <label className="flex items-center space-x-1">
-                                <input
-                                    type="checkbox"
-                                    checked={data.permission?.includes("admin") || false}
-                                    onChange={(e) => {
-                                        let newPermissions = data.permission ? [...data.permission] : [];
-                                        if (e.target.checked) {
-                                            newPermissions.push("admin");
-                                        } else {
-                                            newPermissions = newPermissions.filter(item => item !== "admin");
-                                        }
-                                        setData({ ...data, permission: newPermissions });
-                                    }}
-                                />
-                                <span>admin</span>
-                            </label>
-                            <label className="flex items-center space-x-1">
-                                <input
-                                    type="checkbox"
-                                    checked={data.permission?.includes("super") || false}
-                                    onChange={(e) => {
-                                        let newPermissions = data.permission ? [...data.permission] : [];
-                                        if (e.target.checked) {
-                                            newPermissions.push("super");
-                                        } else {
-                                            newPermissions = newPermissions.filter(item => item !== "super");
-                                        }
-                                        setData({ ...data, permission: newPermissions });
-                                    }}
-                                />
-                                <span>super</span>
-                            </label>
-                        </div>
+                        <Transfer
+                            dataSource={permissionList}
+                            titles={['可选权限', '已选权限']}
+                            targetKeys={targetKeys}
+                            onChange={handleTransferChange}
+                            filterOption={filterOption}
+                            render={item => item.title}
+                            showSearch
+                            listStyle={{
+                                width: 280,
+                                height: 300,
+                            }}
+                        />
                     </fieldset>
 
                     {/* 仅当角色为教务时才显示部门和权限类型 */}
@@ -373,6 +363,5 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                 </form>
             </div>
         </Modal>
-
     );
 }
