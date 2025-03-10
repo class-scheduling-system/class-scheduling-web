@@ -39,6 +39,7 @@ import {message} from "antd";
 import {GetCurrentUserAPI} from "./apis/user_api.ts";
 import {setUserInfo} from "./stores/user_store.ts";
 import {PageNotFound} from "./views/404/page_not_found.tsx";
+import {BaseAcademic} from "./views/base_academic.tsx";
 
 /**
  * # Index
@@ -81,6 +82,9 @@ export function Index(): JSX.Element {
                             case "管理员":
                                 navigate("/admin/dashboard");
                                 break;
+                            case "教务":
+                                navigate("/academic/dashboard");
+                                break;
                             case "老师":
                                 navigate("/teacher/dashboard");
                                 break;
@@ -103,6 +107,7 @@ export function Index(): JSX.Element {
             <Route path={"/init"} element={<BaseInit/>}/>
             <Route path={"/auth/*"} element={<BaseAuth/>}/>
             <Route path={"/admin/*"} element={<BaseAdmin/>}/>
+            <Route path={"/academic/*"} element={<BaseAcademic/>}/>
             <Route path={"/*"} element={<PageNotFound/>}/>
         </Routes>
     );
