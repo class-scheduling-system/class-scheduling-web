@@ -53,19 +53,17 @@ export function AdminNavLinkComponent({title, icon, path}: Readonly<{
      */
     function selectedRoute(route: string): string {
         if (location.pathname === route) {
-            return "bg-primary-content text-white shadow-md";
+            return "bg-primary text-white border-l-4 border-primary-focus";
         } else {
-            return "hover:bg-base-300 hover:shadow-md active:text-primary-content active:bg-primary-content active:shadow-md";
+            return "hover:bg-primary-content hover:text-primary hover:border-l-4 hover:border-primary";
         }
     }
 
     return (
         <Link to={path}
-              className={`transition rounded-lg p-2 ${selectedRoute(path)}`}>
-            <div className={"flex space-x-2 items-center"}>
-                {icon}
-                <span>{title}</span>
-            </div>
+              className={`transition-all duration-200 rounded-r-lg p-2 flex space-x-2 items-center ${selectedRoute(path)}`}>
+            <div className="text-lg">{icon}</div>
+            <span className="font-medium">{title}</span>
         </Link>
     );
 }
