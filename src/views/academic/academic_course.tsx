@@ -106,21 +106,24 @@ export function AcademicCourse({site}: Readonly<{
 
                 <div className="flex gap-2">
                     <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                            <Search theme="outline" size="18" />
+                        </div>
                         <input
                             ref={inputFocus}
                             type="text"
                             placeholder="搜索课程..."
-                            className="input input-bordered pr-10"
+                            className="input input-bordered pl-10 pr-16"
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1); // 重置页码
                             }}
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Search theme="outline" size="18" />
-                            <kbd className="hidden sm:inline kbd kbd-sm ml-1">Ctrl</kbd>
-                            <kbd className="hidden sm:inline kbd kbd-sm">K</kbd>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                            <kbd className="kbd kbd-sm">Ctrl</kbd>
+                            <span className="mx-1">+</span>
+                            <kbd className="kbd kbd-sm">K</kbd>
                         </div>
                     </div>
 

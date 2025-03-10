@@ -1,20 +1,48 @@
-import { useState, useEffect, JSX, useRef } from "react";
-import {Add, Correct, Delete, Error, Newlybuild, Search, MoreApp} from "@icon-park/react";
-import { GetRoleListAPI } from "../../apis/role_api.ts";
-import { animated, useTransition } from "@react-spring/web";
-import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
-import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
-import { message } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
-import { PageEntity } from "../../models/entity/page_entity.ts";
-import { RoleEntity } from "../../models/entity/role_entity.ts"; // ① 引入 RoleEntity
-import { CardComponent } from "../../components/card_component.tsx";
-import { LabelComponent } from "../../components/label_component.tsx";
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2022-NOW(至今) 锋楪技术团队
+ * Author: 锋楪技术团队 (https://www.frontleaves.com)
+ *
+ * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
+ * --------------------------------------------------------------------------------
+ * 许可证声明：
+ *
+ * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
+ *
+ * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
+ * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
+ * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
+ *
+ * 使用本软件即表示您了解此声明并同意其条款。
+ *
+ * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
+ * https://opensource.org/licenses/MIT
+ * --------------------------------------------------------------------------------
+ * 免责声明：
+ *
+ * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
+ * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
+ * --------------------------------------------------------------------------------
+ */
+
+import {JSX, useEffect, useRef, useState} from "react";
+import {Correct, Error, MoreApp, Newlybuild, Search} from "@icon-park/react";
+import {GetRoleListAPI} from "../../apis/role_api.ts";
+import {animated, useTransition} from "@react-spring/web";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {message} from "antd";
+import {useDispatch, useSelector} from "react-redux";
+import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
+import {PageEntity} from "../../models/entity/page_entity.ts";
+import {RoleEntity} from "../../models/entity/role_entity.ts"; // ① 引入 RoleEntity
+import {CardComponent} from "../../components/card_component.tsx";
+import {LabelComponent} from "../../components/label_component.tsx";
 import cardImage from "../../assets/images/card-background.webp";
 import {AdminRolePermissionDialog} from "../../components/admin/admin_role_permission.tsx";
 
-export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+export function AdminRole({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -74,9 +102,9 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     }, [dispatch, searchRequest]);
 
     const transitionSearch = useTransition(loading ?? 0, {
-        from: { opacity: 0 },
-        enter: { opacity: 1 },
-        config: { duration: 100 },
+        from: {opacity: 0},
+        enter: {opacity: 1},
+        config: {duration: 100},
     });
 
     function getPageInfo(): JSX.Element[] {
@@ -91,7 +119,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             } else {
                 pageInfo.push(
                     <button key={i}
-                            onClick={() => setSearchRequest({ ...searchRequest, page: i + 1 })}
+                            onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
                             className="transition shadow btn btn-sm join-item border">
                         {i + 1}
                     </button>
@@ -105,7 +133,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            setSearchRequest({ ...searchRequest, keyword: search });
+            setSearchRequest({...searchRequest, keyword: search});
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -113,7 +141,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     return (
         <>
             <div className={"grid grid-cols-10 gap-4"}>
-                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-104px)]"}>
+                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) =>
                             item ? (
@@ -147,7 +175,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             style={"badge-outline"}
                                                             type={"success"}
                                                             text={"启用"}
-                                                            icon={<Correct theme="outline" size="12" />}
+                                                            icon={<Correct theme="outline" size="12"/>}
                                                         />
                                                     ) : (
                                                         <LabelComponent
@@ -155,7 +183,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             style={"badge-outline"}
                                                             type={"error"}
                                                             text={"禁用"}
-                                                            icon={<Error theme="outline" size="12" />}
+                                                            icon={<Error theme="outline" size="12"/>}
                                                         />
                                                     )}
                                                 </td>
@@ -211,7 +239,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                 className="join-item transition select select-sm mx-1 border-l-0"
                                 value={searchRequest.size}
                                 onChange={(e) =>
-                                    setSearchRequest({ ...searchRequest, size: Number(e.target.value) })
+                                    setSearchRequest({...searchRequest, size: Number(e.target.value)})
                                 }
                             >
                                 <option value={5}>5</option>
@@ -226,7 +254,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     </div>
                 </div>
                 <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
-                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl" />
+                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                     <div className="p-4 flex flex-col gap-1">
                         <h2 className="text-xl font-bold">角色列表</h2>
                         <p className="text-base-content text-sm border-l-4 border-base-content ps-2">
@@ -236,7 +264,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     <div className="px-4 pb-4 flex flex-col gap-3">
                         <div>
                             <label className="input transition w-full">
-                                <Search theme="outline" size="12" />
+                                <Search theme="outline" size="12"/>
                                 <input
                                     ref={inputFocus}
                                     type="search"
@@ -250,7 +278,7 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                         </div>
                         <div className="w-full">
                             <button className="transition shadow btn btn-outline btn-secondary w-full">
-                                <Newlybuild theme="outline" size="16" />
+                                <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
                             </button>
                         </div>
