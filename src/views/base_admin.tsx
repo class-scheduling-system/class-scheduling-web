@@ -108,7 +108,7 @@ export function BaseAdmin(): JSX.Element {
         if (pathSegments.length > 1) {
             // 第一级：主要管理页面（如"用户管理"、"教学楼管理"等）
             const mainSection = pathSegments[1];
-            let mainTitle = '';
+            let mainTitle: string;
 
             switch (mainSection) {
                 case 'dashboard':
