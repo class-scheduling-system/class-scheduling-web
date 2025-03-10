@@ -27,30 +27,25 @@
  */
 
 /**
- * # PageSearchDTO
+ * 校区数据传输对象
+ * <p>
+ * 用于返回校区数据相关信息，包含校区主键、校区名称和校区编码。
+ * 该类主要用于在服务层与控制器层之间传递校区信息。
+ * </p>
  *
- * > 用于页面搜索请求的数据传输对象，包含了排序方式、关键词、页码以及每页显示条目数等信息。
- *
- * @param {boolean} is_desc - 是否按降序排列，默认值为 true
- * @param {string} [keyword] - 可选的搜索关键词
- * @param {number} page - 当前页码，默认值为 1
- * @param {number} size - 每页显示的条目数，默认值为 20，最大值为 200
+ * ListOfCampusDTO
  */
-export type PageSearchDTO = {
+export type ListOfCampusEntity = {
     /**
-     * 是否按降序排列，默认值为 true
+     * 校区编码
      */
-    is_desc: boolean;
+    campus_code: string;
     /**
-     * 可选的搜索关键词
+     * 校区名称
      */
-    keyword?: string;
+    campus_name: string;
     /**
-     * 当前页码，默认值为 1
+     * 校区主键
      */
-    page: number;
-    /**
-     * 每页显示的条目数，默认值为 20，最大值为 200
-     */
-    size: number;
+    campus_uuid: string;
 }

@@ -29,48 +29,34 @@
 import {JSX, useEffect} from "react";
 import {useSelector} from "react-redux";
 import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
-import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
-import {Route, Routes, useLocation, useNavigate} from "react-router";
-import {AdminDashboard} from "./admin/admin_dashboard.tsx";
-import {AdminUser} from "./admin/admin_user.tsx";
-import {AdminBuilding} from "./admin/admin_building.tsx";
+import {Link, Route, Routes, useLocation, useNavigate} from "react-router";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
-import {BuildingTwo, Dashboard, HomeTwo, System, User, UserPositioning} from "@icon-park/react";
-import {AdminRole} from "./admin/admin_role.tsx";
-
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
-import {Link} from "react-router";
 import {People} from "@icon-park/react";
+import {AcademicNavComponent} from "../components/academic/academic_nav_component.tsx";
+import {AcademicDashboard} from "./academic/academic_dashboard.tsx";
+import {AcademicClass} from "./academic/academic_class.tsx";
+import {AcademicCourse} from "./academic/academic_course.tsx";
+import {AcademicSchedule} from "./academic/academic_schedule.tsx";
+import {AcademicTeacher} from "./academic/academic_teacher.tsx";
 
 /**
- * 生成一个基础的控制台组件。
- * 该函数返回一个包含标题为"Base Console"的div元素。
- * @return {JSX.Element} 包含基础控制台标题的div元素
+ * 生成一个教务管理控制台组件。
+ * 该函数返回一个包含教务管理控制台的框架页面。
+ * @return {JSX.Element} 包含教务管理控制台的完整框架页面
  */
-export function BaseAdmin(): JSX.Element {
+export function BaseAcademic(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
     const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (location.pathname === "/admin") {
-            navigate("/admin/dashboard");
+        if (location.pathname === "/academic") {
+            navigate("/academic/dashboard");
         }
     }, [location.pathname, navigate]);
-
-    // 定义路由与面包屑标题及图标的映射关系
-    const breadcrumbMap: Record<string, { title: string; icon: JSX.Element }> = {
-        "/admin/dashboard": { title: "看板", icon: <Dashboard theme="outline" size="16" /> },
-        "/admin/user": { title: "用户管理", icon: <User theme="outline" size="16" /> },
-        "/admin/role": { title: "角色管理", icon: <UserPositioning theme="outline" size="16" /> },
-        "/admin/building": { title: "教学楼管理", icon: <BuildingTwo theme="outline" size="16" /> },
-        "/admin/system-info": { title: "系统信息", icon: <System theme="outline" size="16" /> },
-    };
-
-    // 根据当前路径获取对应的面包屑信息，如果没有匹配则默认显示首页
-    const currentBreadcrumb = breadcrumbMap[location.pathname] || { title: "首页", icon: <HomeTwo theme="outline" size="16" fill="#333" /> };
 
     // 设置路由切换动画
     const transitions = useTransition(location, {
@@ -121,7 +107,7 @@ export function BaseAdmin(): JSX.Element {
 
         // 从路径中提取面包屑项
         if (pathSegments.length > 1) {
-            // 第一级：主要管理页面（如"用户管理"、"教学楼管理"等）
+            // 第一级：主要管理页面（如"班级管理"、"课程管理"等）
             const mainSection = pathSegments[1];
             let mainTitle = '';
 
@@ -129,17 +115,23 @@ export function BaseAdmin(): JSX.Element {
                 case 'dashboard':
                     mainTitle = '看板';
                     break;
-                case 'user':
-                    mainTitle = '用户管理';
+                case 'class':
+                    mainTitle = '班级管理';
                     break;
-                case 'building':
-                    mainTitle = '教学楼管理';
+                case 'course':
+                    mainTitle = '课程管理';
                     break;
-                case 'role':
-                    mainTitle = '角色管理';
+                case 'schedule':
+                    mainTitle = '排课管理';
                     break;
-                case 'system-info':
-                    mainTitle = '系统信息';
+                case 'teacher':
+                    mainTitle = '教师管理';
+                    break;
+                case 'student':
+                    mainTitle = '学生管理';
+                    break;
+                case 'exam':
+                    mainTitle = '考试管理';
                     break;
                 default:
                     mainTitle = mainSection;
@@ -147,7 +139,7 @@ export function BaseAdmin(): JSX.Element {
 
             breadcrumbItems.push(
                 <li key={mainSection}>
-                    <Link to={`/admin/${mainSection}`}>{mainTitle}</Link>
+                    <Link to={`/academic/${mainSection}`}>{mainTitle}</Link>
                 </li>
             );
 
@@ -166,15 +158,18 @@ export function BaseAdmin(): JSX.Element {
                         subTitle = '查看';
                     } else if (subPath.includes('delete')) {
                         subTitle = '删除';
+                    } else if (subPath.includes('assign')) {
+                        subTitle = '分配';
+                    } else if (subPath.includes('grade')) {
+                        subTitle = '成绩';
                     } else {
                         // 将路径格式转为显示友好的格式
-                        // 如 'user-detail' 转为 '用户详情'
                         subTitle = subPath.replace(/-/g, ' ');
                     }
 
                     breadcrumbItems.push(
                         <li key={subPath}>
-                            <Link to={`/admin/${pathSegments.slice(1, i+1).join('/')}`}>
+                            <Link to={`/academic/${pathSegments.slice(1, i+1).join('/')}`}>
                                 {subTitle}
                             </Link>
                         </li>
@@ -187,38 +182,46 @@ export function BaseAdmin(): JSX.Element {
     };
 
     return (
-        <animated.div style={fade} className="h-lvh flex bg-gray-50">
-            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 shadow-md border-r border-gray-100">
-                <AdminNavComponent/>
+        <animated.div style={fade} className="h-lvh flex bg-gradient-to-br from-primary-50 to-base-100">
+            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 shadow-lg">
+                <AcademicNavComponent/>
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm border-b border-gray-100 flex justify-between items-center z-10">
+                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-md flex justify-between items-center z-10">
                     <div className="breadcrumbs text-sm">
                         <ul>
                             {generateBreadcrumbs()}
                         </ul>
                     </div>
                     <div className="flex items-center space-x-3">
-                        <div className="flex items-center">
-                            <div className="hidden md:flex flex-col items-end mr-3">
-                                <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
-                                <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
+                        <div className="dropdown dropdown-end">
+                            <div tabIndex={0} role="button" className="flex items-center cursor-pointer">
+                                <div className="hidden md:flex flex-col items-end mr-3">
+                                    <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
+                                    <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
+                                </div>
+                                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white">
+                                    <People theme="filled" size="20" fill="#FFFFFF" />
+                                </div>
                             </div>
-                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
-                                <People theme="filled" size="20" fill="#FFFFFF" />
-                            </div>
+                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2">
+                                <li><a>个人信息</a></li>
+                                <li><a>修改密码</a></li>
+                                <li><a className="text-error">退出登录</a></li>
+                            </ul>
                         </div>
                     </div>
                 </animated.div>
-                <animated.div style={bottomFade} className="p-6 flex-1 overflow-auto flex">
+                <animated.div style={bottomFade} className="mb-6 pt-6 px-6 flex-1 overflow-auto overflow-y-scroll flex">
                     {transitions((style, item) => (
                         <animated.div style={{...style, flex: 1}}>
                             <Routes location={item}>
-                                <Route path="/dashboard" element={<AdminDashboard site={site} />} />
-                                <Route path="/user" element={<AdminUser site={site} />} />
-                                <Route path="/role" element={<AdminRole site={site} />} />
-                                <Route path="/building" element={<AdminBuilding site={site} />} />
-                                <Route path="/*" element={<AdminNotFound/>} />
+                                <Route path="/dashboard" element={<AcademicDashboard site={site}/>}/>
+                                <Route path="/class" element={<AcademicClass site={site}/>}/>
+                                <Route path="/course" element={<AcademicCourse site={site}/>}/>
+                                <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
+                                <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
+                                <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>
                     ))}

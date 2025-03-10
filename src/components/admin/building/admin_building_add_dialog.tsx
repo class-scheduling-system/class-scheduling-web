@@ -32,6 +32,8 @@ import {JSX, useEffect, useState} from "react";
 import {BuildingAddDTO} from "../../../models/dto/building_add_dto.ts";
 import {message, Modal} from "antd";
 import {AddBuildingAPI} from "../../../apis/building_api.ts";
+import {GetCampusListAPI} from "../../../apis/campus_api.ts";
+import {ListOfCampusEntity} from "../../../models/entity/list_of_campus_entity.ts";
 
 /**
  * # AdminBuildingAddDialog
@@ -47,6 +49,7 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
 }>): JSX.Element {
     const [data, setData] = useState<BuildingAddDTO>({status: true, campus_uuid: "", building_name: ""} as BuildingAddDTO);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [campusList, setCampusList] = useState<ListOfCampusEntity[]>([] as ListOfCampusEntity[]);
 
     useEffect(() => {
         setIsModalOpen(show);
@@ -55,6 +58,20 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
     useEffect(() => {
         emit(isModalOpen);
     }, [emit, isModalOpen]);
+
+    // 获取教学楼列表
+    useEffect(() => {
+        const func = async () => {
+            const getResp = await GetCampusListAPI();
+            if (getResp?.output === "Success") {
+                setCampusList(getResp.data!);
+            } else {
+                console.log(getResp);
+                message.error(getResp?.message ?? "获取教学楼列表失败");
+            }
+        }
+        func().then();
+    }, []);
 
     const handleOk = () => {
         setIsModalOpen(false);
@@ -127,15 +144,22 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
                                 onChange={(e) => setData({...data, campus_uuid: e.target.value})}
                                 className="select w-full validator" required>
                             <option value={""} disabled={true}>请选择校区</option>
-                            <option>Crimson</option>
-                            <option>Amber</option>
-                            <option>Velvet</option>
+                            {
+                                campusList.map((campus) => {
+                                    return (
+                                        <option key={campus.campus_uuid}
+                                                value={campus.campus_uuid}>
+                                            {campus.campus_name}
+                                        </option>
+                                    );
+                                })
+                            }
                         </select>
                         <p className="fieldset-label hidden validator-hint">请选择校区</p>
                     </fieldset>
                     <fieldset className="flex items-center space-x-3">
                         <input
-                            onChange={(e) => setData({...data, status: Boolean(e.target.value)})}
+                            onChange={(e) => setData({...data, status: e.target.checked})}
                             type="checkbox" className={"toggle toggle-sm"} defaultChecked/>
                         <span>启用教学楼</span>
                     </fieldset>

@@ -92,7 +92,7 @@ export function AdminBuildingDeleteDialog({building, show, emit, requestRefresh}
                                <CloseOne theme="outline" size="16"/>
                                <span>取消</span>
                            </button>
-                           <button type={"submit"} form={"building_add"}
+                           <button type={"submit"} form={"building_remove"}
                                    className={"btn btn-success"}>
                                <CheckOne theme="outline" size="16"/>
                                <span>提交</span>
@@ -105,7 +105,7 @@ export function AdminBuildingDeleteDialog({building, show, emit, requestRefresh}
                     <BuildingOne theme="outline" size="20"/>
                     <span>删除教学楼</span>
                 </h3>
-                <form id={"building_add"} onSubmit={onSubmit} className="py-2 grid space-y-2">
+                <form id={"building_remove"} onSubmit={onSubmit} className="py-2 grid space-y-2">
                     <div className="text-base-content flex space-x-0.5">
                         <span>是否确认删除</span>
                         <strong className={"text-primary font-bold"}>{building.building_name}</strong>
