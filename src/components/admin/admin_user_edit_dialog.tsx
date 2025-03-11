@@ -32,7 +32,7 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
     show: boolean;
     emit: (data: boolean) => void;
     userUuid: string;
-    defaultData?: UserAddDTO | null;
+    defaultData?: UserEditDTO | null;
     onEditSuccess?: () => void;
 }>): JSX.Element {
     const [data, setData] = useState<UserEditDTO>(defaultData || {} as UserEditDTO);

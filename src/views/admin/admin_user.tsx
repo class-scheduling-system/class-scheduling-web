@@ -43,7 +43,7 @@ import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
 import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
-import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
+import {UserEntity} from "../../models/entity/user_entity.ts";
 
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
@@ -67,7 +67,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     const [dialogEdit, setDialogEdit] = useState<boolean>(false);
     const [editUserUuid, setEditUserUuid] = useState("");
     // 新增状态：保存编辑时对应的用户数据
-    const [editUserData, setEditUserData] = useState<UserAddDTO | null>(null);
+    // 在状态定义处
+    const [editUserData, setEditUserData] = useState<UserEntity | null>(null);
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -182,12 +183,12 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                     </thead>
                                     <tbody>
                                     {userList.records.map((record, index) => (
-                                        <tr key={record.user.user_uuid} className="transition hover:bg-base-200">
+                                        <tr key={record.user?.user_uuid} className="transition hover:bg-base-200">
                                             <td>{index + 1 + (userList.current - 1) * userList.size}</td>
-                                            <td>{record.user.name}</td>
-                                            <td>{record.user.role.role_name}</td>
-                                            <td>{record.user.email}</td>
-                                            <td>{record.user.status ? (
+                                            <td>{record.user?.name}</td>
+                                            <td>{record.user?.role.role_name}</td>
+                                            <td>{record.user?.email}</td>
+                                            <td>{record.user?.status ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"启用"}
                                                                 icon={<Correct theme="outline" size="12"/>}/>
@@ -197,7 +198,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                                 text={"禁用"}
                                                                 icon={<Error theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td>{record.user.ban ? (
+                                            <td>{record.user?.ban ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"error"}
                                                                 text={"已封禁"}
@@ -212,8 +213,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                     <button
                                                         onClick={() => {
                                                             // 同时传递 userUuid 和用户数据（直接从列表获取）
-                                                            setEditUserUuid(record.user.user_uuid);
-                                                            setEditUserData(record.user);
+                                                            setEditUserUuid(record.user?.user_uuid || '');
+                                                            setEditUserData(record.user || null);  // 使用 || 操作符提供默认值
                                                             setDialogEdit(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
@@ -222,7 +223,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                     </button>
                                                     <button
                                                         onClick={() => {
-                                                            setDeleteUserUuid(record.user.user_uuid);
+                                                            setDeleteUserUuid(record.user?.user_uuid ?? '');
                                                             setDialogDelete(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-error inline-flex">
