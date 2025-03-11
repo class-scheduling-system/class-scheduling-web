@@ -37,13 +37,12 @@ import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
  * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
  */
 export function AdminNavComponent(): JSX.Element {
-
     return (
         <div className={"flex flex-col h-full"}>
             <div className={"px-6 py-6 w-full bg-base-200 border-b border-gray-200"}>
                 <h1 className={"text-2xl font-bold text-primary text-center"}>管理员控制台</h1>
             </div>
-            <div className={"px-4 grid gap-2 flex-grow pt-4"}>
+            <div className={"px-4 grid gap-2 overflow-y-auto pt-4"}>
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统管理</h2>
                 <AdminNavLinkComponent title={"系统看板"} icon={<Dashboard theme="outline" size="18"/>}
                                        path={"/admin/dashboard"}/>

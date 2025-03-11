@@ -28,11 +28,14 @@
 
 import {useEffect, useState} from "react";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
-import {Book, Calendar, People, PeopleDeleteOne, School} from "@icon-park/react";
+import {Book, People, School, User} from "@icon-park/react";
+import {useSelector} from 'react-redux';
+import {UserInfoEntity} from '../../models/entity/user_info_entity.ts';
 
 export function AcademicDashboard({site}: Readonly<{
     site: SiteInfoEntity
 }>) {
+    const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const [currentTime, setCurrentTime] = useState(new Date());
 
     // 更新当前时间
@@ -47,6 +50,17 @@ export function AcademicDashboard({site}: Readonly<{
     useEffect(() => {
         document.title = `教务看板 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
+
+    // 根据时间获取问候语
+    const getGreeting = () => {
+        const hour = currentTime.getHours();
+        if (hour < 6) return '深夜了，注意休息';
+        if (hour < 9) return '早上好';
+        if (hour < 12) return '上午好';
+        if (hour < 14) return '中午好';
+        if (hour < 18) return '下午好';
+        return '晚上好';
+    };
 
     // 模拟数据
     const statistics = {
@@ -70,11 +84,32 @@ export function AcademicDashboard({site}: Readonly<{
     return (
         <div className="space-y-6 w-full">
             {/* 顶部欢迎信息和时间 */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl">
-                <div className="card-body">
-                    <h2 className="card-title text-2xl">欢迎使用教务管理系统</h2>
-                    <p>当前时间: {currentTime.toLocaleTimeString()} {currentTime.toLocaleDateString()}</p>
-                    <p>当前学期: {statistics.currentTerm}</p>
+            <div className="bg-gradient-to-r from-primary/90 to-secondary/90 rounded-xl shadow-lg overflow-hidden">
+                <div className="p-6 flex items-center justify-between">
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-white">
+                            {getGreeting()}，{getUser.user?.name ?? '教务管理员'}
+                        </h2>
+                        <p className="text-white/80 text-sm">
+                            {getUser.user?.email ? `${getUser.user.email} | ` : ''}当前学期：{statistics.currentTerm}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-3xl font-bold text-white">
+                            {currentTime.toLocaleTimeString('zh-CN', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            })}
+                        </div>
+                        <div className="text-sm text-white/80">
+                            {currentTime.toLocaleDateString('zh-CN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -87,8 +122,8 @@ export function AcademicDashboard({site}: Readonly<{
                                 <h2 className="text-xl font-semibold">学生总数</h2>
                                 <p className="text-3xl font-bold text-primary mt-2">{statistics.studentCount}</p>
                             </div>
-                            <div className="bg-primary-content p-3 rounded-lg">
-                                <People theme="filled" size="28" fill="#3B82F6" />
+                            <div className="bg-blue-100 p-3 rounded-lg">
+                                <User theme="outline" size="24" className="text-blue-500" />
                             </div>
                         </div>
                     </div>
@@ -101,8 +136,8 @@ export function AcademicDashboard({site}: Readonly<{
                                 <h2 className="text-xl font-semibold">教师总数</h2>
                                 <p className="text-3xl font-bold text-secondary mt-2">{statistics.teacherCount}</p>
                             </div>
-                            <div className="bg-secondary-content p-3 rounded-lg">
-                                <PeopleDeleteOne theme="filled" size="28" fill="#8B5CF6" />
+                            <div className="bg-green-100 p-3 rounded-lg">
+                                <People theme="outline" size="24" className="text-green-500" />
                             </div>
                         </div>
                     </div>
@@ -115,8 +150,8 @@ export function AcademicDashboard({site}: Readonly<{
                                 <h2 className="text-xl font-semibold">班级总数</h2>
                                 <p className="text-3xl font-bold text-accent mt-2">{statistics.classCount}</p>
                             </div>
-                            <div className="bg-accent-content p-3 rounded-lg">
-                                <School theme="filled" size="28" fill="#EC4899" />
+                            <div className="bg-purple-100 p-3 rounded-lg">
+                                <School theme="outline" size="24" className="text-purple-500" />
                             </div>
                         </div>
                     </div>
@@ -129,8 +164,8 @@ export function AcademicDashboard({site}: Readonly<{
                                 <h2 className="text-xl font-semibold">课程总数</h2>
                                 <p className="text-3xl font-bold text-info mt-2">{statistics.courseCount}</p>
                             </div>
-                            <div className="bg-info-content p-3 rounded-lg">
-                                <Book theme="filled" size="28" fill="#06B6D4" />
+                            <div className="bg-orange-100 p-3 rounded-lg">
+                                <Book theme="outline" size="24" className="text-orange-500" />
                             </div>
                         </div>
                     </div>
@@ -140,10 +175,7 @@ export function AcademicDashboard({site}: Readonly<{
             {/* 即将到来的考试 */}
             <div className="card bg-base-100 shadow-md overflow-hidden">
                 <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">
-                        <Calendar theme="outline" size="20" />
-                        即将到来的考试
-                    </h2>
+                    <h2 className="card-title flex items-center gap-2">即将到来的考试</h2>
                     <div className="overflow-x-auto overflow-hidden">
                         <table className="table table-zebra">
                             <thead>
@@ -174,10 +206,7 @@ export function AcademicDashboard({site}: Readonly<{
             {/* 最近课程安排 */}
             <div className="card bg-base-100 shadow-md overflow-hidden">
                 <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">
-                        <Book theme="outline" size="20" />
-                        最近课程安排
-                    </h2>
+                    <h2 className="card-title flex items-center gap-2">最近课程安排</h2>
                     <div className="overflow-x-auto overflow-hidden">
                         <table className="table table-zebra">
                             <thead>
