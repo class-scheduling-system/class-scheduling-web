@@ -44,6 +44,7 @@ import {LabelComponent} from "../../components/label_component.tsx";
 import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {UserEntity} from "../../models/entity/user_entity.ts";
+import { useNavigate } from 'react-router-dom';
 
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
@@ -69,6 +70,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     // 新增状态：保存编辑时对应的用户数据
     // 在状态定义处
     const [editUserData, setEditUserData] = useState<UserEntity | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -285,11 +287,14 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                             </label>
                         </div>
                         <div className={"grid grid-cols-2 gap-3"}>
-                            <button onClick={() => setDialogAdd(true)}
-                                    className="transition shadow btn btn-outline btn-primary">
+                            <button
+                                onClick={() => navigate('/admin/user/add')}
+                                className="transition shadow btn btn-outline btn-primary"
+                            >
                                 <Add theme="outline" size="16" />
                                 <span>添加</span>
                             </button>
+
                             <button className="transition shadow btn btn-outline btn-secondary">
                                 <Newlybuild theme="outline" size="16" />
                                 <span>批量导入</span>
