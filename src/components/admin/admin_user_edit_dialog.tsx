@@ -198,11 +198,11 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
                             <option value="" disabled>
                                 请选择角色
                             </option>
-                            {roleList.map((role) => (
+                            {roleList?.map((role) => (
                                 <option key={role.role_uuid} value={role.role_uuid}>
                                     {role.role_name}
                                 </option>
-                            ))}
+                            )) || []}
                         </select>
                     </fieldset>
                     {/* 权限选择（可选多选） */}

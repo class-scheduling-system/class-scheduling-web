@@ -1,93 +1,157 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2022-NOW(至今) 锋楪技术团队
- * Author: 锋楪技术团队 (https://www.frontleaves.com)
- *
- * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
- * --------------------------------------------------------------------------------
- * 许可证声明：
- *
- * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
- *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
- * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
- * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
- * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
- *
- * 使用本软件即表示您了解此声明并同意其条款。
- *
- * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- * 免责声明：
- *
- * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
- * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
- * --------------------------------------------------------------------------------
- */
+import {JSX, useEffect, useState} from "react";
+import {
+    CloseOne, Correct, Error, MoreApp,
+} from "@icon-park/react";
+import {message, Modal} from "antd";
+import {GetRoleListAPI} from "../../apis/role_api.ts";
+import {RoleEntity} from "../../models/entity/role_entity.ts";
+import {useDispatch} from "react-redux";
+import {LabelComponent} from "../label_component.tsx";
 
-import { useState } from "react";
 
-export function AdminRolePermissionDialog() {
-    const [formData, setFormData] = useState({
-        name: '',
-        role: '',
-        email: '',
-        permissions: [],
-    });
+export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
+    show: boolean;
+    emit: (data: boolean) => void;
+    roleUuid: string;
+}>): JSX.Element {
+    const dispatch = useDispatch();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const permissionsList = [
-        "查看用户", "编辑用户", "删除用户", "管理角色", "查看报表"
-    ];
+    // 当前选中的角色
+    const [currentRole, setCurrentRole] = useState<RoleEntity | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    // 关闭对话框的函数
-    const handleCloseDialog = () => {
-        const dialog = document.getElementById('my_modal_2');
-        if (dialog) {
-            dialog.close(); // 关闭对话框
+    useEffect(() => {
+        setIsModalOpen(show);
+    }, [show]);
+
+    useEffect(() => {
+        emit(isModalOpen);
+    }, [emit, isModalOpen]);
+
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+    }
+
+    // 根据roleUuid获取对应角色的权限
+    useEffect(() => {
+        // 只有当对话框打开且有roleUuid时才获取数据
+        if (isModalOpen && roleUuid) {
+            setLoading(true);
+
+            const fetchRoleData = async () => {
+                try {
+                    // 使用现有的GetRoleListAPI获取所有角色
+                    const response = await GetRoleListAPI({
+                        page: 1,
+                        size: 100,  // 获取足够多的记录以确保包含目标角色
+                        is_desc: true
+                    });
+
+                    if (response?.output === "Success") {
+                        // 从返回的角色列表中找到匹配roleUuid的角色
+                        const targetRole = response.data.records.find(
+                            (role: RoleEntity) => role.role_uuid === roleUuid
+                        );
+
+                        if (targetRole) {
+                            setCurrentRole(targetRole);
+                        } else {
+                            message.error("未找到指定角色");
+                        }
+                    } else {
+                        message.error(response?.error_message ?? "获取角色数据失败");
+                    }
+                } catch (error) {
+                    console.error("获取角色数据时出错:", error);
+                    message.error("获取角色数据时出错");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchRoleData();
         }
+    }, [roleUuid, isModalOpen]);
+
+    // 将权限数组转换为适合显示的格式
+    // 假设permission是权限代码，这里将其转换为更友好的显示格式
+    const getPermissionName = (code: string) => {
+        const permissionMap: {[key: string]: string} = {
+            "operate": "操作权限",
+            "user": "用户管理",
+            // 可以根据实际需要添加更多权限的映射
+        };
+
+        return permissionMap[code] || code;
     };
 
-    // 处理权限勾选
-    const handlePermissionChange = (permission) => {
-        setFormData((prev) => {
-            const newPermissions = prev.permissions.includes(permission)
-                ? prev.permissions.filter((p) => p !== permission)
-                : [...prev.permissions, permission];
-            return { ...prev, permissions: newPermissions };
-        });
+    const getPermissionDescription = (code: string) => {
+        const descriptionMap: {[key: string]: string} = {
+            "operate": "允许执行系统操作",
+            "user": "允许管理用户",
+            // 可以根据实际需要添加更多权限的描述
+        };
+
+        return descriptionMap[code] || "未定义的权限";
     };
 
     return (
         <>
-            <dialog id="my_modal_2" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">权限列表</h3>
-                    <div className="mt-3">
-                        <form method="dialog" className="flex flex-col space-y-4 p-4">
-                            {/* 权限选择列表 */}
-                            <div className="flex flex-col space-y-2">
-                                {permissionsList.map((permission) => (
-                                    <label key={permission} className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.permissions.includes(permission)}
-                                            onChange={() => handlePermissionChange(permission)}
-                                        />
-                                        <span>{permission}</span>
-                                    </label>
-                                ))}
-                            </div>
-
-                            <div className="flex justify-end gap-2 w-full">
-                                <button type="submit" className="btn btn-neutral">修改</button>
-                                <button type="button" className="btn" onClick={handleCloseDialog}>取消</button>
-                            </div>
-                        </form>
+            <Modal
+                open={isModalOpen}
+                onCancel={handleClose}
+                footer={
+                    <div className="modal-action">
+                        <div className={"flex space-x-3"}>
+                            <button type={"button"} onClick={handleClose} className={"btn btn-soft btn-secondary"}>
+                                <CloseOne theme="outline" size="16" />
+                                <span>关闭</span>
+                            </button>
+                        </div>
                     </div>
+                }
+            >
+                <div className="flex flex-col space-y-4">
+                    <h3 className="font-bold text-lg flex items-center space-x-2">
+                        <MoreApp theme="outline" size="20"/>
+                        <span>角色详情: {currentRole?.role_name || ""}</span>
+                    </h3>
+                    {loading ? (
+                        <div className="flex justify-center p-4">
+                            <span className="loading loading-spinner loading-md"></span>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                            <table className="table">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>权限名称</th>
+                                    <th>权限描述</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {currentRole && currentRole.permission && currentRole.permission.length > 0 ? (
+                                    currentRole.permission.map((permCode, index) => (
+                                        <tr key={permCode} className="transition hover:bg-base-200">
+                                            <td>{index + 1}</td>
+                                            <td>{getPermissionName(permCode)}</td>
+                                            <td>{getPermissionDescription(permCode)}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-4">该角色没有权限记录</td>
+                                    </tr>
+                                )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
-            </dialog>
+            </Modal>
         </>
     );
 }
-

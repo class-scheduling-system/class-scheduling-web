@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, System, User, UserPositioning} from "@icon-park/react";
+import {BuildingTwo, Dashboard, DatabaseAlert, Log, System, User, UserPositioning, WatchOne} from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 
@@ -34,27 +34,40 @@ import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 /**
  * 生成管理员导航组件。
  *
- * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中site属性为SiteInfoEntity类型，提供站点名称等信息。
  * @return {JSX.Element} 返回一个包含站点名称和基本导航链接的JSX元素，用于在管理员界面中展示导航栏。
  */
 export function AdminNavComponent(): JSX.Element {
-
     return (
-        <div className={"flex flex-col"}>
-            <div className={"px-4 py-8 text-center w-full"}>
-                <h1 className={"text-2xl font-bold"}>管理员面板</h1>
+        <div className={"flex flex-col h-full"}>
+            <div className={"px-6 py-6 w-full bg-base-200 border-b border-gray-200"}>
+                <h1 className={"text-2xl font-bold text-primary text-center"}>管理员控制台</h1>
             </div>
-            <div className={"px-4 grid gap-1"}>
-                <AdminNavLinkComponent title={"看板"} icon={<Dashboard theme="outline" size="16"/>}
+            <div className={"px-4 grid gap-2 overflow-y-auto pt-4"}>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统管理</h2>
+                <AdminNavLinkComponent title={"系统看板"} icon={<Dashboard theme="outline" size="18"/>}
                                        path={"/admin/dashboard"}/>
-                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="16"/>}
+                <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="18"/>}
                                        path={"/admin/user"}/>
-                <AdminNavLinkComponent title={"角色管理"} icon={<UserPositioning theme="outline" size="16"/>}
+                <AdminNavLinkComponent title={"角色管理"} icon={<UserPositioning theme="outline" size="18"/>}
                                        path={"/admin/role"}/>
-                <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="16"/>}
+                <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="18"/>}
                                        path={"/admin/building"}/>
-                <AdminNavLinkComponent title={"系统信息"} icon={<System theme="outline" size="16" />}
+
+                <div className="divider my-2"></div>
+
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统维护</h2>
+                <AdminNavLinkComponent title={"系统信息"} icon={<System theme="outline" size="18" />}
                                        path={"/admin/system-info"}/>
+                <AdminNavLinkComponent title={"系统日志"} icon={<Log theme="outline" size="18" />}
+                                       path={"/admin/log"}/>
+                <AdminNavLinkComponent title={"备份与恢复"} icon={<DatabaseAlert theme="outline" size="18" />}
+                                       path={"/admin/backup"}/>
+                <AdminNavLinkComponent title={"系统设置"} icon={<WatchOne theme="outline" size="18" />}
+                                       path={"/admin/settings"}/>
+            </div>
+            <div className="px-4 py-4 mt-auto bg-base-200 border-t border-gray-200 text-center text-xs text-gray-500">
+                <p>版本: v1.0.0</p>
+                <p>© 2025 锋楪技术团队</p>
             </div>
         </div>
     );

@@ -26,8 +26,8 @@
  * --------------------------------------------------------------------------------
  */
 
-import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
-import { useEffect } from "react";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import {useEffect} from "react";
 
 export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
     useEffect(() => {
@@ -64,7 +64,7 @@ export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
     };
 
     return (
-        <div className="p-6">
+        <div className="pb-4">
 
             {/* 系统概览 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -78,7 +78,7 @@ export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
                             <div className="flex justify-center items-center">
                                 <div
                                     className="radial-progress text-primary"
-                                    style={{ "--value": systemInfo.cpu.usage, "--size": "8rem" }}
+                                    //style={{ "--value": systemInfo.cpu.usage, "--size": "8rem" }}
                                     role="progressbar"
                                 >
                                     {systemInfo.cpu.usage}%
@@ -98,7 +98,7 @@ export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
                             <div className="flex justify-center items-center">
                                 <div
                                     className="radial-progress text-secondary"
-                                    style={{ "--value": systemInfo.memory.usage, "--size": "8rem" }}
+                                    //style={{ "--value": systemInfo.memory.usage, "--size": "8rem" }}
                                     role="progressbar"
                                 >
                                     {systemInfo.memory.usage}%
@@ -118,7 +118,7 @@ export function AdminSystemInfo({ site }: Readonly<{ site: SiteInfoEntity }>) {
                             <div className="flex justify-center items-center">
                                 <div
                                     className="radial-progress text-accent"
-                                    style={{ "--value": systemInfo.disk.usage, "--size": "8rem" }}
+                                    //style={{ "--value": systemInfo.disk.usage, "--size": "8rem" }}
                                     role="progressbar"
                                 >
                                     {systemInfo.disk.usage}%

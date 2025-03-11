@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -30,20 +30,20 @@ import {JSX, useEffect} from "react";
 import {useSelector} from "react-redux";
 import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
 import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
-import {Route, Routes, useLocation, useNavigate} from "react-router";
+import {Link, Route, Routes, useLocation, useNavigate} from "react-router";
 import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {AdminUser} from "./admin/admin_user.tsx";
 import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
-import {Link} from "react-router";
 import {People} from "@icon-park/react";
+import {AdminRole} from "./admin/admin_role.tsx";
 
 /**
- * 生成一个基础的控制台组件。
- * 该函数返回一个包含标题为"Base Console"的div元素。
- * @return {JSX.Element} 包含基础控制台标题的div元素
+ * 生成一个管理员控制台组件。
+ * 该函数返回一个包含管理员控制台的框架页面。
+ * @return {JSX.Element} 包含管理员控制台的完整框架页面
  */
 export function BaseAdmin(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
@@ -108,7 +108,7 @@ export function BaseAdmin(): JSX.Element {
         if (pathSegments.length > 1) {
             // 第一级：主要管理页面（如"用户管理"、"教学楼管理"等）
             const mainSection = pathSegments[1];
-            let mainTitle = '';
+            let mainTitle: string;
 
             switch (mainSection) {
                 case 'dashboard':
@@ -125,6 +125,15 @@ export function BaseAdmin(): JSX.Element {
                     break;
                 case 'system-info':
                     mainTitle = '系统信息';
+                    break;
+                case 'log':
+                    mainTitle = '系统日志';
+                    break;
+                case 'backup':
+                    mainTitle = '备份与恢复';
+                    break;
+                case 'settings':
+                    mainTitle = '系统设置';
                     break;
                 default:
                     mainTitle = mainSection;
@@ -151,9 +160,12 @@ export function BaseAdmin(): JSX.Element {
                         subTitle = '查看';
                     } else if (subPath.includes('delete')) {
                         subTitle = '删除';
+                    } else if (subPath.includes('assign')) {
+                        subTitle = '分配';
+                    } else if (subPath.includes('permission')) {
+                        subTitle = '权限';
                     } else {
                         // 将路径格式转为显示友好的格式
-                        // 如 'user-detail' 转为 '用户详情'
                         subTitle = subPath.replace(/-/g, ' ');
                     }
 
@@ -172,37 +184,45 @@ export function BaseAdmin(): JSX.Element {
     };
 
     return (
-        <animated.div style={fade} className="h-lvh flex bg-gray-50">
-            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 shadow-md border-r border-gray-100">
+        <animated.div style={fade} className="h-lvh flex bg-gradient-to-br from-primary-50 to-base-100">
+            <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 border-r border-gray-200">
                 <AdminNavComponent/>
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm border-b border-gray-100 flex justify-between items-center z-10">
+                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
                     <div className="breadcrumbs text-sm">
                         <ul>
                             {generateBreadcrumbs()}
                         </ul>
                     </div>
                     <div className="flex items-center space-x-3">
-                        <div className="flex items-center">
-                            <div className="hidden md:flex flex-col items-end mr-3">
-                                <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
-                                <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
+                        <div className="dropdown dropdown-end">
+                            <div tabIndex={0} role="button" className="flex items-center cursor-pointer">
+                                <div className="hidden md:flex flex-col items-end mr-3">
+                                    <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
+                                    <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
+                                </div>
+                                <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
+                                    <People theme="filled" size="20" fill="#FFFFFF" />
+                                </div>
                             </div>
-                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
-                                <People theme="filled" size="20" fill="#FFFFFF" />
-                            </div>
+                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
+                                <li><a>个人信息</a></li>
+                                <li><a>修改密码</a></li>
+                                <li><a className="text-error">退出登录</a></li>
+                            </ul>
                         </div>
                     </div>
                 </animated.div>
-                <animated.div style={bottomFade} className="p-6 flex-1 overflow-auto flex">
+                <animated.div style={bottomFade} className="pt-6 px-6 flex-1 overflow-auto overflow-y-scroll flex">
                     {transitions((style, item) => (
                         <animated.div style={{...style, flex: 1}}>
                             <Routes location={item}>
-                                <Route path="/dashboard" element={<AdminDashboard site={site}/>}/>
-                                <Route path="/user" element={<AdminUser site={site}/>}/>
-                                <Route path="/building" element={<AdminBuilding site={site}/>}/>
-                                <Route path="/*" element={<AdminNotFound/>}/>
+                                <Route path="/dashboard" element={<AdminDashboard site={site} />} />
+                                <Route path="/user" element={<AdminUser site={site} />} />
+                                <Route path="/role" element={<AdminRole site={site} />} />
+                                <Route path="/building" element={<AdminBuilding site={site} />} />
+                                <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>
                     ))}

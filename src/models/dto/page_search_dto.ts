@@ -40,7 +40,7 @@ export type PageSearchDTO = {
     /**
      * 是否按降序排列，默认值为 true
      */
-    is_desc: boolean;
+    is_desc?: boolean;
     /**
      * 可选的搜索关键词
      */

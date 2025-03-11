@@ -26,24 +26,24 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState, useEffect, JSX, useRef } from "react";
-import {Add, Correct, Delete, Editor, Error, Newlybuild,Search, Forbid, CheckSmall} from "@icon-park/react";
-import { AdminAddUserDialog } from "../../components/admin/admin_user_add_dialog.tsx";
-import { AdminEditUserDialog } from "../../components/admin/admin_user_edit_dialog.tsx";
-import { AdminDeleteUserDialog } from "../../components/admin/admin_user_delete_dialog.tsx";
-import { GetUserListAPI } from "../../apis/user_api.ts";
-import { animated, useTransition } from "@react-spring/web";
-import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
-import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
-import { message } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
-import { PageEntity } from "../../models/entity/page_entity.ts";
-import { CardComponent } from "../../components/card_component.tsx";
-import { LabelComponent } from "../../components/label_component.tsx";
+import {JSX, useEffect, useRef, useState} from "react";
+import {Add, CheckSmall, Correct, Delete, Editor, Error, Forbid, Newlybuild, Search} from "@icon-park/react";
+import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
+import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
+import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
+import {GetUserListAPI} from "../../apis/user_api.ts";
+import {animated, useTransition} from "@react-spring/web";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
+import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {message} from "antd";
+import {useDispatch, useSelector} from "react-redux";
+import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
+import {PageEntity} from "../../models/entity/page_entity.ts";
+import {CardComponent} from "../../components/card_component.tsx";
+import {LabelComponent} from "../../components/label_component.tsx";
 import cardImage from "../../assets/images/card-background.webp";
-import { UserInfoEntity } from "../../models/entity/user_info_entity.ts";
-import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
+import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
+import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
 
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
@@ -157,7 +157,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
 
     return (
         <>
-            <div className={"grid grid-cols-10 gap-4"}>
+            <div className={"grid grid-cols-10 gap-4 pb-4"}>
                 <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) => item ? (
