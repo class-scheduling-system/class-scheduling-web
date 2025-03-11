@@ -44,6 +44,13 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
         is_desc: true,
     } as PageSearchDTO);
 
+    // 过滤出允许的角色：管理、管理员、教务
+    const allowedRoles = roleList?.filter(role =>
+        ["管理", "管理员", "教务"].some(roleName =>
+            role?.role_name?.includes(roleName)
+        )
+    );
+
     useEffect(() => {
         setIsModalOpen(show);
     }, [show]);
@@ -198,11 +205,11 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
                             <option value="" disabled>
                                 请选择角色
                             </option>
-                            {roleList?.map((role) => (
+                            {allowedRoles?.map((role) => (
                                 <option key={role.role_uuid} value={role.role_uuid}>
                                     {role.role_name}
                                 </option>
-                            ))|| []}
+                            )) || []}
                         </select>
                     </fieldset>
                     {/* 权限选择（可选多选） */}

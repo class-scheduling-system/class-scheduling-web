@@ -49,6 +49,13 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         is_desc: true,
     } as PageSearchDTO);
 
+    // 过滤出允许的角色：管理员、管理、教务
+    const allowedRoles = roleList?.filter(role =>
+        ["管理员", "管理", "教务"].some(roleName =>
+            role?.role_name?.includes(roleName)
+        )
+    );
+
     // 根据角色名称判断教务角色：假设角色名称包含"教务"的即为教务角色
     const teachingRole = roleList?.find(role => role?.role_name?.includes("教务"));
 
@@ -87,7 +94,7 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                 if (response?.output === "Success") {
                     console.log("获取权限列表成功:", response.data);
                     // 转换权限列表为Transfer需要的格式
-                    const permissionData = response.data.map(item => ({
+                    const permissionData = response.data?.map(item => ({
                         key: item.permission_key,
                         title: item.name,
                         description: item.permission_key,
@@ -150,7 +157,14 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
         option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
 
     // 穿梭框渲染项
-    const renderItem = (item: any) => {
+    interface PermissionItem {
+        key: string;
+        title: string;
+        description: string;
+        disabled?: boolean;
+    }
+
+    const renderItem = (item: PermissionItem) => {
         const customLabel = (
             <div className="custom-item">
                 <span className="custom-item-title">{item.title}</span>
@@ -240,11 +254,11 @@ export function AdminAddUserDialog({ show, emit, onAddSuccess }: Readonly<{
                             <option value="" disabled>
                                 请选择角色
                             </option>
-                            {roleList?.map((role) => (
+                            {allowedRoles?.map((role) => (
                                 <option key={role.role_uuid} value={role.role_uuid}>
                                     {role.role_name}
                                 </option>
-                            ))|| []}
+                            )) || []}
                         </select>
                     </fieldset>
 
