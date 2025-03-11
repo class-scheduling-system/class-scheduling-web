@@ -1,35 +1,5 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2022-NOW(至今) 锋楪技术团队
- * Author: 锋楪技术团队 (https://www.frontleaves.com)
- *
- * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
- * --------------------------------------------------------------------------------
- * 许可证声明：
- *
- * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
- *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
- * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
- * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
- * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
- *
- * 使用本软件即表示您了解此声明并同意其条款。
- *
- * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- * 免责声明：
- *
- * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
- * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
- * --------------------------------------------------------------------------------
- */
-
 import {JSX, useEffect, useRef, useState} from "react";
 import {Add, CheckSmall, Correct, Delete, Editor, Error, Forbid, Newlybuild, Search} from "@icon-park/react";
-import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
-import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
 import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
 import {GetUserListAPI} from "../../apis/user_api.ts";
 import {animated, useTransition} from "@react-spring/web";
@@ -44,12 +14,14 @@ import {LabelComponent} from "../../components/label_component.tsx";
 import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {UserEntity} from "../../models/entity/user_entity.ts";
-import { useNavigate } from 'react-router-dom';
+import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
+// 不再需要 useNavigate
 
 export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const inputFocus = useRef<HTMLInputElement | null>(null);
+    // 不再使用 navigate
 
     const [userList, setUserList] = useState<PageEntity<UserInfoEntity>>({
         records: new Array(5).fill({}) as UserInfoEntity[],
@@ -61,16 +33,27 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     } as PageSearchDTO);
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(true);
-    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     // 删除用户相关状态
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
     const [dialogEdit, setDialogEdit] = useState<boolean>(false);
     const [editUserUuid, setEditUserUuid] = useState("");
-    // 新增状态：保存编辑时对应的用户数据
-    // 在状态定义处
+    // 保存编辑时对应的用户数据
     const [editUserData, setEditUserData] = useState<UserEntity | null>(null);
-    const navigate = useNavigate();
+    // 添加刷新标记状态
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+
+    // 检查是否是从添加页面返回的
+    useEffect(() => {
+        // 检查 URL 中是否有 fromAdd=true 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('fromAdd') === 'true') {
+            // 如果是从添加页面返回，则刷新用户列表
+            refreshUserList();
+            // 清除 URL 参数，避免重复刷新
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -95,19 +78,22 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
         };
     }, [getCurrent.system]);
 
+    // 修改这个useEffect，添加refreshTrigger作为依赖，实现自动刷新
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetUserListAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setUserList(getResp.data!);
+                setLoading(false);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取用户列表失败");
+                setLoading(false);
             }
         };
         func().then();
-    }, [dispatch, searchRequest]);
+    }, [dispatch, searchRequest, refreshTrigger]);
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: { opacity: 0 },
@@ -116,15 +102,9 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     });
 
     // 定义刷新用户列表的方法
-    const refreshUserList = async () => {
-        setLoading(true);
-        const getResp = await GetUserListAPI(searchRequest);
-        if (getResp?.output === "Success") {
-            setUserList(getResp.data!);
-        } else {
-            message.error(getResp?.error_message ?? "获取用户列表失败");
-        }
-        setLoading(false);
+    const refreshUserList = () => {
+        // 通过更新refreshTrigger触发useEffect重新加载数据
+        setRefreshTrigger(prev => prev + 1);
     };
 
     function getPageInfo(): JSX.Element[] {
@@ -214,9 +194,8 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 <div className="join">
                                                     <button
                                                         onClick={() => {
-                                                            // 同时传递 userUuid 和用户数据（直接从列表获取）
                                                             setEditUserUuid(record.user?.user_uuid || '');
-                                                            setEditUserData(record.user || null);  // 使用 || 操作符提供默认值
+                                                            setEditUserData(record.user || null);
                                                             setDialogEdit(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
@@ -288,7 +267,9 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                         </div>
                         <div className={"grid grid-cols-2 gap-3"}>
                             <button
-                                onClick={() => navigate('/admin/user/add')}
+                                onClick={() => {
+                                    window.location.href = '/admin/user/add';
+                                }}
                                 className="transition shadow btn btn-outline btn-primary"
                             >
                                 <Add theme="outline" size="16" />
@@ -309,11 +290,6 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                 emit={setDialogDelete}
                 userUuid={deleteUserUuid}
                 onDeletedSuccess={refreshUserList}
-            />
-            <AdminAddUserDialog
-                show={dialogAdd}
-                emit={setDialogAdd}
-                onAddSuccess={refreshUserList}
             />
 
             <AdminEditUserDialog
