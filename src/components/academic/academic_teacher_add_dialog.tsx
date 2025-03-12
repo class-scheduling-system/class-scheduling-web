@@ -9,7 +9,7 @@ import {
     IdCard,
     Book,
     Write,
-    School, EmotionHappy, AllApplication
+    School, EmotionHappy, AllApplication, ChinesePavilion, English, AddTextTwo
 } from "@icon-park/react";
 import * as React from "react";
 import { JSX, useEffect, useState } from "react";
@@ -164,7 +164,7 @@ export function AdminAddTeacherDialog({ show, emit, onAddSuccess }: Readonly<{
                     {/* 英文名 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <Book theme="outline" size="16" fill="#333" />
+                            <English theme="outline" size="16" fill="#333"/>
                             <span>英文名</span>
                             <span className="text-red-500">*</span>
                         </legend>
@@ -215,7 +215,7 @@ export function AdminAddTeacherDialog({ show, emit, onAddSuccess }: Readonly<{
                     {/* 单位UUID */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <School theme="outline" size="16" fill="#333" />
+                            <ChinesePavilion theme="outline" size="16" fill="#333"/>
                             <span>单位</span>
                             <span className="text-red-500">*</span>
                         </legend>
@@ -294,7 +294,7 @@ export function AdminAddTeacherDialog({ show, emit, onAddSuccess }: Readonly<{
                     {/* 职称 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <Book theme="outline" size="16" fill="#333" />
+                            <AddTextTwo theme="outline" size="16" fill="#333"/>
                             <span>职称</span>
                         </legend>
                         <input

@@ -12,7 +12,18 @@ import {TeacherEntity} from "../../models/entity/teacher_entity.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 import {useTransition} from "@react-spring/web";
 import {AcademicDeleteTeacherDialog} from "../../components/academic/academic_teacher_delete_dialog.tsx";
+
+
+import {GetDepartmentInfoAPI} from "../../apis/department_api.ts";
+import {DepartmentInfoEntity} from "../../models/entity/department__info_entity.ts";
 import {AcademicEditTeacherDialog} from "../../components/academic/academic_teacher_edit_dialog.tsx";
+import {TeacherEditDTO} from "../../models/dto/teacher_edit_dto.ts";
+
+
+// 扩展TeacherEntity接口，添加departmentName字段
+interface TeacherWithDepartment extends TeacherEntity {
+    departmentName?: string;
+}
 
 export function AcademicTeacher({site}: Readonly<{
     site: SiteInfoEntity
@@ -23,12 +34,15 @@ export function AcademicTeacher({site}: Readonly<{
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
 
-    const [teacherList, setTeacherList] = useState<PageEntity<TeacherEntity>>({
-        records: new Array(5).fill({}) as TeacherEntity[],
+    const [teacherList, setTeacherList] = useState<PageEntity<TeacherWithDepartment>>({
+        records: new Array(5).fill({}) as TeacherWithDepartment[],
         total: 0,
         size: 20,
         current: 1
-    } as PageEntity<TeacherEntity>);
+    } as PageEntity<TeacherWithDepartment>);
+
+    // 缓存已加载的部门信息
+    const [departmentCache, setDepartmentCache] = useState<{[key: string]: DepartmentInfoEntity}>({});
 
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
         page: 1,
@@ -45,7 +59,7 @@ export function AcademicTeacher({site}: Readonly<{
     const [dialogEdit, setDialogEdit] = useState<boolean>(false);
     const [editTeacherUuid, setEditTeacherUuid] = useState("");
     // 编辑状态：保存编辑时对应的用户数据
-    const [editTeacherData, setEditTeacherData] = useState<TeacherAddDTO | null>(null);
+    const [editTeacherData, setEditTeacherData] = useState<TeacherEditDTO | null>(null);
     // 统计显示状态
     const [showStats, setShowStats] = useState(false);
 
@@ -63,19 +77,66 @@ export function AcademicTeacher({site}: Readonly<{
         };
     }, []);
 
+    // 获取教师列表并获取对应的部门信息
     useEffect(() => {
-        const func = async () => {
+        const fetchTeacherList = async () => {
             const getResp = await GetTeacherListAPI(searchRequest);
             if (getResp?.output === "Success") {
+                const teachers = getResp.data!.records;
+
+                // 创建具有部门名称的教师列表
+                const teachersWithDepartment = [...teachers] as TeacherWithDepartment[];
+
+                // 获取每个教师的部门信息
+                for (const teacher of teachersWithDepartment) {
+                    if (teacher.unit_uuid) {
+                        await fetchDepartmentInfo(teacher);
+                    }
+                }
+
+                setTeacherList({
+                    ...getResp.data!,
+                    records: teachersWithDepartment
+                });
                 setLoading(false);
-                setTeacherList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取教师列表失败");
+                setLoading(false);
             }
         };
-        func().then();
+
+        fetchTeacherList();
     }, [searchRequest]);
+
+    // 获取部门信息
+    const fetchDepartmentInfo = async (teacher: TeacherWithDepartment) => {
+        // 检查缓存中是否已有该部门信息
+        if (departmentCache[teacher.unit_uuid]) {
+            teacher.departmentName = departmentCache[teacher.unit_uuid].department_name;
+            return;
+        }
+
+        try {
+            const deptResp = await GetDepartmentInfoAPI(teacher.unit_uuid);
+            if (deptResp?.output === "Success" && deptResp.data) {
+                // 更新缓存
+                setDepartmentCache(prev => ({
+                    ...prev,
+                    [teacher.unit_uuid]: deptResp.data
+                }));
+
+                // 设置部门名称
+                teacher.departmentName = deptResp.data.department_name;
+            } else {
+                // 设置为未知部门
+                teacher.departmentName = "未知部门";
+            }
+        } catch (error) {
+            console.error("获取部门信息失败", error);
+            teacher.departmentName = "未知部门";
+        }
+    };
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: { opacity: 0 },
@@ -88,7 +149,22 @@ export function AcademicTeacher({site}: Readonly<{
         setLoading(true);
         const getResp = await GetTeacherListAPI(searchRequest);
         if (getResp?.output === "Success") {
-            setTeacherList(getResp.data!);
+            const teachers = getResp.data!.records;
+
+            // 创建具有部门名称的教师列表
+            const teachersWithDepartment = [...teachers] as TeacherWithDepartment[];
+
+            // 获取每个教师的部门信息
+            for (const teacher of teachersWithDepartment) {
+                if (teacher.unit_uuid) {
+                    await fetchDepartmentInfo(teacher);
+                }
+            }
+
+            setTeacherList({
+                ...getResp.data!,
+                records: teachersWithDepartment
+            });
         } else {
             message.error(getResp?.error_message ?? "获取教师列表失败");
         }
@@ -291,6 +367,7 @@ export function AcademicTeacher({site}: Readonly<{
                                     <th>工号</th>
                                     <th>姓名</th>
                                     <th>性别</th>
+                                    <th>部门</th>
                                     <th>职称</th>
                                     <th>联系电话</th>
                                     <th>电子邮箱</th>
@@ -306,6 +383,7 @@ export function AcademicTeacher({site}: Readonly<{
                                             <td><div className="h-4 bg-base-300 rounded w-16"></div></td>
                                             <td><div className="h-4 bg-base-300 rounded w-20"></div></td>
                                             <td><div className="h-4 bg-base-300 rounded w-8"></div></td>
+                                            <td><div className="h-4 bg-base-300 rounded w-24"></div></td>
                                             <td><div className="h-4 bg-base-300 rounded w-16"></div></td>
                                             <td><div className="h-4 bg-base-300 rounded w-28"></div></td>
                                             <td><div className="h-4 bg-base-300 rounded w-32"></div></td>
@@ -319,6 +397,7 @@ export function AcademicTeacher({site}: Readonly<{
                                             <td>{teacher.id}</td>
                                             <td>{teacher.name}</td>
                                             <td>{teacher.sex === 1 ? '男' : '女'}</td>
+                                            <td>{teacher.departmentName || '未分配'}</td>
                                             <td>{teacher.job_title}</td>
                                             <td>{teacher.phone}</td>
                                             <td>{teacher.email}</td>
@@ -390,7 +469,7 @@ export function AcademicTeacher({site}: Readonly<{
             <AcademicDeleteTeacherDialog
                 show={dialogDelete}
                 emit={setDialogDelete}
-                userUuid={deleteTeacherUuid}
+                teacherUuid={deleteTeacherUuid}
                 onDeletedSuccess={refreshTeacherList}
             />
             <AdminAddTeacherDialog
@@ -401,7 +480,7 @@ export function AcademicTeacher({site}: Readonly<{
             <AcademicEditTeacherDialog
                 show={dialogEdit}
                 emit={setDialogEdit}
-                userUuid={editTeacherUuid}
+                teacherUuid={editTeacherUuid}
                 defaultData={editTeacherData}
                 onEditSuccess={refreshTeacherList}
             />

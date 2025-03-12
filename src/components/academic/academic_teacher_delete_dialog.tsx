@@ -32,24 +32,25 @@ import {
     CheckOne,
     CloseOne,
 } from "@icon-park/react";
-import {DeleteUserAPI} from "../../apis/user_api.ts";
+
 import * as React from "react";
 import {message, Modal} from "antd";
+import {DeleteTeacherAPI} from "../../apis/teacher_api.ts";
 
 
 /**
- * # 管理员删除用户 dialog
- * > 该函数用于创建一个对话框，管理员可以通过该对话框删除用户
+ * # 管理员删除教师 dialog
+ * > 该函数用于创建一个对话框，管理员可以通过该对话框删除教师
  * @param show  控制该对话框是否显示
  * @param emit  控制该对话框是否提交
- * @param userUuid  用户uuid
- * @param onDeletedSuccess  成功删除用户后的操作
+ * @param 教师Uuid  教师uuid
+ * @param onDeletedSuccess  成功删除教师后的操作
  * @constructor
  */
-export function AcademicDeleteTeacherDialog({show, emit,userUuid, onDeletedSuccess}: Readonly<{
+export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSuccess}: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
-    userUuid: string;
+    teacherUuid: string;
     onDeletedSuccess?: () => void;
 }>) : JSX.Element {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,14 +79,14 @@ export function AcademicDeleteTeacherDialog({show, emit,userUuid, onDeletedSucce
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        console.log("执行删除操作, userUuid:", userUuid); // 调试日志
+        console.log("执行删除操作, teacherUuid:", teacherUuid); // 调试日志
 
-        if (!userUuid) {
-            message.error("用户 UUID 为空，无法删除！");
+        if (!teacherUuid) {
+            message.error("教师 UUID 为空，无法删除！");
             return;
         }
         try {
-            const getResp = await DeleteUserAPI(userUuid);
+            const getResp = await DeleteTeacherAPI(teacherUuid);
             if (getResp?.output === "Success") {
                 message.success("删除成功");
                 onDeletedSuccess?.();
@@ -127,10 +128,10 @@ export function AcademicDeleteTeacherDialog({show, emit,userUuid, onDeletedSucce
                 <div className="flex flex-col space-y-4">
                     <h3 className="font-bold text-lg flex items-center space-x-2">
                         <AddUser theme="outline" size="20" fill="#333"/>
-                        <span>删除用户</span>
+                        <span>删除教师</span>
                     </h3>
-                    <form id={"user_delete"} onSubmit={onSubmit}  className="py-2 grid space-y-2">
-                        <p>确定要删除该用户吗？</p>
+                    <form id={"teacher_delete"} onSubmit={onSubmit}  className="py-2 grid space-y-2">
+                        <p>确定要删除该教师吗？</p>
                     </form>
                 </div>
             </Modal>
