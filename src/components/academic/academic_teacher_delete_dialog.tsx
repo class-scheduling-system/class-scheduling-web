@@ -78,9 +78,7 @@ export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSu
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
         console.log("执行删除操作, teacherUuid:", teacherUuid); // 调试日志
-
         if (!teacherUuid) {
             message.error("教师 UUID 为空，无法删除！");
             return;
@@ -97,7 +95,7 @@ export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSu
                 message.error(getResp?.error_message ?? "删除失败");
             }
         } catch (error) {
-            console.error("删除用户失败:", error);
+            console.error("删除教师失败:", error);
             message.error("删除失败");
         }
     }
@@ -117,7 +115,7 @@ export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSu
                                    <span>取消</span>
                                </button>
                                <button
-                                   type={"submit"} form={"user_delete"}
+                                   type={"submit"} form={"teacher_delete"}
                                    className={"btn btn-success"}>
                                    <CheckOne theme="outline" size="16"/>
                                    <span>确定</span>

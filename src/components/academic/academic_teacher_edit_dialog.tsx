@@ -1,21 +1,19 @@
 import { useState, useEffect, JSX } from "react";
 import {
-    AddUser, BuildingThree,
-    CheckOne,
-    CloseOne, DocDetail, EditName,
-    Envelope,
+    BuildingThree,
+    CheckOne, Chinese,
+    CloseOne, Column, DocDetail, EditName, English,
+    Envelope, Keyboard,
     PhoneTelephone,
-    User,
+    User, UserBusiness,
     UserPositioning
 } from "@icon-park/react";
 import { message, Modal } from "antd";
 import * as React from "react";
 import { TeacherEntity } from "../../models/entity/teacher_entity.ts";
 import {GetDepartmentListAPI} from "../../apis/department_api.ts";
-import {RoleEntity} from "../../models/entity/role_entity.ts";
 import {DepartmentInfoEntity} from "../../models/entity/department__info_entity.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
-import {UserEditDTO} from "../../models/dto/user_edit_dto.ts";
 import {TeacherEditDTO} from "../../models/dto/teacher_edit_dto.ts";
 import {EditTeacherAPI} from "../../apis/teacher_api.ts";
 import {GetUserListAPI} from "../../apis/user_api.ts";
@@ -200,7 +198,7 @@ export function AcademicEditTeacherDialog({ show, emit, teacherUuid, defaultData
                     {/* 教师工号 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <User theme="outline" size="16" fill="#333" />
+                            <Keyboard theme="outline" size="16" fill="#333"/>
                             <span>教师工号</span>
                         </legend>
                         <input
@@ -215,7 +213,7 @@ export function AcademicEditTeacherDialog({ show, emit, teacherUuid, defaultData
                     {/* 教师姓名 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <User theme="outline" size="16" fill="#333" />
+                            <Chinese theme="outline" size="16" fill="#333"/>
                             <span>教师姓名</span>
                         </legend>
                         <input
@@ -230,7 +228,7 @@ export function AcademicEditTeacherDialog({ show, emit, teacherUuid, defaultData
                     {/* 教师英文名 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <User theme="outline" size="16" fill="#333" />
+                            <English theme="outline" size="16" fill="#333"/>
                             <span>教师英文名</span>
                         </legend>
                         <input
@@ -260,7 +258,7 @@ export function AcademicEditTeacherDialog({ show, emit, teacherUuid, defaultData
                     {/* 教师性别 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <User theme="outline" size="16" fill="#333" />
+                            <Column theme="outline" size="16" fill="#333"/>
                             <span>教师性别</span>
                         </legend>
                         <select
@@ -306,7 +304,7 @@ export function AcademicEditTeacherDialog({ show, emit, teacherUuid, defaultData
                     {/* 教师职称 */}
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
-                            <UserPositioning theme="outline" size="16" fill="#333" />
+                            <UserBusiness theme="outline" size="16" fill="#333"/>
                             <span>教师职称</span>
                         </legend>
                         <input
