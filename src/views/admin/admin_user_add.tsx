@@ -129,7 +129,6 @@ export function AdminUserAddPage(): React.JSX.Element {
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
         // 根据角色判断是否需要保留 department、type
         const payload = {...data, permission: targetKeys} as UserAddDTO;
         if (payload.role_uuid !== (teachingRole ? teachingRole.role_uuid : "")) {
@@ -329,8 +328,6 @@ export function AdminUserAddPage(): React.JSX.Element {
                             </>
                         )}
                     </div>
-
-                    {/* 创建一个两列布局的容器来放置权限和手机号 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* 权限选择（穿梭框）*/}
                         <div className="form-control">

@@ -78,8 +78,6 @@ export function AdminEditUserDialog({ show, emit, userUuid, defaultData,onEditSu
             const getResp = await EditUserAPI(userUuid, data);
             if (getResp?.output === "Success") {
                 message.success("编辑成功");
-
-                // 调用父组件传来的回调，刷新用户列表
                 onEditSuccess?.();
 
                 handleClose();

@@ -28,7 +28,7 @@
 
 import { useState, useEffect, JSX } from "react";
 import {
-    AddUser, ApplicationEffect,
+  ApplicationEffect,
     CheckOne,
     CloseOne, EditName,
     Envelope, Forbid,
@@ -38,15 +38,16 @@ import {
     UserPositioning
 } from "@icon-park/react";
 import { EditUserAPI } from "../../apis/user_api.ts";
-import { message, Modal } from "antd";
+import {message, Transfer} from "antd";
 import * as React from "react";
-import { UserAddDTO } from "../../models/dto/user_add_dto.ts";
 import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 import { GetRoleListAPI } from "../../apis/role_api.ts";
 import { RoleEntity } from "../../models/entity/role_entity.ts";
 import { UserEditDTO } from "../../models/dto/user_edit_dto.ts";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {Link, useLocation, useNavigate, useParams} from "react-router";
+import {GetPermissionListAPI} from "../../apis/permission_api.ts";
+import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
 
 
 export function AdminEditUserPage({site}: Readonly<{
@@ -64,36 +65,13 @@ export function AdminEditUserPage({site}: Readonly<{
         phone: "",
         email: "",
         status: 1,
-        ban: 0, // 修改为布尔类型值
+        ban: false,
         role_uuid: "",
         permission: [] as string[],
     });
     const [loading, setLoading] = useState(true);
-
-    // 初始化教师信息
-    useEffect(() => {
-        if (userInfo) {
-            // 使用传递过来的教师信息初始化表单
-            setData({
-                name: userInfo.name,
-                password: userInfo.password,
-                phone:  userInfo. phone,
-                email:userInfo.email,
-                status: userInfo. status,
-                ban: userInfo.ban,
-                role_uuid: userInfo.role_uuid,
-                permission: userInfo.permission,
-            });
-            setLoading(false);
-        } else {
-            // 如果没有传递教师信息，返回教师列表页面
-            message.error("未找到用户信息");
-            navigate("/admin/user");
-        }
-    }, [userInfo, navigate]);
-
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [permissionList, setPermissionList] = useState<any[]>([]);
+    const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
     const [searchRequest] = useState<PageSearchDTO>({
         page: 1,
@@ -108,6 +86,64 @@ export function AdminEditUserPage({site}: Readonly<{
         )
     );
 
+    // 初始化教师信息
+    useEffect(() => {
+        if (userInfo) {
+            // 使用传递过来的教师信息初始化表单
+            setData({
+                name: userInfo.name,
+                password: userInfo.password,
+                phone:  userInfo. phone,
+                email:userInfo.email,
+                status: userInfo.status,
+                ban: userInfo.ban,
+                role_uuid: userInfo.role_uuid,
+                permission: userInfo.permission,
+            });
+            setLoading(false);
+        } else {
+            // 如果没有传递教师信息，返回教师列表页面
+            message.error("未找到用户信息");
+            navigate("/admin/user");
+        }
+    }, [userInfo, navigate]);
+
+
+    // 获取权限列表
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            try {
+                const response = await GetPermissionListAPI();
+                if (response?.output === "Success") {
+                    console.log("获取权限列表成功:", response.data);
+                    // 转换权限列表为Transfer需要的格式
+                    const permissionData = response.data?.map(item => ({
+                        key: item.permission_key,
+                        title: item.name,
+                        description: item.permission_key,
+                        disabled: false
+                    }));
+                    setPermissionList(permissionData);
+                } else {
+                    message.error(response?.error_message ?? "获取权限列表失败");
+                }
+            } catch (error) {
+                console.error("权限列表请求失败:", error);
+                message.error("获取权限列表失败");
+            }
+        };
+        fetchPermissions().then();
+    }, []);
+
+    // 穿梭框变更处理
+    const handleTransferChange = (newTargetKeys: string[]) => {
+        setTargetKeys(newTargetKeys);
+    };
+
+    // 穿梭框过滤函数
+    const filterOption = (inputValue: string, option: any) =>
+        option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
+        option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
 
     // 重置表单
     const resetForm = () => {
@@ -118,7 +154,7 @@ export function AdminEditUserPage({site}: Readonly<{
                 password: userInfo.password,
                 phone:  userInfo. phone,
                 email:userInfo.email,
-                status: userInfo. status,
+                status: userInfo.status,
                 ban: userInfo.ban,
                 role_uuid: userInfo.role_uuid,
                 permission: userInfo.permission,
@@ -129,8 +165,9 @@ export function AdminEditUserPage({site}: Readonly<{
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        const payload = {...data, permission: targetKeys} as UserAddDTO;
         try {
-            const getResp = await EditUserAPI(userId || '', data);
+            const getResp = await EditUserAPI(userId || '', payload);
             if (getResp?.output === "Success") {
                 message.success("编辑用户成功");
                 navigate("/admin/user");
@@ -263,26 +300,6 @@ export function AdminEditUserPage({site}: Readonly<{
                                 )) || []}
                             </select>
                         </fieldset>
-                        {/* 权限选择（可选多选） */}
-                        <fieldset className="flex flex-col">
-                            <legend className="flex items-center space-x-1 mb-1">
-                                <Permissions theme="outline" size="16" fill="#333" />
-                                <span>权限</span>
-                            </legend>
-                            <select
-                                className="select w-full validator"
-                                value={data.permission && data.permission.length ? data.permission[0] : ""}
-                                onChange={(e) => setData({ ...data, permission: [e.target.value] })}
-                                required
-                            >
-                                <option value="" disabled>
-                                    请选择权限
-                                </option>
-                                <option value="user">user</option>
-                                <option value="admin">admin</option>
-                                <option value="super">super</option>
-                            </select>
-                        </fieldset>
                         <fieldset className="flex flex-col">
                             <legend className="flex items-center space-x-1 mb-1">
                                 <ApplicationEffect theme="outline" size="16" fill="#333"/>
@@ -300,6 +317,26 @@ export function AdminEditUserPage({site}: Readonly<{
                                 <option value="1">启用</option>
                                 <option value="0">禁用</option>
                             </select>
+                        </fieldset>
+                        {/* 权限选择（可选多选） */}
+                        <fieldset className="flex flex-col">
+                                <legend className="flex items-center space-x-1 mb-1">
+                                    <Permissions theme="outline" size="16" fill="#333"/>
+                                    <span className="label-text">权限</span>
+                                </legend>
+                                <Transfer
+                                    dataSource={permissionList}
+                                    titles={['可选权限', '已选权限']}
+                                    targetKeys={targetKeys}
+                                    onChange={handleTransferChange}
+                                    filterOption={filterOption}
+                                    render={item => item.title}
+                                    showSearch
+                                    listStyle={{
+                                        width: '100%',
+                                        height: 300,
+                                    }}
+                                />
                         </fieldset>
                         <fieldset className="flex flex-col">
                             <legend className="flex items-center space-x-1 mb-1">

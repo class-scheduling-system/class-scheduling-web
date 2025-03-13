@@ -27,12 +27,42 @@
  */
 
 export type UserEditDTO = {
-    ban?: number;
+    /**
+     * 账号是否被封禁 0: 未封禁 1: 已封禁
+     */
+    ban?: boolean;
+    /**
+     * 用户邮箱
+     * <p>
+     * 该字段用于存储用户的电子邮箱地址。邮箱地址必须符合正则表达式{@code
+     * StringConstant.Regular.EMAIL_REGULAR_EXPRESSION_ABLE_EMPTY}，
+     * 允许为空或为标准的电子邮件格式，例如 "example@example.com"。
+     */
     email?: string;
+    /**
+     * 用户名
+     * <p>
+     * 该字段用于存储用户的名称。用户名必须符合正则表达式{@code
+     * StringConstant.Regular.USER_NAME_REGULAR_EXPRESSION_ABLE_EMPTY}，
+     * 允许为空或为4到32位的字母、数字、下划线或短横线的组合。
+     */
     name?: string;
     password?: string;
+    /**
+     * 用户权限列表
+     */
     permission?: string[];
+    /**
+     * 用户手机号
+     * <p>
+     * 该字段用于存储用户的手机号码。手机号码必须符合正则表达式{@code
+     * StringConstant.Regular.PHONE_REGULAR_EXPRESSION_ABLE_EMPTY}，
+     * 允许为空或为标准的手机号格式，例如 "13800138000"。
+     */
     phone?: string;
     role_uuid?: string;
+    /**
+     * 账号状态 0: 禁用 1: 启用
+     */
     status?: number;
 }
