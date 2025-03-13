@@ -43,7 +43,8 @@ import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {UserEntity} from "../../models/entity/user_entity.ts";
 import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
+;
 
 // 不再需要 useNavigate
 
@@ -61,15 +62,15 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
+
+    const navigate = useNavigate();
+
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     // 删除用户相关状态
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
-    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
-    const [editUserUuid, setEditUserUuid] = useState("");
-    // 保存编辑时对应的用户数据
-    const [editUserData, setEditUserData] = useState<UserEntity | null>(null);
+
     // 添加刷新标记状态
     const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
@@ -159,6 +160,13 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         return pageInfo;
     }
 
+    // 处理编辑用户
+    const handleEditUser = (user: UserEntity) => {
+        navigate(`/admin/edit-user/${user.user_uuid}`, {
+            state: { userInfo: user }
+        });
+    };
+
     // 搜索防抖动
     useEffect(() => {
         setLoading(true);
@@ -223,11 +231,7 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                             <td className={"flex justify-end"}>
                                                 <div className="join">
                                                     <button
-                                                        onClick={() => {
-                                                            setEditUserUuid(record.user?.user_uuid || '');
-                                                            setEditUserData(record.user || null);
-                                                            setDialogEdit(true);
-                                                        }}
+                                                        onClick={() => handleEditUser(record.user!)}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                         <Editor theme="outline" size="12"/>
                                                         <span>编辑</span>
@@ -319,14 +323,6 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 emit={setDialogDelete}
                 userUuid={deleteUserUuid}
                 onDeletedSuccess={refreshUserList}
-            />
-
-            <AdminEditUserDialog
-                show={dialogEdit}
-                emit={setDialogEdit}
-                userUuid={editUserUuid}
-                defaultData={editUserData}
-                onEditSuccess={refreshUserList}
             />
         </>
     );

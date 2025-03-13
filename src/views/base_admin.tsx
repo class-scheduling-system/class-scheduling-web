@@ -40,6 +40,7 @@ import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 import {People} from "@icon-park/react";
 import {AdminRole} from "./admin/admin_role.tsx";
 import {AdminUserAddPage} from "./admin/admin_user_add.tsx";
+import {AdminEditUserPage} from "./admin/admin_user_edit.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -222,6 +223,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
                                 <Route path="/user/add" element={<AdminUserAddPage/>}/>
+                                <Route path="/edit-user/:userId" element={<AdminEditUserPage site={site}/>}/>
                                 <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
