@@ -73,11 +73,15 @@ export type TeacherEntity = {
     /**
      * 教师性别（0：女，1：男）
      */
-    sex?: number;
+    sex?: boolean;
     /**
      * 教师主键
      */
     teacher_uuid?: string;
+    /**
+     * 教师类型
+     */
+    type?: string;
     /**
      * 单位主键
      */

@@ -1,23 +1,18 @@
 import {JSX, useEffect, useRef, useState} from "react";
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {AddOne, ChartGraph, Delete, EditTwo, PeopleDeleteOne, PreviewOpen, Search} from "@icon-park/react";
-import {TeacherAddDTO} from "../../models/dto/teacher_add_dto.ts";
-import {AdminAddTeacherDialog} from "../../components/academic/academic_teacher_add_dialog.tsx";
 import {GetTeacherListAPI} from "../../apis/teacher_api.ts";
 import {message} from "antd";
-import {useDispatch, useSelector} from "react-redux";
-import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {PageEntity} from "../../models/entity/page_entity.ts";
 import {TeacherEntity} from "../../models/entity/teacher_entity.ts";
-import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 import {useTransition} from "@react-spring/web";
 import {AcademicDeleteTeacherDialog} from "../../components/academic/academic_teacher_delete_dialog.tsx";
 
 
 import {GetDepartmentInfoAPI} from "../../apis/department_api.ts";
 import {DepartmentInfoEntity} from "../../models/entity/department__info_entity.ts";
-import {AcademicEditTeacherDialog} from "../../components/academic/academic_teacher_edit_dialog.tsx";
-import {TeacherEditDTO} from "../../models/dto/teacher_edit_dto.ts";
+import {useNavigate} from "react-router";
+import {PageTeacherSearchDto} from "../../models/dto/page_teacher_search_dto.ts"; // 添加 useNavigate
 
 
 // 扩展TeacherEntity接口，添加departmentName字段
@@ -28,11 +23,9 @@ interface TeacherWithDepartment extends TeacherEntity {
 export function AcademicTeacher({site}: Readonly<{
     site: SiteInfoEntity
 }>) {
-    const [searchTerm, setSearchTerm] = useState("");
     const inputFocus = useRef<HTMLInputElement | null>(null);
+    const navigate = useNavigate(); // 使用 useNavigate hook
 
-    const dispatch = useDispatch();
-    const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
 
     const [teacherList, setTeacherList] = useState<PageEntity<TeacherWithDepartment>>({
         records: new Array(5).fill({}) as TeacherWithDepartment[],
@@ -44,22 +37,23 @@ export function AcademicTeacher({site}: Readonly<{
     // 缓存已加载的部门信息
     const [departmentCache, setDepartmentCache] = useState<{[key: string]: DepartmentInfoEntity}>({});
 
-    const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
+    const [searchRequest, setSearchRequest] = useState<PageTeacherSearchDto>({
         page: 1,
         size: 20,
         is_desc: true,
-    } as PageSearchDTO);
+        department:'',
+        status:'',
+        name:''
+    } as PageTeacherSearchDto);
 
-    const [search, setSearch] = useState<string>("");
+    const [departmentSearch, setDepartmentSearch] = useState<string>("");
+    const [statusSearch, setStatusSearch] = useState<string>("");
+    const [nameSearch, setNameSearch] = useState<string>("");
+
     const [loading, setLoading] = useState(true);
-    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     // 删除用户相关状态
     const [deleteTeacherUuid, setDeleteTeacherUuid] = useState("");
-    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
-    const [editTeacherUuid, setEditTeacherUuid] = useState("");
-    // 编辑状态：保存编辑时对应的用户数据
-    const [editTeacherData, setEditTeacherData] = useState<TeacherEditDTO | null>(null);
     // 统计显示状态
     const [showStats, setShowStats] = useState(false);
 
@@ -105,12 +99,16 @@ export function AcademicTeacher({site}: Readonly<{
                 setLoading(false);
             }
         };
-
         fetchTeacherList();
     }, [searchRequest]);
 
     // 获取部门信息
     const fetchDepartmentInfo = async (teacher: TeacherWithDepartment) => {
+        // 确保 unit_uuid 存在且非空
+        if (!teacher.unit_uuid) {
+            return;
+        }
+
         // 检查缓存中是否已有该部门信息
         if (departmentCache[teacher.unit_uuid]) {
             teacher.departmentName = departmentCache[teacher.unit_uuid].department_name;
@@ -211,27 +209,18 @@ export function AcademicTeacher({site}: Readonly<{
         return pageInfo;
     }
 
-    // 处理添加教师按钮
+    // 处理添加教师按钮 - 直接导航到添加教师页面
     const handleAddTeacher = () => {
-        setDialogAdd(true);
+        navigate("/academic/add-teacher");
     };
 
     // 处理编辑教师
+    // 处理编辑教师
     const handleEditTeacher = (teacher: TeacherEntity) => {
-        setEditTeacherUuid(teacher.teacher_uuid);
-        // 将教师数据转换为TeacherAddDTO
-        setEditTeacherData({
-            name: teacher.name,
-            english_name: teacher.english_name,
-            ethnic: teacher.ethnic,
-            sex: teacher.sex,
-            phone: teacher.phone,
-            email: teacher.email,
-            job_title: teacher.job_title,
-            desc: teacher.desc,
-            status: teacher.status
-        } as TeacherAddDTO);
-        setDialogEdit(true);
+        // 使用路由导航到编辑页面，并传递教师ID和教师信息
+        navigate(`/academic/edit-teacher/${teacher.teacher_uuid}`, {
+            state: { teacherInfo: teacher }
+        });
     };
 
     // 处理删除教师
@@ -250,10 +239,15 @@ export function AcademicTeacher({site}: Readonly<{
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            setSearchRequest({ ...searchRequest, keyword: search });
+            setSearchRequest({
+                ...searchRequest,
+                department: departmentSearch || undefined,
+                status: statusSearch || undefined,
+                name: nameSearch || undefined,
+            });
         }, 500);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [departmentSearch, statusSearch, nameSearch]); // 添加依赖项
 
     return (
         <>
@@ -264,7 +258,7 @@ export function AcademicTeacher({site}: Readonly<{
                         教师管理
                     </h1>
 
-                    <div className="flex gap-2">
+                    < div className="flex gap-2">
                         <button
                             className="btn btn-outline btn-info flex items-center gap-1"
                             onClick={() => setShowStats(!showStats)}
@@ -282,10 +276,49 @@ export function AcademicTeacher({site}: Readonly<{
                                 type="text"
                                 placeholder="搜索教师..."
                                 className="input input-bordered pl-10 pr-16"
-                                value={search}
+                                value={departmentSearch}
                                 onChange={(e) => {
-                                    setSearch(e.target.value);
-                                    setSearchRequest({ ...searchRequest, page: 1 }); // 重置页码
+                                    setDepartmentSearch(e.target.value);
+                                }}
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                                <kbd className="kbd kbd-sm">Ctrl</kbd>
+                                <span className="mx-1">+</span>
+                                <kbd className="kbd kbd-sm">K</kbd>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                <Search theme="outline" size="18" />
+                            </div>
+                            <input
+                                ref={inputFocus}
+                                type="text"
+                                placeholder="搜索教师..."
+                                className="input input-bordered pl-10 pr-16"
+                                value={statusSearch}
+                                onChange={(e) => {
+                                    setStatusSearch(e.target.value);
+                                }}
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                                <kbd className="kbd kbd-sm">Ctrl</kbd>
+                                <span className="mx-1">+</span>
+                                <kbd className="kbd kbd-sm">K</kbd>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                <Search theme="outline" size="18" />
+                            </div>
+                            <input
+                                ref={inputFocus}
+                                type="text"
+                                placeholder="搜索教师..."
+                                className="input input-bordered pl-10 pr-16"
+                                value={nameSearch}
+                                onChange={(e) => {
+                                    setNameSearch(e.target.value);
                                 }}
                             />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
@@ -295,9 +328,10 @@ export function AcademicTeacher({site}: Readonly<{
                             </div>
                         </div>
 
+                        {/* 修改为直接导航到添加教师页面的按钮 */}
                         <button
-                            className="btn btn-primary flex items-center gap-1"
                             onClick={handleAddTeacher}
+                            className="btn btn-primary flex items-center gap-1"
                         >
                             <AddOne theme="outline" size="18" />
                             <span className="hidden sm:inline">添加教师</span>
@@ -415,9 +449,9 @@ export function AcademicTeacher({site}: Readonly<{
                                                     <PreviewOpen theme="outline" size="16" />
                                                 </button>
                                                 <button
-                                                    className="btn btn-xs btn-warning"
-                                                    title="编辑"
-                                                    onClick={() => handleEditTeacher(teacher)}
+                                                      className="btn btn-xs btn-warning"
+                                                      title="编辑"
+                                                      onClick={() => handleEditTeacher(teacher)}
                                                 >
                                                     <EditTwo theme="outline" size="16" />
                                                 </button>
@@ -471,18 +505,6 @@ export function AcademicTeacher({site}: Readonly<{
                 emit={setDialogDelete}
                 teacherUuid={deleteTeacherUuid}
                 onDeletedSuccess={refreshTeacherList}
-            />
-            <AdminAddTeacherDialog
-                show={dialogAdd}
-                emit={setDialogAdd}
-                onAddSuccess={refreshTeacherList}
-            />
-            <AcademicEditTeacherDialog
-                show={dialogEdit}
-                emit={setDialogEdit}
-                teacherUuid={editTeacherUuid}
-                defaultData={editTeacherData}
-                onEditSuccess={refreshTeacherList}
             />
         </>
     );

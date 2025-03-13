@@ -40,6 +40,8 @@ import {AcademicClass} from "./academic/academic_class.tsx";
 import {AcademicCourse} from "./academic/academic_course.tsx";
 import {AcademicSchedule} from "./academic/academic_schedule.tsx";
 import {AcademicTeacher} from "./academic/academic_teacher.tsx";
+import {AcademicAddTeacher} from "./academic/academic_add_teacher.tsx";
+import {AcademicEditTeacher} from "./academic/academic_edit_teacher.tsx";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -221,6 +223,8 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/course" element={<AcademicCourse site={site}/>}/>
                                 <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
+                                <Route path="/add-teacher" element={<AcademicAddTeacher site={site}/>}/>
+                                <Route path="/edit-teacher/:teacherId" element={<AcademicEditTeacher site={site}/>}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>

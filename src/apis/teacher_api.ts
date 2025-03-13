@@ -28,9 +28,9 @@
 
 import {BaseResponse} from "../models/base_response.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {TeacherEntity} from "../models/entity/teacher_entity.ts";
+import {PageTeacherSearchDto} from "../models/dto/page_teacher_search_dto.ts";
 
 /**
  * # 获取教师列表
@@ -39,7 +39,7 @@ import {TeacherEntity} from "../models/entity/teacher_entity.ts";
  * @returns {Promise<BaseResponse<Page<TeacherEntity>> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetTeacherListAPI = async (data: PageSearchDTO):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
+const GetTeacherListAPI = async (data:PageTeacherSearchDto):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
     return BaseApi<PageEntity<TeacherEntity>>(
         MethodType.GET,
         "/api/v1/teacher/list",
@@ -68,6 +68,7 @@ const AddTeacherAPI = async (data: {
     name: string;
     phone?: string;
     sex: number;
+    type: string;
     unit_uuid: string;
     user_uuid: string;
 }): Promise<BaseResponse<TeacherEntity> | undefined> => {

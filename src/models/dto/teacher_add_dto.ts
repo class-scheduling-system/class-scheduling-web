@@ -40,7 +40,7 @@ export type TeacherAddDTO = {
      */
     english_name: string;
     /**
-     * 教师名族
+     * 教师民族
      */
     ethnic: string;
     /**
@@ -62,7 +62,11 @@ export type TeacherAddDTO = {
     /**
      * 教师性别 0：女 1：男
      */
-    sex: number;
+    sex: boolean;
+    /**
+     * 教师类型
+     */
+    type: string;
     /**
      * 单位主键
      */

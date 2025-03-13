@@ -26,53 +26,30 @@
  * --------------------------------------------------------------------------------
  */
 
-export type TeacherEditDTO = {
+export type TeacherTypeEntity = {
     /**
-     * 教师描述
+     * 创建时间
      */
-    desc?: string;
+    created_at?: number;
     /**
-     * 教师邮箱
+     * 教师类型主键
      */
-    email?: string;
+    teacher_type_uuid?: string;
     /**
-     * 教师英文名
+     * 类型描述
      */
-    english_name: string;
+    type_desc?: string;
     /**
-     * 教师民族
+     * 类型英文名称
      */
-    ethnic: string;
+    type_english_name?: string;
     /**
-     * 教师工号
+     * 类型名称
      */
-    id: string;
+    type_name?: string;
     /**
-     * 教师职称
+     * 更新时间
      */
-    job_title?: string;
-    /**
-     * 教师姓名
-     */
-    name: string;
-    /**
-     * 教师电话
-     */
-    phone?: string;
-    /**
-     * 教师性别 0：女 1：男
-     */
-    sex: boolean;
-    /**
-     * 教师类型
-     */
-    type: string;
-    /**
-     * 单位主键
-     */
-    unit_uuid: string;
-    /**
-     * 用户主键
-     */
-    user_uuid: string;
+    updated_at?: number;
+
 }

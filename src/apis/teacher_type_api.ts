@@ -26,53 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
-export type TeacherEditDTO = {
-    /**
-     * 教师描述
-     */
-    desc?: string;
-    /**
-     * 教师邮箱
-     */
-    email?: string;
-    /**
-     * 教师英文名
-     */
-    english_name: string;
-    /**
-     * 教师民族
-     */
-    ethnic: string;
-    /**
-     * 教师工号
-     */
-    id: string;
-    /**
-     * 教师职称
-     */
-    job_title?: string;
-    /**
-     * 教师姓名
-     */
-    name: string;
-    /**
-     * 教师电话
-     */
-    phone?: string;
-    /**
-     * 教师性别 0：女 1：男
-     */
-    sex: boolean;
-    /**
-     * 教师类型
-     */
-    type: string;
-    /**
-     * 单位主键
-     */
-    unit_uuid: string;
-    /**
-     * 用户主键
-     */
-    user_uuid: string;
+import {BaseResponse} from "../models/base_response.ts";
+import {TeacherTypeEntity} from "../models/entity/teacher_type_entity.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+
+/**
+ * # 获取用户列表
+ * > 该函数用于通过API请求获取用户列表。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ *
+ * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetTeacherTypeListAPI = async (): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
+    return BaseApi<TeacherTypeEntity>(
+        MethodType.GET,
+        "/api/v1/teacher-type/list",
+        null,
+        null,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
+export {
+    GetTeacherTypeListAPI
 }

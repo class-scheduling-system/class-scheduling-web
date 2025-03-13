@@ -26,53 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-export type TeacherEditDTO = {
+export type PageTeacherSearchDto = {
     /**
-     * 教师描述
+     * 部门名称，可选参数，如果提供，则按部门筛选教师
      */
-    desc?: string;
+    department?: string;
     /**
-     * 教师邮箱
+     * 是否降序，默认为true，表示结果按照降序排列
      */
-    email?: string;
+    is_desc: boolean;
     /**
-     * 教师英文名
+     * 教师姓名，可选参数，如果提供，则按姓名筛选教师
      */
-    english_name: string;
+    name?: string;
     /**
-     * 教师民族
+     * 页码，默认为1，表示获取第一页数据
      */
-    ethnic: string;
+    page: number;
     /**
-     * 教师工号
+     * 每页记录数，默认为20，表示每页获取20条记录
      */
-    id: string;
+    size: number;
     /**
-     * 教师职称
+     * 状态，可选参数，如果提供，则按状态筛选教师
      */
-    job_title?: string;
-    /**
-     * 教师姓名
-     */
-    name: string;
-    /**
-     * 教师电话
-     */
-    phone?: string;
-    /**
-     * 教师性别 0：女 1：男
-     */
-    sex: boolean;
-    /**
-     * 教师类型
-     */
-    type: string;
-    /**
-     * 单位主键
-     */
-    unit_uuid: string;
-    /**
-     * 用户主键
-     */
-    user_uuid: string;
+    status?: string;
 }
