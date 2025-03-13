@@ -205,7 +205,6 @@ export function AdminEditUserPage({site}: Readonly<{
                     <Return theme="outline" size="24"/>
                 </Link>
                 <h2 className="text-2xl font-bold flex items-center space-x-2">
-                    <EditName theme="outline" size="24" />
                     <span>编辑用户</span>
                 </h2>
             </div>

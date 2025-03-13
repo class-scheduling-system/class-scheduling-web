@@ -47,13 +47,13 @@ import {RoleEntity} from "../../models/entity/role_entity.ts";
 import {GetRoleListAPI} from "../../apis/role_api.ts";
 import {GetPermissionListAPI} from "../../apis/permission_api.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
 
 export function AdminUserAddPage(): React.JSX.Element {
     const [data, setData] = useState<UserAddDTO>({
         permission: [] as string[],
     } as UserAddDTO);
-
+    const navigate = useNavigate();
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
     const [permissionList, setPermissionList] = useState<any[]>([]);
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
@@ -141,8 +141,7 @@ export function AdminUserAddPage(): React.JSX.Element {
             const getResp = await AddUserAPI(payload);
             if (getResp?.output === "Success") {
                 message.success("添加成功");
-                // 跳转到用户列表或重置表单
-                resetForm();
+                navigate("/admin/user");
             } else {
                 message.error(getResp?.error_message ?? "添加失败");
             }
