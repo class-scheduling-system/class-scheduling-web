@@ -1,3 +1,31 @@
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2022-NOW(至今) 锋楪技术团队
+ * Author: 锋楪技术团队 (https://www.frontleaves.com)
+ *
+ * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
+ * --------------------------------------------------------------------------------
+ * 许可证声明：
+ *
+ * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
+ *
+ * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
+ * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
+ * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
+ *
+ * 使用本软件即表示您了解此声明并同意其条款。
+ *
+ * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
+ * https://opensource.org/licenses/MIT
+ * --------------------------------------------------------------------------------
+ * 免责声明：
+ *
+ * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
+ * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
+ * --------------------------------------------------------------------------------
+ */
+
 import {JSX, useEffect, useRef, useState} from "react";
 import {Add, CheckSmall, Correct, Delete, Editor, Error, Forbid, Newlybuild, Search} from "@icon-park/react";
 import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
@@ -15,9 +43,11 @@ import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {UserEntity} from "../../models/entity/user_entity.ts";
 import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
+import {Link} from "react-router";
+
 // 不再需要 useNavigate
 
-export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -96,9 +126,9 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     }, [dispatch, searchRequest, refreshTrigger]);
 
     const transitionSearch = useTransition(loading ?? 0, {
-        from: { opacity: 0 },
-        enter: { opacity: 1 },
-        config: { duration: 100 },
+        from: {opacity: 0},
+        enter: {opacity: 1},
+        config: {duration: 100},
     });
 
     // 定义刷新用户列表的方法
@@ -119,7 +149,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             } else {
                 pageInfo.push(
                     <button key={i}
-                            onClick={() => setSearchRequest({ ...searchRequest, page: i + 1 })}
+                            onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
                             className="transition shadow btn btn-sm join-item border">
                         {i + 1}
                     </button>
@@ -133,7 +163,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            setSearchRequest({ ...searchRequest, keyword: search });
+            setSearchRequest({...searchRequest, keyword: search});
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -184,11 +214,11 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"error"}
                                                                 text={"已封禁"}
-                                                                icon={<Forbid theme="outline" size="12" />}/>
+                                                                icon={<Forbid theme="outline" size="12"/>}/>
                                             ) : (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"未封禁"}
-                                                                icon={<CheckSmall theme="outline" size="12" />}/>
+                                                                icon={<CheckSmall theme="outline" size="12"/>}/>
                                             )}</td>
                                             <td className={"flex justify-end"}>
                                                 <div className="join">
@@ -199,7 +229,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             setDialogEdit(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
-                                                        <Editor theme="outline" size="12" />
+                                                        <Editor theme="outline" size="12"/>
                                                         <span>编辑</span>
                                                     </button>
                                                     <button
@@ -208,7 +238,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             setDialogDelete(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-error inline-flex">
-                                                        <Delete theme="outline" size="12" />
+                                                        <Delete theme="outline" size="12"/>
                                                         <span>删除</span>
                                                     </button>
                                                 </div>
@@ -223,19 +253,22 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     <div className="flex justify-center">
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: userList.current - 1 })}
+                                    onClick={() => setSearchRequest({...searchRequest, page: userList.current - 1})}
                                     disabled={userList.current === 1}>
                                 上一页
                             </button>
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: userList.current + 1 })}
+                                    onClick={() => setSearchRequest({...searchRequest, page: userList.current + 1})}
                                     disabled={userList.current === Math.ceil(userList.total / userList.size)}>
                                 下一页
                             </button>
                             <select className="join-item transition select select-sm mx-1 border-l-0"
                                     value={searchRequest.size}
-                                    onChange={(e) => setSearchRequest({ ...searchRequest, size: Number(e.target.value) })}>
+                                    onChange={(e) => setSearchRequest({
+                                        ...searchRequest,
+                                        size: Number(e.target.value)
+                                    })}>
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
                                 <option value={15}>15</option>
@@ -248,7 +281,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     </div>
                 </div>
                 <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
-                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl" />
+                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                     <div className="p-4 flex flex-col gap-1">
                         <h2 className="text-xl font-bold">用户列表</h2>
                         <p className="text-base-content text-sm border-l-4 border-base-content ps-2">
@@ -258,26 +291,22 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     <div className="px-4 pb-4 flex flex-col gap-3">
                         <div>
                             <label className="input transition w-full">
-                                <Search theme="outline" size="12" />
+                                <Search theme="outline" size="12"/>
                                 <input ref={inputFocus} type="search" className="grow" placeholder="查询"
-                                       onChange={(event) => setSearch(event.target.value)} />
+                                       onChange={(event) => setSearch(event.target.value)}/>
                                 <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
                                 <kbd className="kbd kbd-sm">K</kbd>
                             </label>
                         </div>
                         <div className={"grid grid-cols-2 gap-3"}>
-                            <button
-                                onClick={() => {
-                                    window.location.href = '/admin/user/add';
-                                }}
-                                className="transition shadow btn btn-outline btn-primary"
-                            >
-                                <Add theme="outline" size="16" />
+                            <Link to={"/admin/user/add"}
+                                  className="transition shadow btn btn-outline btn-primary">
+                                <Add theme="outline" size="16"/>
                                 <span>添加</span>
-                            </button>
+                            </Link>
 
                             <button className="transition shadow btn btn-outline btn-secondary">
-                                <Newlybuild theme="outline" size="16" />
+                                <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
                             </button>
                         </div>
