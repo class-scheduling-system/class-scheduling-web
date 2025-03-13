@@ -32,7 +32,7 @@ import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useRef, useState} from "react";
 import {PageEntity} from "../../models/entity/page_entity.ts";
 import {BuildingEntity} from "../../models/entity/building_entity.ts";
-import {GetBuildingListAPI} from "../../apis/building_api.ts";
+import {GetBuildingPageAPI} from "../../apis/building_api.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
@@ -43,6 +43,7 @@ import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-par
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {AdminBuildingAddDialog} from "../../components/admin/building/admin_building_add_dialog.tsx";
 import {AdminBuildingDeleteDialog} from "../../components/admin/building/admin_building_delete_dialog.tsx";
+import {AdminBuildingEditDialog} from "../../components/admin/building/admin_building_edit_dialog.tsx";
 
 /**
  * # AdminBuilding
@@ -73,7 +74,9 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
     const [dialogAdd, setDialogAdd] = useState<boolean>(false);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
+    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
+    const [operateUuid, setOperateUuid] = useState<string>("");
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -105,7 +108,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
-            const getResp = await GetBuildingListAPI(searchRequest);
+            const getResp = await GetBuildingPageAPI(searchRequest);
             if (getResp?.output === "Success") {
                 setLoading(false);
                 setBuildingList(getResp.data!);
@@ -199,9 +202,9 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                     <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>名字</th>
+                                        <th>教学楼名字</th>
+                                        <th>校区</th>
                                         <th>状态</th>
-                                        <th>新建时间</th>
                                         <th>修改时间</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
@@ -214,8 +217,9 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                 className="transition hover:bg-base-200"
                                             >
                                                 <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
-                                                <td>{building?.building_name}</td>
-                                                <td>{building?.status ? (
+                                                <td>{building.building_name}</td>
+                                                <td>{building.campus.campus_name}</td>
+                                                <td>{building.status ? (
                                                     <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                     type={"success"} text={"启用"}
                                                                     icon={<Correct theme="outline" size="12"/>}/>
@@ -225,12 +229,13 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                                     text={"禁用"}
                                                                     icon={<Error theme="outline" size="12"/>}/>
                                                 )}</td>
-                                                <td>{new Date(building.created_at).toLocaleString()}</td>
                                                 <td>{new Date(building.updated_at).toLocaleString()}</td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
                                                         <button
                                                             onClick={() => {
+                                                                setOperateUuid(building.building_uuid);
+                                                                setDialogEdit(true);
                                                             }}
                                                             className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                             <Editor theme="outline" size="12"/>
@@ -319,6 +324,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
             </div>
             <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd} requestRefresh={setRefreshOperate}/>
             <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete} requestRefresh={setRefreshOperate}/>
+            <AdminBuildingEditDialog show={dialogEdit} editBuildingUuid={operateUuid} emit={setDialogEdit} requestRefresh={setRefreshOperate}/>
         </>
     );
 }
