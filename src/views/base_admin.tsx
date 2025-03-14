@@ -37,10 +37,13 @@ import {AdminBuilding} from "./admin/admin_building.tsx";
 import {animated, useSpring, useTransition} from "@react-spring/web";
 import {AdminNotFound} from "./404/medium_page_not_found.tsx";
 import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
-import {People} from "@icon-park/react";
+import {Home, People} from "@icon-park/react";
 import {AdminRole} from "./admin/admin_role.tsx";
 import {AdminUserAddPage} from "./admin/admin_user_add.tsx";
 import {AdminEditUserPage} from "./admin/admin_user_edit.tsx";
+import {AdminDepartment} from "./admin/admin_department.tsx";
+import cookie from "react-cookies";
+import {message} from "antd";
 
 /**
  * 生成一个管理员控制台组件。
@@ -137,12 +140,16 @@ export function BaseAdmin(): JSX.Element {
                 case 'settings':
                     mainTitle = '系统设置';
                     break;
+                case 'department':
+                    mainTitle = '部门管理';
+                    break;
                 default:
                     mainTitle = mainSection;
             }
 
             breadcrumbItems.push(
-                <li key={mainSection}>
+                <li key={mainSection} className={"flex items-center space-x-1"}>
+                    <Home theme="outline" size="16"/>
                     <Link to={`/admin/${mainSection}`}>{mainTitle}</Link>
                 </li>
             );
@@ -167,7 +174,6 @@ export function BaseAdmin(): JSX.Element {
                     } else if (subPath.includes('permission')) {
                         subTitle = '权限';
                     } else {
-                        // 将路径格式转为显示友好的格式
                         subTitle = subPath.replace(/-/g, ' ');
                     }
 
@@ -184,6 +190,14 @@ export function BaseAdmin(): JSX.Element {
 
         return breadcrumbItems;
     };
+
+    // 用户登出
+    async function userLogout() {
+        cookie.remove("token", { path: '/' });
+        cookie.remove("refresh_token", { path: '/' });
+        message.success("已退出登录");
+        navigate("/auth/login");
+    }
 
     return (
         <animated.div style={fade} className="h-lvh flex bg-gradient-to-br from-primary-50 to-base-100">
@@ -211,7 +225,11 @@ export function BaseAdmin(): JSX.Element {
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
                                 <li><a>个人信息</a></li>
                                 <li><a>修改密码</a></li>
-                                <li><a className="text-error">退出登录</a></li>
+                                <li>
+                                    <button onClick={userLogout} className="text-error">
+                                        退出登录
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -226,6 +244,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/edit-user/:userId" element={<AdminEditUserPage site={site}/>}/>
                                 <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
+                                <Route path="/department" element={<AdminDepartment site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>

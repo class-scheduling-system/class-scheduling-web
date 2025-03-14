@@ -26,7 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingTwo, Dashboard, DatabaseAlert, Log, System, User, UserPositioning, WatchOne} from "@icon-park/react";
+import {
+    BranchOne,
+    BuildingTwo,
+    Dashboard,
+    DatabaseAlert,
+    Log,
+    System,
+    User,
+    UserPositioning,
+    WatchOne
+} from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 
@@ -52,6 +62,8 @@ export function AdminNavComponent(): JSX.Element {
                                        path={"/admin/role"}/>
                 <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="18"/>}
                                        path={"/admin/building"}/>
+                <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
+                                       path={"/admin/department"}/>
 
                 <div className="divider my-2"></div>
 

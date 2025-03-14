@@ -31,23 +31,27 @@ import * as React from "react";
 import {JSX, useEffect, useState} from "react";
 import {BuildingDTO} from "../../../models/dto/building_add_dto.ts";
 import {message, Modal} from "antd";
-import {AddBuildingAPI} from "../../../apis/building_api.ts";
+import {EditBuildingAPI, GetBuildingAPI} from "../../../apis/building_api.ts";
 import {GetCampusListAPI} from "../../../apis/campus_api.ts";
 import {ListOfCampusEntity} from "../../../models/entity/list_of_campus_entity.ts";
 
 /**
- * # AdminBuildingAddDialog
+ * # AdminBuildingEditDialog
+ * > 该函数用于创建一个对话框，管理员可以通过这个对话框编辑已有的建筑信息。此组件以模态对话框的形式呈现，并且提供了关闭对话框的功能。
  *
- * > 该函数用于创建一个对话框，管理员可以通过这个对话框添加新的建筑信息。此组件以模态对话框的形式呈现，并且提供了关闭对话框的功能。
- *
- * @returns {JSX.Element} 返回一个包含标题、说明文本以及关闭按钮的模态对话框组件。
+ * @param show - 一个布尔值，表示对话框是否显示。
+ * @param emit - 一个函数，用于向父组件发送数据。
+ * @param editBuildingUuid - 一个字符串，表示待编辑的建筑的唯一标识符。
+ * @param requestRefresh - 一个函数，用于请求刷新数据。
+ * @constructor
  */
-export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
+export function AdminBuildingEditDialog({show, emit, editBuildingUuid, requestRefresh}: Readonly<{
     show: boolean;
+    editBuildingUuid: string;
     emit: (data: boolean) => void;
     requestRefresh: (refresh: boolean) => void;
 }>): JSX.Element {
-    const [data, setData] = useState<BuildingDTO>({status: true, campus_uuid: "", building_name: ""} as BuildingDTO);
+    const [data, setData] = useState<BuildingDTO>({} as BuildingDTO);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [campusList, setCampusList] = useState<ListOfCampusEntity[]>([] as ListOfCampusEntity[]);
 
@@ -73,6 +77,24 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
         func().then();
     }, []);
 
+    useEffect(() => {
+        const func = async () => {
+            const getResp = await GetBuildingAPI(editBuildingUuid);
+            if (getResp?.output === "Success") {
+                setData({
+                    status: getResp.data!.status,
+                    campus_uuid: getResp.data!.campus.campus_uuid,
+                    building_name: getResp.data!.building_name
+                } as BuildingDTO);
+            } else {
+                message.error(getResp?.error_message);
+            }
+        }
+        if (editBuildingUuid) {
+            func().then();
+        }
+    }, [editBuildingUuid]);
+
     const handleOk = () => {
         setIsModalOpen(false);
     };
@@ -81,18 +103,13 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
         setIsModalOpen(false);
     };
 
-    const handleClose = () => {
-        setData({status: true, campus_uuid: "", building_name: ""} as BuildingDTO);
-        setIsModalOpen(false);
-    }
-
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         console.log(message);
-        const getResp = await AddBuildingAPI(data);
+        const getResp = await EditBuildingAPI(editBuildingUuid, data);
         if (getResp?.output === "Success") {
-            message.success("添加成功");
-            handleClose();
+            message.success("更新成功");
+            handleCancel();
             requestRefresh(true);
         } else {
             message.error(getResp?.error_message);
@@ -105,12 +122,12 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
                    <div className="modal-action">
                        <div className={"flex space-x-3"}>
                            <button type={"button"}
-                                   onClick={handleClose}
+                                   onClick={handleCancel}
                                    className={"btn btn-error"}>
                                <CloseOne theme="outline" size="16"/>
                                <span>取消</span>
                            </button>
-                           <button type={"submit"} form={"building_add"}
+                           <button type={"submit"} form={"building_edit"}
                                    className={"btn btn-success"}>
                                <CheckOne theme="outline" size="16"/>
                                <span>提交</span>
@@ -123,7 +140,7 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
                     <BuildingOne theme="outline" size="20"/>
                     <span>添加教学楼</span>
                 </h3>
-                <form id={"building_add"} onSubmit={onSubmit} className="py-2 grid space-y-2">
+                <form id={"building_edit"} onSubmit={onSubmit} className="py-2 grid space-y-2">
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
                             <Pencil theme="outline" size="16"/>
@@ -160,7 +177,7 @@ export function AdminBuildingAddDialog({show, emit, requestRefresh}: Readonly<{
                     <fieldset className="flex items-center space-x-3">
                         <input
                             onChange={(e) => setData({...data, status: e.target.checked})}
-                            type="checkbox" className={"toggle toggle-sm"} defaultChecked/>
+                            type="checkbox" className={"toggle toggle-sm"} checked={data.status}/>
                         <span>启用教学楼</span>
                     </fieldset>
                 </form>

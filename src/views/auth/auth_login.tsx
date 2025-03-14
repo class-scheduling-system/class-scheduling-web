@@ -81,6 +81,9 @@ export function AuthLogin(): JSX.Element {
                     case "管理员":
                         navigate("/admin/dashboard");
                         break;
+                    case "教务":
+                        navigate("/academic/dashboard");
+                        break;
                     case "用户":
                         navigate("/user/dashboard");
                         break;

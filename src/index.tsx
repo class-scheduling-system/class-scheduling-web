@@ -92,7 +92,7 @@ export function Index(): JSX.Element {
                                 break;
                         }
                     }
-                } else if (location.pathname !== "/auth/login") {
+                } else if (location.pathname !== "/auth/login" && location.pathname !== "/init") {
                     message.error("登录已失效");
                     navigate("/auth/login?fallback=" + location.pathname);
                 }
