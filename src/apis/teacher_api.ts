@@ -42,7 +42,7 @@ import {PageTeacherSearchDto} from "../models/dto/page_teacher_search_dto.ts";
 const GetTeacherListAPI = async (data:PageTeacherSearchDto):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
     return BaseApi<PageEntity<TeacherEntity>>(
         MethodType.GET,
-        "/api/v1/teacher/list",
+        "/api/v1/teacher/page",
         null,
         data,
         null,
