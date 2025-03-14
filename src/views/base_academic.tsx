@@ -42,6 +42,8 @@ import {AcademicSchedule} from "./academic/academic_schedule.tsx";
 import {AcademicTeacher} from "./academic/academic_teacher.tsx";
 import {AcademicAddTeacher} from "./academic/academic_add_teacher.tsx";
 import {AcademicEditTeacher} from "./academic/academic_edit_teacher.tsx";
+import cookie from "react-cookies";
+import {message} from "antd";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -183,6 +185,14 @@ export function BaseAcademic(): JSX.Element {
         return breadcrumbItems;
     };
 
+    // 用户登出
+    async function userLogout() {
+        cookie.remove("token", { path: '/' });
+        cookie.remove("refresh_token", { path: '/' });
+        message.success("已退出登录");
+        navigate("/auth/login");
+    }
+
     return (
         <animated.div style={fade} className="h-lvh flex bg-gradient-to-br from-primary-50 to-base-100">
             <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 shadow-lg">
@@ -209,7 +219,11 @@ export function BaseAcademic(): JSX.Element {
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2">
                                 <li><a>个人信息</a></li>
                                 <li><a>修改密码</a></li>
-                                <li><a className="text-error">退出登录</a></li>
+                                <li>
+                                    <button onClick={userLogout} className="text-error">
+                                        退出登录
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                     </div>

@@ -26,35 +26,42 @@
  * --------------------------------------------------------------------------------
  */
 
-import {CampusEntity} from "./campus_entity.ts";
-
 /**
- * # BuildingEntity
- * > 该类型用于表示一个教学楼实体，包含了教学楼的基本信息，如名称、唯一标识符以及关联的校区等。
+ * 所属校区信息
+ *
+ * CampusDTO
  */
-export type BuildingEntity = {
+export type CampusEntity = {
     /**
-     * 教学楼名称
+     * 校区地址
      */
-    building_name: string;
+    campus_address?: string;
     /**
-     * 教学楼主键，UUID
+     * 校区编码
      */
-    building_uuid: string;
+    campus_code?: string;
+    /**
+     * 校区描述
+     */
+    campus_desc?: string;
+    /**
+     * 校区名称
+     */
+    campus_name?: string;
+    /**
+     * 校区状态 0:禁用 1:启用
+     */
+    campus_status?: boolean;
     /**
      * 校区主键
      */
-    campus: CampusEntity;
+    campus_uuid?: string;
     /**
      * 创建时间
      */
-    created_at: number;
-    /**
-     * 教学楼状态
-     */
-    status: boolean;
+    created_at?: number;
     /**
      * 更新时间
      */
-    updated_at: number;
+    updated_at?: number;
 }

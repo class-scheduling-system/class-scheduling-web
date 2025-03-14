@@ -46,7 +46,7 @@ import {AdminBuildingDeleteDialog} from "../../components/admin/building/admin_b
 import {AdminBuildingEditDialog} from "../../components/admin/building/admin_building_edit_dialog.tsx";
 
 /**
- * # AdminBuilding
+ * # AdminDepartment
  * > 该函数用于显示和管理教学楼列表。它根据提供的站点信息加载相关联的教学楼数据，并允许用户查看这些数据。
  *
  * @param {Readonly<{site: SiteInfoEntity}>} - 包含站点信息的对象，其中`site`字段为`SiteInfoEntity`类型，提供必要的站点上下文信息。
@@ -55,7 +55,7 @@ import {AdminBuildingEditDialog} from "../../components/admin/building/admin_bui
  *
  * @throws 如果从API获取教学楼列表失败，则会通过dispatch抛出一个错误消息toast。
  */
-export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
 
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);

@@ -30,7 +30,7 @@ import {useEffect, useState} from 'react';
 import {SiteInfoEntity} from '../../models/entity/site_info_entity';
 import {BuildingTwo, People, Setting, User} from "@icon-park/react";
 import {GetUserListAPI} from '../../apis/user_api';
-import {GetBuildingListAPI} from '../../apis/building_api';
+import {GetBuildingPageAPI} from '../../apis/building_api';
 import {GetRoleListAPI} from '../../apis/role_api';
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {useSelector} from "react-redux";
@@ -63,7 +63,7 @@ export function AdminDashboard({ site }: Readonly<{
     useEffect(() => {
         const fetchSummaryData = async () => {
             const userResp = await GetUserListAPI({ page: 1, size: 1 });
-            const buildingResp = await GetBuildingListAPI({ page: 1, size: 1 });
+            const buildingResp = await GetBuildingPageAPI({ page: 1, size: 1 });
             const roleResp = await GetRoleListAPI({ page: 1, size: 1 });
 
             setSummary({
