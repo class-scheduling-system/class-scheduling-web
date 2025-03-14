@@ -26,19 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import {
-    Back,
-    BuildingOne,
-    Calendar,
-    CalendarThirty,
-    CheckOne,
-    CloseOne,
-    Notes,
-    People,
-    PhoneTelephone,
-    Sort,
-    Tag
-} from "@icon-park/react";
+import {BuildingOne, CheckOne, CloseOne, Notes, PhoneTelephone, Tag} from "@icon-park/react";
 import * as React from "react";
 import {JSX, useEffect, useState} from "react";
 import {DepartmentDTO} from "../../../models/dto/department_dto.ts";
@@ -49,6 +37,12 @@ import {useNavigate} from "react-router";
 import dayjs from "dayjs";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {message} from "antd";
+import {FormTabsComponent} from "../../../components/form/form_tabs_component.tsx";
+import {BasicInfoSection} from "./components/basic_info_section.tsx";
+import {ContactInfoSection} from "./components/contact_info_section.tsx";
+import {DepartmentPropertiesSection} from "./components/department_properties_section.tsx";
+import {NoteSection} from "./components/note_section.tsx";
+import {PageHeader} from "./components/page_header.tsx";
 
 /**
  * # 部门添加页面
@@ -81,6 +75,8 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [submitting, setSubmitting] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<string>("basic"); // 用于切换标签页
+    const [showHelpText, setShowHelpText] = useState<boolean>(true); // 控制是否显示帮助文本
 
     // 设置页面标题
     useEffect(() => {
@@ -154,423 +150,125 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
         }
     }
 
+    // 切换帮助提示的显示/隐藏
+    const toggleHelpText = () => {
+        setShowHelpText(!showHelpText);
+    };
+
+    // 定义表单标签页
+    const formTabs = [
+        {
+            id: "basic",
+            title: "基本信息",
+            icon: <BuildingOne theme="outline" size="18" />,
+            content: (
+                <BasicInfoSection
+                    data={data}
+                    setData={setData}
+                    departmentList={departmentList}
+                    showHelpText={showHelpText}
+                    today={today}
+                />
+            )
+        },
+        {
+            id: "contact",
+            title: "联系方式",
+            icon: <PhoneTelephone theme="outline" size="18" />,
+            content: (
+                <ContactInfoSection
+                    data={data}
+                    setData={setData}
+                    showHelpText={showHelpText}
+                />
+            )
+        },
+        {
+            id: "properties",
+            title: "部门属性",
+            icon: <Tag theme="outline" size="18" />,
+            content: (
+                <DepartmentPropertiesSection
+                    data={data}
+                    setData={setData}
+                />
+            )
+        },
+        {
+            id: "notes",
+            title: "备注信息",
+            icon: <Notes theme="outline" size="18" />,
+            content: (
+                <NoteSection
+                    data={data}
+                    setData={setData}
+                    showHelpText={showHelpText}
+                />
+            )
+        }
+    ];
+
     return (
         <div className="container mx-auto pb-6">
-            {/* 页面标题 */}
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold flex items-center">
-                    <BuildingOne theme="outline" size="24" className="mr-2" fill="#333"/>
-                    添加部门
-                </h1>
-                <button
-                    onClick={handleBack}
-                    className="btn btn-outline btn-primary"
-                >
-                    <Back theme="outline" size="18"/>
-                    <span>返回列表</span>
-                </button>
-            </div>
+            {/* 页面标题和导航 */}
+            <PageHeader
+                onBack={handleBack}
+                showHelpText={showHelpText}
+                toggleHelpText={toggleHelpText}
+            />
 
             {/* 加载中状态 */}
             {loading && (
-                <div className="flex justify-center my-8">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                <div className="flex flex-col items-center justify-center my-8 p-10">
+                    <span className="loading loading-spinner loading-lg text-primary mb-4"></span>
+                    <p className="text-base-content/70">正在加载部门数据，请稍候...</p>
                 </div>
             )}
 
             {/* 表单卡片 */}
-            <CardComponent innerMargin={"p-4"}>
-                <form id="department_add" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* 基本信息部分 */}
-                        <div className="lg:col-span-3">
-                            <h2 className="text-lg font-semibold border-l-4 border-primary pl-3 mb-4">基本信息</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* 部门名称 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <BuildingOne theme="outline" size="16" fill="#333"/>
-                                        <span>部门名称</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.department_name}
-                                        onChange={(e) => setData({...data, department_name: e.target.value})}
-                                        placeholder="例如: 计算机科学与技术学院"
-                                    />
-                                </fieldset>
+            {!loading && (
+                <CardComponent innerMargin={"p-4"}>
+                    <form id="department_add" onSubmit={handleSubmit} className="space-y-6">
+                        {/* 表单标签页 */}
+                        <FormTabsComponent
+                            tabs={formTabs}
+                            activeTab={activeTab}
+                            onTabChange={setActiveTab}
+                            tabsStyle="tabs-boxed"
+                        />
 
-                                {/* 部门编码 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Tag theme="outline" size="16" fill="#333"/>
-                                        <span>部门编码</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.department_code}
-                                        onChange={(e) => setData({...data, department_code: e.target.value})}
-                                        placeholder="例如: CS001"
-                                    />
-                                </fieldset>
-
-                                {/* 部门简称 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Tag theme="outline" size="16" fill="#333"/>
-                                        <span>部门简称</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.department_short_name || ""}
-                                        onChange={(e) => setData({...data, department_short_name: e.target.value})}
-                                        placeholder="例如: 计算机学院"
-                                    />
-                                </fieldset>
-
-                                {/* 部门英文名称 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Tag theme="outline" size="16" fill="#333"/>
-                                        <span>部门英文名称</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.department_english_name || ""}
-                                        onChange={(e) => setData({...data, department_english_name: e.target.value})}
-                                        placeholder="例如: School of Computer Science"
-                                    />
-                                </fieldset>
-
-                                {/* 单位类别 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Tag theme="outline" size="16" fill="#333"/>
-                                        <span>单位类别</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.unit_category}
-                                        onChange={(e) => setData({...data, unit_category: e.target.value})}
-                                        placeholder="例如: 学院/部门/中心"
-                                    />
-                                </fieldset>
-
-                                {/* 单位办别 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Tag theme="outline" size="16" fill="#333"/>
-                                        <span>单位办别</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.unit_type}
-                                        onChange={(e) => setData({...data, unit_type: e.target.value})}
-                                        placeholder="例如: 教学/科研/行政"
-                                    />
-                                </fieldset>
-
-                                {/* 部门排序 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Sort theme="outline" size="16" fill="#333"/>
-                                        <span>部门排序</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="number"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.department_order}
-                                        onChange={(e) => setData({...data, department_order: parseInt(e.target.value)})}
-                                        placeholder="例如: 100"
-                                    />
-                                </fieldset>
-
-                                {/* 上级部门 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <BuildingOne theme="outline" size="16" fill="#333"/>
-                                        <span>上级部门</span>
-                                    </legend>
-                                    <select
-                                        className="select select-bordered w-full"
-                                        value={data.parent_department || ""}
-                                        onChange={(e) => setData({
-                                            ...data,
-                                            parent_department: e.target.value || undefined
-                                        })}
-                                    >
-                                        <option value="">无上级部门</option>
-                                        {departmentList.map((department) => (
-                                            <option key={department.department_uuid} value={department.department_uuid}>
-                                                {department.department_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </fieldset>
-
-                                {/* 成立日期 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <Calendar theme="outline" size="16" fill="#333"/>
-                                        <span>成立日期</span>
-                                        <span className="text-red-500">*</span>
-                                    </legend>
-                                    <input
-                                        type="date"
-                                        className="input input-bordered w-full"
-                                        required
-                                        value={data.establishment_date}
-                                        onChange={(e) => setData({
-                                            ...data,
-                                            establishment_date: e.target.value || today
-                                        })}
-                                    />
-                                </fieldset>
-
-                                {/* 失效日期 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <CalendarThirty theme="outline" size="16" fill="#333"/>
-                                        <span>失效日期</span>
-                                    </legend>
-                                    <input
-                                        type="date"
-                                        className="input input-bordered w-full"
-                                        value={data.expiration_date || ""}
-                                        onChange={(e) => setData({
-                                            ...data,
-                                            expiration_date: e.target.value || undefined
-                                        })}
-                                    />
-                                </fieldset>
-                            </div>
+                        {/* 表单按钮 */}
+                        <div className="divider"></div>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                type="button"
+                                onClick={handleReset}
+                                className="btn btn-outline"
+                            >
+                                <CloseOne theme="outline" size="18"/>
+                                <span>重置表单</span>
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={submitting}
+                            >
+                                {submitting ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span>提交中...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckOne theme="outline" size="18"/>
+                                        <span>提交</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
-
-                        {/* 联系方式部分 */}
-                        <div className="lg:col-span-3">
-                            <h2 className="text-lg font-semibold border-l-4 border-primary pl-3 mb-4">联系方式</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* 部门地址 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <BuildingOne theme="outline" size="16" fill="#333"/>
-                                        <span>部门地址</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.department_address || ""}
-                                        onChange={(e) => setData({...data, department_address: e.target.value})}
-                                        placeholder="例如: 主校区思源楼B305"
-                                    />
-                                </fieldset>
-
-                                {/* 固定电话 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <PhoneTelephone theme="outline" size="16" fill="#333"/>
-                                        <span>固定电话</span>
-                                    </legend>
-                                    <input
-                                        type="tel"
-                                        className="input input-bordered w-full"
-                                        value={data.fixed_phone || ""}
-                                        onChange={(e) => setData({...data, fixed_phone: e.target.value})}
-                                        placeholder="例如: 020-12345678"
-                                    />
-                                </fieldset>
-
-                                {/* 行政负责人 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <People theme="outline" size="16" fill="#333"/>
-                                        <span>行政负责人</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.administrative_head || ""}
-                                        onChange={(e) => setData({...data, administrative_head: e.target.value})}
-                                        placeholder="例如: 张三"
-                                    />
-                                </fieldset>
-
-                                {/* 党委负责人 */}
-                                <fieldset className="flex flex-col">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <People theme="outline" size="16" fill="#333"/>
-                                        <span>党委负责人</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.party_committee_head || ""}
-                                        onChange={(e) => setData({...data, party_committee_head: e.target.value})}
-                                        placeholder="例如: 李四"
-                                    />
-                                </fieldset>
-
-                                {/* 分配教学楼 */}
-                                <fieldset className="flex flex-col lg:col-span-2">
-                                    <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                        <BuildingOne theme="outline" size="16" fill="#333"/>
-                                        <span>分配教学楼</span>
-                                    </legend>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={data.assigned_teaching_building || ""}
-                                        onChange={(e) => setData({...data, assigned_teaching_building: e.target.value})}
-                                        placeholder="例如: 思源楼,行政楼"
-                                    />
-                                </fieldset>
-                            </div>
-                        </div>
-
-                        {/* 备注信息 */}
-                        <div className="lg:col-span-3">
-                            <h2 className="text-lg font-semibold border-l-4 border-primary pl-3 mb-4">备注信息</h2>
-                            <fieldset className="flex flex-col">
-                                <legend className="flex items-center space-x-1 mb-1 text-sm font-medium">
-                                    <Notes theme="outline" size="16" fill="#333"/>
-                                    <span>备注</span>
-                                </legend>
-                                <textarea
-                                    className="textarea textarea-bordered w-full"
-                                    value={data.remark || ""}
-                                    onChange={(e) => setData({...data, remark: e.target.value})}
-                                    placeholder="请输入备注信息（可选）"
-                                    rows={3}
-                                />
-                            </fieldset>
-                        </div>
-
-                        {/* 部门属性 */}
-                        <div className="lg:col-span-3">
-                            <h2 className="text-lg font-semibold border-l-4 border-primary pl-3 mb-4">部门属性</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div className="space-y-4">
-                                    <div className="tooltip" data-tip="设置部门是否可用">
-                                        <fieldset className="flex items-center space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-primary"
-                                                checked={data.is_enabled}
-                                                onChange={(e) => setData({...data, is_enabled: e.target.checked})}
-                                            />
-                                            <span>启用部门</span>
-                                        </fieldset>
-                                    </div>
-
-                                    <div className="tooltip" data-tip="设置是否为实体部门">
-                                        <fieldset className="flex items-center space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-primary"
-                                                checked={data.is_entity}
-                                                onChange={(e) => setData({...data, is_entity: e.target.checked})}
-                                            />
-                                            <span>实体部门</span>
-                                        </fieldset>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="tooltip" data-tip="设置是否为上课院系">
-                                        <fieldset className="flex items-center space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-primary"
-                                                checked={data.is_attending_college}
-                                                onChange={(e) => setData({
-                                                    ...data,
-                                                    is_attending_college: e.target.checked
-                                                })}
-                                            />
-                                            <span>上课院系</span>
-                                        </fieldset>
-                                    </div>
-
-                                    <div className="tooltip" data-tip="设置是否为开课院系">
-                                        <fieldset className="flex items-center space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-primary"
-                                                checked={data.is_teaching_college}
-                                                onChange={(e) => setData({
-                                                    ...data,
-                                                    is_teaching_college: e.target.checked
-                                                })}
-                                            />
-                                            <span>开课院系</span>
-                                        </fieldset>
-                                    </div>
-
-                                    <div className="tooltip" data-tip="设置是否为开课教研室">
-                                        <fieldset className="flex items-center space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-primary"
-                                                checked={data.is_teaching_office}
-                                                onChange={(e) => setData({
-                                                    ...data,
-                                                    is_teaching_office: e.target.checked
-                                                })}
-                                            />
-                                            <span>开课教研室</span>
-                                        </fieldset>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 表单按钮 */}
-                    <div className="mt-8 flex justify-end space-x-4">
-                        <button
-                            type="button"
-                            onClick={handleReset}
-                            className="btn btn-outline"
-                        >
-                            <CloseOne theme="outline" size="18"/>
-                            <span>重置表单</span>
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={submitting}
-                        >
-                            {submitting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    <span>提交中...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <CheckOne theme="outline" size="18"/>
-                                    <span>提交</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </CardComponent>
+                    </form>
+                </CardComponent>
+            )}
         </div>
     );
 }
