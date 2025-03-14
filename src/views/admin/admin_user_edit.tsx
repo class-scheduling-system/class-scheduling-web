@@ -68,7 +68,7 @@ export function AdminEditUserPage({site}: Readonly<{
             setData({
                 name: userInfo.name,
                 password: userInfo.password,
-                phone:  userInfo.phone,
+                phone: userInfo.phone,
                 email: userInfo.email,
                 status: userInfo.status,
                 ban: userInfo.ban,
@@ -188,7 +188,7 @@ export function AdminEditUserPage({site}: Readonly<{
     // 获取角色名称
     const getRoleName = (roleUuid: string) => {
         const role = roleList?.find(r => r.role_uuid === roleUuid);
-        return role?.role_name || "未分配角色";
+        return role?.role_name;
     };
 
     return (
@@ -201,9 +201,9 @@ export function AdminEditUserPage({site}: Readonly<{
                     <h2 className="text-2xl font-bold flex items-center space-x-2">
                         <span>编辑用户</span>
                         {data.name && (
-                            <Tag color="blue" className="ml-2">
+                            <div className="badge badge-soft badge-secondary ml-2">
                                 {data.name}
-                            </Tag>
+                            </div>
                         )}
                     </h2>
                 </div>
@@ -257,9 +257,6 @@ export function AdminEditUserPage({site}: Readonly<{
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <Key theme="outline" size="14" fill="#333" />
                                             <span>密码</span>
-                                            <Tooltip title="留空表示不修改当前密码">
-
-                                            </Tooltip>
                                         </legend>
                                         <input
                                             type="password"
@@ -308,7 +305,7 @@ export function AdminEditUserPage({site}: Readonly<{
                                         </legend>
                                         <select
                                             className="select select-sm w-full validator"
-                                            value={data.role_uuid || ""}
+                                            value={data.role_uuid}
                                             onChange={(e) => setData({ ...data, role_uuid: e.target.value })}
                                             required
                                         >
@@ -327,13 +324,10 @@ export function AdminEditUserPage({site}: Readonly<{
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <ApplicationEffect theme="outline" size="14" fill="#333"/>
                                             <span>状态</span>
-                                            <Tooltip title="禁用状态的用户无法登录系统">
-
-                                            </Tooltip>
                                         </legend>
                                         <select
                                             className="select select-sm w-full validator"
-                                            value={data.status !== undefined ? data.status : ""}
+                                            value={data.status !== undefined ? (data.status ? "1" : "0") : ""}
                                             onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
                                             required
                                         >
@@ -433,51 +427,51 @@ export function AdminEditUserPage({site}: Readonly<{
                             <div className="space-y-3 p-2">
                                 <div className="grid grid-cols-2 gap-2 items-center">
                                     <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
-                                        <User theme="outline" size="14" className="text-blue-500" />
+                                        <User theme="outline" size="14" className="text-secondary" />
                                         <span>用户名</span>
                                     </span>
-                                    <span className="text-right font-semibold text-gray-800">{data.name}</span>
+                                    <span className="text-right font-semibold text-gray-800">{userInfo?.name || data.name}</span>
                                 </div>
                                 <div className="border-b border-gray-200"></div>
                                 <div className="grid grid-cols-2 gap-2 items-center">
                                     <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
-                                        <UserPositioning theme="outline" size="14" className="text-blue-500" />
+                                        <UserPositioning theme="outline" size="14" className="text-secondary" />
                                         <span>当前角色</span>
                                     </span>
-                                    <span className="text-right font-semibold text-gray-800">{getRoleName(data.role_uuid)}</span>
+                                    <span className="text-right  text-gray-800">{userInfo?.role.role_name}</span>
                                 </div>
                                 <div className="border-b border-gray-200"></div>
                                 <div className="grid grid-cols-2 gap-2 items-center">
                                     <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
-                                        <ApplicationEffect theme="outline" size="14" className="text-blue-500" />
+                                        <ApplicationEffect theme="outline" size="14" className="text-secondary" />
                                         <span>状态</span>
                                     </span>
                                     <div className="text-right">
-                                        <Tag color={data.status === 1 ? "success" : "error"} className="font-medium">
-                                            {data.status === 1 ? "启用" : "禁用"}
-                                        </Tag>
+                                        <div className={`badge badge-outline ${data?.status === 1 ? "badge-success" : "badge-error"} font-medium`}>
+                                            {data?.status === 1 ? "启用" : "禁用"}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="border-b border-gray-200"></div>
                                 <div className="grid grid-cols-2 gap-2 items-center">
                                     <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
-                                        <Forbid theme="outline" size="14" className="text-blue-500" />
+                                        <Forbid theme="outline" size="14" className="text-secondary" />
                                         <span>封禁状态</span>
                                     </span>
                                     <div className="text-right">
-                                        <Tag color={data.ban ? "error" : "success"} className="font-medium">
-                                            {data.ban ? "已封禁" : "未封禁"}
-                                        </Tag>
+                                        <div className={`badge badge-outline ${data?.ban ? "badge-error " : "badge-success"} font-medium`}>
+                                            {data?.ban ? "已封禁" : "未封禁"}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="border-b border-gray-200"></div>
                                 <div className="grid grid-cols-2 gap-2 items-center">
                                     <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
-                                        <Permissions theme="outline" size="14" className="text-blue-500" />
+                                        <Permissions theme="outline" size="14" className="text-secondary" />
                                         <span>拥有权限数</span>
                                     </span>
-                                    <span className="text-right font-semibold text-blue-700">
-                                        {targetKeys.length} 个
+                                    <span className="text-right font-semibold text-secondary">
+                                        {userInfo?.permission?.length || targetKeys.length} 个
                                     </span>
                                 </div>
                             </div>
@@ -487,40 +481,40 @@ export function AdminEditUserPage({site}: Readonly<{
                         <Card
                             title={
                                 <div className="flex items-center">
-                                    <span className="text-blue-700">操作提示</span>
+                                    <span className="text-secondary">操作提示</span>
                                 </div>
                             }
                             bordered={true}
-                            className="shadow-lg bg-blue-50"
+                            className="shadow-lg bg-info"
                             headStyle={{ backgroundColor: '#e6f7ff', borderBottom: '1px solid #91caff' }}
                         >
                             <ul className="space-y-2 text-gray-700">
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>密码留空表示不修改当前密码</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>用户必须分配角色才能正常使用系统</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>权限列表决定用户可执行的具体操作</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>禁用状态的用户将无法登录系统</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>封禁状态会限制用户使用某些功能</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>用户权限将与角色自带权限合并生效</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-secondary mr-2">•</span>
                                     <span>重置按钮可恢复表单到初始状态</span>
                                 </li>
                             </ul>
