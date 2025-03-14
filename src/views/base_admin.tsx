@@ -241,7 +241,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
                                 <Route path="/user/add" element={<AdminUserAddPage/>}/>
-                                <Route path="/edit-user/:userId" element={<AdminEditUserPage site={site}/>}/>
+                                <Route path="/user/edit/:userId" element={<AdminEditUserPage site={site}/>}/>
                                 <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/department" element={<AdminDepartment site={site} />} />

@@ -162,7 +162,7 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
 
     // 处理编辑用户
     const handleEditUser = (user: UserEntity) => {
-        navigate(`/admin/edit-user/${user.user_uuid}`, {
+        navigate(`/admin/user/edit/${user.user_uuid}`, {
             state: { userInfo: user }
         });
     };
