@@ -29,15 +29,35 @@
 import {BaseResponse} from "../models/base_response.ts";
 import {TeacherTypeEntity} from "../models/entity/teacher_type_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
+import {PageTeacherTypeDto} from "../models/dto/page_teacher_type_search_dto.ts";
 
 /**
- * # 获取用户列表
- * > 该函数用于通过API请求获取用户列表。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
+ * # 获取教师类型列表
+ * > 该函数用于通过API请求获取教师类型列表。它利用了Bearer令牌认证方式来确保安全地访问教师类型数据。
  *
- * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含用户信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @returns {Promise<BaseResponse<PageEntity<TeacherTypeEntity> | undefined>} - 返回一个Promise，解析为包含教师类型的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetTeacherTypeListAPI = async (): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
+const GetTeacherTypeListAPI = async (data: PageTeacherTypeDto): Promise<BaseResponse<PageEntity<TeacherTypeEntity>> | undefined> => {
+    return BaseApi<PageEntity<TeacherTypeEntity>>(
+        MethodType.GET,
+        "/api/v1/teacher-type/page",
+        null,
+        data,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
+/**
+ * # 获取教师类型简洁列表
+ * > 该函数用于通过API请求获取教师类型简洁列表。它利用了Bearer令牌认证方式来确保安全地访问教师类型简洁数据。
+ *
+ * @returns {Promise<BaseResponse<TeacherTypeEntity> | undefined>} - 返回一个Promise，解析为包含教师类型简洁的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetTeacherTypeSimpleListAPI = async (): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
     return BaseApi<TeacherTypeEntity>(
         MethodType.GET,
         "/api/v1/teacher-type/list",
@@ -48,6 +68,26 @@ const GetTeacherTypeListAPI = async (): Promise<BaseResponse<TeacherTypeEntity> 
     )
 }
 
+/**
+ * # 根据type_uuid获取教师类型信息
+ * > 该函数用于通过API请求获取教师类型信息。它利用了Bearer令牌认证方式来确保安全地访问教师类型数据。
+ *
+ * @returns {Promise<BaseResponse<TeacherTypeEntity> | undefined>} - 返回一个Promise，解析为包含教师类型信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetTeacherTypeInfoByTypeUuidAPI = async (teacher_type_uuid:string): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
+    return BaseApi<TeacherTypeEntity>(
+        MethodType.GET,
+        "/api/v1/teacher-type",
+        null,
+        null,
+        teacher_type_uuid,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
 export {
-    GetTeacherTypeListAPI
+    GetTeacherTypeListAPI,
+    GetTeacherTypeSimpleListAPI,
+    GetTeacherTypeInfoByTypeUuidAPI
 }
