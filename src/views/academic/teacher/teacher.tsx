@@ -2,11 +2,11 @@ import {JSX, useEffect, useRef, useState} from "react";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {
     AddOne,
-    ChartGraph,
+    ChartGraph, Close,
     Correct,
     Delete,
     Editor,
-    EditTwo, Error, Me,
+    EditTwo, Error, Me, MoreApp,
     PeopleDeleteOne,
     PreviewOpen, Refresh,
     Search
@@ -77,7 +77,7 @@ export function AcademicTeacher({site}: Readonly<{
     // 删除用户相关状态
     const [deleteTeacherUuid, setDeleteTeacherUuid] = useState("");
     // 统计显示状态
-    const [showStats, setShowStats] = useState(false);
+    const [showStats, setShowStats] = useState(true);
 
     // 获取部门列表
     useEffect(() => {
@@ -336,7 +336,68 @@ export function AcademicTeacher({site}: Readonly<{
     return (
         <>
             <div className={"grid grid-cols-10 gap-4 pb-4"}>
-                <div className={"col-span-8 md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
+                <div className={"lg:col-span-8 md:col-span-10 sm:col-span-10 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
+                    {/* 统计信息卡片 - 现在放在列表上方 */}
+                    {showStats && (
+                        <CardComponent padding={18} className="space-y-2 mb-2">
+                            <div className="flex justify-between items-center mb-1">
+                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                    <ChartGraph theme="outline" size="20" fill="#666"/>
+                                    教师数据统计
+                                </h2>
+                                <button
+                                    className="btn btn-sm btn-ghost"
+                                    onClick={() => setShowStats(!showStats)}
+                                >
+                                    <Close theme="outline" size="14"/>
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="text-center p-3 bg-base-200 rounded-lg">
+                                    <p className="text-sm text-gray-500">教师总数</p>
+                                    <p className="text-3xl font-bold text-primary mt-1">{teacherStats.total}</p>
+                                </div>
+
+                                <div className="p-3 bg-base-200 rounded-lg">
+                                    <p className="text-sm text-gray-500 mb-2">职称分布</p>
+                                    <div className="grid grid-cols-3 gap-2 text-center">
+                                        <div>
+                                            <div className="badge badge-primary">{teacherStats.byTitle.professor}</div>
+                                            <p className="text-xs mt-1">教授</p>
+                                        </div>
+                                        <div>
+                                            <div className="badge badge-secondary">{teacherStats.byTitle.associateProf}</div>
+                                            <p className="text-xs mt-1">副教授</p>
+                                        </div>
+                                        <div>
+                                            <div className="badge badge-accent">{teacherStats.byTitle.lecturer}</div>
+                                            <p className="text-xs mt-1">讲师</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-3 bg-base-200 rounded-lg">
+                                    <p className="text-sm text-gray-500 mb-2">状态分布</p>
+                                    <div className="flex justify-around">
+                                        <div className="text-center">
+                                            <div className="radial-progress text-success" style={{"--value": teacherStats.total ? (teacherStats.byStatus.active / teacherStats.total) * 100 : 0} as any}>
+                                                {teacherStats.byStatus.active}
+                                            </div>
+                                            <p className="text-xs mt-1">在职</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="radial-progress text-warning" style={{"--value": teacherStats.total ? (teacherStats.byStatus.onLeave / teacherStats.total) * 100 : 0} as any}>
+                                                {teacherStats.byStatus.onLeave}
+                                            </div>
+                                            <p className="text-xs mt-1">休假</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardComponent>
+                    )}
+
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) => item ? (
                             <animated.div style={style} className={"flex h-full justify-center"}>
@@ -444,7 +505,7 @@ export function AcademicTeacher({site}: Readonly<{
                         </div>
                     </div>
                 </div>
-                <div className={"col-span-2 md:col-span-3 flex flex-col gap-4"}>
+                <div className={"lg:col-span-2 md:col-span-10 sm:col-span-10 flex flex-col gap-4"}>
                     {/* 搜索卡片 */}
                     <CardComponent padding={18} className="space-y-6 bg-gradient-to-br from-base-100 to-base-200 shadow-lg rounded-xl">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
@@ -561,7 +622,10 @@ export function AcademicTeacher({site}: Readonly<{
                     </CardComponent>
                     {/* 操作卡片 */}
                     <CardComponent padding={18} className="space-y-3">
-                        <h2 className="text-xl font-bold">其他操作</h2>
+                        <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
+                            <MoreApp theme="outline" size="22" fill="#666"/>
+                            其他操作
+                        </h2>
                         <div className="grid grid-cols-1 gap-3 mt-2">
                             <button
                                 onClick={handleAddTeacher}
@@ -579,55 +643,6 @@ export function AcademicTeacher({site}: Readonly<{
                             </button>
                         </div>
                     </CardComponent>
-
-                    {/* 统计信息卡片 */}
-                    {showStats && (
-                        <CardComponent padding={18} className="space-y-4">
-                            <h2 className="text-xl font-bold mb-3">教师数据统计</h2>
-                            <div className="space-y-5">
-                                <div className="text-center">
-                                    <p className="text-sm text-gray-500">教师总数</p>
-                                    <p className="text-3xl font-bold text-primary mt-1">{teacherStats.total}</p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-2">职称分布</p>
-                                    <div className="grid grid-cols-3 gap-2 text-center">
-                                        <div className="bg-base-200 rounded-lg p-2">
-                                            <div className="badge badge-primary">{teacherStats.byTitle.professor}</div>
-                                            <p className="text-sm mt-1">教授</p>
-                                        </div>
-                                        <div className="bg-base-200 rounded-lg p-2">
-                                            <div className="badge badge-secondary">{teacherStats.byTitle.associateProf}</div>
-                                            <p className="text-sm mt-1">副教授</p>
-                                        </div>
-                                        <div className="bg-base-200 rounded-lg p-2">
-                                            <div className="badge badge-accent">{teacherStats.byTitle.lecturer}</div>
-                                            <p className="text-sm mt-1">讲师</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-2">状态分布</p>
-                                    <div className="flex justify-around">
-                                        <div className="text-center">
-                                            <div className="radial-progress text-success" style={{"--value": teacherStats.total ? (teacherStats.byStatus.active / teacherStats.total) * 100 : 0} as any}>
-                                                {teacherStats.byStatus.active}
-                                            </div>
-                                            <p className="text-sm mt-2">在职</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="radial-progress text-warning" style={{"--value": teacherStats.total ? (teacherStats.byStatus.onLeave / teacherStats.total) * 100 : 0} as any}>
-                                                {teacherStats.byStatus.onLeave}
-                                            </div>
-                                            <p className="text-sm mt-2">休假</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardComponent>
-                    )}
                 </div>
             </div>
 
