@@ -30,20 +30,19 @@ import cardImage from "../../assets/images/card-background.webp";
 
 import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useRef, useState} from "react";
+import {Link} from "react-router";
 import {PageEntity} from "../../models/entity/page_entity.ts";
-import {BuildingEntity} from "../../models/entity/building_entity.ts";
-import {GetBuildingPageAPI} from "../../apis/building_api.ts";
 import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
-import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
+import {Add, BookOpen, CheckOne, CloseOne, Delete, Editor, Newlybuild, Search} from "@icon-park/react";
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
-import {AdminBuildingAddDialog} from "../../components/admin/building/admin_building_add_dialog.tsx";
-import {AdminBuildingDeleteDialog} from "../../components/admin/building/admin_building_delete_dialog.tsx";
-import {AdminBuildingEditDialog} from "../../components/admin/building/admin_building_edit_dialog.tsx";
+import {GetDepartmentPageAPI} from "../../apis/department_api.ts";
+import {DepartmentEntity} from "../../models/entity/department_entity.ts";
+
 
 /**
  * # AdminDepartment
@@ -62,7 +61,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
 
     const inputFocus = useRef<HTMLInputElement | null>(null);
 
-    const [buildingList, setBuildingList] = useState<PageEntity<BuildingEntity>>({} as PageEntity<BuildingEntity>);
+    const [departmentList, setDepartmentList] = useState<PageEntity<DepartmentEntity>>({} as PageEntity<DepartmentEntity>);
     const [searchRequest, setSearchRequest] = useState<PageSearchDTO>({
         page: 1,
         size: 20,
@@ -70,11 +69,9 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     } as PageSearchDTO);
     const [search, setSearch] = useState<string>();
     const [loading, setLoading] = useState(true);
-    const [building, setBuilding] = useState<BuildingEntity>({} as BuildingEntity);
+    const [department, setDepartment] = useState<DepartmentEntity>({} as DepartmentEntity);
 
-    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
-    const [dialogDelete, setDialogDelete] = useState<boolean>(false);
-    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
+
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
     const [operateUuid, setOperateUuid] = useState<string>("");
 
@@ -108,10 +105,10 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
-            const getResp = await GetBuildingPageAPI(searchRequest);
+            const getResp = await GetDepartmentPageAPI(searchRequest);
             if (getResp?.output === "Success") {
                 setLoading(false);
-                setBuildingList(getResp.data!);
+                setDepartmentList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.message ?? "获取教学楼列表失败");
@@ -151,8 +148,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
      */
     function getPageInfo(): JSX.Element[] {
         const pageInfo: JSX.Element[] = [];
-        for (let i = 0; i < Math.ceil(buildingList.total / buildingList.size); i++) {
-            if (i + 1 === buildingList.current) {
+        for (let i = 0; i < Math.ceil(departmentList.total / departmentList.size); i++) {
+            if (i + 1 === departmentList.current) {
                 pageInfo.push(
                     <button key={i}
                             className="transition shadow btn btn-sm join-item btn-primary border">
@@ -162,7 +159,10 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
             } else {
                 pageInfo.push(
                     <button key={i}
-                            onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
+                            onClick={() => {
+                                setSearchRequest({...searchRequest, page: i + 1});
+                                setRefreshOperate(true);
+                            }}
                             className="transition shadow btn btn-sm join-item border">
                         {i + 1}
                     </button>
@@ -173,16 +173,16 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     }
 
     /**
-     * # selectedBuildingDelete
-     * > 该函数用于设置将要被删除的建筑实体，并打开确认删除对话框。
+     * # selectedDepartmentDelete
+     * > 该函数用于删除选中的教学楼实体。它会将选中的教学楼实体传递给删除对话框组件，并显示该对话框。
      *
-     * @param {BuildingEntity} building - 将要被删除的建筑实体。
+     * @param {DepartmentEntity} department - 选中的教学楼实体对象，类型为 DepartmentEntity。
      * @returns {void}
      * @throws {TypeError} 如果传入的参数不是 BuildingEntity 类型，则抛出此异常。
      */
-    function selectedBuildingDelete(building: BuildingEntity): void {
-        setBuilding(building);
-        setDialogDelete(true);
+    function selectedDepartmentDelete(department: DepartmentEntity): void {
+        setDepartment(department);
+        // TODO: 实现删除功能
     }
 
     return (
@@ -202,47 +202,71 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                     <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>教学楼名字</th>
-                                        <th>校区</th>
-                                        <th>状态</th>
-                                        <th>修改时间</th>
+                                        <th>部门编号</th>
+                                        <th>部门名字</th>
+                                        <th>行政负责人</th>
+                                        <th>上课院系</th>
+                                        <th>实体部门</th>
+                                        <th>是否启用</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {
-                                        buildingList.records.map((building, index) => (
+                                        departmentList.records.map((department, index) => (
                                             <tr
-                                                key={building.building_uuid}
+                                                key={department.department_uuid}
                                                 className="transition hover:bg-base-200"
                                             >
-                                                <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
-                                                <td>{building.building_name}</td>
-                                                <td>{building.campus.campus_name}</td>
-                                                <td>{building.status ? (
-                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                    type={"success"} text={"启用"}
-                                                                    icon={<Correct theme="outline" size="12"/>}/>
-                                                ) : (
-                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                    type={"error"}
-                                                                    text={"禁用"}
-                                                                    icon={<Error theme="outline" size="12"/>}/>
-                                                )}</td>
-                                                <td>{new Date(building.updated_at).toLocaleString()}</td>
+                                                <td>{index + 1 + (departmentList.current - 1) * departmentList.size}</td>
+                                                <td>{department.department_code}</td>
+                                                <td>{department.department_name}</td>
+                                                <td>{department.administrative_head}</td>
+                                                <td>
+                                                    {department.is_attending_college ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"是"}
+                                                                        icon={<BookOpen theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"} text={"否"}
+                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {department.is_entity ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"是"}
+                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"} text={"否"}
+                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {department.is_enabled ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"是"}
+                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"} text={"否"}
+                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
                                                         <button
                                                             onClick={() => {
-                                                                setOperateUuid(building.building_uuid);
-                                                                setDialogEdit(true);
+                                                                setOperateUuid(department.department_uuid!);
                                                             }}
                                                             className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                             <Editor theme="outline" size="12"/>
                                                             <span>编辑</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => selectedBuildingDelete(building)}
+                                                            onClick={() => selectedDepartmentDelete(department)}
                                                             className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                             <Delete theme="outline" size="12"/>
                                                             <span>删除</span>
@@ -260,19 +284,19 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
                                     onClick={() => {
-                                        setSearchRequest({...searchRequest, page: buildingList.current - 1});
+                                        setSearchRequest({...searchRequest, page: departmentList.current - 1});
                                         setRefreshOperate(true);
                                     }}
-                                    disabled={buildingList.current === 1}>
+                                    disabled={departmentList.current === 1}>
                                 上一页
                             </button>
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
                                     onClick={() => {
-                                        setSearchRequest({...searchRequest, page: buildingList.current + 1});
+                                        setSearchRequest({...searchRequest, page: departmentList.current + 1});
                                         setRefreshOperate(true);
                                     }}
-                                    disabled={buildingList.current === Math.ceil(buildingList.total / buildingList.size) || Math.ceil(buildingList.total / buildingList.size) === 0}>
+                                    disabled={departmentList.current === Math.ceil(departmentList.total / departmentList.size) || Math.ceil(departmentList.total / departmentList.size) === 0}>
                                 下一页
                             </button>
                             <select className="join-item transition select select-sm mx-1 border-l-0"
@@ -295,8 +319,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                 <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
                     <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                     <div className="p-4 flex flex-col gap-1">
-                        <h2 className="text-xl font-bold">教学楼列表</h2>
-                        <p className="text-base-content text-sm border-l-4 border-base-content ps-2">这里是所有教学楼的列表，你可以在这里查看、编辑和删除教学楼信息。</p>
+                        <h2 className="text-xl font-bold">部门列表</h2>
+                        <p className="text-base-content text-sm border-l-4 border-base-content ps-2">这里是部门列表，您可以查看、编辑和删除部门信息。</p>
                     </div>
                     <div className="px-4 pb-4 flex flex-col gap-3">
                         <div>
@@ -309,11 +333,11 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                             </label>
                         </div>
                         <div className={"grid grid-cols-2 gap-3"}>
-                            <button onClick={() => setDialogAdd(true)}
-                                    className="transition shadow btn btn-outline btn-primary">
+                            <Link to="/admin/department/add"
+                                  className="transition shadow btn btn-outline btn-primary">
                                 <Add theme="outline" size="16"/>
                                 <span>添加</span>
-                            </button>
+                            </Link>
                             <button className="transition shadow btn btn-outline btn-secondary">
                                 <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
@@ -322,9 +346,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                     </div>
                 </CardComponent>
             </div>
-            <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd} requestRefresh={setRefreshOperate}/>
-            <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete} requestRefresh={setRefreshOperate}/>
-            <AdminBuildingEditDialog show={dialogEdit} editBuildingUuid={operateUuid} emit={setDialogEdit} requestRefresh={setRefreshOperate}/>
+            {/* 这里可以添加删除和编辑对话框 */}
         </>
     );
 }

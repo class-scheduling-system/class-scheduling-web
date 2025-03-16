@@ -55,27 +55,36 @@ export function AdminNavComponent(): JSX.Element {
             <div className={"px-4 grid gap-2 overflow-y-auto pt-4"}>
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统管理</h2>
                 <AdminNavLinkComponent title={"系统看板"} icon={<Dashboard theme="outline" size="18"/>}
+                                       match={"dashboard"}
                                        path={"/admin/dashboard"}/>
                 <AdminNavLinkComponent title={"用户管理"} icon={<User theme="outline" size="18"/>}
+                                       match={"user"}
                                        path={"/admin/user"}/>
                 <AdminNavLinkComponent title={"角色管理"} icon={<UserPositioning theme="outline" size="18"/>}
+                                       match={"role"}
                                        path={"/admin/role"}/>
                 <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="18"/>}
+                                       match={"building"}
                                        path={"/admin/building"}/>
                 <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
+                                       match={"department"}
                                        path={"/admin/department"}/>
 
                 <div className="divider my-2"></div>
 
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统维护</h2>
                 <AdminNavLinkComponent title={"系统信息"} icon={<System theme="outline" size="18" />}
+                                       match={"system-info"}
                                        path={"/admin/system-info"}/>
                 <AdminNavLinkComponent title={"系统日志"} icon={<Log theme="outline" size="18" />}
+                                       match={"log"}
                                        path={"/admin/log"}/>
                 <AdminNavLinkComponent title={"备份与恢复"} icon={<DatabaseAlert theme="outline" size="18" />}
+                                       match={"backup"}
                                        path={"/admin/backup"}/>
                 <AdminNavLinkComponent title={"系统设置"} icon={<WatchOne theme="outline" size="18" />}
-                                       path={"/admin/settings"}/>
+                                       match={"setting"}
+                                       path={"/admin/setting"}/>
             </div>
             <div className="px-4 py-4 mt-auto bg-base-200 border-t border-gray-200 text-center text-xs text-gray-500">
                 <p>版本: v1.0.0</p>

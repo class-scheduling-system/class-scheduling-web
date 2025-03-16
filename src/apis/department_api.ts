@@ -27,8 +27,10 @@
  */
 
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+import {DepartmentDTO} from "../models/dto/department_dto.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {DepartmentInfoEntity} from "../models/entity/department__info_entity.ts";
+import {DepartmentEntity} from "../models/entity/department_entity.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
 
@@ -51,6 +53,23 @@ const GetDepartmentInfoAPI = async (department_uuid: string): Promise<BaseRespon
     )
 }
 
+/**
+ * # DeleteDepartmentAPI
+ * > 该函数用于通过API删除指定部门的详细信息。它接受一个包含部门唯一标识符的字符串，并将其发送到指定的后端接口，以删除部门的详细信息。
+ *
+ * @param data - 包含待删除部门的唯一标识符的字符串。
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const DeleteDepartmentAPI = async (data: string): Promise<BaseResponse<void> | undefined> => {
+    return BaseApi<void>(
+        MethodType.DELETE,
+        "/api/v1/department/",
+        null,
+        null,
+        data,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
 
 /**
  * # 获取部门列表
@@ -89,10 +108,106 @@ const GetDepartmentSimpleListAPI = async (): Promise<BaseResponse<DepartmentInfo
     )
 }
 
+/**
+ * # DepartmentAddAPI
+ * > 该函数用于向后端API发送一个部门添加请求，包含了需要验证的部门信息。
+ *
+ * @param data - 包含需要验证的部门信息的对象。
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const DepartmentAddAPI = async (data: DepartmentDTO): Promise<BaseResponse<DepartmentEntity> | undefined> => {
+    return BaseApi<DepartmentEntity>(
+        MethodType.POST,
+        "/api/v1/department",
+        data,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # GetDepartmentAPI
+ * > 该函数用于通过API获取指定部门的详细信息。它接受一个包含部门唯一标识符的字符串，并将其发送到指定的后端接口，以获取部门的详细信息。
+ *
+ * @param data - 包含待获取部门的唯一标识符的字符串。
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const GetDepartmentAPI = async (data: string): Promise<BaseResponse<DepartmentEntity> | undefined> => {
+    return BaseApi<DepartmentEntity>(
+        MethodType.GET,
+        "/api/v1/department/",
+        null,
+        null,
+        data,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # EditDepartmentAPI
+ * > 该函数用于通过API向系统中更新指定的部门信息。它接受一个包含更新后部门详细数据的对象，并将其发送到指定的后端接口，以完成数据的持久化存储。
+ *
+ * @param uuid - 包含待更新部门的唯一标识符的字符串。
+ * @param data - 包含待更新部门的所有必要信息的数据传输对象。
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const EditDepartmentAPI = async (uuid: string, data: DepartmentDTO): Promise<BaseResponse<DepartmentEntity> | undefined> => {
+    return BaseApi<DepartmentEntity>(
+        MethodType.PUT,
+        "/api/v1/department/",
+        data,
+        null,
+        uuid,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # GetDepartmentPageAPI
+ * > 该函数用于通过API获取部门分页信息。它接受一个包含分页信息的对象，并将其发送到指定的后端接口，以获取部门的分页信息。
+ *
+ * @param data - 包含分页信息的对象。
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门分页数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const GetDepartmentPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<DepartmentEntity>> | undefined> => {
+    return BaseApi<PageEntity<DepartmentEntity>>(
+        MethodType.GET,
+        "/api/v1/department/page",
+        null,
+        data,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # GetDepartmentListAPI
+ * > 该函数用于通过API获取部门列表信息。它将发送请求到指定的后端接口，以获取部门的列表信息。
+ *
+ * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门列表数据；若请求失败或遇到错误，则可能返回undefined。
+ */
+const GetDepartmentListAPI = async (): Promise<BaseResponse<DepartmentEntity[]> | undefined> => {
+    return BaseApi<DepartmentEntity[]>(
+        MethodType.GET,
+        "/api/v1/department/list",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
 export {
     GetDepartmentInfoAPI,
     GetDepartmentListAPI,
-    GetDepartmentSimpleListAPI
+    GetDepartmentSimpleListAPI,
+    DepartmentAddAPI,
+    GetDepartmentAPI,
+    DeleteDepartmentAPI,
+    EditDepartmentAPI,
+    GetDepartmentPageAPI,
+    GetDepartmentListAPI,
 }
 
 
