@@ -1,11 +1,11 @@
 import {JSX, useEffect, useRef, useState} from "react";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {
-    AddOne,
+    AddOne, AllApplication, CategoryManagement,
     ChartGraph,
-    Close,
+    Close, CloseOne,
     Delete,
-    Editor,
+    Editor, Info,
     Me,
     MoreApp,
     Refresh,
@@ -368,283 +368,301 @@ export function AcademicTeacher({site}: Readonly<{
 
     return (
         <>
-            <div className={"grid grid-cols-10 gap-4 pb-4"}>
-                <div className={"lg:col-span-8 md:col-span-10 sm:col-span-10 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
-                    {/* 统计信息卡片 - 现在放在列表上方 */}
-                    {showStats && (
-                        <CardComponent className="bg-base-100 shadow-md rounded-xl overflow-hidden border border-base-200">
-                            <div className="p-5 space-y-4">
-                                {/* 卡片标题 */}
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-xl font-bold flex items-center gap-2 text-primary">
-                                        <ChartGraph theme="outline" size="22" fill="#666" />
-                                        教师数据统计
-                                    </h2>
-                                    <button
-                                        className="btn btn-circle btn-ghost btn-sm hover:bg-base-200"
-                                        onClick={() => setShowStats(!showStats)}
-                                    >
-                                        <Close theme="filled" size="16" />
-                                    </button>
-                                </div>
-
-                                {/* 统计卡片网格 */}
-                                <div className="grid grid-cols-3 gap-5">
-                                    {/* 教师总数 */}
-                                    <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-xl border border-primary/20">
-                                        <p className="text-sm font-medium text-primary-content">教师总数</p>
-                                        <p className="text-3xl font-bold text-primary mt-1">{teacherStats.total}</p>
+            {/* 修改这里：设置整体容器为固定高度并禁止溢出 */}
+            <div className={"grid grid-cols-10 gap-4 pb-4 h-[calc(100vh-117px)] overflow-hidden"}>
+                <div className={"lg:col-span-7 md:col-span-10 sm:col-span-10 flex flex-col gap-4 h-full overflow-hidden"}>
+                    {/* 主容器采用flex布局，包含统计和列表 */}
+                    <div className="flex flex-col gap-4 h-full overflow-hidden">
+                        {/* 统计信息卡片 - 现在放在列表上方，但不影响列表滚动 */}
+                        {showStats && (
+                            <CardComponent>
+                                <div className="p-3 space-y-1">
+                                    {/* 卡片标题 */}
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-lg font-bold flex items-center gap-2 text-primary-content pb-3">
+                                            <ChartGraph theme="outline" size="20"/>
+                                            教师数据统计
+                                        </h2>
+                                        <button
+                                            className="btn btn-circle btn-ghost btn-sm hover:bg-base-200"
+                                            onClick={() => setShowStats(!showStats)}>
+                                            <Close theme="filled" size="16" />
+                                        </button>
                                     </div>
 
-                                    {/* 状态分布 */}
-                                    <div className="p-4 bg-base-200 rounded-xl border border-base-300">
-                                        <p className="text-sm font-medium text-base-content mb-3 text-center">状态分布</p>
-                                        <div className="grid grid-cols-3 gap-2 text-center">
-                                            <div>
-                                                <div className="badge badge-success badge-lg shadow-sm">{teacherStats.byStatus.active}</div>
-                                                <p className="text-xs mt-1 font-medium">在职</p>
+                                    {/* 其他统计内容不变... */}
+                                    {/* 统计卡片网格 */}
+                                    <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                                        {/* 教师总数 */}
+                                        <div className="p-4 card card-md border border-primary/35 bg-primary/25 flex flex-col gap-1">
+                                            <div className="font-bold text-primary-content flex items-center space-x-1">
+                                                <AllApplication theme="outline" size="16"/>
+                                                <span>教师总数</span>
                                             </div>
-                                            <div>
-                                                <div className="badge badge-warning badge-lg shadow-sm">{teacherStats.byStatus.unregistered}</div>
-                                                <p className="text-xs mt-1 font-medium">未注册</p>
-                                            </div>
-                                            <div>
-                                                <div className="badge badge-error badge-lg shadow-sm">{teacherStats.byStatus.onLeave}</div>
-                                                <p className="text-xs mt-1 font-medium">停用</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 教师类型分布 */}
-                                    <div className="p-4 bg-info/10 rounded-xl border border-info/20">
-                                        <p className="text-sm font-medium text-info-content mb-3 text-center">教师类型分布</p>
-                                        <div className="flex flex-wrap gap-3 justify-center">
-                                            {teacherTypeList.length > 0 ? (
-                                                teacherTypeList.slice(0, 3).map((type) => (
-                                                    <div key={type.teacher_type_uuid} className="text-center">
-                                                        <div className="badge badge-info badge-lg shadow-sm">{String(teacherStats.byType[type.teacher_type_uuid] || 0)}</div>
-                                                        <p className="text-xs mt-1 max-w-16 truncate font-medium" title={type.type_name}>{type.type_name}</p>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p className="text-xs text-base-content/50">暂无类型数据</p>
-                                            )}
-                                            {teacherTypeList.length > 3 && (
-                                                <div className="text-center">
-                                                    <div className="badge badge-neutral badge-lg shadow-sm">
-                                                        +{teacherTypeList.length - 3}
-                                                    </div>
-                                                    <p className="text-xs mt-1 font-medium">其他</p>
+                                            <div className={"flex-1 flex justify-center items-center gap-3"}>
+                                                <div className="text-3xl font-bold text-primary-content">
+                                                    {teacherStats.total} 人
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                {/* 查看更多教师类型 */}
-                                {teacherTypeList.length > 3 && (
-                                    <div className="mt-3 pt-3 border-t border-base-300">
-                                        <details className="collapse collapse-arrow bg-base-100">
-                                            <summary className="collapse-title text-sm py-2 text-primary font-medium flex items-center">
-                                                查看更多教师类型分布
-                                            </summary>
-                                            <div className="collapse-content pt-2">
-                                                <div className="grid grid-cols-4 gap-3">
-                                                    {teacherTypeList.map((type) => (
-                                                        <div key={type.teacher_type_uuid!} className="flex items-center justify-between p-2 bg-base-200 hover:bg-base-300 transition-colors rounded-lg">
-                                                            <span className="text-xs truncate font-medium" title={type.type_name}>{type.type_name}</span>
-                                                            <span className="badge badge-sm badge-info shadow-sm">{teacherStats.byType[type.teacher_type_uuid!] || 0}</span>
+                                        {/* 状态分布 */}
+                                        <div className="p-4 card border border-base-content/15 bg-base-300/50 flex flex-col gap-1">
+                                            <div className="font-bold text-base-content flex items-center space-x-1">
+                                                <Info theme="outline" size="16"/>
+                                                <span>状态分布</span>
+                                            </div>
+                                            <div className="flex-1 flex space-x-3 justify-center items-center">
+                                                <div className={"card bg-success/25 border border-primary border-dashed card-lg rounded-md shadow-sm items-center justify-center w-12 p-2"}>
+                                                    <div className="font-bold text-lg text-success-content">{teacherStats.byStatus.active}</div>
+                                                    <p className="text-xs font-medium text-nowrap text-success-content">在职</p>
+                                                </div>
+                                                <div className={"card bg-warning/25 border border-warning border-dashed card-lg rounded-md shadow-sm items-center justify-center w-12 p-2"}>
+                                                    <div className="font-bold text-lg text-warning-content">{teacherStats.byStatus.unregistered}</div>
+                                                    <p className="text-xs font-medium text-nowrap text-warning-content">未注册</p>
+                                                </div>
+                                                <div className={"card bg-error/25 border border-error border-dashed card-lg rounded-md shadow-sm items-center justify-center w-12 p-2"}>
+                                                    <div className="font-bold text-lg text-error-content">{teacherStats.byStatus.onLeave}</div>
+                                                    <p className="text-xs font-medium text-nowrap text-error-content">停用</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 教师类型分布 */}
+                                        <div className="hidden xl:flex p-4 card border border-info/25 bg-info/25 flex-col gap-1">
+                                            <div className="font-bold text-info-content flex items-center space-x-1">
+                                                <CategoryManagement theme="outline" size="16"/>
+                                                <span>教师类型分布</span>
+                                            </div>
+                                            <div className="flex-1 flex space-x-3 w-full justify-center items-center">
+                                                {teacherTypeList.length > 0 ? (
+                                                    teacherTypeList.slice(0, 2).map((type) => (
+                                                        <div key={type.teacher_type_uuid} className="card bg-info card-lg rounded-md shadow-sm items-center justify-center w-12 p-2">
+                                                            <div className="font-bold text-lg text-warning-content">{String(teacherStats.byType[type.teacher_type_uuid] || 0)}</div>
+                                                            <p className="text-xs font-medium text-nowrap text-info-content">{type.type_name}</p>
                                                         </div>
-                                                    ))}
-                                                </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-base-content/50">暂无类型数据</p>
+                                                )}
+                                                {teacherTypeList.length > 3 && (
+                                                    <div className="card bg-base-content card-lg rounded-md shadow-sm items-center justify-center w-12 p-2">
+                                                        <div className="font-bold text-lg text-base-100">
+                                                            +{teacherTypeList.length - 2}
+                                                        </div>
+                                                        <p className="text-xs font-medium text-nowrap text-base-100">其他</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </details>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        </CardComponent>
-                    )}
 
-                    <CardComponent padding={0} className={"flex-1 flex overflow-y-auto shadow-md rounded-xl"}>
-                        {transitionSearch((style, item) => item ? (
-                            <animated.div style={style} className={"flex h-full justify-center"}>
-                                <div className={"flex items-center"}>
-                                    <span className="loading loading-bars loading-xl"></span>
-                                </div>
-                            </animated.div>
-                        ) : (
-                            <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
-                                <table className="table">
-                                    <thead>
-                                    <tr>
-                                        <th>工号</th>
-                                        <th>姓名</th>
-                                        <th>性别</th>
-                                        <th>部门</th>
-                                        <th>职称</th>
-                                        <th>状态</th>
-                                        <th>教师类型</th>
-                                        <th>联系方式</th>
-                                        <th>邮箱</th>
-                                        <th className={"text-end"}>操作</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {teacherList.records.map((teacher) => (
-                                        <tr key={teacher.teacher_uuid} className="transition hover:bg-base-200">
-                                            <td>{teacher.id}</td>
-                                            <td>{teacher.name}</td>
-                                            <td>{teacher.sex === false ? '男' : '女'}</td>
-                                            <td>{teacher.departmentName || '未分配'}</td>
-                                            <td>{teacher.job_title}</td>
-                                            <td>{teacher.status === 1 ? (
-                                                <LabelComponent
-                                                    size={"badge-sm"}
-                                                    style={"badge-outline"}
-                                                    type={"success"}
-                                                    text={"启用"}
-                                                />
-                                            ) : teacher.status === 2 ? (
-                                                <LabelComponent
-                                                    size={"badge-sm"}
-                                                    style={"badge-outline"}
-                                                    type={"warning"}
-                                                    text={"未注册"}
-                                                />
-                                            ) : (
-                                                <LabelComponent
-                                                    size={"badge-sm"}
-                                                    style={"badge-outline"}
-                                                    type={"error"}
-                                                    text={"停用"}
-                                                />
-                                            )}</td>
-                                            <td>{teacher.typeName || '未知类型'}</td>
-                                            <td>{teacher.phone}</td>
-                                            <td>{teacher.email}</td>
-                                            <td className={"flex justify-end"}>
-                                                <div className="join">
-                                                    <button
-                                                        onClick={() => handleEditTeacher(teacher)}
-                                                        className="join-item btn btn-sm btn-soft btn-info inline-flex">
-                                                        <Editor theme="outline" size="12" />
-                                                        <span>编辑</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteTeacher(teacher.teacher_uuid!)}
-                                                        className="join-item btn btn-sm btn-soft btn-error inline-flex">
-                                                        <Delete theme="outline" size="12" />
-                                                        <span>删除</span>
-                                                    </button>
+                                    {/* 查看更多教师类型 */}
+                                    {teacherTypeList.length > 3 && (
+                                        <div className="hidden xl:block">
+                                            <details className="collapse collapse-arrow bg-base-100">
+                                                <summary className="collapse-title text-primary-content font-medium">
+                                                    <div className={"flex items-center h-full"}>
+                                                        <span className="text-sm">查看更多教师类型分布</span>
+                                                    </div>
+                                                </summary>
+                                                <div className="collapse-content">
+                                                    <div className="grid xl:grid-cols-6 2xl:grid-cols-8 gap-1.5">
+                                                        {teacherTypeList.map((type) => (
+                                                            <div key={type.teacher_type_uuid!} className="flex items-center justify-between p-2 bg-base-200/50 hover:bg-base-300/50 transition rounded-md">
+                                                                <span className="text-sm truncate font-medium">
+                                                                    {type.type_name}
+                                                                </span>
+                                                                <span className="badge badge-sm badge-info badge-soft shadow">
+                                                                    {teacherStats.byType[type.teacher_type_uuid!] || 0}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </td>
+                                            </details>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardComponent>
+                        )}
+
+                        {/* 修改教师列表卡片 - 确保表格可以正确滚动 */}
+                        <CardComponent padding={0} className={"flex-1 flex overflow-auto"}>
+                            {transitionSearch((style, item) => item ? (
+                                <animated.div style={style} className={"flex h-full justify-center"}>
+                                    <div className={"flex items-center"}>
+                                        <span className="loading loading-bars loading-xl"></span>
+                                    </div>
+                                </animated.div>
+                            ) : (
+                                <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
+                                    <table className="table">
+                                        <thead className="sticky top-0 bg-base-100 z-10">
+                                        <tr>
+                                            <th>工号</th>
+                                            <th>姓名</th>
+                                            <th>性别</th>
+                                            <th>部门</th>
+                                            <th>职称</th>
+                                            <th>状态</th>
+                                            <th>教师类型</th>
+                                            <th>联系方式</th>
+                                            <th>邮箱</th>
+                                            <th className={"text-end"}>操作</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </animated.div>
-                        ))}
-                    </CardComponent>
-                    <div className="flex justify-center">
-                        <div className={"join join-horizontal"}>
-                            <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: teacherList.current - 1 })}
-                                    disabled={teacherList.current === 1}>
-                                上一页
-                            </button>
-                            {getPageInfo()}
-                            <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: teacherList.current + 1 })}
-                                    disabled={teacherList.current === Math.ceil(teacherList.total / teacherList.size)}>
-                                下一页
-                            </button>
-                            <select className="join-item transition select select-sm mx-1 border-l-0"
-                                    value={searchRequest.size}
-                                    onChange={(e) => setSearchRequest({ ...searchRequest, size: Number(e.target.value) })}>
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={15}>15</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
+                                        </thead>
+                                        <tbody>
+                                        {teacherList.records.map((teacher) => (
+                                            <tr key={teacher.teacher_uuid} className="transition hover:bg-base-200">
+                                                <td>{teacher.id}</td>
+                                                <td className={"text-nowrap"}>{teacher.name}</td>
+                                                <td>{teacher.sex === false ? '男' : '女'}</td>
+                                                <td className={"text-nowrap"}>{teacher.departmentName || '未分配'}</td>
+                                                <td>{teacher.job_title}</td>
+                                                <td>{teacher.status === 1 ? (
+                                                    <LabelComponent
+                                                        size={"badge-sm"}
+                                                        style={"badge-outline"}
+                                                        type={"success"}
+                                                        text={"启用"}
+                                                    />
+                                                ) : teacher.status === 2 ? (
+                                                    <LabelComponent
+                                                        size={"badge-sm"}
+                                                        style={"badge-outline"}
+                                                        type={"warning"}
+                                                        text={"未注册"}
+                                                    />
+                                                ) : (
+                                                    <LabelComponent
+                                                        size={"badge-sm"}
+                                                        style={"badge-outline"}
+                                                        type={"error"}
+                                                        text={"停用"}
+                                                    />
+                                                )}</td>
+                                                <td>{teacher.typeName || '未知类型'}</td>
+                                                <td>{teacher.phone}</td>
+                                                <td>{teacher.email}</td>
+                                                <td className={"grid justify-end text-nowrap"}>
+                                                    <div className="join">
+                                                        <button
+                                                            onClick={() => handleEditTeacher(teacher)}
+                                                            className="join-item btn btn-sm btn-soft btn-info inline-flex">
+                                                            <Editor theme="outline" size="12" />
+                                                            <span>编辑</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteTeacher(teacher.teacher_uuid!)}
+                                                            className="join-item btn btn-sm btn-soft btn-error inline-flex">
+                                                            <Delete theme="outline" size="12" />
+                                                            <span>删除</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </animated.div>
+                            ))}
+                        </CardComponent>
+                        {/* 分页控件 */}
+                        <div className="flex justify-center flex-shrink-0 mt-2">
+                            <div className={"join join-horizontal"}>
+                                <button className="transition shadow btn btn-sm join-item border"
+                                        onClick={() => setSearchRequest({ ...searchRequest, page: teacherList.current - 1 })}
+                                        disabled={teacherList.current === 1}>
+                                    上一页
+                                </button>
+                                {getPageInfo()}
+                                <button className="transition shadow btn btn-sm join-item border"
+                                        onClick={() => setSearchRequest({ ...searchRequest, page: teacherList.current + 1 })}
+                                        disabled={teacherList.current === Math.ceil(teacherList.total / teacherList.size)}>
+                                    下一页
+                                </button>
+                                <select className="join-item transition select select-sm mx-1 border-l-0"
+                                        value={searchRequest.size}
+                                        onChange={(e) => setSearchRequest({ ...searchRequest, size: Number(e.target.value) })}>
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={15}>15</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className={"lg:col-span-2 md:col-span-10 sm:col-span-10 flex flex-col gap-4"}>
+                <div className={"lg:col-span-3 md:col-span-10 sm:col-span-10 flex flex-col gap-4 h-full pb-2"}>
                     {/* 搜索卡片 */}
-                    <CardComponent padding={18} className="space-y-6 bg-gradient-to-br from-base-100 to-base-200 shadow-md rounded-xl">
-                        <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
-                            <Search theme="outline" size="22" fill="#666" />
-                            搜索教师
+                    <CardComponent padding={18}>
+                        <div className={"space-y-3"}>
+                        <h2 className="text-lg font-bold flex gap-2 items-center text-primary-content">
+                            <Search theme="outline" size="20"/>
+                            <span>搜索教师</span>
                         </h2>
 
-                        <div className="space-y-5">
+                        <div className="grid gap-1 grid-cols-2">
                             {/* 教师姓名搜索 */}
-                            <div className="relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-200">
-                                    <Me theme="outline" size="18" />
-                                </div>
-                                <input
-                                    ref={inputFocus}
-                                    type="text"
-                                    placeholder="教师姓名"
-                                    className="input input-bordered w-full pl-11 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                                    value={nameSearch}
-                                    onChange={(e) => setNameSearch(e.target.value)}
-                                />
-                                {nameSearch && (
-                                    <button
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-error"
-                                        onClick={() => setNameSearch('')}
+                            <div className="w-full col-span-full">
+                                <label className="input input-sm transition flex items-center w-full validator">
+                                    <Me theme="outline" size="14"/>
+                                    <input type="text"
+                                           ref={inputFocus}
+                                           value={nameSearch}
+                                           onChange={(e) => setNameSearch(e.target.value)}
+                                           className="grow ps-1"
+                                           placeholder="教师姓名"/>
+                                    {nameSearch && (
+                                        <button
+                                            className="transition hover:bg-error/45 rounded-md p-1.5"
+                                            onClick={() => setNameSearch('')}
+                                        >
+                                            <Delete theme="outline" size="12" className={"transition text-black hover:text-error-content"}/>
+                                        </button>
+                                    )}
+                                </label>
+                            </div>
+                            <div className="w-full">
+                                <label className="select select-sm transition flex items-center w-full validator">
+                                    <select
+                                        className="grow ps-1 flex-1"
+                                        value={departmentSearch}
+                                        onChange={(e) => setDepartmentSearch(e.target.value)}
                                     >
-                                        <Delete theme="outline" size="16" />
-                                    </button>
-                                )}
+                                        <option value="">请选择部门</option>
+                                        {departmentList.map((dept) => (
+                                            <option key={dept.department_uuid} value={dept.department_uuid}>
+                                                {dept.department_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
                             </div>
-
-                            {/* 部门搜索 - 改为选择器 */}
-                            <div className="relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-200">
-                                    <Search theme="outline" size="18" />
-                                </div>
-                                <select
-                                    className="select select-bordered w-full pl-11 py-3 h-auto focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none"
-                                    value={departmentSearch}
-                                    onChange={(e) => setDepartmentSearch(e.target.value)}
-                                >
-                                    <option value="">请选择部门</option>
-                                    {departmentList.map((dept) => (
-                                        <option key={dept.department_uuid} value={dept.department_uuid}>
-                                            {dept.department_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 状态搜索 */}
-                            <div className="relative group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-200">
-                                    <Search theme="outline" size="18" />
-                                </div>
-                                <select
-                                    className="select select-bordered w-full pl-11 py-3 h-auto focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none"
-                                    value={statusSearch}
-                                    onChange={(e) => setStatusSearch(e.target.value)}
-                                >
-                                    <option value="">请选择教师状态</option>
-                                    <option value="1">启用</option>
-                                    <option value="0">停用</option>
-                                    <option value="2">未注册</option>
-                                </select>
+                            <div className="w-full">
+                                <label className="select select-sm transition flex items-center w-full validator">
+                                    <select
+                                        className="grow ps-1 flex-1"
+                                        value={statusSearch}
+                                        onChange={(e) => setStatusSearch(e.target.value)}
+                                    >
+                                        <option value="">请选择教师状态</option>
+                                        <option value="1">启用</option>
+                                        <option value="0">停用</option>
+                                        <option value="2">未注册</option>
+                                    </select>
+                                </label>
                             </div>
                         </div>
 
                         {/* 按钮组 */}
-                        <div className="grid grid-cols-2 gap-4 pt-3">
+                        <div className="grid grid-cols-2 gap-1">
                             <button
-                                className="btn btn-primary shadow-md hover:shadow-lg transition-all duration-200 py-3"
+                                className="btn btn-sm btn-primary shadow-md hover:shadow-lg transition py-3"
                                 onClick={() => {
                                     setSearchRequest({
                                         ...searchRequest,
@@ -658,9 +676,8 @@ export function AcademicTeacher({site}: Readonly<{
                                 <Search theme="outline" size="18" />
                                 搜索
                             </button>
-
                             <button
-                                className="btn btn-outline shadow hover:shadow-md transition-all duration-200 py-3"
+                                className="btn btn-sm btn-primary btn-outline shadow-md hover:shadow-lg transition py-3"
                                 onClick={() => {
                                     setNameSearch('');
                                     setDepartmentSearch('');
@@ -679,35 +696,45 @@ export function AcademicTeacher({site}: Readonly<{
                             </button>
                         </div>
 
-                        {/* 快捷键提示 */}
-                        <div className="flex items-center justify-end gap-2 text-xs text-base-content/60 mt-2 pt-3 border-t border-base-300">
+                        <div className="flex items-center justify-end gap-0.5 text-xs text-base-content/60">
                             <span>快速搜索：</span>
                             <kbd className="kbd kbd-xs bg-base-300">{getCurrent?.system ? "⌘" : "Ctrl"}</kbd>
                             <span>+</span>
                             <kbd className="kbd kbd-xs bg-base-300">K</kbd>
                         </div>
+                        </div>
                     </CardComponent>
                     {/* 操作卡片 */}
-                    <CardComponent padding={18} className="space-y-3 shadow-md rounded-xl">
-                        <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
-                            <MoreApp theme="outline" size="22" fill="#666"/>
-                            其他操作
+                    <CardComponent padding={18} className={"space-3"}>
+                        <h2 className="text-lg font-bold flex items-center gap-2 text-primary-content pb-2">
+                            <MoreApp theme="outline" size="20"/>
+                            <span>其他操作</span>
                         </h2>
-                        <div className="grid grid-cols-1 gap-3 mt-2">
+                        <div className="grid grid-cols-2 gap-1.5">
                             <button
                                 onClick={handleAddTeacher}
-                                className="btn btn-primary w-full flex items-center justify-center gap-2"
+                                className="btn btn-sm btn-primary w-full flex items-center justify-center gap-2"
                             >
-                                <AddOne theme="outline" size="18" />
+                                <AddOne theme="outline" size="14" />
                                 添加教师
                             </button>
+                            {showStats ? (
                             <button
-                                className="btn btn-outline btn-info w-full flex items-center justify-center gap-2"
+                                className="btn btn-sm btn-outline btn-error w-full flex items-center justify-center gap-2"
                                 onClick={() => setShowStats(!showStats)}
                             >
-                                <ChartGraph theme="outline" size="18" />
-                                {showStats ? "隐藏统计" : "显示统计"}
+                                <CloseOne theme="outline" size="14"/>
+                                <span>隐藏统计</span>
                             </button>
+                                ) : (
+                            <button
+                                className="btn btn-sm btn-outline btn-info w-full flex items-center justify-center gap-2"
+                                onClick={() => setShowStats(!showStats)}
+                            >
+                                <ChartGraph theme="outline" size="14" />
+                                <span>显示统计</span>
+                            </button>
+                                )}
                         </div>
                     </CardComponent>
                 </div>
