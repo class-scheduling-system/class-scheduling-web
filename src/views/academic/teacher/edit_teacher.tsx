@@ -31,20 +31,18 @@ import {
     AllApplication,
     BuildingThree,
     CheckOne, Chinese,
-    CloseOne, Column, DocDetail, EditName, English,
+    Column, DocDetail,English,
     Envelope, Keyboard,
     PhoneTelephone, Return, Refresh,
-    User, UserBusiness, Announcement, Attention, Editor
+    UserBusiness, Announcement, Attention, Editor
 } from "@icon-park/react";
-import { message, Card, Tooltip } from "antd";
+import { message, Card} from "antd";
 import * as React from "react";
-import {GetDepartmentListAPI, GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
+import { GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
 import {DepartmentInfoEntity} from "../../../models/entity/department__info_entity.ts";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
 import {TeacherEditDTO} from "../../../models/dto/teacher_edit_dto.ts";
 import {EditTeacherAPI} from "../../../apis/teacher_api.ts";
-import {GetUserListAPI} from "../../../apis/user_api.ts";
-import {UserInfoEntity} from "../../../models/entity/user_info_entity.ts";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {Link, useLocation, useNavigate, useParams} from "react-router";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
@@ -98,7 +96,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                 id: teacherInfo.id,
                 unit_uuid: teacherInfo.unit_uuid,
                 user_uuid: teacherInfo.user_uuid,
-                type_uuid: teacherInfo.type_uuid, // 修改为type_uuid
+                type: teacherInfo.type_uuid,
             });
             setLoading(false);
         } else {
@@ -122,7 +120,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                 english_name: teacherInfo.english_name,
                 ethnic: teacherInfo.ethnic,
                 sex: teacherInfo.sex,
-                type_uuid: teacherInfo.type_uuid, // 修改为type_uuid
+                type: teacherInfo.type_uuid,
                 phone: teacherInfo.phone,
                 email: teacherInfo.email,
                 job_title: teacherInfo.job_title,
@@ -296,8 +294,8 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.sex !== undefined ? String(data.sex) : ""}
-                                                onChange={(e) => setData({...data, sex: e.target.value === '1'})}
+                                                value={data.sex ? "0" : !data.sex ? "1" : ""}
+                                                onChange={(e) => setData({...data, sex: e.target.value === '0'})}
                                                 required
                                             >
                                                 <option value="" disabled>请选择性别</option>
@@ -314,13 +312,16 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.type || ""}
+                                                value={data.type || teacherInfo?.type_uuid || ""}
                                                 onChange={(e) => setData({ ...data, type: e.target.value })}
                                                 required
                                             >
                                                 <option value="" disabled>请选择教师类型</option>
                                                 {teacherTypeList.map((type) => (
-                                                    <option key={type.teacher_type_uuid} value={type.teacher_type_uuid}>
+                                                    <option
+                                                        key={type.teacher_type_uuid}
+                                                        value={type.teacher_type_uuid}
+                                                    >
                                                         {type.type_name}
                                                     </option>
                                                 ))}
@@ -494,7 +495,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <Column theme="outline" size="14" className="text-secondary" />
                                                 <span>性别</span>
                                             </span>
-                                            <span className="text-right text-gray-800">{teacherInfo?.sex ? "男" : "女"}</span>
+                                            <span className="text-right text-gray-800">{teacherInfo?.sex ? "女" : "男"}</span>
                                         </div>
                                         <div className="border-b border-gray-200"></div>
                                         <div className="grid grid-cols-2 gap-2 items-center">
@@ -502,7 +503,9 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <UserBusiness theme="outline" size="14" className="text-secondary" />
                                                 <span>教师类型</span>
                                             </span>
-                                            <span className="text-right text-gray-800">{teacherInfo?.type || data.type || "未设置"}</span>
+                                            <span className="text-right text-gray-800">
+                                                {teacherTypeList.find(type => type.teacher_type_uuid === (teacherInfo?.type || data.type))?.type_name || "未设置"}
+                                            </span>
                                         </div>
                                         <div className="border-b border-gray-200"></div>
                                         <div className="grid grid-cols-2 gap-2 items-center">

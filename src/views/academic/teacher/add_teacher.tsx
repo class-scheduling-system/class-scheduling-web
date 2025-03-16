@@ -28,16 +28,12 @@
 
 import {
     CheckOne,
-    CloseOne,
     Envelope,
-    Key,
     PhoneTelephone,
     User,
     IdCard,
     Write,
-    EmotionHappy,
     AllApplication,
-    ChinesePavilion,
     English,
     AddTextTwo,
     Return,
@@ -50,15 +46,13 @@ import {
 } from "@icon-park/react";
 import * as React from "react";
 import {useEffect, useState} from "react";
-import { message, Card, List, Tooltip } from "antd";
+import { message, Card, List} from "antd";
 import { AddTeacherAPI } from "../../../apis/teacher_api.ts";
 import { TeacherAddDTO } from "../../../models/dto/teacher_add_dto.ts";
 import {Link} from "react-router";
-import {UserInfoEntity} from "../../../models/entity/user_info_entity.ts";
-import {GetUserListAPI} from "../../../apis/user_api.ts";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
 import {DepartmentInfoEntity} from "../../../models/entity/department__info_entity.ts";
-import {GetDepartmentListAPI, GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
+import {GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 
@@ -115,13 +109,13 @@ export function AcademicAddTeacher(): React.JSX.Element {
     };
 
     // 更新最近添加的教师列表
-    const updateRecentTeachers = (newTeacher) => {
+    const updateRecentTeachers = (newTeacher: { desc?: string | undefined; email?: string | undefined; english_name?: string; ethnic?: string; id?: string; job_title?: string | undefined; name: any; phone?: string | undefined; sex?: boolean; type?: string; unit_uuid: any; user_uuid?: string; }) => {
         // 创建当前时间格式化字符串
         const now = new Date();
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
         // 获取部门名称
-        const getDepartmentName = (deptUuid) => {
+        const getDepartmentName = (deptUuid: string | undefined) => {
             const selectedDept = departmentList.find(dept => dept.department_uuid === deptUuid);
             return selectedDept ? selectedDept.department_name : "";
         };
@@ -278,12 +272,12 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                         <select
                                             className="select select-sm w-full validator"
                                             value={data.sex !== undefined ? String(data.sex) : ""}
-                                            onChange={(e) => setData({...data, sex: e.target.value})}
+                                            onChange={(e) => setData({...data, sex: e.target.value === "true"})}
                                             required
                                         >
                                             <option value="" disabled>请选择性别</option>
-                                            <option value="0">女</option>
-                                            <option value="1">男</option>
+                                            <option value="false">女</option>
+                                            <option value="true">男</option>
                                         </select>
                                     </fieldset>
                                     <fieldset className="flex flex-col">

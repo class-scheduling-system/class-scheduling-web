@@ -75,6 +75,10 @@ export type TeacherEntity = {
      */
     sex?: boolean;
     /**
+     * 教师状态（0：禁用，1：启用，2：未注册）
+     */
+    status?: number;
+    /**
      * 教师主键
      */
     teacher_uuid?: string;

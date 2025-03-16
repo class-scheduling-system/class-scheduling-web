@@ -2,13 +2,13 @@ import {JSX, useEffect, useRef, useState} from "react";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {
     AddOne,
-    ChartGraph, Close,
-    Correct,
+    ChartGraph,
+    Close,
     Delete,
     Editor,
-    EditTwo, Error, Me, MoreApp,
-    PeopleDeleteOne,
-    PreviewOpen, Refresh,
+    Me,
+    MoreApp,
+    Refresh,
     Search
 } from "@icon-park/react";
 import {GetTeacherListAPI} from "../../../apis/teacher_api.ts";
@@ -27,13 +27,11 @@ import {CardComponent} from "../../../components/card_component.tsx";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeInfoByTypeUuidAPI, GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {LabelComponent} from "../../../components/label_component.tsx";
-import * as React from "react";
 
 // 扩展TeacherEntity接口，添加departmentName字段和typeName字段
 interface TeacherWithExtInfo extends TeacherEntity {
     departmentName?: string;
     typeName?: string;
-    status?: string;
 }
 
 export function AcademicTeacher({site}: Readonly<{
@@ -80,7 +78,7 @@ export function AcademicTeacher({site}: Readonly<{
     // 删除用户相关状态
     const [deleteTeacherUuid, setDeleteTeacherUuid] = useState("");
     // 统计显示状态
-    const [showStats, setShowStats] = useState(true);
+    const [showStats, setShowStats] = useState(false);
 
     // 获取部门列表
     useEffect(() => {
@@ -193,11 +191,13 @@ export function AcademicTeacher({site}: Readonly<{
             const deptResp = await GetDepartmentInfoAPI(teacher.unit_uuid);
             if (deptResp?.output === "Success" && deptResp.data) {
                 // 更新缓存
-                setDepartmentCache(prev => ({
-                    ...prev,
-                    [teacher.unit_uuid]: deptResp.data
-                }));
-
+                setDepartmentCache((prev: {[key: string]: DepartmentInfoEntity}) => {
+                    const newCache = { ...prev };
+                    if (teacher.unit_uuid) {
+                        newCache[teacher.unit_uuid] = deptResp.data;
+                    }
+                    return newCache;
+                });
                 // 设置部门名称
                 teacher.departmentName = deptResp.data.department_name;
             } else {
@@ -223,7 +223,6 @@ export function AcademicTeacher({site}: Readonly<{
             teacher.typeName = teacherTypeCache[teacher.type].type_name;
             return;
         }
-
         try {
             const typeResp = await GetTeacherTypeInfoByTypeUuidAPI(teacher.type);
             if (typeResp?.output === "Success" && typeResp.data) {
@@ -232,7 +231,6 @@ export function AcademicTeacher({site}: Readonly<{
                     ...prev,
                     [teacher.type]: typeResp.data
                 }));
-
                 // 设置类型名称
                 teacher.typeName = typeResp.data.type_name;
             } else {
@@ -374,7 +372,7 @@ export function AcademicTeacher({site}: Readonly<{
                 <div className={"lg:col-span-8 md:col-span-10 sm:col-span-10 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     {/* 统计信息卡片 - 现在放在列表上方 */}
                     {showStats && (
-                        <CardComponent className="bg-base-100 shadow-lg rounded-xl overflow-hidden border border-base-200">
+                        <CardComponent className="bg-base-100 shadow-md rounded-xl overflow-hidden border border-base-200">
                             <div className="p-5 space-y-4">
                                 {/* 卡片标题 */}
                                 <div className="flex justify-between items-center">
@@ -467,7 +465,7 @@ export function AcademicTeacher({site}: Readonly<{
                         </CardComponent>
                     )}
 
-                    <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
+                    <CardComponent padding={0} className={"flex-1 flex overflow-y-auto shadow-md rounded-xl"}>
                         {transitionSearch((style, item) => item ? (
                             <animated.div style={style} className={"flex h-full justify-center"}>
                                 <div className={"flex items-center"}>
@@ -496,7 +494,7 @@ export function AcademicTeacher({site}: Readonly<{
                                         <tr key={teacher.teacher_uuid} className="transition hover:bg-base-200">
                                             <td>{teacher.id}</td>
                                             <td>{teacher.name}</td>
-                                            <td>{teacher.sex === 1 ? '男' : '女'}</td>
+                                            <td>{teacher.sex === false ? '男' : '女'}</td>
                                             <td>{teacher.departmentName || '未分配'}</td>
                                             <td>{teacher.job_title}</td>
                                             <td>{teacher.status === 1 ? (
@@ -533,7 +531,7 @@ export function AcademicTeacher({site}: Readonly<{
                                                         <span>编辑</span>
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDeleteTeacher(teacher.teacher_uuid)}
+                                                        onClick={() => handleDeleteTeacher(teacher.teacher_uuid!)}
                                                         className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                         <Delete theme="outline" size="12" />
                                                         <span>删除</span>
@@ -576,7 +574,7 @@ export function AcademicTeacher({site}: Readonly<{
                 </div>
                 <div className={"lg:col-span-2 md:col-span-10 sm:col-span-10 flex flex-col gap-4"}>
                     {/* 搜索卡片 */}
-                    <CardComponent padding={18} className="space-y-6 bg-gradient-to-br from-base-100 to-base-200 shadow-lg rounded-xl">
+                    <CardComponent padding={18} className="space-y-6 bg-gradient-to-br from-base-100 to-base-200 shadow-md rounded-xl">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
                             <Search theme="outline" size="22" fill="#666" />
                             搜索教师
@@ -690,7 +688,7 @@ export function AcademicTeacher({site}: Readonly<{
                         </div>
                     </CardComponent>
                     {/* 操作卡片 */}
-                    <CardComponent padding={18} className="space-y-3">
+                    <CardComponent padding={18} className="space-y-3 shadow-md rounded-xl">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-primary pb-2">
                             <MoreApp theme="outline" size="22" fill="#666"/>
                             其他操作
