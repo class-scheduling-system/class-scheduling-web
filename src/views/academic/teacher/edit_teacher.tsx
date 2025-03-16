@@ -39,7 +39,6 @@ import {
 import { message, Card} from "antd";
 import * as React from "react";
 import { GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
-import {DepartmentInfoEntity} from "../../../models/entity/department__info_entity.ts";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
 import {TeacherEditDTO} from "../../../models/dto/teacher_edit_dto.ts";
 import {EditTeacherAPI} from "../../../apis/teacher_api.ts";
@@ -47,6 +46,7 @@ import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {Link, useLocation, useNavigate, useParams} from "react-router";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
+import {DepartmentEntity} from "../../../models/entity/department_entity.ts";
 
 
 /**
@@ -71,7 +71,7 @@ export function AcademicEditTeacher({site}: Readonly<{
         desc: ""
     } as TeacherEditDTO);
 
-    const [departmentList, setDepartmentList] = useState<DepartmentInfoEntity[]>([]);
+    const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
     const [teacherTypeList, setTeacherTypeList] = useState<TeacherTypeEntity[]>([]);
     const [searchRequest] = useState<PageSearchDTO>({
         page: 1,
@@ -162,7 +162,7 @@ export function AcademicEditTeacher({site}: Readonly<{
             .then(response => {
                 if (response?.output === "Success") {
                     console.log("获取部门列表成功:", response.data);
-                    setDepartmentList(response.data! as DepartmentInfoEntity[]);
+                    setDepartmentList(response.data! as DepartmentEntity[]);
                 } else {
                     message.error(response?.error_message ?? "获取部门列表失败");
                 }

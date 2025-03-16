@@ -18,7 +18,6 @@ import {TeacherEntity} from "../../../models/entity/teacher_entity.ts";
 import {animated, useTransition} from "@react-spring/web";
 import {AcademicDeleteTeacherDialog} from "../../../components/academic/academic_teacher_delete_dialog.tsx";
 import {GetDepartmentInfoAPI, GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
-import {DepartmentInfoEntity} from "../../../models/entity/department__info_entity.ts";
 import {useNavigate} from "react-router";
 import {PageTeacherSearchDto} from "../../../models/dto/page_teacher_search_dto.ts";
 import {useSelector} from "react-redux";
@@ -27,6 +26,7 @@ import {CardComponent} from "../../../components/card_component.tsx";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeInfoByTypeUuidAPI, GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {LabelComponent} from "../../../components/label_component.tsx";
+import {DepartmentEntity} from "../../../models/entity/department_entity.ts";
 
 // 扩展TeacherEntity接口，添加departmentName字段和typeName字段
 interface TeacherWithExtInfo extends TeacherEntity {
@@ -49,10 +49,10 @@ export function AcademicTeacher({site}: Readonly<{
     } as PageEntity<TeacherWithExtInfo>);
 
     // 缓存已加载的部门信息
-    const [departmentCache, setDepartmentCache] = useState<{[key: string]: DepartmentInfoEntity}>({});
+    const [departmentCache, setDepartmentCache] = useState<{[key: string]: DepartmentEntity}>({});
 
     // 部门列表状态
-    const [departmentList, setDepartmentList] = useState<DepartmentInfoEntity[]>([]);
+    const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
 
     // 缓存已加载的教师类型信息
     const [teacherTypeCache, setTeacherTypeCache] = useState<{[key: string]: TeacherTypeEntity}>({});
@@ -191,7 +191,7 @@ export function AcademicTeacher({site}: Readonly<{
             const deptResp = await GetDepartmentInfoAPI(teacher.unit_uuid);
             if (deptResp?.output === "Success" && deptResp.data) {
                 // 更新缓存
-                setDepartmentCache((prev: {[key: string]: DepartmentInfoEntity}) => {
+                setDepartmentCache((prev: {[key: string]: DepartmentEntity}) => {
                     const newCache = { ...prev };
                     if (teacher.unit_uuid) {
                         newCache[teacher.unit_uuid] = deptResp.data;

@@ -29,7 +29,6 @@
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {DepartmentDTO} from "../models/dto/department_dto.ts";
 import {BaseResponse} from "../models/base_response.ts";
-import {DepartmentInfoEntity} from "../models/entity/department__info_entity.ts";
 import {DepartmentEntity} from "../models/entity/department_entity.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
@@ -39,11 +38,11 @@ import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
  * > 该函数用于通过API请求获取部门信息。它利用了Bearer令牌认证方式来确保安全地访问用户数据。
  *
  * @param {string} department_uuid - 部门的唯一标识符
- * @returns {Promise<BaseResponse<DepartmentInfoEntity> | undefined>} - 返回一个Promise，解析为包含部门信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @returns {Promise<BaseResponse<DepartmentEntity> | undefined>} - 返回一个Promise，解析为包含部门信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetDepartmentInfoAPI = async (department_uuid: string): Promise<BaseResponse<DepartmentInfoEntity> | undefined> => {
-    return BaseApi<DepartmentInfoEntity>(
+const GetDepartmentInfoAPI = async (department_uuid: string): Promise<BaseResponse<DepartmentEntity> | undefined> => {
+    return BaseApi<DepartmentEntity>(
         MethodType.GET,
         "/api/v1/department",
         null,
@@ -71,34 +70,16 @@ const DeleteDepartmentAPI = async (data: string): Promise<BaseResponse<void> | u
     );
 }
 
-/**
- * # 获取部门列表
- * > 该函数用于通过API请求获取部门列表。它利用了Bearer令牌认证方式来确保安全地访问部门数据。
- *
- * @returns {Promise<BaseResponse<DepartmentInfoEntity> | undefined>} - 返回一个Promise，解析为包含部门信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
- * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
- */
-const GetDepartmentListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<DepartmentInfoEntity>> | undefined> => {
-    return BaseApi<PageEntity<DepartmentInfoEntity>>(
-        MethodType.GET,
-        "/api/v1/departments",
-        null,
-        data,
-        null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
-    )
-}
-
 
 /**
  * # 获取部门简洁列表
  * > 该函数用于通过API请求获取部门简洁列表。它利用了Bearer令牌认证方式来确保安全地访问部门数据。
  *
- * @returns {Promise<BaseResponse<DepartmentInfoEntity> | undefined>} - 返回一个Promise，解析为包含部门简洁列表的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @returns {Promise<BaseResponse<DepartmentEntity> | undefined>} - 返回一个Promise，解析为包含部门简洁列表的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetDepartmentSimpleListAPI = async (): Promise<BaseResponse<DepartmentInfoEntity> | undefined> => {
-    return BaseApi<DepartmentInfoEntity>(
+const GetDepartmentSimpleListAPI = async (): Promise<BaseResponse<DepartmentEntity> | undefined> => {
+    return BaseApi<DepartmentEntity>(
         MethodType.GET,
         "/api/v1/department/list",
         null,
@@ -207,7 +188,6 @@ export {
     DeleteDepartmentAPI,
     EditDepartmentAPI,
     GetDepartmentPageAPI,
-    GetDepartmentListAPI,
 }
 
 
