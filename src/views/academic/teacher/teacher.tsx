@@ -25,7 +25,7 @@ import {useSelector} from "react-redux";
 import {CurrentInfoStore} from "../../../models/store/current_info_store.ts";
 import {CardComponent} from "../../../components/card_component.tsx";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
-import {GetTeacherTypeInfoByTypeUuidAPI} from "../../../apis/teacher_type_api.ts";
+import {GetTeacherTypeInfoByTypeUuidAPI, GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {LabelComponent} from "../../../components/label_component.tsx";
 import * as React from "react";
 
@@ -58,6 +58,9 @@ export function AcademicTeacher({site}: Readonly<{
 
     // 缓存已加载的教师类型信息
     const [teacherTypeCache, setTeacherTypeCache] = useState<{[key: string]: TeacherTypeEntity}>({});
+
+    // 教师类型列表
+    const [teacherTypeList, setTeacherTypeList] = useState<TeacherTypeEntity[]>([]);
 
     const [searchRequest, setSearchRequest] = useState<PageTeacherSearchDto>({
         page: 1,
@@ -98,6 +101,25 @@ export function AcademicTeacher({site}: Readonly<{
         };
 
         fetchDepartmentList();
+    }, []);
+
+    // 获取教师类型列表
+    useEffect(() => {
+        const fetchTeacherTypeList = async () => {
+            try {
+                const typeListResp = await GetTeacherTypeSimpleListAPI();
+                if (typeListResp?.output === "Success" && typeListResp.data) {
+                    setTeacherTypeList(Array.isArray(typeListResp.data) ? typeListResp.data : [typeListResp.data]);
+                } else {
+                    message.error(typeListResp?.error_message ?? "获取教师类型列表失败");
+                }
+            } catch (error) {
+                console.error("获取教师类型列表失败", error);
+                message.error("获取教师类型列表失败");
+            }
+        };
+
+        fetchTeacherTypeList();
     }, []);
 
     useEffect(() => {
@@ -274,10 +296,23 @@ export function AcademicTeacher({site}: Readonly<{
             lecturer: teacherList.records.filter(t => t.job_title === "讲师").length
         },
         byStatus: {
-            active: teacherList.records.filter(t => t.status === "1").length,
-            onLeave: teacherList.records.filter(t => t.status === "0").length
-        }
+            active: teacherList.records.filter(t => t.status === 1).length,
+            onLeave: teacherList.records.filter(t => t.status === 0).length,
+            unregistered: teacherList.records.filter(t => t.status === 2).length
+        },
+        byType: {} as Record<string, number>
     };
+
+    // 计算教师类型分布
+    if (teacherTypeList.length > 0) {
+        teacherTypeList.forEach(type => {
+            if (type.teacher_type_uuid) {  // 添加空值检查
+                teacherStats.byType[type.teacher_type_uuid] = teacherList.records.filter(
+                    t => t.type === type.teacher_type_uuid
+                ).length;
+            }
+        });
+    }
 
     function getPageInfo(): JSX.Element[] {
         const pageInfo: JSX.Element[] = [];
@@ -339,61 +374,95 @@ export function AcademicTeacher({site}: Readonly<{
                 <div className={"lg:col-span-8 md:col-span-10 sm:col-span-10 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     {/* 统计信息卡片 - 现在放在列表上方 */}
                     {showStats && (
-                        <CardComponent padding={18} className="space-y-2 mb-2">
-                            <div className="flex justify-between items-center mb-1">
-                                <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <ChartGraph theme="outline" size="20" fill="#666"/>
-                                    教师数据统计
-                                </h2>
-                                <button
-                                    className="btn btn-sm btn-ghost"
-                                    onClick={() => setShowStats(!showStats)}
-                                >
-                                    <Close theme="outline" size="14"/>
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="text-center p-3 bg-base-200 rounded-lg">
-                                    <p className="text-sm text-gray-500">教师总数</p>
-                                    <p className="text-3xl font-bold text-primary mt-1">{teacherStats.total}</p>
+                        <CardComponent className="bg-base-100 shadow-lg rounded-xl overflow-hidden border border-base-200">
+                            <div className="p-5 space-y-4">
+                                {/* 卡片标题 */}
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-xl font-bold flex items-center gap-2 text-primary">
+                                        <ChartGraph theme="outline" size="22" fill="#666" />
+                                        教师数据统计
+                                    </h2>
+                                    <button
+                                        className="btn btn-circle btn-ghost btn-sm hover:bg-base-200"
+                                        onClick={() => setShowStats(!showStats)}
+                                    >
+                                        <Close theme="filled" size="16" />
+                                    </button>
                                 </div>
 
-                                <div className="p-3 bg-base-200 rounded-lg">
-                                    <p className="text-sm text-gray-500 mb-2">职称分布</p>
-                                    <div className="grid grid-cols-3 gap-2 text-center">
-                                        <div>
-                                            <div className="badge badge-primary">{teacherStats.byTitle.professor}</div>
-                                            <p className="text-xs mt-1">教授</p>
+                                {/* 统计卡片网格 */}
+                                <div className="grid grid-cols-3 gap-5">
+                                    {/* 教师总数 */}
+                                    <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-xl border border-primary/20">
+                                        <p className="text-sm font-medium text-primary-content">教师总数</p>
+                                        <p className="text-3xl font-bold text-primary mt-1">{teacherStats.total}</p>
+                                    </div>
+
+                                    {/* 状态分布 */}
+                                    <div className="p-4 bg-base-200 rounded-xl border border-base-300">
+                                        <p className="text-sm font-medium text-base-content mb-3 text-center">状态分布</p>
+                                        <div className="grid grid-cols-3 gap-2 text-center">
+                                            <div>
+                                                <div className="badge badge-success badge-lg shadow-sm">{teacherStats.byStatus.active}</div>
+                                                <p className="text-xs mt-1 font-medium">在职</p>
+                                            </div>
+                                            <div>
+                                                <div className="badge badge-warning badge-lg shadow-sm">{teacherStats.byStatus.unregistered}</div>
+                                                <p className="text-xs mt-1 font-medium">未注册</p>
+                                            </div>
+                                            <div>
+                                                <div className="badge badge-error badge-lg shadow-sm">{teacherStats.byStatus.onLeave}</div>
+                                                <p className="text-xs mt-1 font-medium">停用</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="badge badge-secondary">{teacherStats.byTitle.associateProf}</div>
-                                            <p className="text-xs mt-1">副教授</p>
-                                        </div>
-                                        <div>
-                                            <div className="badge badge-accent">{teacherStats.byTitle.lecturer}</div>
-                                            <p className="text-xs mt-1">讲师</p>
+                                    </div>
+
+                                    {/* 教师类型分布 */}
+                                    <div className="p-4 bg-info/10 rounded-xl border border-info/20">
+                                        <p className="text-sm font-medium text-info-content mb-3 text-center">教师类型分布</p>
+                                        <div className="flex flex-wrap gap-3 justify-center">
+                                            {teacherTypeList.length > 0 ? (
+                                                teacherTypeList.slice(0, 3).map((type) => (
+                                                    <div key={type.teacher_type_uuid} className="text-center">
+                                                        <div className="badge badge-info badge-lg shadow-sm">{String(teacherStats.byType[type.teacher_type_uuid] || 0)}</div>
+                                                        <p className="text-xs mt-1 max-w-16 truncate font-medium" title={type.type_name}>{type.type_name}</p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-xs text-base-content/50">暂无类型数据</p>
+                                            )}
+                                            {teacherTypeList.length > 3 && (
+                                                <div className="text-center">
+                                                    <div className="badge badge-neutral badge-lg shadow-sm">
+                                                        +{teacherTypeList.length - 3}
+                                                    </div>
+                                                    <p className="text-xs mt-1 font-medium">其他</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="p-3 bg-base-200 rounded-lg">
-                                    <p className="text-sm text-gray-500 mb-2">状态分布</p>
-                                    <div className="flex justify-around">
-                                        <div className="text-center">
-                                            <div className="radial-progress text-success" style={{"--value": teacherStats.total ? (teacherStats.byStatus.active / teacherStats.total) * 100 : 0} as any}>
-                                                {teacherStats.byStatus.active}
+                                {/* 查看更多教师类型 */}
+                                {teacherTypeList.length > 3 && (
+                                    <div className="mt-3 pt-3 border-t border-base-300">
+                                        <details className="collapse collapse-arrow bg-base-100">
+                                            <summary className="collapse-title text-sm py-2 text-primary font-medium flex items-center">
+                                                查看更多教师类型分布
+                                            </summary>
+                                            <div className="collapse-content pt-2">
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {teacherTypeList.map((type) => (
+                                                        <div key={type.teacher_type_uuid!} className="flex items-center justify-between p-2 bg-base-200 hover:bg-base-300 transition-colors rounded-lg">
+                                                            <span className="text-xs truncate font-medium" title={type.type_name}>{type.type_name}</span>
+                                                            <span className="badge badge-sm badge-info shadow-sm">{teacherStats.byType[type.teacher_type_uuid!] || 0}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <p className="text-xs mt-1">在职</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="radial-progress text-warning" style={{"--value": teacherStats.total ? (teacherStats.byStatus.onLeave / teacherStats.total) * 100 : 0} as any}>
-                                                {teacherStats.byStatus.onLeave}
-                                            </div>
-                                            <p className="text-xs mt-1">休假</p>
-                                        </div>
+                                        </details>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </CardComponent>
                     )}
