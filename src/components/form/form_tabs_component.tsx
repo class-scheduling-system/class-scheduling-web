@@ -66,8 +66,9 @@ export function FormTabsComponent({
             <div className={`tabs ${tabsStyle} mb-6 ${tabsStyle === 'tabs-boxed' ? 'bg-base-200' : ''} rounded-md overflow-hidden`}>
                 {tabs.map((tab) => (
                     <button
+                        type={"button"}
                         key={tab.id}
-                        className={`tab ${activeTab === tab.id ? 'tab-active bg-primary/50' : ''}`}
+                        className={`tab ${activeTab === tab.id ? 'tab-active bg-primary/50 font-bold' : ''}`}
                         onClick={() => onTabChange(tab.id)}
                     >
                         {tab.icon && <span className="mr-2">{tab.icon}</span>}

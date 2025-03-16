@@ -33,6 +33,7 @@ interface PageHeaderProps {
     onBack: () => void;
     showHelpText: boolean;
     toggleHelpText: () => void;
+    isEditMode?: boolean;
 }
 
 /**
@@ -42,7 +43,8 @@ interface PageHeaderProps {
 export function PageHeader({
     onBack,
     showHelpText,
-    toggleHelpText
+    toggleHelpText,
+    isEditMode = false
 }: Readonly<PageHeaderProps>): JSX.Element {
     return (
         <>
@@ -50,7 +52,7 @@ export function PageHeader({
             <div className="flex justify-between items-center mb-4 bg-base-200 p-4 rounded-lg shadow-sm">
                 <h1 className="text-2xl font-bold flex items-center text-primary">
                     <BuildingOne theme="filled" size="28" className="mr-2" fill="currentColor"/>
-                    添加部门
+                    {isEditMode ? "编辑部门" : "添加部门"}
                 </h1>
                 <div className="flex space-x-2">
                     <button
@@ -64,9 +66,14 @@ export function PageHeader({
             </div>
 
             {/* 页面说明 */}
-            <div className="alert alert-warning mb-6 shadow-sm">
+            <div className="alert alert-warning mb-6 shadow-sm rounded-lg">
                 <Attention theme="filled" size="20"/>
-                <span>在此页面添加新的部门信息。带有 <span className="text-error font-bold">*</span> 的字段为必填项。</span>
+                <span>
+                    {isEditMode
+                        ? "您正在编辑部门信息。"
+                        : "在此页面添加新的部门信息。"}
+                    带有 <span className="text-error font-bold">*</span> 的字段为必填项。
+                </span>
                 <div className="flex-none">
                     <button className="btn btn-sm btn-ghost" onClick={toggleHelpText}>
                         {showHelpText ? "隐藏提示" : "显示提示"}

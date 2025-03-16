@@ -257,14 +257,11 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                 </td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
-                                                        <button
-                                                            onClick={() => {
-                                                                setOperateUuid(department.department_uuid!);
-                                                            }}
+                                                        <Link to={"/admin/department/edit/" + department.department_uuid}
                                                             className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                             <Editor theme="outline" size="12"/>
                                                             <span>编辑</span>
-                                                        </button>
+                                                        </Link>
                                                         <button
                                                             onClick={() => selectedDepartmentDelete(department)}
                                                             className="join-item btn btn-sm btn-soft btn-error inline-flex">

@@ -28,6 +28,7 @@
 
 import {Tag} from "@icon-park/react";
 import * as React from "react";
+import {JSX} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
 import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
 
@@ -40,10 +41,7 @@ interface DepartmentPropertiesSectionProps {
  * # 部门属性组件
  * > 显示和编辑部门的属性信息
  */
-export function DepartmentPropertiesSection({
-    data,
-    setData
-}: Readonly<DepartmentPropertiesSectionProps>): JSX.Element {
+export function DepartmentPropertiesSection({data, setData}: Readonly<DepartmentPropertiesSectionProps>): JSX.Element {
     return (
         <FormSectionComponent
             title="部门属性"
@@ -62,7 +60,7 @@ export function DepartmentPropertiesSection({
                                 <input
                                     type="checkbox"
                                     className="toggle toggle-primary"
-                                    checked={data.is_enabled}
+                                    checked={data.is_enabled ?? false}
                                     onChange={(e) => setData({...data, is_enabled: e.target.checked})}
                                 />
                             </div>

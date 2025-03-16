@@ -26,12 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingOne, People, PhoneTelephone} from "@icon-park/react";
+import {BuildingOne, Delete, People, PhoneTelephone, Plus} from "@icon-park/react";
 import * as React from "react";
-import {JSX} from "react";
+import {useEffect, useState} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
 import {FormFieldComponent} from "../../../../components/form/form_field_component.tsx";
 import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
+import {GetBuildingListAPI} from "../../../../apis/building_api.ts";
+import {BuildingLiteEntity} from "../../../../models/entity/building_lite_entity.ts";
+import {message} from "antd";
 
 interface ContactInfoSectionProps {
     data: DepartmentDTO;
@@ -48,6 +51,65 @@ export function ContactInfoSection({
     setData,
     showHelpText
 }: Readonly<ContactInfoSectionProps>): JSX.Element {
+    const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
+    const [selectedBuildings, setSelectedBuildings] = useState<string[]>([]);
+
+    // 加载已分配的教学楼
+    useEffect(() => {
+        if (data.assigned_teaching_building) {
+            const buildings = data.assigned_teaching_building.split(',');
+            setSelectedBuildings(buildings);
+        } else {
+            setSelectedBuildings([]);
+        }
+    }, [data.assigned_teaching_building]);
+
+    // 获取建筑列表
+    useEffect(() => {
+        const fetchBuildingList = async () => {
+            setLoading(true);
+            try {
+                const response = await GetBuildingListAPI(searchKeyword);
+                if (response?.output === "Success") {
+                    setBuildingList(response.data || []);
+                } else {
+                    message.warning(response?.error_message || "获取教学楼列表失败");
+                }
+            } catch (error) {
+                console.error("获取教学楼列表失败:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBuildingList();
+    }, [searchKeyword]);
+
+    // 添加教学楼
+    const handleAddBuilding = (buildingUuid: string, buildingName: string) => {
+        if (!selectedBuildings.includes(buildingName)) {
+            const newSelectedBuildings = [...selectedBuildings, buildingName];
+            setSelectedBuildings(newSelectedBuildings);
+            // 更新数据要 uuid13
+            setData({
+                ...data,
+                assigned_teaching_building: newSelectedBuildings.join(',')
+            });
+        }
+    };
+
+    // 移除教学楼
+    const handleRemoveBuilding = (buildingName: string) => {
+        const newSelectedBuildings = selectedBuildings.filter(b => b !== buildingName);
+        setSelectedBuildings(newSelectedBuildings);
+        setData({
+            ...data,
+            assigned_teaching_building: newSelectedBuildings.join(',') || undefined
+        });
+    };
+
     return (
         <FormSectionComponent
             title="联系方式"
@@ -123,19 +185,78 @@ export function ContactInfoSection({
             <FormFieldComponent
                 label="分配教学楼"
                 icon={<BuildingOne theme="outline" size="16"/>}
-                tooltip="多个教学楼用英文逗号分隔"
+                tooltip="选择该学院可使用的教学楼"
                 helpText="该部门可使用的教学楼列表"
                 showHelpText={showHelpText}
                 fullWidth={true}
-                className="lg:col-span-2"
+                className="lg:col-span-3"
             >
-                <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    value={data.assigned_teaching_building || ""}
-                    onChange={(e) => setData({...data, assigned_teaching_building: e.target.value})}
-                    placeholder="例如: 思源楼,行政楼"
-                />
+                <div className="space-y-4">
+                    {/* 搜索框 */}
+                    <div className="flex w-full items-center">
+                        <input
+                            type="text"
+                            className="input input-bordered w-full"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            placeholder="搜索教学楼..."
+                        />
+                    </div>
+
+                    {/* 选择的教学楼显示 */}
+                    <div className="flex flex-wrap gap-2 my-2">
+                        {selectedBuildings.map((building) => (
+                            <div key={building} className="badge badge-lg gap-2 badge-secondary p-3">
+                                <BuildingOne theme="outline" size="16" />
+                                {building}
+                                <button
+                                    onClick={() => handleRemoveBuilding(building)}
+                                    className="btn btn-xs btn-circle btn-ghost"
+                                >
+                                    <Delete theme="outline" size="14" />
+                                </button>
+                            </div>
+                        ))}
+                        {selectedBuildings.length === 0 &&
+                            <div className="text-base-content/60 text-sm">未选择任何教学楼</div>
+                        }
+                    </div>
+
+                    {/* 教学楼选择列表 */}
+                    <div className="mt-2 border border-base-300 rounded-md p-2 max-h-60 overflow-y-auto">
+                        <h3 className="font-medium text-sm mb-2">可选教学楼列表</h3>
+
+                        {loading ? (
+                            <div className="flex justify-center py-4">
+                                <span className="loading loading-spinner loading-sm"></span>
+                            </div>
+                        ) : buildingList.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {buildingList.map((building) => (
+                                    <div
+                                        key={building.building_uuid}
+                                        className={`
+                                            flex justify-between items-center p-2 rounded-md cursor-pointer
+                                            ${selectedBuildings.includes(building.building_name) ? 'bg-secondary/20' : 'bg-base-200 hover:bg-base-300'}
+                                        `}
+                                        onClick={() => handleAddBuilding(building.building_uuid, building.building_name)}
+                                    >
+                                        <span className="text-sm">{building.building_name}</span>
+                                        <Plus
+                                            theme="outline"
+                                            size="16"
+                                            className={selectedBuildings.includes(building.building_name) ? 'opacity-0' : ''}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-4 text-base-content/60">
+                                {searchKeyword ? "未找到匹配的教学楼" : "无可用教学楼"}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </FormFieldComponent>
         </FormSectionComponent>
     );

@@ -32,6 +32,7 @@ import {BaseResponse} from "../models/base_response.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {BuildingEntity} from "../models/entity/building_entity.ts";
 import {BuildingDTO} from "../models/dto/building_add_dto.ts";
+import {BuildingLiteEntity} from "../models/entity/building_lite_entity.ts";
 
 /**
  * # 获取建筑列表 API
@@ -47,6 +48,24 @@ const GetBuildingPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
         "/api/v1/building/page",
         null,
         data,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # GetBuildingListAPI
+ * > 该函数用于通过API获取建筑列表。它接受一个关键字字符串，并将其发送到指定的后端接口，以获取建筑列表。
+ *
+ * @param keyword
+ * @constructor
+ */
+const GetBuildingListAPI = async (keyword: string): Promise<BaseResponse<BuildingLiteEntity[]> | undefined> => {
+    return BaseApi<BuildingLiteEntity[]>(
+        MethodType.GET,
+        "/api/v1/building/list",
+        null,
+        {keyword},
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`}
     );
@@ -131,5 +150,6 @@ export {
     AddBuildingAPI,
     DeleteBuildingAPI,
     EditBuildingAPI,
-    GetBuildingAPI
+    GetBuildingAPI,
+    GetBuildingListAPI
 }

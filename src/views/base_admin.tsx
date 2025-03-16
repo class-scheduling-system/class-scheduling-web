@@ -41,6 +41,7 @@ import {Home, People} from "@icon-park/react";
 import {AdminRole} from "./admin/admin_role.tsx";
 import {AdminDepartment} from "./admin/admin_department.tsx";
 import {DepartmentAdd} from "./admin/department/department_add.tsx";
+import {DepartmentEdit} from "./admin/department/department_edit.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
 
@@ -243,6 +244,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/department" element={<AdminDepartment site={site} />} />
                                 <Route path="/department/add" element={<DepartmentAdd site={site} />} />
+                                <Route path="/department/edit/:uuid" element={<DepartmentEdit site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>

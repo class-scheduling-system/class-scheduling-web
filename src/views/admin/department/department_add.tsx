@@ -215,6 +215,7 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                 onBack={handleBack}
                 showHelpText={showHelpText}
                 toggleHelpText={toggleHelpText}
+                isEditMode={false}
             />
 
             {/* 加载中状态 */}
@@ -227,7 +228,7 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
             {/* 表单卡片 */}
             {!loading && (
-                <CardComponent innerMargin={"p-4"}>
+                <CardComponent innerMargin={"p-6"} className="shadow-md">
                     <form id="department_add" onSubmit={handleSubmit} className="space-y-6">
                         {/* 表单标签页 */}
                         <FormTabsComponent
