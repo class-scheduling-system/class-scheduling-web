@@ -102,13 +102,17 @@ export function Index(): JSX.Element {
     }, [dispatch, location.pathname, navigate]);
 
     return (
-        <Routes location={location}>
-            <Route path={"/"} element={<BaseIndex/>}/>
-            <Route path={"/init"} element={<BaseInit/>}/>
-            <Route path={"/auth/*"} element={<BaseAuth/>}/>
-            <Route path={"/admin/*"} element={<BaseAdmin/>}/>
-            <Route path={"/academic/*"} element={<BaseAcademic/>}/>
-            <Route path={"/*"} element={<PageNotFound/>}/>
-        </Routes>
+        <>
+            {/* 适配变量显示强制刷新 */}
+            <div className={"xs:block sm:block md:block lg:block xl:block 2xl:block 3xl:block 4xl:block"}/>
+            <Routes location={location}>
+                <Route path={"/"} element={<BaseIndex/>}/>
+                <Route path={"/init"} element={<BaseInit/>}/>
+                <Route path={"/auth/*"} element={<BaseAuth/>}/>
+                <Route path={"/admin/*"} element={<BaseAdmin/>}/>
+                <Route path={"/academic/*"} element={<BaseAcademic/>}/>
+                <Route path={"/*"} element={<PageNotFound/>}/>
+            </Routes>
+        </>
     );
 }

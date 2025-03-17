@@ -257,6 +257,7 @@ export function DepartmentEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.
                     data={data}
                     setData={setData}
                     showHelpText={showHelpText}
+                    hasSelected={activeTab === "contact"}
                 />
             )
         },

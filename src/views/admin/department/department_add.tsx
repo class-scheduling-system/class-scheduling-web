@@ -180,6 +180,7 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                     data={data}
                     setData={setData}
                     showHelpText={showHelpText}
+                    hasSelected={activeTab === "contact"}
                 />
             )
         },

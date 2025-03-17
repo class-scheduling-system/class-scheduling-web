@@ -52,24 +52,24 @@ interface FormTabsProps {
  * @param onTabChange - 标签切换回调函数
  * @param className - 额外的CSS类名
  * @param tabsStyle - 标签样式
+ * @param emitSelect
  * @returns JSX.Element - 返回表单标签页组件
  */
-export function FormTabsComponent({
-    tabs,
-    activeTab,
-    onTabChange,
-    className = "",
-    tabsStyle = "tabs-boxed"
-}: Readonly<FormTabsProps>): JSX.Element {
+export function FormTabsComponent(
+    {tabs, activeTab, onTabChange, className = "", tabsStyle = "tabs-boxed"}: Readonly<FormTabsProps>
+): JSX.Element {
     return (
         <div className={className}>
-            <div className={`tabs ${tabsStyle} mb-3 ${tabsStyle === 'tabs-boxed' ? 'bg-base-200' : ''} rounded-md overflow-hidden`}>
+            <div
+                className={`tabs ${tabsStyle} mb-3 ${tabsStyle === 'tabs-boxed' ? 'bg-base-200' : ''} rounded-md overflow-hidden`}>
                 {tabs.map((tab) => (
                     <button
                         type={"button"}
                         key={tab.id}
                         className={`transition tab ${activeTab === tab.id ? 'tab-active bg-primary/50 font-bold' : ''}`}
-                        onClick={() => onTabChange(tab.id)}
+                        onClick={() => {
+                            onTabChange(tab.id);
+                        }}
                     >
                         {tab.icon && <span className="mr-2">{tab.icon}</span>}
                         {tab.title}

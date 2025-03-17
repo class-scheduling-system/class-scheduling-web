@@ -40,31 +40,30 @@ interface ContactInfoSectionProps {
     data: DepartmentDTO;
     setData: React.Dispatch<React.SetStateAction<DepartmentDTO>>;
     showHelpText: boolean;
+    hasSelected: boolean;
+}
+
+interface SelectedBuildings {
+    building_name: string;
+    building_uuid: string;
 }
 
 /**
  * # 部门联系方式组件
  * > 显示和编辑部门的联系方式信息
  */
-export function ContactInfoSection({
-    data,
-    setData,
-    showHelpText
-}: Readonly<ContactInfoSectionProps>): JSX.Element {
+export function ContactInfoSection({data, setData, showHelpText, hasSelected}: Readonly<ContactInfoSectionProps>): JSX.Element {
     const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
-    const [selectedBuildings, setSelectedBuildings] = useState<string[]>([]);
+    const [selectedBuildings, setSelectedBuildings] = useState<SelectedBuildings[]>([]);
 
     // 加载已分配的教学楼
     useEffect(() => {
-        if (data.assigned_teaching_building) {
-            const buildings = data.assigned_teaching_building;
-            setSelectedBuildings(buildings);
-        } else {
-            setSelectedBuildings([]);
-        }
-    }, [data.assigned_teaching_building]);
+        const getBuilding = data.assigned_teaching_building;
+        const building = buildingList.filter(building => getBuilding!.includes(building.building_uuid));
+        setSelectedBuildings(building);
+    }, [data.assigned_teaching_building, hasSelected]);
 
     // 获取建筑列表
     useEffect(() => {
@@ -73,7 +72,7 @@ export function ContactInfoSection({
             try {
                 const response = await GetBuildingListAPI(searchKeyword);
                 if (response?.output === "Success") {
-                    setBuildingList(response.data || []);
+                    setBuildingList(response.data!);
                 } else {
                     message.warning(response?.error_message || "获取教学楼列表失败");
                 }
@@ -84,29 +83,30 @@ export function ContactInfoSection({
             }
         };
 
-        fetchBuildingList();
+        fetchBuildingList().then();
     }, [searchKeyword]);
 
     // 添加教学楼
     const handleAddBuilding = (buildingUuid: string, buildingName: string) => {
-        if (!selectedBuildings.includes(buildingName)) {
-            const newSelectedBuildings = [...selectedBuildings, buildingName];
-            setSelectedBuildings(newSelectedBuildings);
-            // 更新数据要 uuid13
-            setData({
-                ...data,
-                assigned_teaching_building: newSelectedBuildings
-            });
-        }
+        selectedBuildings.map(building => {
+            if (building.building_name === buildingName) {
+                return;
+            }
+        });
+        selectedBuildings.push({building_name: buildingName, building_uuid: buildingUuid});
+        setData({
+            ...data,
+            assigned_teaching_building: selectedBuildings.map(b => b.building_uuid) || undefined
+        });
     };
 
     // 移除教学楼
-    const handleRemoveBuilding = (buildingName: string) => {
-        const newSelectedBuildings = selectedBuildings.filter(b => b !== buildingName);
+    const handleRemoveBuilding = (buildingUuid: string) => {
+        const newSelectedBuildings = selectedBuildings.filter(b => b.building_uuid !== buildingUuid);
         setSelectedBuildings(newSelectedBuildings);
         setData({
             ...data,
-            assigned_teaching_building: newSelectedBuildings || undefined
+            assigned_teaching_building: newSelectedBuildings.map(b => b.building_uuid) || undefined
         });
     };
 
@@ -206,14 +206,14 @@ export function ContactInfoSection({
                     {/* 选择的教学楼显示 */}
                     <div className="flex flex-wrap gap-2 my-2">
                         {selectedBuildings.map((building) => (
-                            <div key={building} className="badge badge-lg gap-2 badge-secondary p-3">
-                                <BuildingOne theme="outline" size="16" />
-                                {building}
+                            <div key={building.building_uuid} className="badge badge-lg gap-2 badge-secondary p-3">
+                                <BuildingOne theme="outline" size="16"/>
+                                {building.building_name}
                                 <button
-                                    onClick={() => handleRemoveBuilding(building)}
+                                    onClick={() => handleRemoveBuilding(building.building_uuid)}
                                     className="btn btn-xs btn-circle btn-ghost"
                                 >
-                                    <Delete theme="outline" size="14" />
+                                    <Delete theme="outline" size="14"/>
                                 </button>
                             </div>
                         ))}
@@ -231,13 +231,13 @@ export function ContactInfoSection({
                                 <span className="loading loading-spinner loading-sm"></span>
                             </div>
                         ) : buildingList.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                                 {buildingList.map((building) => (
                                     <div
                                         key={building.building_uuid}
                                         className={`
                                             flex justify-between items-center p-2 rounded-md cursor-pointer
-                                            ${selectedBuildings.includes(building.building_name) ? 'bg-secondary/20' : 'bg-base-200 hover:bg-base-300'}
+                                            ${selectedBuildings.map(b => b.building_uuid).includes(building.building_uuid) ? 'bg-secondary/20' : 'bg-base-200 hover:bg-base-300'}
                                         `}
                                         onClick={() => handleAddBuilding(building.building_uuid, building.building_name)}
                                     >
@@ -245,7 +245,7 @@ export function ContactInfoSection({
                                         <Plus
                                             theme="outline"
                                             size="16"
-                                            className={selectedBuildings.includes(building.building_name) ? 'opacity-0' : ''}
+                                            className={selectedBuildings.map(b => b.building_uuid).includes(building.building_uuid) ? 'opacity-0' : ''}
                                         />
                                     </div>
                                 ))}
