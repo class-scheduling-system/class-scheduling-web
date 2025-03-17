@@ -31,7 +31,7 @@ import {
     BuildingTwo,
     Dashboard,
     DatabaseAlert,
-    Log,
+    Log, School,
     System,
     User,
     UserPositioning,
@@ -66,6 +66,9 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"教学楼管理"} icon={<BuildingTwo theme="outline" size="18"/>}
                                        match={"building"}
                                        path={"/admin/building"}/>
+                <AdminNavLinkComponent title={"校区管理"} icon={<School theme="outline" size="18"/>}
+                                       path={"/admin/campus"}
+                                       match={"campus"}/>
                 <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
                                        match={"department"}
                                        path={"/admin/department"}/>
