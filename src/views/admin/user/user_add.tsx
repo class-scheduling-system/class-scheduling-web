@@ -29,7 +29,6 @@
 import React, {useEffect, useState} from 'react';
 import {
     CheckOne,
-    CloseOne,
     Envelope,
     GreenHouse,
     HamburgerButton,
@@ -40,27 +39,34 @@ import {
     User,
     UserPositioning,
     History,
-    Remind,
-    Help,
-    FileProtection,
-    People, AddUser, Refresh
+    AddUser, Refresh
 } from "@icon-park/react";
-import {message, Transfer, Card, List, Tag, Alert, Statistic, Tooltip, Timeline} from "antd";
+import {message, Transfer, Card, List,Tooltip} from "antd";
 import {AddUserAPI} from "../../../apis/user_api.ts";
 import {UserAddDTO} from "../../../models/dto/user_add_dto.ts";
 import {RoleEntity} from "../../../models/entity/role_entity.ts";
 import {GetRoleListAPI} from "../../../apis/role_api.ts";
 import {GetPermissionListAPI} from "../../../apis/permission_api.ts";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
-import {Link, useNavigate} from "react-router";
+import {Link} from "react-router";
 
+
+interface UserItem {
+    name: string;
+    role: string;
+    time: string;
+}
+interface OptionType {
+    title: string;
+    description: string;
+    [key: string]: unknown;
+}
 export function AdminUserAddPage(): React.JSX.Element {
     const [data, setData] = useState<UserAddDTO>({
         permission: [] as string[],
     } as UserAddDTO);
-    const navigate = useNavigate();
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
-    const [permissionList, setPermissionList] = useState<any[]>([]);
+    const [permissionList, setPermissionList] = useState<OptionType[]>([]);
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [searchRequest] = useState<PageSearchDTO>({
         page: 1,
@@ -74,23 +80,9 @@ export function AdminUserAddPage(): React.JSX.Element {
         return savedUsers ? JSON.parse(savedUsers) : [];
     });
 
-    // 用户统计示例数据
-    const userStats = {
-        total: 128,
-        admin: 8,
-        teaching: 42,
-        management: 78
-    };
-
-    // 角色权限对照示例
-    const rolePermissionGuide = [
-        { role: "管理员", permissions: ["所有系统权限"] },
-        { role: "管理", permissions: ["用户管理", "内容审核", "数据查看"] },
-        { role: "教务", permissions: ["学生管理", "课程管理", "成绩录入"] }
-    ];
 
     // 获取选中角色的名称
-    const getSelectedRoleName = (roleUuid) => {
+    const getSelectedRoleName = (roleUuid: string) => {
         const selectedRole = roleList.find(role => role.role_uuid === roleUuid);
         return selectedRole ? selectedRole.role_name : "";
     };
@@ -132,13 +124,13 @@ export function AdminUserAddPage(): React.JSX.Element {
                 if (response?.output === "Success") {
                     console.log("获取权限列表成功:", response.data);
                     // 转换权限列表为Transfer需要的格式
-                    const permissionData = response.data?.map(item => ({
+                    const formattedData = response.data?.map(item => ({
                         key: item.permission_key,
                         title: item.name,
                         description: item.permission_key,
                         disabled: false
                     }));
-                    setPermissionList(permissionData);
+                    setPermissionList(formattedData as OptionType[]);
                 } else {
                     message.error(response?.error_message ?? "获取权限列表失败");
                 }
@@ -159,7 +151,7 @@ export function AdminUserAddPage(): React.JSX.Element {
     };
 
     // 更新最近添加的用户列表
-    const updateRecentUsers = (newUser) => {
+    const updateRecentUsers = (newUser: { department?: string | undefined; email?: string; name: string; password?: string | undefined; permission?: string[] | undefined; phone?: string; role_uuid: string; type?: number | undefined; }) => {
         // 创建当前时间格式化字符串
         const now = new Date();
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -218,9 +210,12 @@ export function AdminUserAddPage(): React.JSX.Element {
     };
 
     // 穿梭框过滤函数
-    const filterOption = (inputValue: string, option: any) =>
-        option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
-        option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
+    const filterOption = (inputValue: string, option: OptionType): boolean => {
+        return (
+            option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
+            option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+        );
+    };
 
     return (
         <div className="flex flex-col gap-4">
@@ -419,7 +414,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                 dataSource={permissionList}
                                                 titles={['可选权限', '已选权限']}
                                                 targetKeys={targetKeys}
-                                                onChange={handleTransferChange}
+                                                onChange={data =>handleTransferChange(data as string[])}
                                                 filterOption={filterOption}
                                                 render={item => item.title}
                                                 showSearch
@@ -476,15 +471,15 @@ export function AdminUserAddPage(): React.JSX.Element {
                                 {recentUsers.length > 0 ? (
                                     <List
                                         dataSource={recentUsers}
-                                        renderItem={item => (
+                                        renderItem={(item: UserItem) => (
                                             <List.Item>
                                                 <div className="w-full">
                                                     <div className="flex justify-between items-center">
                                                         <span className="font-medium">{item.name}</span>
                                                         <div className={`badge badge-soft ${
-                                                            item.role === "管理员" ? "badge-success" :
-                                                                item.role === "教务" ? "badge-secondary" :
-                                                                    item.role === "管理" ? "neutral" : "badge-warning"
+                                                            item.role === "管理员" ? "badge-soft-primary" :
+                                                                item.role === "教务" ? "badge-soft-success" :
+                                                                    item.role === "管理" ? "badge-soft-warning" : ""
                                                         }`}>
                                                             {item.role}
                                                         </div>
