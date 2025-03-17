@@ -67,7 +67,7 @@ const AddTeacherAPI = async (data: {
     job_title?: string;
     name: string;
     phone?: string;
-    sex: number;
+    sex: boolean;
     type: string;
     unit_uuid: string;
     user_uuid: string;

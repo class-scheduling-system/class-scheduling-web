@@ -30,7 +30,6 @@ import {
     CheckOne,
     Envelope,
     PhoneTelephone,
-    User,
     IdCard,
     Write,
     AllApplication,
@@ -42,7 +41,7 @@ import {
     BuildingThree,
     History,
     Refresh,
-    UserBusiness
+    UserBusiness, AddUser
 } from "@icon-park/react";
 import * as React from "react";
 import {useEffect, useState} from "react";
@@ -74,8 +73,14 @@ export function AcademicAddTeacher(): React.JSX.Element {
         is_desc: true,
     } as PageSearchDTO);
 
+    interface RecentTeacher {
+        name: string;
+        department: string;
+        time: string;
+    }
+
     // 最近添加的教师列表状态 - 从localStorage获取或使用空数组作为默认值
-    const [recentTeachers, setRecentTeachers] = useState(() => {
+    const [recentTeachers, setRecentTeachers] = useState<RecentTeacher[]>(() => {
         const savedTeachers = localStorage.getItem('recentAddedTeachers');
         return savedTeachers ? JSON.parse(savedTeachers) : [];
     });
@@ -109,7 +114,7 @@ export function AcademicAddTeacher(): React.JSX.Element {
     };
 
     // 更新最近添加的教师列表
-    const updateRecentTeachers = (newTeacher: { desc?: string | undefined; email?: string | undefined; english_name?: string; ethnic?: string; id?: string; job_title?: string | undefined; name: any; phone?: string | undefined; sex?: boolean; type?: string; unit_uuid: any; user_uuid?: string; }) => {
+    const updateRecentTeachers = (newTeacher: { desc?: string | undefined; email?: string | undefined; english_name?: string; ethnic?: string; id?: string; job_title?: string | undefined; name: string; phone?: string | undefined; sex?: boolean; type?: string; unit_uuid: string; user_uuid?: string; }) => {
         // 创建当前时间格式化字符串
         const now = new Date();
         const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -121,16 +126,16 @@ export function AcademicAddTeacher(): React.JSX.Element {
         };
 
         // 创建新教师记录
-        const teacherRecord = {
+        const teacherRecord: RecentTeacher = {
             name: newTeacher.name,
-            department: getDepartmentName(newTeacher.unit_uuid),
+            department: getDepartmentName(newTeacher.unit_uuid) || "", // 确保即使找不到部门也返回空字符串
             time: timeString
         };
 
         // 将新教师添加到最近教师列表的最前面，并只保留前三个
-        const updatedRecentTeachers = [teacherRecord, ...recentTeachers.slice(0, 2)];
+        const updatedRecentTeachers: RecentTeacher[] = [teacherRecord, ...recentTeachers.slice(0, 2)];
 
-        // 更新状态
+// 更新状态
         setRecentTeachers(updatedRecentTeachers);
 
         // 保存到localStorage
@@ -197,7 +202,7 @@ export function AcademicAddTeacher(): React.JSX.Element {
                         <Card
                             title={
                                 <div className="flex items-center gap-1">
-                                    <User theme="outline" size="18" fill="#333"/>
+                                    <AddUser theme="outline"  size="18" fill="#333"/>
                                     <span>添加教师</span>
                                 </div>
                             }
@@ -433,12 +438,12 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                 {recentTeachers.length > 0 ? (
                                     <List
                                         dataSource={recentTeachers}
-                                        renderItem={item => (
+                                        renderItem={(item: RecentTeacher) => (
                                             <List.Item>
                                                 <div className="w-full">
                                                     <div className="flex justify-between items-center">
                                                         <span className="font-medium">{item.name}</span>
-                                                        <div className="badge badge-soft badge-secondary">
+                                                        <div className="badge badge-soft badge-soft-success">
                                                             {item.department}
                                                         </div>
                                                     </div>
