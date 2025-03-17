@@ -55,7 +55,7 @@ export function AcademicTeacher({site}: Readonly<{
     const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
 
     // 缓存已加载的教师类型信息
-    const [teacherTypeCache, setTeacherTypeCache] = useState<{[key: string]: TeacherTypeEntity}>({});
+    const [teacherTypeCache, setTeacherTypeCache] = useState<Map<string, TeacherTypeEntity>>(new Map());
 
     // 教师类型列表
     const [teacherTypeList, setTeacherTypeList] = useState<TeacherTypeEntity[]>([]);
@@ -193,7 +193,7 @@ export function AcademicTeacher({site}: Readonly<{
                 // 更新缓存
                 setDepartmentCache((prev: {[key: string]: DepartmentEntity}) => {
                     const newCache = { ...prev };
-                    if (teacher.unit_uuid) {
+                    if (teacher.unit_uuid && deptResp.data) {
                         newCache[teacher.unit_uuid] = deptResp.data;
                     }
                     return newCache;
@@ -219,18 +219,26 @@ export function AcademicTeacher({site}: Readonly<{
         }
 
         // 检查缓存中是否已有该类型信息
-        if (teacherTypeCache[teacher.type]) {
-            teacher.typeName = teacherTypeCache[teacher.type].type_name;
+        if (teacherTypeCache.has(teacher.type)) {
+            const cachedType = teacherTypeCache.get(teacher.type);
+            if (cachedType) {
+                teacher.typeName = cachedType.type_name;
+            } else {
+                teacher.typeName = "未知类型";
+            }
             return;
         }
+
         try {
             const typeResp = await GetTeacherTypeInfoByTypeUuidAPI(teacher.type);
             if (typeResp?.output === "Success" && typeResp.data) {
                 // 更新缓存
-                setTeacherTypeCache(prev => ({
-                    ...prev,
-                    [teacher.type]: typeResp.data
-                }));
+                setTeacherTypeCache(prevMap => {
+                    const newMap = new Map(prevMap);
+                    newMap.set(teacher.type!, typeResp.data!); // 使用非空断言
+                    return newMap;
+                });
+
                 // 设置类型名称
                 teacher.typeName = typeResp.data.type_name;
             } else {
@@ -242,7 +250,6 @@ export function AcademicTeacher({site}: Readonly<{
             teacher.typeName = "未知类型";
         }
     };
-
     const transitionSearch = useTransition(loading ?? 0, {
         from: { opacity: 0 },
         enter: { opacity: 1 },
@@ -438,7 +445,7 @@ export function AcademicTeacher({site}: Readonly<{
                                                 {teacherTypeList.length > 0 ? (
                                                     teacherTypeList.slice(0, 2).map((type) => (
                                                         <div key={type.teacher_type_uuid} className="card bg-info card-lg rounded-md shadow-sm items-center justify-center w-12 p-2">
-                                                            <div className="font-bold text-lg text-warning-content">{String(teacherStats.byType[type.teacher_type_uuid] || 0)}</div>
+                                                            <div className="font-bold text-lg text-warning-content">{String(teacherStats.byType[type.teacher_type_uuid!] || 0)}</div>
                                                             <p className="text-xs font-medium text-nowrap text-info-content">{type.type_name}</p>
                                                         </div>
                                                     ))
