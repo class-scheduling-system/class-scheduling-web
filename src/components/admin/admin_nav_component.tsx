@@ -50,7 +50,7 @@ export function AdminNavComponent(): JSX.Element {
     return (
         <div className={"flex flex-col h-full"}>
             <div className={"px-6 py-6 w-full bg-base-200 border-b border-gray-200"}>
-                <h1 className={"text-2xl font-bold text-primary text-center"}>管理员控制台</h1>
+                <h1 className={"text-2xl font-bold text-primary-content text-center"}>管理员控制台</h1>
             </div>
             <div className={"px-4 grid gap-2 overflow-y-auto pt-4"}>
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统管理</h2>

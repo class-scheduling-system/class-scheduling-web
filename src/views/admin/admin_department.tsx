@@ -42,6 +42,7 @@ import {Add, BookOpen, CheckOne, CloseOne, Delete, Editor, Eyes, Newlybuild, Sea
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {GetDepartmentPageAPI} from "../../apis/department_api.ts";
 import {DepartmentEntity} from "../../models/entity/department_entity.ts";
+import {AdminDepartmentDeleteDialog} from "../../components/admin/department/dialog/admin_department_delete_dialog.tsx";
 
 
 /**
@@ -70,6 +71,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     const [search, setSearch] = useState<string>();
     const [loading, setLoading] = useState(true);
     const [department, setDepartment] = useState<DepartmentEntity>({} as DepartmentEntity);
+
+    const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
 
 
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
@@ -182,7 +185,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
      */
     function selectedDepartmentDelete(department: DepartmentEntity): void {
         setDepartment(department);
-        // TODO: 实现删除功能
+        setDeleteDialog(true);
     }
 
     return (
@@ -349,6 +352,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                 </CardComponent>
             </div>
             {/* 这里可以添加删除和编辑对话框 */}
+            <AdminDepartmentDeleteDialog department={department} show={deleteDialog} emit={setDeleteDialog} requestRefresh={setRefreshOperate}/>
         </>
     );
 }

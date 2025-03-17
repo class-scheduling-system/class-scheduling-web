@@ -38,11 +38,13 @@ import dayjs from "dayjs";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {message} from "antd";
 import {FormTabsComponent} from "../../../components/form/form_tabs_component.tsx";
-import {BasicInfoSection} from "./components/basic_info_section.tsx";
-import {ContactInfoSection} from "./components/contact_info_section.tsx";
-import {DepartmentPropertiesSection} from "./components/department_properties_section.tsx";
-import {NoteSection} from "./components/note_section.tsx";
-import {PageHeader} from "./components/page_header.tsx";
+import {BasicInfoSection} from "../../../components/admin/department/editing_operations/basic_info_section.tsx";
+import {ContactInfoSection} from "../../../components/admin/department/editing_operations/contact_info_section.tsx";
+import {
+    DepartmentPropertiesSection
+} from "../../../components/admin/department/editing_operations/department_properties_section.tsx";
+import {NoteSection} from "../../../components/admin/department/editing_operations/note_section.tsx";
+import {PageHeader} from "../../../components/admin/department/editing_operations/page_header.tsx";
 
 /**
  * # 部门添加页面

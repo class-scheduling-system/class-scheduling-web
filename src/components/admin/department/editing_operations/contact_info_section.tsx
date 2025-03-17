@@ -30,8 +30,8 @@ import {BuildingOne, Delete, People, PhoneTelephone, Plus} from "@icon-park/reac
 import * as React from "react";
 import {JSX, useEffect, useState} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
-import {FormFieldComponent} from "../../../../components/form/form_field_component.tsx";
-import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
+import {FormFieldComponent} from "../../../form/form_field_component.tsx";
+import {FormSectionComponent} from "../../../form/form_section_component.tsx";
 import {GetBuildingListAPI} from "../../../../apis/building_api.ts";
 import {BuildingLiteEntity} from "../../../../models/entity/building_lite_entity.ts";
 import {message} from "antd";

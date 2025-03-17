@@ -31,8 +31,8 @@ import * as React from "react";
 import {JSX} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
 import {DepartmentEntity} from "../../../../models/entity/department_entity.ts";
-import {FormFieldComponent} from "../../../../components/form/form_field_component.tsx";
-import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
+import {FormFieldComponent} from "../../../form/form_field_component.tsx";
+import {FormSectionComponent} from "../../../form/form_section_component.tsx";
 
 interface BasicInfoSectionProps {
     data: DepartmentDTO;

@@ -30,8 +30,8 @@ import {Notes} from "@icon-park/react";
 import * as React from "react";
 import {JSX} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
-import {FormFieldComponent} from "../../../../components/form/form_field_component.tsx";
-import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
+import {FormFieldComponent} from "../../../form/form_field_component.tsx";
+import {FormSectionComponent} from "../../../form/form_section_component.tsx";
 
 interface NoteSectionProps {
     data: DepartmentDTO;
