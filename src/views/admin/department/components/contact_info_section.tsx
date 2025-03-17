@@ -28,7 +28,7 @@
 
 import {BuildingOne, Delete, People, PhoneTelephone, Plus} from "@icon-park/react";
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {JSX, useEffect, useState} from "react";
 import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
 import {FormFieldComponent} from "../../../../components/form/form_field_component.tsx";
 import {FormSectionComponent} from "../../../../components/form/form_section_component.tsx";
@@ -59,7 +59,7 @@ export function ContactInfoSection({
     // 加载已分配的教学楼
     useEffect(() => {
         if (data.assigned_teaching_building) {
-            const buildings = data.assigned_teaching_building.split(',');
+            const buildings = data.assigned_teaching_building;
             setSelectedBuildings(buildings);
         } else {
             setSelectedBuildings([]);
@@ -95,7 +95,7 @@ export function ContactInfoSection({
             // 更新数据要 uuid13
             setData({
                 ...data,
-                assigned_teaching_building: newSelectedBuildings.join(',')
+                assigned_teaching_building: newSelectedBuildings
             });
         }
     };
@@ -106,7 +106,7 @@ export function ContactInfoSection({
         setSelectedBuildings(newSelectedBuildings);
         setData({
             ...data,
-            assigned_teaching_building: newSelectedBuildings.join(',') || undefined
+            assigned_teaching_building: newSelectedBuildings || undefined
         });
     };
 

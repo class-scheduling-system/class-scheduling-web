@@ -49,8 +49,8 @@ export function PageHeader({
     return (
         <>
             {/* 页面标题和导航 */}
-            <div className="flex justify-between items-center mb-4 bg-base-200 p-4 rounded-lg shadow-sm">
-                <h1 className="text-2xl font-bold flex items-center text-primary">
+            <div className="flex justify-between items-center mb-4 bg-base-200 p-4 rounded-lg shadow-xs">
+                <h1 className="text-2xl font-bold flex items-center text-primary-content">
                     <BuildingOne theme="filled" size="28" className="mr-2" fill="currentColor"/>
                     {isEditMode ? "编辑部门" : "添加部门"}
                 </h1>
@@ -66,12 +66,10 @@ export function PageHeader({
             </div>
 
             {/* 页面说明 */}
-            <div className="alert alert-warning mb-6 shadow-sm rounded-lg">
-                <Attention theme="filled" size="20"/>
+            <div className="alert bg-blue-100 border-blue-100 mb-6 shadow-sm rounded-lg">
+                <Attention theme="outline" size="20"/>
                 <span>
-                    {isEditMode
-                        ? "您正在编辑部门信息。"
-                        : "在此页面添加新的部门信息。"}
+                    {isEditMode ? "您正在编辑部门信息。" : "在此页面添加新的部门信息。"}
                     带有 <span className="text-error font-bold">*</span> 的字段为必填项。
                 </span>
                 <div className="flex-none">

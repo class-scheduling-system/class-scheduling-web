@@ -55,7 +55,7 @@ export function FormSectionComponent({
     badgeColor = "badge-primary"
 }: Readonly<FormSectionProps>): JSX.Element {
     return (
-        <div className={`card bg-base-100 border border-base-300 ${className}`}>
+        <div className={`card bg-base-100 border border-base-200 ${className}`}>
             <div className="card-body">
                 <h2 className="card-title text-lg font-semibold flex items-center mb-4">
                     {icon && (

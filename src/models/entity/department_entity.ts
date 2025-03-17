@@ -37,7 +37,7 @@ export type DepartmentEntity = {
     /**
      * 分配教学楼
      */
-    assigned_teaching_building?: string;
+    assigned_teaching_building?: string[];
     /**
      * 创建时间
      */

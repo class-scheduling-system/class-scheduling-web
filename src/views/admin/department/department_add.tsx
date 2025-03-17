@@ -228,8 +228,8 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
 
             {/* 表单卡片 */}
             {!loading && (
-                <CardComponent innerMargin={"p-6"} className="shadow-md">
-                    <form id="department_add" onSubmit={handleSubmit} className="space-y-6">
+                <CardComponent padding={18}>
+                    <form id="department_add" onSubmit={handleSubmit} className={"space-y-3"}>
                         {/* 表单标签页 */}
                         <FormTabsComponent
                             tabs={formTabs}
@@ -239,7 +239,6 @@ export function DepartmentAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                         />
 
                         {/* 表单按钮 */}
-                        <div className="divider"></div>
                         <div className="flex justify-end space-x-4">
                             <button
                                 type="button"

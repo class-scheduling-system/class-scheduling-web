@@ -88,7 +88,7 @@ export function DepartmentEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.
     // 获取部门详情和部门列表
     useEffect(() => {
         if (!uuid) {
-            message.error("部门ID不存在，请返回列表重试");
+            message.error("部门ID不存在，请返回列表重试").then();
             return;
         }
 
@@ -215,7 +215,7 @@ export function DepartmentEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.
                 message.success("部门更新成功");
                 setTimeout(() => {
                     navigate("/admin/department");
-                }, 1500);
+                }, 500);
             } else {
                 message.warning(response?.error_message ?? "部门更新失败");
             }
@@ -318,8 +318,8 @@ export function DepartmentEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.
 
             {/* 表单卡片 */}
             {!loading && originalData && (
-                <CardComponent innerMargin={"p-6"} className="shadow-md">
-                    <form id="department_edit" onSubmit={handleSubmit} className="space-y-6">
+                <CardComponent padding={18}>
+                    <form id="department_edit" onSubmit={handleSubmit} className="space-y-3">
                         {/* 部门ID信息 */}
                         <div className="flex items-center justify-between bg-base-200 px-4 py-2 rounded-md">
                             <div className="text-sm">
@@ -339,7 +339,6 @@ export function DepartmentEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.
                         />
 
                         {/* 表单按钮 */}
-                        <div className="divider"></div>
                         <div className="flex justify-between">
                             <div>
                                 {originalData && (

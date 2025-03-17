@@ -56,7 +56,7 @@ export function BasicInfoSection({
     return (
         <FormSectionComponent
             title="基本信息"
-            icon={<BuildingOne theme="outline" size="16" fill="currentColor"/>}
+            icon={<BuildingOne theme="outline" size="16"/>}
             badgeColor="badge-primary"
         >
             {/* 部门名称 */}
