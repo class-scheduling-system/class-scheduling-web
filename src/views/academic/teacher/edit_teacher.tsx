@@ -96,7 +96,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                 id: teacherInfo.id,
                 unit_uuid: teacherInfo.unit_uuid,
                 user_uuid: teacherInfo.user_uuid,
-                type: teacherInfo.type_uuid,
+                type: teacherInfo.type,
             });
             setLoading(false);
         } else {
@@ -312,7 +312,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.type || teacherInfo?.type_uuid || ""}
+                                                value={data.type || ""}
                                                 onChange={(e) => setData({ ...data, type: e.target.value })}
                                                 required
                                             >
