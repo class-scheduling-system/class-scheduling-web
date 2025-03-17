@@ -73,7 +73,6 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
 
 
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
-    const [operateUuid, setOperateUuid] = useState<string>("");
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -105,14 +104,15 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetDepartmentPageAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setDepartmentList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.message ?? "获取教学楼列表失败");
             }
+            setLoading(false);
         };
         if (refreshOperate) {
             func().then();

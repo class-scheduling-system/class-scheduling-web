@@ -89,14 +89,15 @@ export function AdminRole({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
 
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetRoleListAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setRoleList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取角色列表失败");
             }
+            setLoading(false);
         };
         func().then();
     }, [dispatch, searchRequest]);
@@ -165,10 +166,10 @@ export function AdminRole({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                         <tbody>
                                         {roleList.records.map((record, index) => (
                                             <tr key={record.role_uuid} className="transition hover:bg-base-200">
-                                                <td>{index + 1 + (roleList.current - 1) * roleList.size}</td>
-                                                <td>{record.role_uuid}</td>
-                                                <td>{record.role_name}</td>
-                                                <td>
+                                                <td className={"text-nowrap"}>{index + 1 + (roleList.current - 1) * roleList.size}</td>
+                                                <td className={"text-nowrap"}>{record.role_uuid}</td>
+                                                <td className={"text-nowrap"}>{record.role_name}</td>
+                                                <td className={"text-nowrap"}>
                                                     {record.role_status ? (
                                                         <LabelComponent
                                                             size={"badge-sm"}
@@ -187,7 +188,7 @@ export function AdminRole({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                         />
                                                     )}
                                                 </td>
-                                                <td className={"flex justify-end"}>
+                                                <td className={"flex justify-end text-nowrap"}>
                                                     <div className="">
                                                         <button
                                                             onClick={() => {

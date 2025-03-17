@@ -27,7 +27,7 @@
  */
 
 import {JSX, useEffect, useRef, useState} from "react";
-import {Add, CheckSmall, Correct, Delete, Editor, Error, Forbid, Newlybuild, Search} from "@icon-park/react";
+import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
 import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
 import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
 import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
@@ -45,7 +45,7 @@ import cardImage from "../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
 
-export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -94,22 +94,23 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
 
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetUserListAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setUserList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取用户列表失败");
             }
+            setLoading(false);
         };
         func().then();
     }, [dispatch, searchRequest]);
 
     const transitionSearch = useTransition(loading ?? 0, {
-        from: { opacity: 0 },
-        enter: { opacity: 1 },
-        config: { duration: 100 },
+        from: {opacity: 0},
+        enter: {opacity: 1},
+        config: {duration: 100},
     });
 
     // 定义刷新用户列表的方法
@@ -136,7 +137,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             } else {
                 pageInfo.push(
                     <button key={i}
-                            onClick={() => setSearchRequest({ ...searchRequest, page: i + 1 })}
+                            onClick={() => setSearchRequest({...searchRequest, page: i + 1})}
                             className="transition shadow btn btn-sm join-item border">
                         {i + 1}
                     </button>
@@ -150,7 +151,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            setSearchRequest({ ...searchRequest, keyword: search });
+            setSearchRequest({...searchRequest, keyword: search});
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -183,11 +184,11 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                     <tbody>
                                     {userList.records.map((record, index) => (
                                         <tr key={record.user.user_uuid} className="transition hover:bg-base-200">
-                                            <td>{index + 1 + (userList.current - 1) * userList.size}</td>
-                                            <td>{record.user.name}</td>
-                                            <td>{record.user.role.role_name}</td>
-                                            <td>{record.user.email}</td>
-                                            <td>{record.user.status ? (
+                                            <td className={"text-nowrap"}>{index + 1 + (userList.current - 1) * userList.size}</td>
+                                            <td className={"text-nowrap"}>{record.user.name}</td>
+                                            <td className={"text-nowrap"}>{record.user.role.role_name}</td>
+                                            <td className={"text-nowrap"}>{record.user.email}</td>
+                                            <td className={"text-nowrap"}>{record.user.status ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"启用"}
                                                                 icon={<Correct theme="outline" size="12"/>}/>
@@ -197,17 +198,14 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                                 text={"禁用"}
                                                                 icon={<Error theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td>{record.user.ban ? (
+                                            <td className={" text-nowrap"}>{record.user.ban ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                type={"error"}
-                                                                text={"已封禁"}
-                                                                icon={<Forbid theme="outline" size="12" />}/>
+                                                                type={"error"} text={"已封禁"}/>
                                             ) : (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                type={"success"} text={"未封禁"}
-                                                                icon={<CheckSmall theme="outline" size="12" />}/>
+                                                                type={"success"} text={"未封禁"}/>
                                             )}</td>
-                                            <td className={"flex justify-end"}>
+                                            <td className={"flex justify-end text-nowrap"}>
                                                 <div className="join">
                                                     <button
                                                         onClick={() => {
@@ -217,7 +215,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             setDialogEdit(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
-                                                        <Editor theme="outline" size="12" />
+                                                        <Editor theme="outline" size="12"/>
                                                         <span>编辑</span>
                                                     </button>
                                                     <button
@@ -226,7 +224,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                             setDialogDelete(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-error inline-flex">
-                                                        <Delete theme="outline" size="12" />
+                                                        <Delete theme="outline" size="12"/>
                                                         <span>删除</span>
                                                     </button>
                                                 </div>
@@ -241,19 +239,22 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     <div className="flex justify-center">
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: userList.current - 1 })}
+                                    onClick={() => setSearchRequest({...searchRequest, page: userList.current - 1})}
                                     disabled={userList.current === 1}>
                                 上一页
                             </button>
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
-                                    onClick={() => setSearchRequest({ ...searchRequest, page: userList.current + 1 })}
+                                    onClick={() => setSearchRequest({...searchRequest, page: userList.current + 1})}
                                     disabled={userList.current === Math.ceil(userList.total / userList.size)}>
                                 下一页
                             </button>
                             <select className="join-item transition select select-sm mx-1 border-l-0"
                                     value={searchRequest.size}
-                                    onChange={(e) => setSearchRequest({ ...searchRequest, size: Number(e.target.value) })}>
+                                    onChange={(e) => setSearchRequest({
+                                        ...searchRequest,
+                                        size: Number(e.target.value)
+                                    })}>
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
                                 <option value={15}>15</option>
@@ -266,7 +267,7 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     </div>
                 </div>
                 <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
-                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl" />
+                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                     <div className="p-4 flex flex-col gap-1">
                         <h2 className="text-xl font-bold">用户列表</h2>
                         <p className="text-base-content text-sm border-l-4 border-base-content ps-2">
@@ -276,9 +277,9 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     <div className="px-4 pb-4 flex flex-col gap-3">
                         <div>
                             <label className="input transition w-full">
-                                <Search theme="outline" size="12" />
+                                <Search theme="outline" size="12"/>
                                 <input ref={inputFocus} type="search" className="grow" placeholder="查询"
-                                       onChange={(event) => setSearch(event.target.value)} />
+                                       onChange={(event) => setSearch(event.target.value)}/>
                                 <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
                                 <kbd className="kbd kbd-sm">K</kbd>
                             </label>
@@ -286,11 +287,11 @@ export function AdminUser({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                         <div className={"grid grid-cols-2 gap-3"}>
                             <button onClick={() => setDialogAdd(true)}
                                     className="transition shadow btn btn-outline btn-primary">
-                                <Add theme="outline" size="16" />
+                                <Add theme="outline" size="16"/>
                                 <span>添加</span>
                             </button>
                             <button className="transition shadow btn btn-outline btn-secondary">
-                                <Newlybuild theme="outline" size="16" />
+                                <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
                             </button>
                         </div>
