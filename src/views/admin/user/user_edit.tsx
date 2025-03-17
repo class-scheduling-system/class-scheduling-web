@@ -26,11 +26,10 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState, useEffect, JSX } from "react";
+import { useState, useEffect} from "react";
 import {
     ApplicationEffect,
     CheckOne,
-    CloseOne,
     Envelope,
     Forbid,
     Key,
@@ -42,20 +41,17 @@ import {
     Refresh, Editor, Announcement, Attention
 } from "@icon-park/react";
 import { EditUserAPI } from "../../../apis/user_api.ts";
-import { message, Transfer, Card, Divider, Alert, Tooltip, Tag, Space, Row, Col } from "antd";
+import { message, Transfer, Card, Tooltip} from "antd";
 import * as React from "react";
 import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
 import { RoleEntity } from "../../../models/entity/role_entity.ts";
 import { UserEditDTO } from "../../../models/dto/user_edit_dto.ts";
-import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { GetPermissionListAPI } from "../../../apis/permission_api.ts";
 import { UserAddDTO } from "../../../models/dto/user_add_dto.ts";
 
-export function AdminEditUserPage({site}: Readonly<{
-    site: SiteInfoEntity
-}>): JSX.Element {
+export function AdminEditUserPage():  React.JSX.Element {
     const navigate = useNavigate();
     const location = useLocation();
     const { userId } = useParams();
@@ -73,7 +69,7 @@ export function AdminEditUserPage({site}: Readonly<{
         permission: [] as string[],
     });
     const [loading, setLoading] = useState(true);
-    const [permissionList, setPermissionList] = useState<any[]>([]);
+    const [permissionList, setPermissionList] = useState<OptionType[]>([]);
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [roleList, setRoleList] = useState<RoleEntity[]>([]);
     const [searchRequest] = useState<PageSearchDTO>({
@@ -98,9 +94,9 @@ export function AdminEditUserPage({site}: Readonly<{
                 password: userInfo.password,
                 phone: userInfo.phone,
                 email: userInfo.email,
-                status: userInfo.status,
+                status: Number(userInfo.status),
                 ban: userInfo.ban,
-                role_uuid: userInfo.role_uuid,
+                role_uuid: userInfo.role.role_uuid,
                 permission: userInfo.permission,
             });
 
@@ -125,14 +121,13 @@ export function AdminEditUserPage({site}: Readonly<{
                 const response = await GetPermissionListAPI();
                 if (response?.output === "Success") {
                     console.log("获取权限列表成功:", response.data);
-                    // 转换权限列表为Transfer需要的格式
-                    const permissionData = response.data?.map(item => ({
+                    const formattedData = response.data?.map(item => ({
                         key: item.permission_key,
                         title: item.name,
                         description: item.permission_key,
                         disabled: false
                     }));
-                    setPermissionList(permissionData);
+                    setPermissionList(formattedData as OptionType[]);
                 } else {
                     message.error(response?.error_message ?? "获取权限列表失败");
                 }
@@ -149,10 +144,19 @@ export function AdminEditUserPage({site}: Readonly<{
         setTargetKeys(newTargetKeys);
     };
 
-    // 穿梭框过滤函数
-    const filterOption = (inputValue: string, option: any) =>
-        option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
-        option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
+    interface OptionType {
+        title: string;
+        description: string;
+        [key: string]: unknown;
+    }
+
+
+    const filterOption = (inputValue: string, option: OptionType): boolean => {
+        return (
+            option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1 ||
+            option.description.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+        );
+    };
 
     // 重置表单
     const resetForm = () => {
@@ -213,11 +217,6 @@ export function AdminEditUserPage({site}: Readonly<{
             });
     }, [searchRequest]);
 
-    // 获取角色名称
-    const getRoleName = (roleUuid: string) => {
-        const role = roleList?.find(r => r.role_uuid === roleUuid);
-        return role?.role_name;
-    };
 
     return (
         <div className="flex flex-col gap-4">
@@ -349,7 +348,7 @@ export function AdminEditUserPage({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.status !== undefined ? (data.status ? "1" : "0") : ""}
+                                                value={data.status !== undefined ? (data.status===1 ? "1" : "0") : ""}
                                                 onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
                                                 required
                                             >
@@ -392,7 +391,7 @@ export function AdminEditUserPage({site}: Readonly<{
                                                     dataSource={permissionList}
                                                     titles={['可选权限', '已选权限']}
                                                     targetKeys={targetKeys}
-                                                    onChange={handleTransferChange}
+                                                    onChange={data =>handleTransferChange(data as string[])}
                                                     filterOption={filterOption}
                                                     render={item => item.title}
                                                     showSearch
@@ -464,7 +463,6 @@ export function AdminEditUserPage({site}: Readonly<{
                                             </span>
                                             <span className="text-right  text-gray-800">{userInfo?.role.role_name}</span>
                                         </div>
-                                        <div className="border-b border-gray-200"></div>
                                         <div className="border-b border-gray-200"></div>
                                         <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
