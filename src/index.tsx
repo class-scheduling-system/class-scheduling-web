@@ -40,6 +40,7 @@ import {GetCurrentUserAPI} from "./apis/user_api.ts";
 import {setUserInfo} from "./stores/user_store.ts";
 import {PageNotFound} from "./views/404/page_not_found.tsx";
 import {BaseAcademic} from "./views/base_academic.tsx";
+import {BaseUser} from "./views/base_user.tsx";
 
 /**
  * # Index
@@ -111,6 +112,7 @@ export function Index(): JSX.Element {
                 <Route path={"/auth/*"} element={<BaseAuth/>}/>
                 <Route path={"/admin/*"} element={<BaseAdmin/>}/>
                 <Route path={"/academic/*"} element={<BaseAcademic/>}/>
+                <Route path={"/user/*"} element={<BaseUser/>}/>
                 <Route path={"/*"} element={<PageNotFound/>}/>
             </Routes>
         </>

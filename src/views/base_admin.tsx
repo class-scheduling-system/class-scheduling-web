@@ -26,24 +26,24 @@
  * --------------------------------------------------------------------------------
  */
 
-import {JSX, useEffect} from "react";
-import {useSelector} from "react-redux";
-import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
-import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
-import {Link, Route, Routes, useLocation, useNavigate} from "react-router";
-import {AdminDashboard} from "./admin/admin_dashboard.tsx";
-import {AdminUser} from "./admin/admin_user.tsx";
-import {AdminBuilding} from "./admin/admin_building.tsx";
-import {animated, useSpring, useTransition} from "@react-spring/web";
-import {AdminNotFound} from "./404/medium_page_not_found.tsx";
-import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
-import {Home, People} from "@icon-park/react";
-import {AdminRole} from "./admin/admin_role.tsx";
-import {AdminDepartment} from "./admin/admin_department.tsx";
-import {DepartmentAdd} from "./admin/department/department_add.tsx";
-import {DepartmentEdit} from "./admin/department/department_edit.tsx";
+import { JSX, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { SiteInfoEntity } from "../models/entity/site_info_entity.ts";
+import { AdminNavComponent } from "../components/admin/admin_nav_component.tsx";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router";
+import { AdminDashboard } from "./admin/admin_dashboard.tsx";
+import { AdminUser } from "./admin/admin_user.tsx";
+import { AdminBuilding } from "./admin/admin_building.tsx";
+import { animated, useSpring, useTransition } from "@react-spring/web";
+import { AdminNotFound } from "./404/medium_page_not_found.tsx";
+import { UserInfoEntity } from "../models/entity/user_info_entity.ts";
+import { Home, People } from "@icon-park/react";
+import { AdminRole } from "./admin/admin_role.tsx";
+import { AdminDepartment } from "./admin/admin_department.tsx";
+import { DepartmentAdd } from "./admin/department/department_add.tsx";
+import { DepartmentEdit } from "./admin/department/department_edit.tsx";
 import cookie from "react-cookies";
-import {message} from "antd";
+import { message } from "antd";
 
 /**
  * 生成一个管理员控制台组件。
@@ -64,8 +64,8 @@ export function BaseAdmin(): JSX.Element {
 
     // 设置路由切换动画
     const transitions = useTransition(location, {
-        from: {opacity: 0, transform: 'translateX(10px)'},
-        enter: {opacity: 1, transform: 'translateX(0)'},
+        from: { opacity: 0, transform: 'translateX(10px)' },
+        enter: { opacity: 1, transform: 'translateX(0)' },
         config: {
             tension: 170,
             friction: 26,
@@ -76,32 +76,32 @@ export function BaseAdmin(): JSX.Element {
     // 设置页面加载动画
     const fade = useSpring({
         opacity: 1,
-        from: {opacity: 0},
-        config: {tension: 120, friction: 26},
+        from: { opacity: 0 },
+        config: { tension: 120, friction: 26 },
     });
 
     // 左侧菜单栏加载动画
     const navFade = useSpring({
         opacity: 1,
         transform: 'translateX(0)',
-        from: {opacity: 0, transform: 'translateX(-30px)'},
-        config: {tension: 150, friction: 26},
+        from: { opacity: 0, transform: 'translateX(-30px)' },
+        config: { tension: 150, friction: 26 },
     });
 
     // 顶部菜单栏加载动画
     const topFade = useSpring({
         opacity: 1,
         transform: 'translateY(0)',
-        from: {opacity: 0, transform: 'translateY(-30px)'},
-        config: {tension: 150, friction: 26},
+        from: { opacity: 0, transform: 'translateY(-30px)' },
+        config: { tension: 150, friction: 26 },
     });
 
     // 底部加载动画
     const bottomFade = useSpring({
         opacity: 1,
         transform: 'translateY(0)',
-        from: {opacity: 0, transform: 'translateY(30px)'},
-        config: {tension: 150, friction: 26},
+        from: { opacity: 0, transform: 'translateY(30px)' },
+        config: { tension: 150, friction: 26 },
     });
 
     // 自动生成面包屑
@@ -149,7 +149,7 @@ export function BaseAdmin(): JSX.Element {
 
             breadcrumbItems.push(
                 <li key={mainSection} className={"flex items-center space-x-1"}>
-                    <Home theme="outline" size="16"/>
+                    <Home theme="outline" size="16" />
                     <Link to={`/admin/${mainSection}`}>{mainTitle}</Link>
                 </li>
             );
@@ -179,7 +179,7 @@ export function BaseAdmin(): JSX.Element {
 
                     breadcrumbItems.push(
                         <li key={subPath}>
-                            <Link to={`/admin/${pathSegments.slice(1, i+1).join('/')}`}>
+                            <Link to={`/admin/${pathSegments.slice(1, i + 1).join('/')}`}>
                                 {subTitle}
                             </Link>
                         </li>
@@ -202,7 +202,7 @@ export function BaseAdmin(): JSX.Element {
     return (
         <animated.div style={fade} className="h-lvh flex bg-gradient-to-br from-primary-50 to-base-100">
             <animated.div style={navFade} className="hidden sm:block sm:w-48 md:w-64 2xl:w-72 h-full bg-base-100 border-r border-gray-200">
-                <AdminNavComponent/>
+                <AdminNavComponent />
             </animated.div>
             <div className="w-full flex flex-col flex-1">
                 <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
@@ -213,7 +213,7 @@ export function BaseAdmin(): JSX.Element {
                     </div>
                     <div className="flex items-center space-x-3">
                         <div className="dropdown dropdown-end">
-                            <div tabIndex={0} role="button" className="flex items-center cursor-pointer">
+                            <button type="button" className="flex items-center cursor-pointer">
                                 <div className="hidden md:flex flex-col items-end mr-3">
                                     <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
                                     <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
@@ -221,10 +221,11 @@ export function BaseAdmin(): JSX.Element {
                                 <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
                                     <People theme="filled" size="20" fill="#FFFFFF" />
                                 </div>
-                            </div>
-                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
-                                <li><a>个人信息</a></li>
-                                <li><a>修改密码</a></li>
+                            </button>
+                            <ul className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
+                                <li>
+                                    <Link to={"/user/profile"}>个人信息</Link>
+                                </li>
                                 <li>
                                     <button onClick={userLogout} className="text-error">
                                         退出登录
@@ -236,7 +237,7 @@ export function BaseAdmin(): JSX.Element {
                 </animated.div>
                 <animated.div style={bottomFade} className="pt-6 px-6 flex-1 overflow-auto overflow-y-scroll flex">
                     {transitions((style, item) => (
-                        <animated.div style={{...style, flex: 1}}>
+                        <animated.div style={{ ...style, flex: 1 }}>
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
@@ -245,7 +246,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/department" element={<AdminDepartment site={site} />} />
                                 <Route path="/department/add" element={<DepartmentAdd site={site} />} />
                                 <Route path="/department/edit/:uuid" element={<DepartmentEdit site={site} />} />
-                                <Route path="/*" element={<AdminNotFound/>} />
+                                <Route path="/*" element={<AdminNotFound />} />
                             </Routes>
                         </animated.div>
                     ))}
