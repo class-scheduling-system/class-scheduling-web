@@ -123,7 +123,7 @@ export function BaseUser(): JSX.Element {
                     {transitions((style, item) => (
                         <animated.div style={style}>
                             <Routes location={item}>
-                                <Route path="/profile" element={<UserProfile />} />
+                                <Route path="/profile" element={<UserProfile site={site} />} />
                             </Routes>
                         </animated.div>
                     ))}
