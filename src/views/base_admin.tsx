@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { JSX, useEffect } from "react";
+import react from "react";
 import { useSelector } from "react-redux";
 import { SiteInfoEntity } from "../models/entity/site_info_entity.ts";
 import { AdminNavComponent } from "../components/admin/admin_nav_component.tsx";
@@ -37,26 +37,28 @@ import { AdminBuilding } from "./admin/admin_building.tsx";
 import { animated, useSpring, useTransition } from "@react-spring/web";
 import { AdminNotFound } from "./404/medium_page_not_found.tsx";
 import { UserInfoEntity } from "../models/entity/user_info_entity.ts";
-import { Home, People } from "@icon-park/react";
+import { People } from "@icon-park/react";
 import { AdminRole } from "./admin/admin_role.tsx";
 import { AdminDepartment } from "./admin/admin_department.tsx";
 import { DepartmentAdd } from "./admin/department/department_add.tsx";
 import { DepartmentEdit } from "./admin/department/department_edit.tsx";
 import cookie from "react-cookies";
 import { message } from "antd";
+import { useBreadcrumbs } from "../hooks/use_breadcrumbs.tsx";
+import { adminRouteConfig } from "../models/config/admin_route_config.ts";
 
 /**
  * 生成一个管理员控制台组件。
  * 该函数返回一个包含管理员控制台的框架页面。
- * @return {JSX.Element} 包含管理员控制台的完整框架页面
+ * @return {react.JSX.Element} 包含管理员控制台的完整框架页面
  */
-export function BaseAdmin(): JSX.Element {
+export function BaseAdmin(): react.JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
     const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const location = useLocation();
     const navigate = useNavigate();
 
-    useEffect(() => {
+    react.useEffect(() => {
         if (location.pathname === "/admin") {
             navigate("/admin/dashboard");
         }
@@ -104,93 +106,6 @@ export function BaseAdmin(): JSX.Element {
         config: { tension: 150, friction: 26 },
     });
 
-    // 自动生成面包屑
-    const generateBreadcrumbs = () => {
-        const pathSegments = location.pathname.split('/').filter(segment => segment);
-        const breadcrumbItems = [];
-
-        // 从路径中提取面包屑项
-        if (pathSegments.length > 1) {
-            // 第一级：主要管理页面（如"用户管理"、"教学楼管理"等）
-            const mainSection = pathSegments[1];
-            let mainTitle: string;
-
-            switch (mainSection) {
-                case 'dashboard':
-                    mainTitle = '看板';
-                    break;
-                case 'user':
-                    mainTitle = '用户管理';
-                    break;
-                case 'building':
-                    mainTitle = '教学楼管理';
-                    break;
-                case 'role':
-                    mainTitle = '角色管理';
-                    break;
-                case 'system-info':
-                    mainTitle = '系统信息';
-                    break;
-                case 'log':
-                    mainTitle = '系统日志';
-                    break;
-                case 'backup':
-                    mainTitle = '备份与恢复';
-                    break;
-                case 'settings':
-                    mainTitle = '系统设置';
-                    break;
-                case 'department':
-                    mainTitle = '部门管理';
-                    break;
-                default:
-                    mainTitle = mainSection;
-            }
-
-            breadcrumbItems.push(
-                <li key={mainSection} className={"flex items-center space-x-1"}>
-                    <Home theme="outline" size="16" />
-                    <Link to={`/admin/${mainSection}`}>{mainTitle}</Link>
-                </li>
-            );
-
-            // 第二级及更深层级：如果存在，添加到面包屑
-            if (pathSegments.length > 2) {
-                for (let i = 2; i < pathSegments.length; i++) {
-                    const subPath = pathSegments[i];
-                    let subTitle = '';
-
-                    // 尝试将路径转换为更友好的显示名称
-                    if (subPath.includes('add')) {
-                        subTitle = '添加';
-                    } else if (subPath.includes('edit')) {
-                        subTitle = '编辑';
-                    } else if (subPath.includes('view')) {
-                        subTitle = '查看';
-                    } else if (subPath.includes('delete')) {
-                        subTitle = '删除';
-                    } else if (subPath.includes('assign')) {
-                        subTitle = '分配';
-                    } else if (subPath.includes('permission')) {
-                        subTitle = '权限';
-                    } else {
-                        subTitle = subPath.replace(/-/g, ' ');
-                    }
-
-                    breadcrumbItems.push(
-                        <li key={subPath}>
-                            <Link to={`/admin/${pathSegments.slice(1, i + 1).join('/')}`}>
-                                {subTitle}
-                            </Link>
-                        </li>
-                    );
-                }
-            }
-        }
-
-        return breadcrumbItems;
-    };
-
     // 用户登出
     async function userLogout() {
         cookie.remove("token", { path: '/' });
@@ -208,7 +123,7 @@ export function BaseAdmin(): JSX.Element {
                 <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
                     <div className="breadcrumbs text-sm">
                         <ul>
-                            {generateBreadcrumbs()}
+                            {useBreadcrumbs('/admin', adminRouteConfig)}
                         </ul>
                     </div>
                     <div className="flex items-center space-x-3">
