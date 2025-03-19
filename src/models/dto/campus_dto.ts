@@ -26,13 +26,37 @@
  * --------------------------------------------------------------------------------
  */
 
-import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
-import {JSX} from "react";
-
-export function AdminCampus({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
-    return(
-        <>
-
-        </>
-    )
+export type CampusDTO = {
+    /**
+     * 校区地址
+     */
+    campus_address?: string;
+    /**
+     * 校区编码
+     */
+    campus_code?: string;
+    /**
+     * 校区描述
+     */
+    campus_desc?: string;
+    /**
+     * 校区名称
+     */
+    campus_name?: string;
+    /**
+     * 校区状态 0:禁用 1:启用
+     */
+    campus_status?: boolean;
+    /**
+     * 校区主键
+     */
+    campus_uuid?: string;
+    /**
+     * 创建时间
+     */
+    created_at?: number;
+    /**
+     * 更新时间
+     */
+    updated_at?: number;
 }

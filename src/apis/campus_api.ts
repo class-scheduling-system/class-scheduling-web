@@ -32,6 +32,7 @@ import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {CampusEntity} from "../models/entity/campus_entity.ts";
 import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {CampusDTO} from "../models/dto/campus_dto.ts";
 
 /**
  * # GetCampusListAPI
@@ -78,13 +79,7 @@ const GetCampusPageListAPI = async (data: PageSearchDTO): Promise<BaseResponse<P
  * @returns {Promise<BaseResponse<CampusEntity> | undefined>} - 返回一个Promise，解析为包含校园信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const AddCampusAPI = async (data: {
-    campus_address: string;
-    campus_code: string;
-    campus_desc: string;
-    campus_name: string;
-    campus_status: boolean;
-}): Promise<BaseResponse<CampusEntity> | undefined> => {
+const AddCampusAPI = async (data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
     return BaseApi<CampusEntity>(
         MethodType.POST,
         "/api/v1/campus",
@@ -125,16 +120,7 @@ const DeleteCampusAPI = async (campus_uuid: string): Promise<BaseResponse<Campus
  * @returns {Promise<BaseResponse<CampusEntity> | undefined>} - 返回一个Promise，解析为包含校园信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const EditCampusAPI = async (campus_uuid: string, data: {
-    campus_address?: string;
-    campus_code?: string;
-    campus_desc?: string;
-    campus_name?: string;
-    campus_status?: boolean;
-    campus_uuid?: string;
-    created_at?: number;
-    updated_at?: number;
-}): Promise<BaseResponse<CampusEntity> | undefined> => {
+const EditCampusAPI = async (campus_uuid: string, data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
     return BaseApi<CampusEntity>(
         MethodType.PUT,
         `/api/v1/campus`,

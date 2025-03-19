@@ -43,7 +43,8 @@ import {AdminDepartment} from "./admin/admin_department.tsx";
 import {DepartmentAdd} from "./admin/department/department_add.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
-import {AdminCampus} from "./admin/admin_campus.tsx";
+import {AdminCampus} from "./admin/campus/admin_campus.tsx";
+import { CampusAdd } from "./admin/campus/campus_add.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -245,6 +246,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/department" element={<AdminDepartment site={site} />} />
                                 <Route path="/department/add" element={<DepartmentAdd site={site} />} />
                                 <Route path="/campus" element={<AdminCampus site={site} />} />
+                                <Route path="/campus/add" element={<CampusAdd site={site} />} />
                                 <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>
