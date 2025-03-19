@@ -47,23 +47,23 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import { message, Card, List} from "antd";
 import { AddTeacherAPI } from "../../../apis/teacher_api.ts";
-import { TeacherAddDTO } from "../../../models/dto/teacher_add_dto.ts";
 import {Link} from "react-router";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
 import {GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {DepartmentEntity} from "../../../models/entity/department_entity.ts";
+import {TeacherDTO} from "../../../models/dto/teacher_dto.ts";
 
 
 export function AcademicAddTeacher(): React.JSX.Element {
-    const [data, setData] = useState<TeacherAddDTO>(
+    const [data, setData] = useState<TeacherDTO>(
         {
             phone: "",
             email: "",
             job_title: "",
             desc: "",
-        } as TeacherAddDTO);
+        } as TeacherDTO);
 
     const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
     const [teacherTypeList, setTeacherTypeList] = useState<TeacherTypeEntity[]>([]);
@@ -110,7 +110,7 @@ export function AcademicAddTeacher(): React.JSX.Element {
                 email: "",
                 job_title: "",
                 desc: "",
-            } as TeacherAddDTO);
+            } as TeacherDTO);
     };
 
     // 更新最近添加的教师列表

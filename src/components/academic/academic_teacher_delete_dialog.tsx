@@ -28,9 +28,8 @@
 
 import {JSX, useEffect, useState} from "react";
 import {
-    AddUser,
     CheckOne,
-    CloseOne,
+    CloseOne, ReduceUser,
 } from "@icon-park/react";
 
 import * as React from "react";
@@ -125,7 +124,7 @@ export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSu
                    }>
                 <div className="flex flex-col space-y-4">
                     <h3 className="font-bold text-lg flex items-center space-x-2">
-                        <AddUser theme="outline" size="20" fill="#333"/>
+                        <ReduceUser theme="outline" size="18"/>
                         <span>删除教师</span>
                     </h3>
                     <form id={"teacher_delete"} onSubmit={onSubmit}  className="py-2 grid space-y-2">

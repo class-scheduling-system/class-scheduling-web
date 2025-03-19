@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-export type PageTeacherTypeDto = {
+export type PageTeacherTypeSearchDTO = {
     /**
      * 是否降序，默认为true，表示结果按照降序排列
      */

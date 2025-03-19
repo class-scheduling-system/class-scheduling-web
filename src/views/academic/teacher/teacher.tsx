@@ -17,22 +17,17 @@ import {PageEntity} from "../../../models/entity/page_entity.ts";
 import {TeacherEntity} from "../../../models/entity/teacher_entity.ts";
 import {animated, useTransition} from "@react-spring/web";
 import {AcademicDeleteTeacherDialog} from "../../../components/academic/academic_teacher_delete_dialog.tsx";
-import {GetDepartmentInfoAPI, GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
+import { GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
 import {useNavigate} from "react-router";
-import {PageTeacherSearchDto} from "../../../models/dto/page_teacher_search_dto.ts";
+import {PageTeacherSearchDTO} from "../../../models/dto/page_teacher_search_dto.ts";
 import {useSelector} from "react-redux";
 import {CurrentInfoStore} from "../../../models/store/current_info_store.ts";
 import {CardComponent} from "../../../components/card_component.tsx";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
-import {GetTeacherTypeInfoByTypeUuidAPI, GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
+import { GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {LabelComponent} from "../../../components/label_component.tsx";
 import {DepartmentEntity} from "../../../models/entity/department_entity.ts";
 
-// 扩展TeacherEntity接口，添加departmentName字段和typeName字段
-interface TeacherWithExtInfo extends TeacherEntity {
-    departmentName?: string;
-    typeName?: string;
-}
 
 export function AcademicTeacher({site}: Readonly<{
     site: SiteInfoEntity
@@ -41,33 +36,28 @@ export function AcademicTeacher({site}: Readonly<{
     const navigate = useNavigate();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
 
-    const [teacherList, setTeacherList] = useState<PageEntity<TeacherWithExtInfo>>({
-        records: new Array(5).fill({}) as TeacherWithExtInfo[],
+    const [teacherList, setTeacherList] = useState<PageEntity<TeacherEntity>>({
+        records: new Array(5).fill({}) as TeacherEntity[],
         total: 0,
         size: 20,
         current: 1
-    } as PageEntity<TeacherWithExtInfo>);
+    } as PageEntity<TeacherEntity>);
 
-    // 缓存已加载的部门信息
-    const [departmentCache, setDepartmentCache] = useState<{[key: string]: DepartmentEntity}>({});
 
     // 部门列表状态
     const [departmentList, setDepartmentList] = useState<DepartmentEntity[]>([]);
 
-    // 缓存已加载的教师类型信息
-    const [teacherTypeCache, setTeacherTypeCache] = useState<Map<string, TeacherTypeEntity>>(new Map());
-
     // 教师类型列表
     const [teacherTypeList, setTeacherTypeList] = useState<TeacherTypeEntity[]>([]);
 
-    const [searchRequest, setSearchRequest] = useState<PageTeacherSearchDto>({
+    const [searchRequest, setSearchRequest] = useState<PageTeacherSearchDTO>({
         page: 1,
         size: 20,
         is_desc: true,
         department:'',
         status:'',
         name:''
-    } as PageTeacherSearchDto);
+    } as PageTeacherSearchDTO);
 
     const [departmentSearch, setDepartmentSearch] = useState<string>("");
     const [statusSearch, setStatusSearch] = useState<string>("");
@@ -80,14 +70,14 @@ export function AcademicTeacher({site}: Readonly<{
     // 统计显示状态
     const [showStats, setShowStats] = useState(false);
 
+    const [refreshFlag, setRefreshFlag] = useState(0);
+
     // 获取部门列表
     useEffect(() => {
         const fetchDepartmentList = async () => {
             try {
                 const deptListResp = await GetDepartmentSimpleListAPI();
                 if (deptListResp?.output === "Success" && deptListResp.data) {
-                    // 这里假设响应数据是一个DepartmentInfoEntity数组
-                    // 如果API实际返回的是分页数据，可能需要相应调整
                     setDepartmentList(Array.isArray(deptListResp.data) ? deptListResp.data : [deptListResp.data]);
                 } else {
                     message.error(deptListResp?.error_message ?? "获取部门列表失败");
@@ -98,7 +88,7 @@ export function AcademicTeacher({site}: Readonly<{
             }
         };
 
-        fetchDepartmentList();
+        fetchDepartmentList().then();
     }, []);
 
     // 获取教师类型列表
@@ -117,7 +107,7 @@ export function AcademicTeacher({site}: Readonly<{
             }
         };
 
-        fetchTeacherTypeList();
+        fetchTeacherTypeList().then();
     }, []);
 
     useEffect(() => {
@@ -145,26 +135,9 @@ export function AcademicTeacher({site}: Readonly<{
             const getResp = await GetTeacherListAPI(searchRequest);
             if (getResp?.output === "Success") {
                 const teachers = getResp.data!.records;
-
-                // 创建具有部门名称和类型名称的教师列表
-                const teachersWithExtInfo = [...teachers] as TeacherWithExtInfo[];
-
-                // 获取每个教师的部门信息和类型信息
-                for (const teacher of teachersWithExtInfo) {
-                    // 获取部门信息
-                    if (teacher.unit_uuid) {
-                        await fetchDepartmentInfo(teacher);
-                    }
-
-                    // 获取教师类型信息
-                    if (teacher.type) {
-                        await fetchTeacherTypeInfo(teacher);
-                    }
-                }
-
                 setTeacherList({
                     ...getResp.data!,
-                    records: teachersWithExtInfo
+                    records: teachers
                 });
                 setLoading(false);
             } else {
@@ -173,120 +146,23 @@ export function AcademicTeacher({site}: Readonly<{
                 setLoading(false);
             }
         };
-        fetchTeacherList();
-    }, [searchRequest]);
+        fetchTeacherList().then();
+    }, [searchRequest, departmentList,teacherTypeList,refreshFlag]);
 
-    // 获取部门信息
-    const fetchDepartmentInfo = async (teacher: TeacherWithExtInfo) => {
-        // 确保 unit_uuid 存在且非空
-        if (!teacher.unit_uuid) {
-            return;
+    useEffect(() => {
+        // 当对话框关闭时，刷新表格数据
+        if (!dialogDelete && deleteTeacherUuid) {
+            setRefreshFlag(prev => prev + 1);
+            setDeleteTeacherUuid('');
         }
-        // 检查缓存中是否已有该部门信息
-        if (departmentCache[teacher.unit_uuid]) {
-            teacher.departmentName = departmentCache[teacher.unit_uuid].department_name;
-            return;
-        }
-        try {
-            const deptResp = await GetDepartmentInfoAPI(teacher.unit_uuid);
-            if (deptResp?.output === "Success" && deptResp.data) {
-                // 更新缓存
-                setDepartmentCache((prev: {[key: string]: DepartmentEntity}) => {
-                    const newCache = { ...prev };
-                    if (teacher.unit_uuid && deptResp.data) {
-                        newCache[teacher.unit_uuid] = deptResp.data;
-                    }
-                    return newCache;
-                });
-                // 设置部门名称
-                teacher.departmentName = deptResp.data.department_name;
-            } else {
-                // 设置为未知部门
-                teacher.departmentName = "未知部门";
-            }
-        } catch (error) {
-            console.error("获取部门信息失败", error);
-            teacher.departmentName = "未知部门";
-        }
-    };
+    }, [dialogDelete]); // 只监听对话框状态变化
 
-    // 获取教师类型信息
-    const fetchTeacherTypeInfo = async (teacher: TeacherWithExtInfo) => {
-        // 确保 type_uuid 存在且非空
-        if (!teacher.type) {
-            teacher.typeName = "未知类型";
-            return;
-        }
 
-        // 检查缓存中是否已有该类型信息
-        if (teacherTypeCache.has(teacher.type)) {
-            const cachedType = teacherTypeCache.get(teacher.type);
-            if (cachedType) {
-                teacher.typeName = cachedType.type_name;
-            } else {
-                teacher.typeName = "未知类型";
-            }
-            return;
-        }
-
-        try {
-            const typeResp = await GetTeacherTypeInfoByTypeUuidAPI(teacher.type);
-            if (typeResp?.output === "Success" && typeResp.data) {
-                // 更新缓存
-                setTeacherTypeCache(prevMap => {
-                    const newMap = new Map(prevMap);
-                    newMap.set(teacher.type!, typeResp.data!); // 使用非空断言
-                    return newMap;
-                });
-
-                // 设置类型名称
-                teacher.typeName = typeResp.data.type_name;
-            } else {
-                // 设置为未知类型
-                teacher.typeName = "未知类型";
-            }
-        } catch (error) {
-            console.error("获取教师类型信息失败", error);
-            teacher.typeName = "未知类型";
-        }
-    };
     const transitionSearch = useTransition(loading ?? 0, {
         from: { opacity: 0 },
         enter: { opacity: 1 },
         config: { duration: 100 },
     });
-
-    // 定义刷新教师列表的方法
-    const refreshTeacherList = async () => {
-        setLoading(true);
-        const getResp = await GetTeacherListAPI(searchRequest);
-        if (getResp?.output === "Success") {
-            const teachers = getResp.data!.records;
-
-            // 创建具有部门名称和类型名称的教师列表
-            const teachersWithExtInfo = [...teachers] as TeacherWithExtInfo[];
-
-            // 获取每个教师的部门信息和类型信息
-            for (const teacher of teachersWithExtInfo) {
-                // 获取部门信息
-                if (teacher.unit_uuid) {
-                    await fetchDepartmentInfo(teacher);
-                }
-
-                // 获取教师类型信息
-                if (teacher.type) {
-                    await fetchTeacherTypeInfo(teacher);
-                }
-            }
-            setTeacherList({
-                ...getResp.data!,
-                records: teachersWithExtInfo
-            });
-        } else {
-            message.error(getResp?.error_message ?? "获取教师列表失败");
-        }
-        setLoading(false);
-    };
 
     useEffect(() => {
         document.title = `教师管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -525,7 +401,9 @@ export function AcademicTeacher({site}: Readonly<{
                                                 <td>{teacher.id}</td>
                                                 <td className={"text-nowrap"}>{teacher.name}</td>
                                                 <td>{teacher.sex === false ? '男' : '女'}</td>
-                                                <td className={"text-nowrap"}>{teacher.departmentName || '未分配'}</td>
+                                                <td className={"text-nowrap"}>
+                                                    {departmentList.filter(dept => dept.department_uuid === teacher.unit_uuid)[0]?.department_name || '未分配部门'}
+                                                </td>
                                                 <td>{teacher.job_title}</td>
                                                 <td>{teacher.status === 1 ? (
                                                     <LabelComponent
@@ -549,7 +427,7 @@ export function AcademicTeacher({site}: Readonly<{
                                                         text={"停用"}
                                                     />
                                                 )}</td>
-                                                <td>{teacher.typeName || '未知类型'}</td>
+                                                <td>{teacherTypeList.filter(ty => ty.teacher_type_uuid === teacher.type)[0]?.type_name|| '未知教师类型'}</td>
                                                 <td>{teacher.phone}</td>
                                                 <td>{teacher.email}</td>
                                                 <td className={"grid justify-end text-nowrap"}>
@@ -752,7 +630,6 @@ export function AcademicTeacher({site}: Readonly<{
                 show={dialogDelete}
                 emit={setDialogDelete}
                 teacherUuid={deleteTeacherUuid}
-                onDeletedSuccess={refreshTeacherList}
             />
         </>
     );

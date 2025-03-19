@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-export type PageTeacherSearchDto = {
+export type PageTeacherSearchDTO = {
     /**
      * 部门名称，可选参数，如果提供，则按部门筛选教师
      */

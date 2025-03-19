@@ -30,7 +30,8 @@ import {BaseResponse} from "../models/base_response.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 import {TeacherEntity} from "../models/entity/teacher_entity.ts";
-import {PageTeacherSearchDto} from "../models/dto/page_teacher_search_dto.ts";
+import {PageTeacherSearchDTO} from "../models/dto/page_teacher_search_dto.ts";
+import {TeacherDTO} from "../models/dto/teacher_dto.ts";
 
 /**
  * # 获取教师列表
@@ -39,7 +40,7 @@ import {PageTeacherSearchDto} from "../models/dto/page_teacher_search_dto.ts";
  * @returns {Promise<BaseResponse<Page<TeacherEntity>> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetTeacherListAPI = async (data:PageTeacherSearchDto):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
+const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
     return BaseApi<PageEntity<TeacherEntity>>(
         MethodType.GET,
         "/api/v1/teacher/page",
@@ -58,20 +59,7 @@ const GetTeacherListAPI = async (data:PageTeacherSearchDto):Promise<BaseResponse
  * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const AddTeacherAPI = async (data: {
-    desc?: string;
-    email?: string;
-    english_name: string;
-    ethnic: string;
-    id: string;
-    job_title?: string;
-    name: string;
-    phone?: string;
-    sex: boolean;
-    type: string;
-    unit_uuid: string;
-    user_uuid: string;
-}): Promise<BaseResponse<TeacherEntity> | undefined> => {
+const AddTeacherAPI = async (data:TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
     return BaseApi<TeacherEntity>(
         MethodType.POST,
         "/api/v1/teacher",
@@ -113,16 +101,7 @@ const DeleteTeacherAPI = async (teacher_uuid: string): Promise<BaseResponse<Teac
  * @returns {Promise<BaseResponse<TeacherEntity> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const EditTeacherAPI = async (teacher_uuid: string, data: {
-    name?: string;
-    password?: string;
-    email?: string;
-    phone?: string;
-    status?: number;
-    ban?: number;
-    role_uuid?: string;
-    permission?: string[];
-}): Promise<BaseResponse<TeacherEntity> | undefined> => {
+const EditTeacherAPI = async (teacher_uuid: string, data: TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
     return BaseApi<TeacherEntity>(
         MethodType.PUT,
         `/api/v1/teacher`,
