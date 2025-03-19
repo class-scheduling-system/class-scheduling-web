@@ -488,27 +488,27 @@ export function AdminEditUserPage():  React.JSX.Element {
                                     <ul className="space-y-2 text-gray-700">
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>姓名、英文名、工号为必填项</span>
+                                            <span>密码留空表示不修改当前密码</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>教师必须关联到现有用户才能登录系统</span>
+                                            <span>用户必须分配角色才能正常使用系统</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>单位决定教师所属的院系或部门</span>
+                                            <span>权限列表决定用户可执行的具体操作</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>职称信息用于学校管理和统计</span>
+                                            <span>禁用状态的用户将无法登录系统</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>电话和邮箱用于系统通知及联系</span>
+                                            <span>封禁状态会限制用户使用某些功能</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>描述可填写教师简介或专业特长</span>
+                                            <span>用户权限将与角色自带权限合并生效</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
