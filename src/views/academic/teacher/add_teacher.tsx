@@ -39,13 +39,12 @@ import {
     Column,
     Chinese,
     BuildingThree,
-    History,
     Refresh,
-    UserBusiness, AddUser
+    UserBusiness, AddUser, Info
 } from "@icon-park/react";
 import * as React from "react";
 import {useEffect, useState} from "react";
-import { message, Card, List} from "antd";
+import { message} from "antd";
 import { AddTeacherAPI } from "../../../apis/teacher_api.ts";
 import {Link} from "react-router";
 import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
@@ -199,201 +198,186 @@ export function AcademicAddTeacher(): React.JSX.Element {
             <div className="w-full">
                 <div className="grid grid-cols-12 gap-x-6">
                     <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
-                        <Card
-                            title={
-                                <div className="flex items-center gap-1">
-                                    <AddUser theme="outline"  size="18" fill="#333"/>
-                                    <span>添加教师</span>
-                                </div>
-                            }
-                            className="shadow-lg w-full flex flex-col"
-                            headStyle={{ backgroundColor: '#f0f2f5'}}
-                            bodyStyle={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                flexGrow: 1,
-                                padding: '16px'
-                            }}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                height: 'calc(100% - 0px)'
-                            }}
-                        >
-                            <form id="teacher_add" onSubmit={onSubmit} className="py-1 flex flex-col flex-grow">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <Chinese theme="outline" size="14" fill="#333"/>
-                                            <span>姓名</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <input
-                                            type="text"
-                                            className="input input-sm w-full validator"
-                                            required
-                                            placeholder="请输入教师姓名"
-                                            value={data.name || ""}
-                                            onChange={(e) => setData({...data, name: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <English theme="outline" size="14" fill="#333"/>
-                                            <span>英文名</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <input
-                                            type="text"
-                                            className="input input-sm w-full validator"
-                                            required
-                                            placeholder="请输入英文名"
-                                            value={data.english_name || ""}
-                                            onChange={(e) => setData({...data, english_name: e.target.value})}
-                                        />
-                                    </fieldset>
+                        <div className="card card-border bg-base-100 w-full shadow-md">
+                            <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><AddUser theme="outline" size="18"/>添加教师信息</h2>
+                            <div className="card-body">
+                                <div>
+                                    <form id="teacher_add" onSubmit={onSubmit} className="py-1 flex flex-col flex-grow">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Chinese theme="outline" size="14"/>
+                                                    <span>姓名</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    placeholder="请输入教师姓名"
+                                                    value={data.name || ""}
+                                                    onChange={(e) => setData({...data, name: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <English theme="outline" size="14"/>
+                                                    <span>英文名</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    placeholder="请输入英文名"
+                                                    value={data.english_name || ""}
+                                                    onChange={(e) => setData({...data, english_name: e.target.value})}
+                                                />
+                                            </fieldset>
 
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <IdCard theme="outline" size="14" fill="#333"/>
-                                            <span>工号</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <input
-                                            type="text"
-                                            className="input input-sm w-full validator"
-                                            required
-                                            placeholder="请输入教师工号"
-                                            value={data.id || ""}
-                                            onChange={(e) => setData({...data, id: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <Column theme="outline" size="14" fill="#333"/>
-                                            <span>性别</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <select
-                                            className="select select-sm w-full validator"
-                                            value={data.sex !== undefined ? String(data.sex) : ""}
-                                            onChange={(e) => setData({...data, sex: e.target.value === "true"})}
-                                            required
-                                        >
-                                            <option value="" disabled>请选择性别</option>
-                                            <option value="false">女</option>
-                                            <option value="true">男</option>
-                                        </select>
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <UserBusiness theme="outline" size="14" fill="#333" />
-                                            <span>教师类型</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <select
-                                            className="select select-sm w-full validator"
-                                            value={data.type || ""}
-                                            onChange={(e) => setData({ ...data, type: e.target.value })}
-                                            required
-                                        >
-                                            <option value="" disabled>请选择教师类型</option>
-                                            {teacherTypeList.map((type) => (
-                                                <option key={type.teacher_type_uuid} value={type.teacher_type_uuid}>
-                                                    {type.type_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <BuildingThree theme="outline" size="14" fill="#333"/>
-                                            <span>单位</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <select
-                                            className="select select-sm w-full validator"
-                                            value={data.unit_uuid || ""}
-                                            onChange={(e) => setData({...data, unit_uuid: e.target.value})}
-                                            required
-                                        >
-                                            <option value="" disabled>请选择单位</option>
-                                            {departmentList.map((department) => (
-                                                <option key={department.department_uuid} value={department.department_uuid}>
-                                                    {department.department_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <AllApplication theme="outline" size="14" fill="#333"/>
-                                            <span>民族</span>
-                                            <span className="text-red-500">*</span>
-                                        </legend>
-                                        <input
-                                            type="text"
-                                            className="input input-sm w-full validator"
-                                            required
-                                            placeholder="请输入教师民族"
-                                            value={data.ethnic || ""}
-                                            onChange={(e) => setData({...data, ethnic: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <PhoneTelephone theme="outline" size="14" fill="#333"/>
-                                            <span>电话</span>
-                                        </legend>
-                                        <input
-                                            type="tel"
-                                            className="input input-sm w-full validator"
-                                            placeholder="请输入联系电话"
-                                            value={data.phone || ""}
-                                            onChange={(e) => setData({...data, phone: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <Envelope theme="outline" size="14" fill="#333"/>
-                                            <span>邮箱</span>
-                                        </legend>
-                                        <input
-                                            type="email"
-                                            className="input input-sm w-full validator"
-                                            placeholder="请输入电子邮箱"
-                                            value={data.email || ""}
-                                            onChange={(e) => setData({...data, email: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <AddTextTwo theme="outline" size="14" fill="#333"/>
-                                            <span>职称</span>
-                                        </legend>
-                                        <input
-                                            type="text"
-                                            className="input input-sm w-full validator"
-                                            placeholder="请输入职称"
-                                            value={data.job_title || ""}
-                                            onChange={(e) => setData({...data, job_title: e.target.value})}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="flex flex-col md:col-span-2">
-                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                            <Write theme="outline" size="14" fill="#333"/>
-                                            <span>描述</span>
-                                        </legend>
-                                        <textarea
-                                            className="textarea textarea-bordered textarea-sm w-full validator"
-                                            placeholder="请输入教师描述"
-                                            rows={3}
-                                            value={data.desc || ""}
-                                            onChange={(e) => setData({...data, desc: e.target.value})}
-                                        />
-                                    </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <IdCard theme="outline" size="14"/>
+                                                    <span>工号</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    placeholder="请输入教师工号"
+                                                    value={data.id || ""}
+                                                    onChange={(e) => setData({...data, id: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Column theme="outline" size="14"/>
+                                                    <span>性别</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.sex !== undefined ? String(data.sex) : ""}
+                                                    onChange={(e) => setData({...data, sex: e.target.value === "true"})}
+                                                    required
+                                                >
+                                                    <option value="" disabled>请选择性别</option>
+                                                    <option value="false">女</option>
+                                                    <option value="true">男</option>
+                                                </select>
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <UserBusiness theme="outline" size="14"/>
+                                                    <span>教师类型</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.type || ""}
+                                                    onChange={(e) => setData({ ...data, type: e.target.value })}
+                                                    required
+                                                >
+                                                    <option value="" disabled>请选择教师类型</option>
+                                                    {teacherTypeList.map((type) => (
+                                                        <option key={type.teacher_type_uuid} value={type.teacher_type_uuid}>
+                                                            {type.type_name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <BuildingThree theme="outline" size="14"/>
+                                                    <span>单位</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.unit_uuid || ""}
+                                                    onChange={(e) => setData({...data, unit_uuid: e.target.value})}
+                                                    required
+                                                >
+                                                    <option value="" disabled>请选择单位</option>
+                                                    {departmentList.map((department) => (
+                                                        <option key={department.department_uuid} value={department.department_uuid}>
+                                                            {department.department_name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <AllApplication theme="outline" size="14"/>
+                                                    <span>民族</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    placeholder="请输入教师民族"
+                                                    value={data.ethnic || ""}
+                                                    onChange={(e) => setData({...data, ethnic: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <PhoneTelephone theme="outline" size="14"/>
+                                                    <span>电话</span>
+                                                </legend>
+                                                <input
+                                                    type="tel"
+                                                    className="input input-sm w-full validator"
+                                                    placeholder="请输入联系电话"
+                                                    value={data.phone || ""}
+                                                    onChange={(e) => setData({...data, phone: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Envelope theme="outline" size="14"/>
+                                                    <span>邮箱</span>
+                                                </legend>
+                                                <input
+                                                    type="email"
+                                                    className="input input-sm w-full validator"
+                                                    placeholder="请输入电子邮箱"
+                                                    value={data.email || ""}
+                                                    onChange={(e) => setData({...data, email: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <AddTextTwo theme="outline" size="14"/>
+                                                    <span>职称</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    placeholder="请输入职称"
+                                                    value={data.job_title || ""}
+                                                    onChange={(e) => setData({...data, job_title: e.target.value})}
+                                                />
+                                            </fieldset>
+                                            <fieldset className="flex flex-col md:col-span-2">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Write theme="outline" size="14"/>
+                                                    <span>描述</span>
+                                                </legend>
+                                                <textarea
+                                                    className="textarea textarea-bordered textarea-sm w-full validator"
+                                                    placeholder="请输入教师描述"
+                                                    rows={3}
+                                                    value={data.desc || ""}
+                                                    onChange={(e) => setData({...data, desc: e.target.value})}
+                                                />
+                                            </fieldset>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div className="mt-auto flex justify-end space-x-4 pt-4">
+                                <div className="card-actions justify-end flex">
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-outline"
@@ -402,7 +386,6 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                         <Refresh theme="outline" size="14"/>
                                         <span>重置</span>
                                     </button>
-
                                     <button
                                         type="submit"
                                         className="btn btn-sm btn-primary"
@@ -411,68 +394,14 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                         <span>提交</span>
                                     </button>
                                 </div>
-                            </form>
-                        </Card>
-                    </div>
-                    {/* 右侧辅助卡片区域 */}
-                    <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6" style={{ height: '100%' }}>
-                        <div className="flex-1">
-                            {/* 最近添加的教师 */}
-                            <Card
-                                className="shadow-lg border-t-4 border-blue-500 bg-white w-full h-full"
-                                bordered={true}
-                                title={
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-2">
-                                            <History theme="outline" size="24" className="text-blue-600"/>
-                                            <span className="text-lg font-semibold text-gray-800">最近添加</span>
-                                        </div>
-                                    </div>
-                                }
-                                headStyle={{
-                                    backgroundColor: '#f0f4f8',
-                                    borderBottom: '1px solid #e2e8f0',
-                                    padding: '12px 16px'
-                                }}
-                            >
-                                {recentTeachers.length > 0 ? (
-                                    <List
-                                        dataSource={recentTeachers}
-                                        renderItem={(item: RecentTeacher) => (
-                                            <List.Item>
-                                                <div className="w-full">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="font-medium">{item.name}</span>
-                                                        <div className="badge badge-soft badge-soft-success">
-                                                            {item.department}
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-gray-500 text-sm">{item.time}</div>
-                                                </div>
-                                            </List.Item>
-                                        )}
-                                    />
-                                ) : (
-                                    <div className="text-center py-4 text-gray-500">
-                                        暂无最近添加的教师
-                                    </div>
-                                )}
-                            </Card>
+                            </div>
                         </div>
-
-                        {/* 提示信息卡片 */}
-                        <div className="flex-1">
-                            <Card
-                                title={
-                                    <div className="flex items-center">
-                                        <span className="text-secondary">操作提示</span>
-                                    </div>
-                                }
-                                bordered={true}
-                                className="shadow-lg bg-info w-full h-full"
-                                headStyle={{ backgroundColor: '#e6f7ff', borderBottom: '1px solid #91caff' }}
-                            >
-                                <ul className="space-y-2 text-gray-700">
+                    </div>
+                    <div className="lg:col-span-4 md:col-span-12 sm:col-span-12">
+                        <div className="card card-border bg-base-100 w-full  shadow-md">
+                            <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                            <div className="card-body">
+                                <ul className="space-y-1 text-gray-700">
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
                                         <span>姓名、英文名、工号为必填项</span>
@@ -502,7 +431,7 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                         <span>重置按钮可恢复表单到初始状态</span>
                                     </li>
                                 </ul>
-                            </Card>
+                            </div>
                         </div>
                     </div>
                 </div>
