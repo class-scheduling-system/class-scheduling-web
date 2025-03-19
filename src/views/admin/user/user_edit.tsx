@@ -38,10 +38,10 @@ import {
     Return,
     User,
     UserPositioning,
-    Refresh, Editor, Announcement, Attention
+    Refresh, Editor, Info
 } from "@icon-park/react";
 import { EditUserAPI } from "../../../apis/user_api.ts";
-import { message, Transfer, Card, Tooltip} from "antd";
+import { message, Transfer} from "antd";
 import * as React from "react";
 import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
@@ -244,216 +244,182 @@ export function AdminEditUserPage():  React.JSX.Element {
                 // 使用网格布局，确保三个元素之间的距离完全相等
                 <div className="w-full">
                     <div className="grid grid-cols-12 gap-x-6">
-                        <div className="lg:col-span-6 md:col-span-12 sm:col-span-12">
-                            <Card
-                                title={
-                                    <div className="flex items-center gap-1">
-                                        <Editor theme="outline" size="18" fill="#333"/>
-                                        <span>用户信息编辑</span>
-                                    </div>
-                                }
-                                className="shadow-lg w-full h-full"
-                                headStyle={{ backgroundColor: '#f0f2f5'}}
-                                bodyStyle={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 'calc(100% - 58px)' // 减去卡片标题的高度
-                                }}
-                            >
-                                {/* 表单内容 */}
-                                <form id="user_edit" onSubmit={onSubmit} className="py-1 flex flex-col h-full">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* 用户名 */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <User theme="outline" size="14" fill="#333" />
-                                                <span>用户名</span>
-                                            </legend>
-                                            <input
-                                                type="text"
-                                                className="input input-sm w-full validator"
-                                                required
-                                                value={data.name || ""}
-                                                onChange={(e) => setData({ ...data, name: e.target.value })}
-                                            />
-                                        </fieldset>
-                                        {/* 密码（留空表示不修改） */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Key theme="outline" size="14" fill="#333" />
-                                                <span>密码</span>
-                                            </legend>
-                                            <input
-                                                type="password"
-                                                className="input input-sm w-full validator"
-                                                placeholder="如需修改密码，请输入新密码"
-                                                onChange={(e) => setData({ ...data, password: e.target.value })}
-                                            />
-                                        </fieldset>
-                                        {/* 邮箱 */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Envelope theme="outline" size="14" fill="#333" />
-                                                <span>邮箱</span>
-                                            </legend>
-                                            <input
-                                                type="email"
-                                                className="input input-sm w-full validator"
-                                                required
-                                                value={data.email || ""}
-                                                onChange={(e) => setData({ ...data, email: e.target.value })}
-                                            />
-                                        </fieldset>
-                                        {/* 手机号 */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <PhoneTelephone theme="outline" size="14" fill="#333" />
-                                                <span>手机号</span>
-                                            </legend>
-                                            <input
-                                                type="text"
-                                                className="input input-sm w-full validator"
-                                                required
-                                                value={data.phone || ""}
-                                                onChange={(e) => setData({ ...data, phone: e.target.value })}
-                                            />
-                                        </fieldset>
-                                        {/* 角色选择 */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <UserPositioning theme="outline" size="14" fill="#333" />
-                                                <span>角色</span>
-                                            </legend>
-                                            <select
-                                                className="select select-sm w-full validator"
-                                                value={data.role_uuid}
-                                                onChange={(e) => setData({ ...data, role_uuid: e.target.value })}
-                                                required
-                                            >
-                                                <option value="" disabled>
-                                                    请选择角色
-                                                </option>
-                                                {allowedRoles?.map((role) => (
-                                                    <option key={role.role_uuid} value={role.role_uuid}>
-                                                        {role.role_name}
-                                                    </option>
-                                                )) || []}
-                                            </select>
-                                        </fieldset>
-                                        {/* 状态 */}
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <ApplicationEffect theme="outline" size="14" fill="#333"/>
-                                                <span>状态</span>
-                                            </legend>
-                                            <select
-                                                className="select select-sm w-full validator"
-                                                value={data.status !== undefined ? (data.status===1 ? "1" : "0") : ""}
-                                                onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
-                                                required
-                                            >
-                                                <option value="" disabled>
-                                                    请选择状态
-                                                </option>
-                                                <option value="1">启用</option>
-                                                <option value="0">禁用</option>
-                                            </select>
-                                        </fieldset>
-
-                                        {/* 封禁 */}
-                                        <fieldset className="flex flex-col md:col-span-1">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Forbid theme="outline" size="14" fill="#333"/>
-                                                <span>封禁</span>
-                                            </legend>
-                                            <select
-                                                className="select select-sm w-full validator"
-                                                value={data.ban !== undefined ? (data.ban ? "1" : "0") : ""}
-                                                onChange={(e) => setData({ ...data, ban: e.target.value === "1" })}
-                                                required
-                                            >
-                                                <option value="" disabled>
-                                                    请选择封禁状态
-                                                </option>
-                                                <option value="0">未封禁</option>
-                                                <option value="1">封禁</option>
-                                            </select>
-                                        </fieldset>
-                                        <fieldset className="flex flex-col md:col-span-2 flex-grow">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Permissions theme="outline" size="14" fill="#333"/>
-                                                <span>权限</span>
-                                                <Tooltip title="封禁将限制用户使用特定功能">
-                                                </Tooltip>
-                                            </legend>
-                                            <div className="flex-grow">
-                                                <Transfer
-                                                    dataSource={permissionList}
-                                                    titles={['可选权限', '已选权限']}
-                                                    targetKeys={targetKeys}
-                                                    onChange={data =>handleTransferChange(data as string[])}
-                                                    filterOption={filterOption}
-                                                    render={item => item.title}
-                                                    showSearch
-                                                    listStyle={{
-                                                        width: '100%',
-                                                        height: 280,
-                                                    }}
+                        <div className="lg:col-span-8 md:col-span-12 sm:col-span-12">
+                            <div className="card card-border bg-base-100 w-full shadow-md">
+                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Editor theme="outline" size="18"/>编辑用户信息</h2>
+                                <div className="card-body">
+                                    <form id="user_edit" onSubmit={onSubmit} className=" flex flex-col h-full space-y-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* 用户名 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <User theme="outline" size="14"/>
+                                                    <span>用户名</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    value={data.name || ""}
+                                                    onChange={(e) => setData({ ...data, name: e.target.value })}
                                                 />
-                                            </div>
-                                        </fieldset>
-                                    </div>
-                                    <div className="mt-auto flex justify-end space-x-4 pt-4">
-                                        <button
-                                            type="button"
-                                            className="btn btn-sm btn-outline"
-                                            onClick={resetForm}
-                                        >
-                                            <Refresh theme="outline" size="14"/>
-                                            <span>重置</span>
-                                        </button>
+                                            </fieldset>
+                                            {/* 密码（留空表示不修改） */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Key theme="outline" size="14"/>
+                                                    <span>密码</span>
+                                                </legend>
+                                                <input
+                                                    type="password"
+                                                    className="input input-sm w-full validator"
+                                                    placeholder="如需修改密码，请输入新密码"
+                                                    onChange={(e) => setData({ ...data, password: e.target.value })}
+                                                />
+                                            </fieldset>
+                                            {/* 邮箱 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Envelope theme="outline" size="14"/>
+                                                    <span>邮箱</span>
+                                                </legend>
+                                                <input
+                                                    type="email"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    value={data.email || ""}
+                                                    onChange={(e) => setData({ ...data, email: e.target.value })}
+                                                />
+                                            </fieldset>
+                                            {/* 手机号 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <PhoneTelephone theme="outline" size="14"/>
+                                                    <span>手机号</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    value={data.phone || ""}
+                                                    onChange={(e) => setData({ ...data, phone: e.target.value })}
+                                                />
+                                            </fieldset>
+                                            {/* 角色选择 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <UserPositioning theme="outline" size="14"/>
+                                                    <span>角色</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.role_uuid}
+                                                    onChange={(e) => setData({ ...data, role_uuid: e.target.value })}
+                                                    required
+                                                >
+                                                    <option value="" disabled>
+                                                        请选择角色
+                                                    </option>
+                                                    {allowedRoles?.map((role) => (
+                                                        <option key={role.role_uuid} value={role.role_uuid}>
+                                                            {role.role_name}
+                                                        </option>
+                                                    )) || []}
+                                                </select>
+                                            </fieldset>
+                                            {/* 状态 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <ApplicationEffect theme="outline" size="14"/>
+                                                    <span>状态</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.status !== undefined ? (data.status===1 ? "1" : "0") : ""}
+                                                    onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
+                                                    required
+                                                >
+                                                    <option value="" disabled>
+                                                        请选择状态
+                                                    </option>
+                                                    <option value="1">启用</option>
+                                                    <option value="0">禁用</option>
+                                                </select>
+                                            </fieldset>
 
-                                        <button
-                                            type="submit"
-                                            className="btn btn-sm btn-primary"
-                                        >
-                                            <CheckOne theme="outline" size="14"/>
-                                            <span>提交</span>
-                                        </button>
-                                    </div>
-                                </form>
-                            </Card>
-                        </div>
-                        <div className="lg:col-span-6 md:col-span-12 sm:col-span-12 flex flex-col space-y-6">
-                            {/* 当前用户信息卡片 */}
-                            <div>
-                                <Card
-                                    className="shadow-lg border-t-4 border-blue-500 bg-white w-full"
-                                    bordered={true}
-                                    title={
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-2">
-                                                <Announcement theme="outline" size="18"/>
-                                                <span className="text-lg font-semibold text-gray-800">当前用户信息</span>
-                                            </div>
-                                            <div className="text-sm text-gray-500 font-mono">
-                                                ID: {userId?.substring(0, 12)}...
-                                            </div>
+                                            {/* 封禁 */}
+                                            <fieldset className="flex flex-col md:col-span-1">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Forbid theme="outline" size="14"/>
+                                                    <span>封禁</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    value={data.ban !== undefined ? (data.ban ? "1" : "0") : ""}
+                                                    onChange={(e) => setData({ ...data, ban: e.target.value === "1" })}
+                                                    required
+                                                >
+                                                    <option value="" disabled>
+                                                        请选择封禁状态
+                                                    </option>
+                                                    <option value="0">未封禁</option>
+                                                    <option value="1">封禁</option>
+                                                </select>
+                                            </fieldset>
+                                            <fieldset className="flex flex-col md:col-span-2 flex-grow">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Permissions theme="outline" size="14"/>
+                                                    <span>权限</span>
+                                                </legend>
+                                                <div className="flex-grow">
+                                                    <Transfer
+                                                        dataSource={permissionList}
+                                                        titles={['可选权限', '已选权限']}
+                                                        targetKeys={targetKeys}
+                                                        onChange={data =>handleTransferChange(data as string[])}
+                                                        filterOption={filterOption}
+                                                        render={item => item.title}
+                                                        showSearch
+                                                        listStyle={{
+                                                            width: '100%',
+                                                            height: 280,
+                                                        }}
+                                                    />
+                                                </div>
+                                            </fieldset>
                                         </div>
-                                    }
-                                    headStyle={{
-                                        backgroundColor: '#f0f4f8',
-                                        borderBottom: '1px solid #e2e8f0',
-                                        padding: '12px 16px'
-                                    }}
-                                >
-                                    <div className="space-y-3 p-2">
+                                        <div className="card-actions justify-end flex">
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline"
+                                                onClick={resetForm}
+                                            >
+                                                <Refresh theme="outline" size="14"/>
+                                                <span>重置</span>
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="btn btn-sm btn-primary"
+                                            >
+                                                <CheckOne theme="outline" size="14"/>
+                                                <span>提交</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6">
+                            <div className="card card-border bg-base-100 w-full h-full shadow-md">
+                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><User theme="outline" size="18"/>当前用户信息</h2>
+                                <div className="card-body">
+                                    <div className="space-y-3">
                                         <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <User theme="outline" size="14" className="text-secondary" />
                                                 <span>用户名</span>
                                             </span>
-                                            <span className="text-right font-semibold text-gray-800">{userInfo?.name || data.name}</span>
+                                            <span className="text-right text-gray-800">{userInfo?.name || data.name}</span>
                                         </div>
                                         <div className="border-b border-gray-200"></div>
                                         <div className="grid grid-cols-2 gap-2 items-center">
@@ -514,51 +480,42 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             </span>
                                         </div>
                                     </div>
-                                </Card>
+                                </div>
                             </div>
-                            <div>
-                                <Card
-                                    title={
-                                        <div className="flex items-center space-x-2">
-                                            <Attention theme="outline" size="18" className="text-secondary"/>
-                                            <span className="text-secondary">操作提示</span>
-                                        </div>
-                                    }
-                                    bordered={true}
-                                    className="shadow-lg bg-info w-full"
-                                    headStyle={{ backgroundColor: '#e6f7ff', borderBottom: '1px solid #91caff' }}
-                                >
+                            <div className="card card-border bg-base-100 w-full h-full shadow-md">
+                                <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                                <div className="card-body">
                                     <ul className="space-y-2 text-gray-700">
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>密码留空表示不修改当前密码</span>
+                                            <span>姓名、英文名、工号为必填项</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>用户必须分配角色才能正常使用系统</span>
+                                            <span>教师必须关联到现有用户才能登录系统</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>权限列表决定用户可执行的具体操作</span>
+                                            <span>单位决定教师所属的院系或部门</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>禁用状态的用户将无法登录系统</span>
+                                            <span>职称信息用于学校管理和统计</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>封禁状态会限制用户使用某些功能</span>
+                                            <span>电话和邮箱用于系统通知及联系</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
-                                            <span>用户权限将与角色自带权限合并生效</span>
+                                            <span>描述可填写教师简介或专业特长</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="text-secondary mr-2">•</span>
                                             <span>重置按钮可恢复表单到初始状态</span>
                                         </li>
                                     </ul>
-                                </Card>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -43,9 +43,6 @@ import cardImage from "../../../assets/images/card-background.webp";
 import {UserInfoEntity} from "../../../models/entity/user_info_entity.ts";
 import {UserEntity} from "../../../models/entity/user_entity.ts";
 import {Link, useNavigate} from "react-router";
-;
-
-// 不再需要 useNavigate
 
 export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
@@ -133,7 +130,6 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
 
     // 定义刷新用户列表的方法
     const refreshUserList = () => {
-        // 通过更新refreshTrigger触发useEffect重新加载数据
         setRefreshTrigger(prev => prev + 1);
     };
 
