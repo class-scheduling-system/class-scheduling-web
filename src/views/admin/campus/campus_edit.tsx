@@ -110,212 +110,223 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
 
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between pb-2">
-                <div className="flex items-center space-x-2">
-                    <Link to={"/admin/user"}>
-                        <Return theme="outline" size="24"/>
+        <div className="flex flex-col gap-6">
+            {/* 顶部导航 */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                    <Link to={"/admin/user"} className="btn btn-circle btn-sm btn-ghost">
+                        <Return theme="outline" size="22"/>
                     </Link>
-                    <h2 className="text-2xl font-bold flex items-center space-x-2">
-                        <span>编辑用户</span>
-                    </h2>
+                    <h2 className="text-2xl font-bold">编辑校区</h2>
                 </div>
             </div>
+
             {loading ? (
                 // 加载中显示骨架屏
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Array(8).fill(0).map((_, index) => (
-                        <div key={index} className="animate-pulse">
-                            <div className="h-4 bg-base-300 rounded w-24 mb-2"></div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {Array(6).fill(0).map((_, index) => (
+                        <div key={index} className="animate-pulse rounded-lg bg-base-200 p-4">
+                            <div className="h-5 bg-base-300 rounded w-1/3 mb-3"></div>
                             <div className="h-10 bg-base-300 rounded w-full"></div>
                         </div>
                     ))}
                 </div>
             ) : (
-                // 使用网格布局，确保三个元素之间的距离完全相等
-                <div className="w-full">
-                    <div className="grid grid-cols-12 gap-x-6">
-                        <div className="lg:col-span-8 md:col-span-12 sm:col-span-12">
-                            <div className="card card-border bg-base-100 w-full shadow-md">
-                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Editor theme="outline" size="18"/>编辑校区信息</h2>
-                                <div className="card-body">
-                                    <form id="user_edit" onSubmit={onSubmit} className=" flex flex-col h-full space-y-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <fieldset className="flex flex-col">
-                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <School theme="outline" size="14"/>
-                                                    <span>校区名</span>
-                                                </legend>
-                                                <input
-                                                    type="text"
-                                                    className="input input-sm w-full validator"
-                                                    required
-                                                    value={data.campus_name || ""}
-                                                    onChange={(e) => setData({ ...data, campus_name: e.target.value })}
-                                                />
-                                            </fieldset>
-                                            <fieldset className="flex flex-col">
-                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <BarCode theme="outline" size="14"/>
-                                                    <span>校区编码</span>
-                                                </legend>
-                                                <input
-                                                    type="text"
-                                                    className="input input-sm w-full validator"
-                                                    value={data.campus_code || ""}
-                                                    onChange={(e) => setData({ ...data, campus_code: e.target.value })}
-                                                />
-                                            </fieldset>
-                                            <fieldset className="flex flex-col">
-                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <DocDetail theme="outline" size="14"/>
-                                                    <span>校区描述</span>
-                                                </legend>
-                                                <input
-                                                    type="text"
-                                                    className="input input-sm w-full validator"
-                                                    required
-                                                    value={data.campus_desc || ""}
-                                                    onChange={(e) => setData({ ...data, campus_desc: e.target.value })}
-                                                />
-                                            </fieldset>
-                                            <fieldset className="flex flex-col">
-                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <ApplicationEffect theme="outline" size="14"/>
-                                                    <span>状态</span>
-                                                </legend>
-                                                <select
-                                                    className="select select-sm w-full validator"
-                                                    value={data.campus_status !== undefined ? String(data.campus_status) : ""}
-                                                    onChange={(e) => setData({...data, campus_status: e.target.value === "true"})}
-                                                    required
-                                                >
-                                                    <option value="" disabled>
-                                                        请选择状态
-                                                    </option>
-                                                    <option value="true">启用</option>
-                                                    <option value="false">禁用</option>
-                                                </select>
-                                            </fieldset>
-                                            <fieldset className="flex flex-col">
-                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <ConnectAddressOne theme="outline" size="14"/>
-                                                    <span>校区地址</span>
-                                                </legend>
-                                                <input
-                                                    type="text"
-                                                    className="input input-sm w-full validator"
-                                                    required
-                                                    value={data.campus_address || ""}
-                                                    onChange={(e) => setData({ ...data, campus_address: e.target.value })}
-                                                />
-                                            </fieldset>
-                                        </div>
-                                        <div className="card-actions justify-end flex">
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-outline"
-                                                onClick={resetForm}
-                                            >
-                                                <Refresh theme="outline" size="14"/>
-                                                <span>重置</span>
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="btn btn-sm btn-primary"
-                                            >
-                                                <CheckOne theme="outline" size="14"/>
-                                                <span>提交</span>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+                <div className="w-full space-y-6">
+                    {/* 基本信息卡片 - 水平布局 */}
+                    <div className="card bg-base-100 shadow-lg border border-base-200 overflow-hidden">
+                        <div className="bg-primary/10 p-4 flex items-center space-x-2">
+                            <Editor theme="outline" size="20" className="text-primary"/>
+                            <h2 className="card-title text-lg m-0">基本信息</h2>
                         </div>
-                        <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6">
-                            <div className="card card-border bg-base-100 w-full h-full shadow-md">
-                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3">当前校区信息</h2>
-                                <div className="card-body">
-                                    <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-2 items-center">
+
+                        <div className="card-body p-6">
+                            <form id="user_edit" onSubmit={onSubmit} className=" flex flex-col h-full space-y-5">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <School theme="outline" size="14"/>
+                                            <span>校区名</span>
+                                        </legend>
+                                        <input
+                                            type="text"
+                                            className="input input-sm w-full validator"
+                                            required
+                                            value={data.campus_name || ""}
+                                            onChange={(e) => setData({ ...data, campus_name: e.target.value })}
+                                        />
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <BarCode theme="outline" size="14"/>
+                                            <span>校区编码</span>
+                                        </legend>
+                                        <input
+                                            type="text"
+                                            className="input input-sm w-full validator"
+                                            value={data.campus_code || ""}
+                                            onChange={(e) => setData({ ...data, campus_code: e.target.value })}
+                                        />
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <DocDetail theme="outline" size="14"/>
+                                            <span>校区描述</span>
+                                        </legend>
+                                        <input
+                                            type="text"
+                                            className="input input-sm w-full validator"
+                                            required
+                                            value={data.campus_desc || ""}
+                                            onChange={(e) => setData({ ...data, campus_desc: e.target.value })}
+                                        />
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <ApplicationEffect theme="outline" size="14"/>
+                                            <span>状态</span>
+                                        </legend>
+                                        <select
+                                            className="select select-sm w-full validator"
+                                            value={data.campus_status !== undefined ? String(data.campus_status) : ""}
+                                            onChange={(e) => setData({...data, campus_status: e.target.value === "true"})}
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                请选择状态
+                                            </option>
+                                            <option value="true">启用</option>
+                                            <option value="false">禁用</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <ConnectAddressOne theme="outline" size="14"/>
+                                            <span>校区地址</span>
+                                        </legend>
+                                        <input
+                                            type="text"
+                                            className="input input-sm w-full validator"
+                                            required
+                                            value={data.campus_address || ""}
+                                            onChange={(e) => setData({ ...data, campus_address: e.target.value })}
+                                        />
+                                    </fieldset>
+                                </div>
+                                <div className="card-actions justify-end flex">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline"
+                                        onClick={resetForm}
+                                    >
+                                        <Refresh theme="outline" size="14"/>
+                                        <span>重置</span>
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-sm btn-primary"
+                                    >
+                                        <CheckOne theme="outline" size="14"/>
+                                        <span>提交</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* 信息展示和操作提示 - 水平并排卡片 */}
+                    <div className="grid grid-cols-6 gap-6">
+                        {/* 当前校区信息卡片 */}
+                        <div className="card col-span-3 bg-base-100 shadow-lg border border-base-200 overflow-hidden h-full">
+                            <div className="bg-info/10 p-4">
+                                <h2 className="card-title text-lg m-0">当前校区信息</h2>
+                            </div>
+
+                            <div className="card-body">
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <School theme="outline" size="14" className="text-secondary"/>
                                                 <span>校区名</span>
                                             </span>
-                                            <span className="text-right text-gray-800">{campusInfo?.campus_name || data.campus_name}</span>
-                                        </div>
-                                        <div className="border-b border-gray-200"></div>
-                                        <div className="grid grid-cols-2 gap-2 items-center">
+                                        <span className="text-right text-gray-800">{campusInfo?.campus_name || data.campus_name}</span>
+                                    </div>
+                                    <div className="border-b border-gray-200"></div>
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <BarCode theme="outline" size="14" className="text-secondary"/>
                                                 <span>校区编码</span>
                                             </span>
-                                            <span className="text-right  text-gray-800">{campusInfo?.campus_code}</span>
-                                        </div>
-                                        <div className="border-b border-gray-200"></div>
-                                        <div className="grid grid-cols-2 gap-2 items-center">
+                                        <span className="text-right  text-gray-800">{campusInfo?.campus_code}</span>
+                                    </div>
+                                    <div className="border-b border-gray-200"></div>
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <DocDetail theme="outline" size="14" className="text-secondary"/>
                                                 <span>校区描述</span>
                                             </span>
-                                            <span className="text-right  text-gray-800">{campusInfo?.campus_desc || data.campus_desc}</span>
-                                        </div>
-                                        <div className="border-b border-gray-200"></div>
-                                        <div className="grid grid-cols-2 gap-2 items-center">
+                                        <span className="text-right  text-gray-800">{campusInfo?.campus_desc || data.campus_desc}</span>
+                                    </div>
+                                    <div className="border-b border-gray-200"></div>
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <ConnectAddressOne theme="outline" size="14" className="text-secondary"/>
                                                 <span>校区地址</span>
                                             </span>
-                                            <span className="text-right  text-gray-800">{campusInfo?.campus_address || data.campus_address}</span>
-                                        </div>
-                                        <div className="border-b border-gray-200"></div>
-                                        <div className="grid grid-cols-2 gap-2 items-center">
+                                        <span className="text-right  text-gray-800">{campusInfo?.campus_address || data.campus_address}</span>
+                                    </div>
+                                    <div className="border-b border-gray-200"></div>
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                             <span className="text-sm text-gray-600 font-medium flex items-center space-x-2">
                                                 <ApplicationEffect theme="outline" size="14" className="text-secondary" />
                                                 <span>校区状态</span>
                                             </span>
-                                            <div className="text-right">
-                                                <div className={`badge badge-outline ${campusInfo?.campus_status? "badge-success" : "badge-error"} font-medium`}>
-                                                    {campusInfo?.campus_status? "启用" : "禁用"}
-                                                </div>
+                                        <div className="text-right">
+                                            <div className={`badge badge-outline ${campusInfo?.campus_status? "badge-success" : "badge-error"} font-medium`}>
+                                                {campusInfo?.campus_status? "启用" : "禁用"}
                                             </div>
                                         </div>
-                                        <div className="border-b border-gray-200"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="card card-border bg-base-100 w-full h-full shadow-md">
-                                <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
-                                <div className="card-body">
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>校区名称为必填项，请确保填写准确</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>校区编码应保持唯一性，用于系统内部识别</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>校区描述应简明扼要地概述校区特点</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>禁用状态的校区将不会在前台页面显示</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>校区地址应填写完整，便于定位和导航</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>修改校区信息会影响关联的班级和学生数据</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
-                                        <span>重置按钮可恢复表单到初始状态</span>
-                                    </li>
-                                </div>
+                        </div>
+
+                        {/* 操作提示卡片 */}
+                        <div className="card col-span-3 bg-base-100 shadow-lg border border-base-200 overflow-hidden h-full">
+                            <div className="bg-secondary/10 p-4 flex items-center space-x-2">
+                                <Info theme="outline" size="20" className="text-secondary"/>
+                                <h2 className="card-title text-lg m-0">操作提示</h2>
+                            </div>
+
+                            <div className="card-body">
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>校区名称为必填项，请确保填写准确</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>校区编码应保持唯一性，用于系统内部识别</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>校区描述应简明扼要地概述校区特点</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>禁用状态的校区将不会在前台页面显示</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>校区地址应填写完整，便于定位和导航</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>修改校区信息会影响关联的班级和学生数据</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-secondary mr-2">•</span>
+                                    <span>重置按钮可恢复表单到初始状态</span>
+                                </li>
                             </div>
                         </div>
                     </div>
