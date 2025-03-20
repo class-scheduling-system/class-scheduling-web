@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState, useEffect} from "react";
+import { useState, useEffect, JSX } from "react";
 import {
     ApplicationEffect,
     CheckOne,
@@ -41,7 +41,7 @@ import {
     Refresh, Editor, Info
 } from "@icon-park/react";
 import { EditUserAPI } from "../../../apis/user_api.ts";
-import { message, Transfer} from "antd";
+import { message, Transfer } from "antd";
 import * as React from "react";
 import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
@@ -50,8 +50,9 @@ import { UserEditDTO } from "../../../models/dto/user_edit_dto.ts";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { GetPermissionListAPI } from "../../../apis/permission_api.ts";
 import { UserAddDTO } from "../../../models/dto/user_add_dto.ts";
+import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
 
-export function AdminEditUserPage():  React.JSX.Element {
+export function AdminEditUserPage({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const navigate = useNavigate();
     const location = useLocation();
     const { userId } = useParams();
@@ -84,6 +85,10 @@ export function AdminEditUserPage():  React.JSX.Element {
             role?.role_name?.includes(roleName)
         )
     );
+
+    useEffect(() => {
+        document.title = `编辑用户 | ${site.name}`;
+    }, []);
 
     // 初始化教师信息
     useEffect(() => {
@@ -165,7 +170,7 @@ export function AdminEditUserPage():  React.JSX.Element {
             setData({
                 name: userInfo.name,
                 password: userInfo.password,
-                phone:  userInfo.phone,
+                phone: userInfo.phone,
                 email: userInfo.email,
                 status: userInfo.status,
                 ban: userInfo.ban,
@@ -185,7 +190,7 @@ export function AdminEditUserPage():  React.JSX.Element {
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const payload = {...data, permission: targetKeys} as UserAddDTO;
+        const payload = { ...data, permission: targetKeys } as UserAddDTO;
         try {
             const getResp = await EditUserAPI(userId || '', payload);
             if (getResp?.output === "Success") {
@@ -223,7 +228,7 @@ export function AdminEditUserPage():  React.JSX.Element {
             <div className="flex items-center justify-between pb-2">
                 <div className="flex items-center space-x-2">
                     <Link to={"/admin/user"}>
-                        <Return theme="outline" size="24"/>
+                        <Return theme="outline" size="24" />
                     </Link>
                     <h2 className="text-2xl font-bold flex items-center space-x-2">
                         <span>编辑用户</span>
@@ -246,14 +251,14 @@ export function AdminEditUserPage():  React.JSX.Element {
                     <div className="grid grid-cols-12 gap-x-6">
                         <div className="lg:col-span-8 md:col-span-12 sm:col-span-12">
                             <div className="card card-border bg-base-100 w-full shadow-md">
-                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Editor theme="outline" size="18"/>编辑用户信息</h2>
+                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Editor theme="outline" size="18" />编辑用户信息</h2>
                                 <div className="card-body">
                                     <form id="user_edit" onSubmit={onSubmit} className=" flex flex-col h-full space-y-5">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {/* 用户名 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <User theme="outline" size="14"/>
+                                                    <User theme="outline" size="14" />
                                                     <span>用户名</span>
                                                 </legend>
                                                 <input
@@ -267,7 +272,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 密码（留空表示不修改） */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <Key theme="outline" size="14"/>
+                                                    <Key theme="outline" size="14" />
                                                     <span>密码</span>
                                                 </legend>
                                                 <input
@@ -280,7 +285,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 邮箱 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <Envelope theme="outline" size="14"/>
+                                                    <Envelope theme="outline" size="14" />
                                                     <span>邮箱</span>
                                                 </legend>
                                                 <input
@@ -294,7 +299,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 手机号 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <PhoneTelephone theme="outline" size="14"/>
+                                                    <PhoneTelephone theme="outline" size="14" />
                                                     <span>手机号</span>
                                                 </legend>
                                                 <input
@@ -308,7 +313,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 角色选择 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <UserPositioning theme="outline" size="14"/>
+                                                    <UserPositioning theme="outline" size="14" />
                                                     <span>角色</span>
                                                 </legend>
                                                 <select
@@ -330,12 +335,12 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 状态 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <ApplicationEffect theme="outline" size="14"/>
+                                                    <ApplicationEffect theme="outline" size="14" />
                                                     <span>状态</span>
                                                 </legend>
                                                 <select
                                                     className="select select-sm w-full validator"
-                                                    value={data.status !== undefined ? (data.status===1 ? "1" : "0") : ""}
+                                                    value={data.status !== undefined ? (data.status === 1 ? "1" : "0") : ""}
                                                     onChange={(e) => setData({ ...data, status: Number(e.target.value) })}
                                                     required
                                                 >
@@ -350,7 +355,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             {/* 封禁 */}
                                             <fieldset className="flex flex-col md:col-span-1">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <Forbid theme="outline" size="14"/>
+                                                    <Forbid theme="outline" size="14" />
                                                     <span>封禁</span>
                                                 </legend>
                                                 <select
@@ -368,7 +373,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                             </fieldset>
                                             <fieldset className="flex flex-col md:col-span-2 flex-grow">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                    <Permissions theme="outline" size="14"/>
+                                                    <Permissions theme="outline" size="14" />
                                                     <span>权限</span>
                                                 </legend>
                                                 <div className="flex-grow">
@@ -376,7 +381,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                                         dataSource={permissionList}
                                                         titles={['可选权限', '已选权限']}
                                                         targetKeys={targetKeys}
-                                                        onChange={data =>handleTransferChange(data as string[])}
+                                                        onChange={data => handleTransferChange(data as string[])}
                                                         filterOption={filterOption}
                                                         render={item => item.title}
                                                         showSearch
@@ -394,14 +399,14 @@ export function AdminEditUserPage():  React.JSX.Element {
                                                 className="btn btn-sm btn-outline"
                                                 onClick={resetForm}
                                             >
-                                                <Refresh theme="outline" size="14"/>
+                                                <Refresh theme="outline" size="14" />
                                                 <span>重置</span>
                                             </button>
                                             <button
                                                 type="submit"
                                                 className="btn btn-sm btn-primary"
                                             >
-                                                <CheckOne theme="outline" size="14"/>
+                                                <CheckOne theme="outline" size="14" />
                                                 <span>提交</span>
                                             </button>
                                         </div>
@@ -411,7 +416,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                         </div>
                         <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6">
                             <div className="card card-border bg-base-100 w-full h-full shadow-md">
-                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><User theme="outline" size="18"/>当前用户信息</h2>
+                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><User theme="outline" size="18" />当前用户信息</h2>
                                 <div className="card-body">
                                     <div className="space-y-3">
                                         <div className="grid grid-cols-2 gap-2 items-center">
@@ -452,8 +457,8 @@ export function AdminEditUserPage():  React.JSX.Element {
                                                 <span>状态</span>
                                             </span>
                                             <div className="text-right">
-                                                <div className={`badge badge-outline ${userInfo?.status? "badge-success" : "badge-error"} font-medium`}>
-                                                    {userInfo?.status? "启用" : "禁用"}
+                                                <div className={`badge badge-outline ${userInfo?.status ? "badge-success" : "badge-error"} font-medium`}>
+                                                    {userInfo?.status ? "启用" : "禁用"}
                                                 </div>
                                             </div>
                                         </div>
@@ -483,7 +488,7 @@ export function AdminEditUserPage():  React.JSX.Element {
                                 </div>
                             </div>
                             <div className="card card-border bg-base-100 w-full h-full shadow-md">
-                                <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                                <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18" />操作提示</h2>
                                 <div className="card-body">
                                     <ul className="space-y-2 text-gray-700">
                                         <li className="flex items-start">
