@@ -118,6 +118,7 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 message.error(getResp?.error_message ?? "获取用户列表失败");
                 setLoading(false);
             }
+            setLoading(false);
         };
         func().then();
     }, [dispatch, searchRequest, refreshTrigger]);
@@ -199,11 +200,11 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                     <tbody>
                                     {userList.records.map((record, index) => (
                                         <tr key={record.user?.user_uuid} className="transition hover:bg-base-200">
-                                            <td>{index + 1 + (userList.current - 1) * userList.size}</td>
-                                            <td>{record.user?.name}</td>
-                                            <td>{record.user?.role.role_name}</td>
-                                            <td>{record.user?.email}</td>
-                                            <td>{record.user?.status ? (
+                                            <td className={"text-nowrap"}>{index + 1 + (userList.current - 1) * userList.size}</td>
+                                            <td className={"text-nowrap"}>{record.user?.name}</td>
+                                            <td className={"text-nowrap"}>{record.user?.role.role_name}</td>
+                                            <td className={"text-nowrap"}>{record.user?.email}</td>
+                                            <td className={"text-nowrap"}>{record.user?.status ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"启用"}
                                                                 icon={<Correct theme="outline" size="12"/>}/>
@@ -213,7 +214,7 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                                 text={"禁用"}
                                                                 icon={<Error theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td>{record.user?.ban ? (
+                                            <td className={"text-nowrap"}>{record.user?.ban ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"error"}
                                                                 text={"已封禁"}
@@ -223,7 +224,7 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                                 type={"success"} text={"未封禁"}
                                                                 icon={<CheckSmall theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td className={"flex justify-end"}>
+                                            <td className={"flex justify-end text-nowrap"}>
                                                 <div className="join">
                                                     <button
                                                         onClick={() => handleEditUser(record.user!)}

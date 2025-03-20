@@ -43,7 +43,7 @@ import {JSX, useEffect, useState} from "react";
  */
 export function LabelComponent({type, icon, text, style, size}: Readonly<{
     type: "success" | "info" | "warning" | "error" | "primary" | "secondary" | "base";
-    text: string;
+    text?: string;
     icon?: JSX.Element;
     style?: "badge-soft" | "badge-dash" | "badge-outline";
     size?: "badge-xs" | "badge-sm" | "badge-lg" | "badge-xl";

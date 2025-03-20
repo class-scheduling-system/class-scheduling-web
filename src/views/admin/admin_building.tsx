@@ -108,14 +108,15 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetBuildingPageAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setBuildingList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.message ?? "获取教学楼列表失败");
             }
+            setLoading(false);
         };
         if (refreshOperate) {
             func().then();
@@ -205,7 +206,6 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                         <th>教学楼名字</th>
                                         <th>校区</th>
                                         <th>状态</th>
-                                        <th>修改时间</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
                                     </thead>
@@ -216,21 +216,22 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                 key={building.building_uuid}
                                                 className="transition hover:bg-base-200"
                                             >
-                                                <td>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
-                                                <td>{building.building_name}</td>
-                                                <td>{building.campus.campus_name}</td>
-                                                <td>{building.status ? (
-                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                    type={"success"} text={"启用"}
-                                                                    icon={<Correct theme="outline" size="12"/>}/>
-                                                ) : (
-                                                    <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                    type={"error"}
-                                                                    text={"禁用"}
-                                                                    icon={<Error theme="outline" size="12"/>}/>
-                                                )}</td>
-                                                <td>{new Date(building.updated_at).toLocaleString()}</td>
-                                                <td className={"flex justify-end"}>
+                                                <td className={"text-nowrap"}>{index + 1 + (buildingList.current - 1) * buildingList.size}</td>
+                                                <td className={"text-nowrap"}>{building.building_name}</td>
+                                                <td className={"text-nowrap"}>{building.campus.campus_name}</td>
+                                                <td className={"text-nowrap"}>
+                                                    {building.status ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"启用"}
+                                                                        icon={<Correct theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"}
+                                                                        text={"禁用"}
+                                                                        icon={<Error theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
+                                                <td className={"flex justify-end text-nowrap"}>
                                                     <div className="join">
                                                         <button
                                                             onClick={() => {
@@ -323,8 +324,10 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                 </CardComponent>
             </div>
             <AdminBuildingAddDialog show={dialogAdd} emit={setDialogAdd} requestRefresh={setRefreshOperate}/>
-            <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete} requestRefresh={setRefreshOperate}/>
-            <AdminBuildingEditDialog show={dialogEdit} editBuildingUuid={operateUuid} emit={setDialogEdit} requestRefresh={setRefreshOperate}/>
+            <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete}
+                                       requestRefresh={setRefreshOperate}/>
+            <AdminBuildingEditDialog show={dialogEdit} editBuildingUuid={operateUuid} emit={setDialogEdit}
+                                     requestRefresh={setRefreshOperate}/>
         </>
     );
 }

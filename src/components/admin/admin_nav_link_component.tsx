@@ -39,20 +39,20 @@ import {Link} from "react-router";
  *
  * @return {JSX.Element} 返回一个React组件，该组件渲染为一个带有指定标题、图标及目标路径的可点击链接。此链接根据其是否指向当前激活的路由自动应用不同的样式。
  */
-export function AdminNavLinkComponent({title, icon, path}: Readonly<{
+export function AdminNavLinkComponent({title, icon, path, match}: Readonly<{
     title: string,
     icon: JSX.Element,
-    path: string
+    path: string,
+    match: string
 }>): JSX.Element {
 
     /**
      * 根据当前路径是否匹配给定的路由，返回相应的CSS类名。
      *
-     * @param {string} route - 需要检查的路由路径。
      * @return {string} 如果当前路径与给定的路由匹配，则返回表示激活状态的CSS类名；否则，返回表示非激活状态的CSS类名。
      */
-    function selectedRoute(route: string): string {
-        if (location.pathname === route) {
+    function selectedRoute(): string {
+        if (location.pathname.includes(match)) {
             return "bg-primary text-white border-l-4 border-primary-focus";
         } else {
             return "hover:bg-primary-content hover:text-primary hover:border-l-4 hover:border-primary";
@@ -61,7 +61,7 @@ export function AdminNavLinkComponent({title, icon, path}: Readonly<{
 
     return (
         <Link to={path}
-              className={`transition-all duration-200 rounded-r-lg p-2 flex space-x-2 items-center ${selectedRoute(path)}`}>
+              className={`transition-all duration-200 rounded-r-lg p-2 flex space-x-2 items-center ${selectedRoute()}`}>
             <div className="text-lg">{icon}</div>
             <span className="font-medium">{title}</span>
         </Link>

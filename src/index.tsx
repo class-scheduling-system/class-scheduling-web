@@ -40,6 +40,7 @@ import {GetCurrentUserAPI} from "./apis/user_api.ts";
 import {setUserInfo} from "./stores/user_store.ts";
 import {PageNotFound} from "./views/404/page_not_found.tsx";
 import {BaseAcademic} from "./views/base_academic.tsx";
+import {BaseUser} from "./views/base_user.tsx";
 
 /**
  * # Index
@@ -92,7 +93,7 @@ export function Index(): JSX.Element {
                                 break;
                         }
                     }
-                } else if (location.pathname !== "/auth/login" && location.pathname !== "/init") {
+                } else if (location.pathname !== "/auth/login" && location.pathname !== "/init" && location.pathname !== "/") {
                     message.error("登录已失效");
                     navigate("/auth/login?fallback=" + location.pathname);
                 }
@@ -102,13 +103,18 @@ export function Index(): JSX.Element {
     }, [dispatch, location.pathname, navigate]);
 
     return (
-        <Routes location={location}>
-            <Route path={"/"} element={<BaseIndex/>}/>
-            <Route path={"/init"} element={<BaseInit/>}/>
-            <Route path={"/auth/*"} element={<BaseAuth/>}/>
-            <Route path={"/admin/*"} element={<BaseAdmin/>}/>
-            <Route path={"/academic/*"} element={<BaseAcademic/>}/>
-            <Route path={"/*"} element={<PageNotFound/>}/>
-        </Routes>
+        <>
+            {/* 适配变量显示强制刷新 */}
+            <div className={"xs:block sm:block md:block lg:block xl:block 2xl:block 3xl:block 4xl:block"}/>
+            <Routes location={location}>
+                <Route path={"/"} element={<BaseIndex/>}/>
+                <Route path={"/init"} element={<BaseInit/>}/>
+                <Route path={"/auth/*"} element={<BaseAuth/>}/>
+                <Route path={"/admin/*"} element={<BaseAdmin/>}/>
+                <Route path={"/academic/*"} element={<BaseAcademic/>}/>
+                <Route path={"/user/*"} element={<BaseUser/>}/>
+                <Route path={"/*"} element={<PageNotFound/>}/>
+            </Routes>
+        </>
     );
 }
