@@ -152,7 +152,7 @@ const EditUserAPI = async (user_uuid: string, data: {
     email?: string;
     phone?: string;
     status?: number;
-    ban?: number;
+    ban?: boolean;
     role_uuid?: string;
     permission?: string[];
 }): Promise<BaseResponse<UserInfoEntity> | undefined> => {

@@ -26,37 +26,49 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseResponse} from "../models/base_response.ts";
-import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+import {JSX, ReactNode} from "react";
 
-
-/**
- * 权限实体接口
- */
-export interface PermissionEntity {
-    permission_uuid: string;
-    permission_key: string;
-    name: string;
+interface FormSectionProps {
+    title: string;
+    icon?: JSX.Element;
+    children: ReactNode;
+    className?: string;
+    badgeColor?: string;
 }
 
 /**
- * # 获取权限列表
- * > 该函数用于通过API请求获取权限列表。它利用了Bearer令牌认证方式来确保安全地访问权限数据。
+ * # FormSectionComponent
+ * > 一个用于创建表单分区的组件，带有标题和图标。
  *
- * @returns {Promise<BaseResponse<PermissionEntity[]> | undefined>} - 返回一个Promise，解析为包含权限信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
- * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ * @param title - 分区标题
+ * @param icon - 分区图标
+ * @param children - 子元素
+ * @param className - 额外的CSS类名
+ * @param badgeColor - 徽章颜色
+ * @returns JSX.Element - 返回表单分区组件
  */
-const GetPermissionListAPI = async (): Promise<BaseResponse<PermissionEntity[]> | undefined> => {
-    return BaseApi<PermissionEntity[]>(
-        MethodType.GET,
-        "/api/v1/permission/list",
-        null,
-        null,
-        null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+export function FormSectionComponent({
+    title,
+    icon,
+    children,
+    className = "",
+    badgeColor = "badge-primary"
+}: Readonly<FormSectionProps>): JSX.Element {
+    return (
+        <div className={`card bg-base-100 border border-base-200 ${className}`}>
+            <div className="card-body">
+                <h2 className="card-title text-lg font-semibold flex items-center mb-4">
+                    {icon && (
+                        <div className={`badge ${badgeColor} p-3 mr-2`}>
+                            {icon}
+                        </div>
+                    )}
+                    {title}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {children}
+                </div>
+            </div>
+        </div>
     );
-}
-
-export {
-    GetPermissionListAPI
 }

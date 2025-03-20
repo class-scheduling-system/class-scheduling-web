@@ -38,10 +38,11 @@ import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "../../components/card_component.tsx";
 import {LabelComponent} from "../../components/label_component.tsx";
-import {Add, BookOpen, CheckOne, CloseOne, Delete, Editor, Newlybuild, Search} from "@icon-park/react";
+import {Add, BookOpen, CheckOne, CloseOne, Delete, Editor, Eyes, Newlybuild, Search} from "@icon-park/react";
 import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {GetDepartmentPageAPI} from "../../apis/department_api.ts";
 import {DepartmentEntity} from "../../models/entity/department_entity.ts";
+import {AdminDepartmentDeleteDialog} from "../../components/admin/department/dialog/admin_department_delete_dialog.tsx";
 
 
 /**
@@ -71,9 +72,10 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     const [loading, setLoading] = useState(true);
     const [department, setDepartment] = useState<DepartmentEntity>({} as DepartmentEntity);
 
+    const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+
 
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
-    const [operateUuid, setOperateUuid] = useState<string>("");
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -105,19 +107,20 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
     // 获取教学楼列表
     useEffect(() => {
         const func = async () => {
+            setLoading(true);
             const getResp = await GetDepartmentPageAPI(searchRequest);
             if (getResp?.output === "Success") {
-                setLoading(false);
                 setDepartmentList(getResp.data!);
             } else {
                 console.log(getResp);
                 message.error(getResp?.message ?? "获取教学楼列表失败");
             }
+            setLoading(false);
         };
         if (refreshOperate) {
             func().then();
-            setRefreshOperate(false);
         }
+        setRefreshOperate(false);
     }, [dispatch, searchRequest, refreshOperate]);
 
     // 搜索防抖动(500毫秒，输入字符串）
@@ -182,13 +185,13 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
      */
     function selectedDepartmentDelete(department: DepartmentEntity): void {
         setDepartment(department);
-        // TODO: 实现删除功能
+        setDeleteDialog(true);
     }
 
     return (
         <>
             <div className={"grid grid-cols-10 gap-4 pb-4"}>
-                <div className={"col-span-full md:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
+                <div className={"col-span-full lg:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) => item ? (
                             <animated.div style={style} className={"flex h-full justify-center"}>
@@ -199,15 +202,16 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                         ) : (
                             <animated.div style={style} className={"overflow-x-auto overflow-y-auto"}>
                                 <table className="table">
-                                    <thead>
+                                    <thead className={"top-0 sticky z-10 bg-base-100"}>
                                     <tr>
                                         <th>#</th>
                                         <th>部门编号</th>
                                         <th>部门名字</th>
-                                        <th>行政负责人</th>
-                                        <th>上课院系</th>
-                                        <th>实体部门</th>
                                         <th>是否启用</th>
+                                        <th>实体部门</th>
+                                        <th className={"hidden xl:block"}>上课院系</th>
+                                        <th>单位类别</th>
+                                        <th>单位办别</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
                                     </thead>
@@ -219,31 +223,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                 className="transition hover:bg-base-200"
                                             >
                                                 <td>{index + 1 + (departmentList.current - 1) * departmentList.size}</td>
-                                                <td>{department.department_code}</td>
-                                                <td>{department.department_name}</td>
-                                                <td>{department.administrative_head}</td>
-                                                <td>
-                                                    {department.is_attending_college ? (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"success"} text={"是"}
-                                                                        icon={<BookOpen theme="outline" size="12"/>}/>
-                                                    ) : (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"error"} text={"否"}
-                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {department.is_entity ? (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"success"} text={"是"}
-                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
-                                                    ) : (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"error"} text={"否"}
-                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
-                                                    )}
-                                                </td>
+                                                <td className={"text-nowrap"}>{department.department_code}</td>
+                                                <td className={"text-nowrap"}>{department.department_name}</td>
                                                 <td>
                                                     {department.is_enabled ? (
                                                         <LabelComponent size={"badge-sm"} style={"badge-outline"}
@@ -255,21 +236,45 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                                         icon={<CloseOne theme="outline" size="12"/>}/>
                                                     )}
                                                 </td>
+                                                <td className={"hidden xl:block"}>
+                                                    {department.is_entity ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"是"}
+                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"} text={"否"}
+                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {department.is_attending_college ? (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"success"} text={"是"}
+                                                                        icon={<BookOpen theme="outline" size="12"/>}/>
+                                                    ) : (
+                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
+                                                                        type={"error"} text={"否"}
+                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
+                                                    )}
+                                                </td>
+                                                <td>{department.unit_category}</td>
+                                                <td>{department.unit_type}</td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
                                                         <button
-                                                            onClick={() => {
-                                                                setOperateUuid(department.department_uuid!);
-                                                            }}
-                                                            className="join-item btn btn-sm btn-soft btn-info inline-flex">
-                                                            <Editor theme="outline" size="12"/>
-                                                            <span>编辑</span>
+                                                            onClick={() => selectedDepartmentDelete(department)}
+                                                            className="join-item btn btn-sm btn-soft btn-primary inline-flex">
+                                                            <Eyes theme="outline" size="14"/>
                                                         </button>
+                                                        <Link to={"/admin/department/edit/" + department.department_uuid}
+                                                            className="join-item btn btn-sm btn-soft btn-info inline-flex">
+                                                            <Editor theme="outline" size="14"/>
+                                                        </Link>
                                                         <button
                                                             onClick={() => selectedDepartmentDelete(department)}
                                                             className="join-item btn btn-sm btn-soft btn-error inline-flex">
-                                                            <Delete theme="outline" size="12"/>
-                                                            <span>删除</span>
+                                                            <Delete theme="outline" size="14"/>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -284,8 +289,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                         <div className={"join join-horizontal"}>
                             <button className="transition shadow btn btn-sm join-item border"
                                     onClick={() => {
-                                        setSearchRequest({...searchRequest, page: departmentList.current - 1});
                                         setRefreshOperate(true);
+                                        setSearchRequest({...searchRequest, page: departmentList.current - 1});
                                     }}
                                     disabled={departmentList.current === 1}>
                                 上一页
@@ -293,8 +298,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                             {getPageInfo()}
                             <button className="transition shadow btn btn-sm join-item border"
                                     onClick={() => {
-                                        setSearchRequest({...searchRequest, page: departmentList.current + 1});
                                         setRefreshOperate(true);
+                                        setSearchRequest({...searchRequest, page: departmentList.current + 1});
                                     }}
                                     disabled={departmentList.current === Math.ceil(departmentList.total / departmentList.size) || Math.ceil(departmentList.total / departmentList.size) === 0}>
                                 下一页
@@ -302,8 +307,8 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                             <select className="join-item transition select select-sm mx-1 border-l-0"
                                     value={searchRequest.size}
                                     onChange={(e) => {
-                                        setSearchRequest({...searchRequest, size: Number(e.target.value)});
                                         setRefreshOperate(true);
+                                        setSearchRequest({...searchRequest, size: Number(e.target.value)});
                                     }}>
                                 <option value={5}>5</option>
                                 <option value={10}>10</option>
@@ -316,7 +321,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                         </div>
                     </div>
                 </div>
-                <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
+                <CardComponent col={3} padding={0} howScreenHide={"lg"}>
                     <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
                     <div className="p-4 flex flex-col gap-1">
                         <h2 className="text-xl font-bold">部门列表</h2>
@@ -347,6 +352,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                 </CardComponent>
             </div>
             {/* 这里可以添加删除和编辑对话框 */}
+            <AdminDepartmentDeleteDialog department={department} show={deleteDialog} emit={setDeleteDialog} requestRefresh={setRefreshOperate}/>
         </>
     );
 }
