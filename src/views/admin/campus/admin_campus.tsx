@@ -166,10 +166,10 @@ export function AdminCampus({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                     {campusList.records.map((record, index) => (
                                         <tr key={record.campus_uuid} className="transition hover:bg-base-200">
                                             <td>{index + 1 + (campusList.current - 1) * campusList.size}</td>
-                                            <td>{record.campus_name}</td>
-                                            <td>{record.campus_code}</td>
-                                            <td>{record.campus_desc}</td>
-                                            <td>{record.campus_status ? (
+                                            <td className={"text-nowrap"}>{record.campus_name}</td>
+                                            <td className={"text-nowrap"}>{record.campus_code}</td>
+                                            <td className={"text-nowrap"}>{record.campus_desc}</td>
+                                            <td className={"text-nowrap"}>{record.campus_status ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"启用"}
                                                                 icon={<Correct theme="outline" size="12"/>}/>
@@ -179,7 +179,7 @@ export function AdminCampus({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                                                 text={"禁用"}
                                                                 icon={<Error theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td>{record.campus_address}</td>
+                                            <td className={"text-nowrap"}>{record.campus_address}</td>
                                             <td className={"flex justify-end"}>
                                                 <div className="join">
                                                     <button
