@@ -26,39 +26,41 @@
  * --------------------------------------------------------------------------------
  */
 
-import react from "react";
-import { useSelector } from "react-redux";
-import { SiteInfoEntity } from "../models/entity/site_info_entity.ts";
-import { AdminNavComponent } from "../components/admin/admin_nav_component.tsx";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router";
-import { AdminDashboard } from "./admin/admin_dashboard.tsx";
-import { AdminUser } from "./admin/admin_user.tsx";
-import { AdminBuilding } from "./admin/admin_building.tsx";
-import { animated, useSpring, useTransition } from "@react-spring/web";
-import { AdminNotFound } from "./404/medium_page_not_found.tsx";
-import { UserInfoEntity } from "../models/entity/user_info_entity.ts";
-import { People } from "@icon-park/react";
-import { AdminRole } from "./admin/admin_role.tsx";
-import { AdminDepartment } from "./admin/admin_department.tsx";
-import { DepartmentAdd } from "./admin/department/department_add.tsx";
-import { DepartmentEdit } from "./admin/department/department_edit.tsx";
+import {JSX, useEffect} from "react";
+import {useSelector} from "react-redux";
+import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
+import {AdminNavComponent} from "../components/admin/admin_nav_component.tsx";
+import {Link, Route, Routes, useLocation, useNavigate} from "react-router";
+import {AdminDashboard} from "./admin/admin_dashboard.tsx";
+import {AdminUser} from "./admin/user/user.tsx";
+import {AdminBuilding} from "./admin/admin_building.tsx";
+import {animated, useSpring, useTransition} from "@react-spring/web";
+import {AdminNotFound} from "./404/medium_page_not_found.tsx";
+import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
+import {People} from "@icon-park/react";
+import {AdminRole} from "./admin/role/role.tsx";
+import {AdminUserAddPage} from "./admin/user/user_add.tsx";
+import {AdminEditUserPage} from "./admin/user/user_edit.tsx";
+import {AdminDepartment} from "./admin/admin_department.tsx";
 import cookie from "react-cookies";
 import { message } from "antd";
 import { useBreadcrumbs } from "../hooks/use_breadcrumbs.tsx";
 import { adminRouteConfig } from "../models/config/admin_route_config.ts";
+import { DepartmentAdd } from "./admin/department/department_add.tsx";
+import { DepartmentEdit } from "./admin/department/department_edit.tsx";
 
 /**
  * 生成一个管理员控制台组件。
  * 该函数返回一个包含管理员控制台的框架页面。
- * @return {react.JSX.Element} 包含管理员控制台的完整框架页面
+ * @return {JSX.Element} 包含管理员控制台的完整框架页面
  */
-export function BaseAdmin(): react.JSX.Element {
+export function BaseAdmin(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
     const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const location = useLocation();
     const navigate = useNavigate();
 
-    react.useEffect(() => {
+    useEffect(() => {
         if (location.pathname === "/admin") {
             navigate("/admin/dashboard");
         }
@@ -156,6 +158,8 @@ export function BaseAdmin(): react.JSX.Element {
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AdminDashboard site={site} />} />
                                 <Route path="/user" element={<AdminUser site={site} />} />
+                                <Route path="/user/add" element={<AdminUserAddPage site={site} />}/>
+                                <Route path="/user/edit/:userId" element={<AdminEditUserPage site={site} />}/>
                                 <Route path="/role" element={<AdminRole site={site} />} />
                                 <Route path="/building" element={<AdminBuilding site={site} />} />
                                 <Route path="/department" element={<AdminDepartment site={site} />} />

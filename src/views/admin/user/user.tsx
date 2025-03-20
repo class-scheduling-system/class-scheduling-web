@@ -27,28 +27,28 @@
  */
 
 import {JSX, useEffect, useRef, useState} from "react";
-import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
-import {AdminAddUserDialog} from "../../components/admin/admin_user_add_dialog.tsx";
-import {AdminEditUserDialog} from "../../components/admin/admin_user_edit_dialog.tsx";
-import {AdminDeleteUserDialog} from "../../components/admin/admin_user_delete_dialog.tsx";
-import {GetUserListAPI} from "../../apis/user_api.ts";
+import {Add, CheckSmall, Correct, Delete, Editor, Error, Forbid, Newlybuild, Search} from "@icon-park/react";
+import {AdminDeleteUserDialog} from "../../../components/admin/admin_user_delete_dialog.tsx";
+import {GetUserListAPI} from "../../../apis/user_api.ts";
 import {animated, useTransition} from "@react-spring/web";
-import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
-import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
+import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
 import {message} from "antd";
 import {useDispatch, useSelector} from "react-redux";
-import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
-import {PageEntity} from "../../models/entity/page_entity.ts";
-import {CardComponent} from "../../components/card_component.tsx";
-import {LabelComponent} from "../../components/label_component.tsx";
-import cardImage from "../../assets/images/card-background.webp";
-import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
-import {UserAddDTO} from "../../models/dto/user_add_dto.ts";
+import {CurrentInfoStore} from "../../../models/store/current_info_store.ts";
+import {PageEntity} from "../../../models/entity/page_entity.ts";
+import {CardComponent} from "../../../components/card_component.tsx";
+import {LabelComponent} from "../../../components/label_component.tsx";
+import cardImage from "../../../assets/images/card-background.webp";
+import {UserInfoEntity} from "../../../models/entity/user_info_entity.ts";
+import {UserEntity} from "../../../models/entity/user_entity.ts";
+import {Link, useNavigate} from "react-router";
 
 export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const inputFocus = useRef<HTMLInputElement | null>(null);
+    // 不再使用 navigate
 
     const [userList, setUserList] = useState<PageEntity<UserInfoEntity>>({
         records: new Array(5).fill({}) as UserInfoEntity[],
@@ -58,16 +58,29 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
+
+    const navigate = useNavigate();
+
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(true);
-    const [dialogAdd, setDialogAdd] = useState<boolean>(false);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     // 删除用户相关状态
     const [deleteUserUuid, setDeleteUserUuid] = useState("");
-    const [dialogEdit, setDialogEdit] = useState<boolean>(false);
-    const [editUserUuid, setEditUserUuid] = useState("");
-    // 新增状态：保存编辑时对应的用户数据
-    const [editUserData, setEditUserData] = useState<UserAddDTO | null>(null);
+
+    // 添加刷新标记状态
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+
+    // 检查是否是从添加页面返回的
+    useEffect(() => {
+        // 检查 URL 中是否有 fromAdd=true 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('fromAdd') === 'true') {
+            // 如果是从添加页面返回，则刷新用户列表
+            refreshUserList();
+            // 清除 URL 参数，避免重复刷新
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
     useEffect(() => {
         document.title = `用户管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -92,20 +105,23 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         };
     }, [getCurrent.system]);
 
+    // 修改这个useEffect，添加refreshTrigger作为依赖，实现自动刷新
     useEffect(() => {
         const func = async () => {
             setLoading(true);
             const getResp = await GetUserListAPI(searchRequest);
             if (getResp?.output === "Success") {
                 setUserList(getResp.data!);
+                setLoading(false);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取用户列表失败");
+                setLoading(false);
             }
             setLoading(false);
         };
         func().then();
-    }, [dispatch, searchRequest]);
+    }, [dispatch, searchRequest, refreshTrigger]);
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
@@ -114,15 +130,8 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
     });
 
     // 定义刷新用户列表的方法
-    const refreshUserList = async () => {
-        setLoading(true);
-        const getResp = await GetUserListAPI(searchRequest);
-        if (getResp?.output === "Success") {
-            setUserList(getResp.data!);
-        } else {
-            message.error(getResp?.error_message ?? "获取用户列表失败");
-        }
-        setLoading(false);
+    const refreshUserList = () => {
+        setRefreshTrigger(prev => prev + 1);
     };
 
     function getPageInfo(): JSX.Element[] {
@@ -146,6 +155,13 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         }
         return pageInfo;
     }
+
+    // 处理编辑用户
+    const handleEditUser = (user: UserEntity) => {
+        navigate(`/admin/user/edit/${user.user_uuid}`, {
+            state: { userInfo: user }
+        });
+    };
 
     // 搜索防抖动
     useEffect(() => {
@@ -183,12 +199,12 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                     </thead>
                                     <tbody>
                                     {userList.records.map((record, index) => (
-                                        <tr key={record.user.user_uuid} className="transition hover:bg-base-200">
+                                        <tr key={record.user?.user_uuid} className="transition hover:bg-base-200">
                                             <td className={"text-nowrap"}>{index + 1 + (userList.current - 1) * userList.size}</td>
-                                            <td className={"text-nowrap"}>{record.user.name}</td>
-                                            <td className={"text-nowrap"}>{record.user.role.role_name}</td>
-                                            <td className={"text-nowrap"}>{record.user.email}</td>
-                                            <td className={"text-nowrap"}>{record.user.status ? (
+                                            <td className={"text-nowrap"}>{record.user?.name}</td>
+                                            <td className={"text-nowrap"}>{record.user?.role.role_name}</td>
+                                            <td className={"text-nowrap"}>{record.user?.email}</td>
+                                            <td className={"text-nowrap"}>{record.user?.status ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                 type={"success"} text={"启用"}
                                                                 icon={<Correct theme="outline" size="12"/>}/>
@@ -198,29 +214,27 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                                 text={"禁用"}
                                                                 icon={<Error theme="outline" size="12"/>}/>
                                             )}</td>
-                                            <td className={" text-nowrap"}>{record.user.ban ? (
+                                            <td className={"text-nowrap"}>{record.user?.ban ? (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                type={"error"} text={"已封禁"}/>
+                                                                type={"error"}
+                                                                text={"已封禁"}
+                                                                icon={<Forbid theme="outline" size="12"/>}/>
                                             ) : (
                                                 <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                type={"success"} text={"未封禁"}/>
+                                                                type={"success"} text={"未封禁"}
+                                                                icon={<CheckSmall theme="outline" size="12"/>}/>
                                             )}</td>
                                             <td className={"flex justify-end text-nowrap"}>
                                                 <div className="join">
                                                     <button
-                                                        onClick={() => {
-                                                            // 同时传递 userUuid 和用户数据（直接从列表获取）
-                                                            setEditUserUuid(record.user.user_uuid);
-                                                            setEditUserData(record.user);
-                                                            setDialogEdit(true);
-                                                        }}
+                                                        onClick={() => handleEditUser(record.user!)}
                                                         className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                         <Editor theme="outline" size="12"/>
                                                         <span>编辑</span>
                                                     </button>
                                                     <button
                                                         onClick={() => {
-                                                            setDeleteUserUuid(record.user.user_uuid);
+                                                            setDeleteUserUuid(record.user?.user_uuid ?? '');
                                                             setDialogDelete(true);
                                                         }}
                                                         className="join-item btn btn-sm btn-soft btn-error inline-flex">
@@ -285,11 +299,12 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                             </label>
                         </div>
                         <div className={"grid grid-cols-2 gap-3"}>
-                            <button onClick={() => setDialogAdd(true)}
-                                    className="transition shadow btn btn-outline btn-primary">
+                            <Link to={"/admin/user/add"}
+                                  className="transition shadow btn btn-outline btn-primary">
                                 <Add theme="outline" size="16"/>
                                 <span>添加</span>
-                            </button>
+                            </Link>
+
                             <button className="transition shadow btn btn-outline btn-secondary">
                                 <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
@@ -304,19 +319,6 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 emit={setDialogDelete}
                 userUuid={deleteUserUuid}
                 onDeletedSuccess={refreshUserList}
-            />
-            <AdminAddUserDialog
-                show={dialogAdd}
-                emit={setDialogAdd}
-                onAddSuccess={refreshUserList}
-            />
-
-            <AdminEditUserDialog
-                show={dialogEdit}
-                emit={setDialogEdit}
-                userUuid={editUserUuid}
-                defaultData={editUserData}
-                onEditSuccess={refreshUserList}
             />
         </>
     );
