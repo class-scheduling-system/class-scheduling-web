@@ -219,7 +219,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 className="input input-sm w-full validator"
                                                 required
                                                 placeholder="请输入教师姓名"
-                                                value={data.name || ""}
+                                                value={data.name ?? ""}
                                                 onChange={(e) => setData({...data, name: e.target.value})}
                                             />
                                         </fieldset>
@@ -234,7 +234,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 className="input input-sm w-full validator"
                                                 required
                                                 placeholder="请输入英文名"
-                                                value={data.english_name || ""}
+                                                value={data.english_name ?? ""}
                                                 onChange={(e) => setData({...data, english_name: e.target.value})}
                                             />
                                         </fieldset>
@@ -249,7 +249,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 className="input input-sm w-full validator"
                                                 required
                                                 placeholder="请输入教师工号"
-                                                value={data.id || ""}
+                                                value={data.id ?? ""}
                                                 onChange={(e) => setData({...data, id: e.target.value})}
                                             />
                                         </fieldset>
@@ -278,7 +278,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.type || ""}
+                                                value={data.type ?? ""}
                                                 onChange={(e) => setData({ ...data, type: e.target.value })}
                                                 required
                                             >
@@ -301,7 +301,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             </legend>
                                             <select
                                                 className="select select-sm w-full validator"
-                                                value={data.unit_uuid || ""}
+                                                value={data.unit_uuid ?? ""}
                                                 onChange={(e) => setData({...data, unit_uuid: e.target.value})}
                                                 required
                                             >
@@ -324,7 +324,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 className="input input-sm w-full validator"
                                                 required
                                                 placeholder="请输入民族"
-                                                value={data.ethnic || ""}
+                                                value={data.ethnic ?? ""}
                                                 onChange={(e) => setData({...data, ethnic: e.target.value})}
                                             />
                                         </fieldset>
@@ -337,7 +337,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 type="tel"
                                                 className="input input-sm w-full validator"
                                                 placeholder="请输入联系电话"
-                                                value={data.phone || ""}
+                                                value={data.phone ?? ""}
                                                 onChange={(e) => setData({...data, phone: e.target.value})}
                                             />
                                         </fieldset>
@@ -350,7 +350,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 type="email"
                                                 className="input input-sm w-full validator"
                                                 placeholder="请输入电子邮箱"
-                                                value={data.email || ""}
+                                                value={data.email ?? ""}
                                                 onChange={(e) => setData({...data, email: e.target.value})}
                                             />
                                         </fieldset>
@@ -363,7 +363,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 type="text"
                                                 className="input input-sm w-full validator"
                                                 placeholder="请输入职称"
-                                                value={data.job_title || ""}
+                                                value={data.job_title ?? ""}
                                                 onChange={(e) => setData({...data, job_title: e.target.value})}
                                             />
                                         </fieldset>
@@ -375,7 +375,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                             <textarea
                                                 className="textarea textarea-sm textarea-bordered w-full h-24"
                                                 placeholder="请输入教师描述"
-                                                value={data.desc || ""}
+                                                value={data.desc ?? ""}
                                                 onChange={(e) => setData({...data, desc: e.target.value})}
                                             />
                                         </fieldset>
@@ -412,7 +412,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <Chinese theme="outline" size="14" className="text-secondary" />
                                                 <span>姓名</span>
                                             </span>
-                                        <span className="text-right font-semibold text-gray-800">{teacherInfo?.name || data.name}</span>
+                                        <span className="text-right text-gray-800">{teacherInfo?.name ?? data.name}</span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
                                     <div className="grid grid-cols-2 gap-2 items-center">
@@ -420,7 +420,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <English theme="outline" size="14" className="text-secondary" />
                                                 <span>英文名</span>
                                             </span>
-                                        <span className="text-right text-gray-800">{teacherInfo?.english_name || data.english_name}</span>
+                                        <span className="text-right text-gray-800">{teacherInfo?.english_name ?? data.english_name}</span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
                                     <div className="grid grid-cols-2 gap-2 items-center">
@@ -428,7 +428,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <Keyboard theme="outline" size="14" className="text-secondary" />
                                                 <span>工号</span>
                                             </span>
-                                        <span className="text-right text-gray-800">{teacherInfo?.id || data.id}</span>
+                                        <span className="text-right text-gray-800">{teacherInfo?.id ?? data.id}</span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
                                     <div className="grid grid-cols-2 gap-2 items-center">
@@ -445,7 +445,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <span>教师类型</span>
                                             </span>
                                         <span className="text-right text-gray-800">
-                                                {teacherTypeList.find(type => type.teacher_type_uuid === (teacherInfo?.type || data.type))?.type_name || "未设置"}
+                                                {teacherTypeList.find(type => type.teacher_type_uuid === (teacherInfo?.type ?? data.type))?.type_name ?? "未设置"}
                                             </span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
@@ -455,7 +455,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <span>所属单位</span>
                                             </span>
                                         <span className="text-right text-gray-800">
-                                                {departmentList.find(dept => dept.department_uuid === teacherInfo?.unit_uuid)?.department_name || "未知"}
+                                                {departmentList.find(dept => dept.department_uuid === teacherInfo?.unit_uuid)?.department_name ?? "未知"}
                                             </span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
@@ -464,7 +464,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <PhoneTelephone theme="outline" size="14" className="text-secondary" />
                                                 <span>电话</span>
                                             </span>
-                                        <span className="text-right text-gray-800">{teacherInfo?.phone || data.phone || "未设置"}</span>
+                                        <span className="text-right text-gray-800">{teacherInfo?.phone ?? data.phone ?? "未设置"}</span>
                                     </div>
                                     <div className="border-b border-gray-200"></div>
                                     <div className="grid grid-cols-2 gap-2 items-center">
@@ -472,7 +472,7 @@ export function AcademicEditTeacher({site}: Readonly<{
                                                 <Envelope theme="outline" size="14" className="text-secondary" />
                                                 <span>邮箱</span>
                                             </span>
-                                        <span className="text-right text-gray-800">{teacherInfo?.email || data.email || "未设置"}</span>
+                                        <span className="text-right text-gray-800">{teacherInfo?.email ?? data.email ?? "未设置"}</span>
                                     </div>
                                 </div>
                             </div>

@@ -406,10 +406,6 @@ export function AcademicAddTeacher(): React.JSX.Element {
                                     </li>
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
-                                        <span>教师必须关联到现有用户才能登录系统</span>
-                                    </li>
-                                    <li className="flex items-start">
-                                        <span className="text-secondary mr-2">•</span>
                                         <span>单位决定教师所属的院系或部门</span>
                                     </li>
                                     <li className="flex items-start">
