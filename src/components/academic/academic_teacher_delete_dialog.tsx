@@ -26,15 +26,16 @@
  * --------------------------------------------------------------------------------
  */
 
-import {JSX, useEffect, useState} from "react";
+import { JSX, useEffect, useState } from "react";
 import {
     CheckOne,
-    CloseOne, ReduceUser,
+    CloseOne,
+    ReduceUser,
 } from "@icon-park/react";
 
 import * as React from "react";
-import {message, Modal} from "antd";
-import {DeleteTeacherAPI} from "../../apis/teacher_api.ts";
+import { message, Modal } from "antd";
+import { DeleteTeacherAPI } from "../../apis/teacher_api.ts";
 
 
 /**
@@ -46,12 +47,12 @@ import {DeleteTeacherAPI} from "../../apis/teacher_api.ts";
  * @param onDeletedSuccess  成功删除教师后的操作
  * @constructor
  */
-export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSuccess}: Readonly<{
+export function AcademicDeleteTeacherDialog({ show, emit, teacherUuid, onDeletedSuccess }: Readonly<{
     show: boolean;
     emit: (data: boolean) => void;
     teacherUuid: string;
     onDeletedSuccess?: () => void;
-}>) : JSX.Element {
+}>): JSX.Element {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
 
@@ -102,37 +103,35 @@ export function AcademicDeleteTeacherDialog({show, emit,teacherUuid, onDeletedSu
 
 
     return (
-        <>
-            <Modal open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
-                   footer={
-                       <div className="modal-action">
-                           <div className={"flex space-x-3"}>
-                               <button type={"button"}
-                                       onClick={handleClose}
-                                       className={"btn btn-error"}>
-                                   <CloseOne theme="outline" size="16"/>
-                                   <span>取消</span>
-                               </button>
-                               <button
-                                   type={"submit"} form={"teacher_delete"}
-                                   className={"btn btn-success"}>
-                                   <CheckOne theme="outline" size="16"/>
-                                   <span>确定</span>
-                               </button>
-                           </div>
-                       </div>
-                   }>
-                <div className="flex flex-col space-y-4">
-                    <h3 className="font-bold text-lg flex items-center space-x-2">
-                        <ReduceUser theme="outline" size="18"/>
-                        <span>删除教师</span>
-                    </h3>
-                    <form id={"teacher_delete"} onSubmit={onSubmit}  className="py-2 grid space-y-2">
-                        <p>确定要删除该教师吗？</p>
-                    </form>
+        <Modal open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
+            footer={
+                <div className="modal-action">
+                    <div className={"flex space-x-3"}>
+                        <button type={"button"}
+                            onClick={handleClose}
+                            className={"btn btn-error"}>
+                            <CloseOne theme="outline" size="16" />
+                            <span>取消</span>
+                        </button>
+                        <button
+                            type={"submit"} form={"teacher_delete"}
+                            className={"btn btn-success"}>
+                            <CheckOne theme="outline" size="16" />
+                            <span>确定</span>
+                        </button>
+                    </div>
                 </div>
-            </Modal>
-        </>
+            }>
+            <div className="flex flex-col space-y-4">
+                <h3 className="font-bold text-lg flex items-center space-x-2">
+                    <ReduceUser theme="outline" size="18" />
+                    <span>删除教师</span>
+                </h3>
+                <form id={"teacher_delete"} onSubmit={onSubmit} className="py-2 grid space-y-2">
+                    <p>确定要删除该教师吗？</p>
+                </form>
+            </div>
+        </Modal>
     )
 
 }
