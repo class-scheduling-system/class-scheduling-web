@@ -40,7 +40,7 @@ import {
     Info,
     Refresh,
     Return,
-    School
+    School, ViewList
 } from "@icon-park/react";
 import { message } from "antd";
 import { EditCampusAPI } from "../../../apis/campus_api.ts";
@@ -114,7 +114,7 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
             {/* 顶部导航 */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                    <Link to={"/admin/user"} className="btn btn-circle btn-sm btn-ghost">
+                    <Link to={"/admin/campus"} className="btn btn-circle btn-sm btn-ghost">
                         <Return theme="outline" size="22"/>
                     </Link>
                     <h2 className="text-2xl font-bold">编辑校区</h2>
@@ -137,7 +137,7 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
                     <div className="card bg-base-100 shadow-lg border border-base-200 overflow-hidden">
                         <div className="bg-primary/10 p-4 flex items-center space-x-2">
                             <Editor theme="outline" size="20" className="text-primary"/>
-                            <h2 className="card-title text-lg m-0">基本信息</h2>
+                            <h2 className="card-title text-lg m-0">编辑校区信息</h2>
                         </div>
 
                         <div className="card-body p-6">
@@ -238,7 +238,8 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
                     <div className="grid grid-cols-6 gap-6">
                         {/* 当前校区信息卡片 */}
                         <div className="card col-span-3 bg-base-100 shadow-lg border border-base-200 overflow-hidden h-full">
-                            <div className="bg-info/10 p-4">
+                            <div className="bg-info/10 p-4 flex items-center space-x-2">
+                                <ViewList theme="outline" size="18"/>
                                 <h2 className="card-title text-lg m-0">当前校区信息</h2>
                             </div>
 
@@ -294,7 +295,7 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
                         {/* 操作提示卡片 */}
                         <div className="card col-span-3 bg-base-100 shadow-lg border border-base-200 overflow-hidden h-full">
                             <div className="bg-secondary/10 p-4 flex items-center space-x-2">
-                                <Info theme="outline" size="20" className="text-secondary"/>
+                                <Info theme="outline" size="18" className="text-secondary"/>
                                 <h2 className="card-title text-lg m-0">操作提示</h2>
                             </div>
 

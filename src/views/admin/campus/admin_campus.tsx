@@ -235,9 +235,9 @@ export function AdminCampus({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.E
                 <CardComponent col={3} padding={0} howScreenHide={"md"} className={"overflow-y-auto"}>
                     <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl" />
                     <div className="p-4 flex flex-col gap-1">
-                        <h2 className="text-xl font-bold">用户列表</h2>
+                        <h2 className="text-xl font-bold">校区列表</h2>
                         <p className="text-base-content text-sm border-l-4 border-base-content ps-2">
-                            这里是所有用户的列表，你可以在这里查看、编辑和删除用户信息。
+                            这里是所有校区的列表，你可以在这里查看、编辑和删除校区信息。
                         </p>
                     </div>
                     <div className="px-4 pb-4 flex flex-col gap-3">

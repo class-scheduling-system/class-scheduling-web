@@ -29,7 +29,7 @@
 import {AddUser, CheckOne, Info, Refresh, Return} from "@icon-park/react";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useState} from "react";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
 import { CampusDTO } from "../../../models/dto/campus_dto.ts";
 import { AddCampusAPI } from "../../../apis/campus_api.ts";
 import { message } from "antd";
@@ -37,6 +37,7 @@ import { message } from "antd";
 export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
 
     const [data, setData] = useState<CampusDTO>({} as CampusDTO);
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `添加校区 | ${site.name ?? "Frontleaves Technology"}`;
@@ -49,7 +50,8 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
             const getResp = await AddCampusAPI(data);
             if (getResp?.output === "Success") {
                 message.success("添加校区成功");
-                resetForm();
+                navigate("/admin/campus");
+
             } else {
                 message.error(getResp?.error_message ?? "添加校区失败");
             }
@@ -85,7 +87,7 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 <div className="grid grid-cols-12 gap-x-6">
                     <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
                         <div className="card card-border bg-base-100 w-full shadow-md">
-                            <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><AddUser theme="outline" size="18"/>添加校区信息</h2>
+                            <h2 className="card-title bg-primary/10 rounded-t-lg p-3"><AddUser theme="outline" size="18"/>添加校区信息</h2>
                             <div className="card-body">
                                 <form id="campus_add" onSubmit={onSubmit}  className="flex flex-col flex-grow space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
@@ -180,7 +182,7 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                     </div>
                     <div className="lg:col-span-4 md:col-span-12 sm:col-span-12">
                         <div className="card card-border bg-base-100 w-full  shadow-md">
-                            <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                            <h2 className="card-title bg-secondary/10 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
                             <div className="card-body">
                                 <ul className="space-y-1 text-gray-700">
                                     <li className="flex items-start">
