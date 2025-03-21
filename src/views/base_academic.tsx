@@ -42,6 +42,8 @@ import {AcademicSchedule} from "./academic/academic_schedule.tsx";
 import {AcademicTeacher} from "./academic/academic_teacher.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
+import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
+import {academicRouteConfig} from "../models/config/academic_route_config";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -102,87 +104,6 @@ export function BaseAcademic(): JSX.Element {
         config: {tension: 150, friction: 26},
     });
 
-    // 自动生成面包屑
-    const generateBreadcrumbs = () => {
-        const pathSegments = location.pathname.split('/').filter(segment => segment);
-        const breadcrumbItems = [];
-
-        // 从路径中提取面包屑项
-        if (pathSegments.length > 1) {
-            // 第一级：主要管理页面（如"班级管理"、"课程管理"等）
-            const mainSection = pathSegments[1];
-            let mainTitle = '';
-
-            switch (mainSection) {
-                case 'dashboard':
-                    mainTitle = '看板';
-                    break;
-                case 'class':
-                    mainTitle = '班级管理';
-                    break;
-                case 'course':
-                    mainTitle = '课程管理';
-                    break;
-                case 'schedule':
-                    mainTitle = '排课管理';
-                    break;
-                case 'teacher':
-                    mainTitle = '教师管理';
-                    break;
-                case 'student':
-                    mainTitle = '学生管理';
-                    break;
-                case 'exam':
-                    mainTitle = '考试管理';
-                    break;
-                default:
-                    mainTitle = mainSection;
-            }
-
-            breadcrumbItems.push(
-                <li key={mainSection}>
-                    <Link to={`/academic/${mainSection}`}>{mainTitle}</Link>
-                </li>
-            );
-
-            // 第二级及更深层级：如果存在，添加到面包屑
-            if (pathSegments.length > 2) {
-                for (let i = 2; i < pathSegments.length; i++) {
-                    const subPath = pathSegments[i];
-                    let subTitle = '';
-
-                    // 尝试将路径转换为更友好的显示名称
-                    if (subPath.includes('add')) {
-                        subTitle = '添加';
-                    } else if (subPath.includes('edit')) {
-                        subTitle = '编辑';
-                    } else if (subPath.includes('view')) {
-                        subTitle = '查看';
-                    } else if (subPath.includes('delete')) {
-                        subTitle = '删除';
-                    } else if (subPath.includes('assign')) {
-                        subTitle = '分配';
-                    } else if (subPath.includes('grade')) {
-                        subTitle = '成绩';
-                    } else {
-                        // 将路径格式转为显示友好的格式
-                        subTitle = subPath.replace(/-/g, ' ');
-                    }
-
-                    breadcrumbItems.push(
-                        <li key={subPath}>
-                            <Link to={`/academic/${pathSegments.slice(1, i+1).join('/')}`}>
-                                {subTitle}
-                            </Link>
-                        </li>
-                    );
-                }
-            }
-        }
-
-        return breadcrumbItems;
-    };
-
     // 用户登出
     async function userLogout() {
         cookie.remove("token", { path: '/' });
@@ -200,23 +121,24 @@ export function BaseAcademic(): JSX.Element {
                 <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-md flex justify-between items-center z-10">
                     <div className="breadcrumbs text-sm">
                         <ul>
-                            {generateBreadcrumbs()}
+                            {useBreadcrumbs("/academic", academicRouteConfig)}
                         </ul>
                     </div>
                     <div className="flex items-center space-x-3">
                         <div className="dropdown dropdown-end">
-                            <div tabIndex={0} role="button" className="flex items-center cursor-pointer">
+                            <button type="button" className="flex items-center cursor-pointer">
                                 <div className="hidden md:flex flex-col items-end mr-3">
                                     <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
                                     <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
                                 </div>
-                                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white">
+                                <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
                                     <People theme="filled" size="20" fill="#FFFFFF" />
                                 </div>
-                            </div>
-                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2">
-                                <li><a>个人信息</a></li>
-                                <li><a>修改密码</a></li>
+                            </button>
+                            <ul className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
+                                <li>
+                                    <Link to={"/user/profile"}>个人信息</Link>
+                                </li>
                                 <li>
                                     <button onClick={userLogout} className="text-error">
                                         退出登录

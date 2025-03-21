@@ -47,7 +47,7 @@ export function CardComponent({col, howScreenFull, howScreenHide, children, padd
     col?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     howScreenHide?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
     howScreenFull?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl",
-    children: JSX.Element | JSX.Element[] | string | number,
+    children: any,
     padding?: number,
     size?: "sm" | "md" | "lg",
     className?: string,

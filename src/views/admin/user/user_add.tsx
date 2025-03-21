@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import React, {useEffect, useState} from 'react';
+import React, { JSX, useEffect, useState } from 'react';
 import {
     CheckOne,
     Envelope,
@@ -40,21 +40,22 @@ import {
     UserPositioning,
     AddUser, Refresh, Info
 } from "@icon-park/react";
-import {message, Transfer} from "antd";
-import {AddUserAPI} from "../../../apis/user_api.ts";
-import {UserAddDTO} from "../../../models/dto/user_add_dto.ts";
-import {RoleEntity} from "../../../models/entity/role_entity.ts";
-import {GetRoleListAPI} from "../../../apis/role_api.ts";
-import {GetPermissionListAPI} from "../../../apis/permission_api.ts";
-import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
-import {Link} from "react-router";
+import { message, Transfer } from "antd";
+import { AddUserAPI } from "../../../apis/user_api.ts";
+import { UserAddDTO } from "../../../models/dto/user_add_dto.ts";
+import { RoleEntity } from "../../../models/entity/role_entity.ts";
+import { GetRoleListAPI } from "../../../apis/role_api.ts";
+import { GetPermissionListAPI } from "../../../apis/permission_api.ts";
+import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
+import { Link } from "react-router";
+import { SiteInfoEntity } from '../../../models/entity/site_info_entity.ts';
 
 interface OptionType {
     title: string;
     description: string;
     [key: string]: unknown;
 }
-export function AdminUserAddPage(): React.JSX.Element {
+export function AdminUserAddPage({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const [data, setData] = useState<UserAddDTO>({
         permission: [] as string[],
     } as UserAddDTO);
@@ -66,6 +67,10 @@ export function AdminUserAddPage(): React.JSX.Element {
         size: 20,
         is_desc: true,
     } as PageSearchDTO);
+
+    useEffect(() => {
+        document.title = `添加用户 | ${site.name}`;
+    }, []);
 
     // 最近添加的用户列表状态 - 从localStorage获取或使用空数组作为默认值
     const [recentUsers, setRecentUsers] = useState(() => {
@@ -170,7 +175,7 @@ export function AdminUserAddPage(): React.JSX.Element {
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         // 根据角色判断是否需要保留 department、type
-        const payload = {...data, permission: targetKeys} as UserAddDTO;
+        const payload = { ...data, permission: targetKeys } as UserAddDTO;
         if (payload.role_uuid !== (teachingRole ? teachingRole.role_uuid : "")) {
             // 如果选中的角色不是教务角色，则移除部门和权限类型字段
             payload.department = undefined;
@@ -214,7 +219,7 @@ export function AdminUserAddPage(): React.JSX.Element {
         <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-2">
                 <Link to={"/admin/user"}>
-                    <Return theme="outline" size="24"/>
+                    <Return theme="outline" size="24" />
                 </Link>
                 <h2 className="text-2xl font-bold flex items-center space-x-2">
                     <span>添加新用户</span>
@@ -224,14 +229,14 @@ export function AdminUserAddPage(): React.JSX.Element {
                 <div className="grid grid-cols-12 gap-x-6">
                     <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
                         <div className="card card-border bg-base-100 w-full shadow-md">
-                            <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><AddUser theme="outline" size="18"/>添加用户信息</h2>
+                            <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><AddUser theme="outline" size="18" />添加用户信息</h2>
                             <div className="card-body">
                                 <form id="user_add" onSubmit={onSubmit} className=" flex flex-col flex-grow space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                                         {/* 用户名 */}
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <User theme="outline" size="14"/>
+                                                <User theme="outline" size="14" />
                                                 <span>用户名</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
@@ -246,7 +251,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                         {/* 角色选择 */}
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <UserPositioning theme="outline" size="14"/>
+                                                <UserPositioning theme="outline" size="14" />
                                                 <span className="label-text">角色</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
@@ -289,21 +294,21 @@ export function AdminUserAddPage(): React.JSX.Element {
                                         {/* 密码 */}
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Key theme="outline" size="14"/>
+                                                <Key theme="outline" size="14" />
                                                 <span className="label-text">密码</span>
                                             </legend>
                                             <input
                                                 type="password"
                                                 className="input input-sm w-full validator"
                                                 value={data.password || ""}
-                                                onChange={(e) => setData({...data, password: e.target.value})}
+                                                onChange={(e) => setData({ ...data, password: e.target.value })}
                                             />
                                         </fieldset>
 
                                         {/* 邮箱 */}
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Envelope theme="outline" size="14"/>
+                                                <Envelope theme="outline" size="14" />
                                                 <span className="label-text">邮箱</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
@@ -312,14 +317,14 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                 className="input input-sm w-full validator"
                                                 required
                                                 value={data.email || ""}
-                                                onChange={(e) => setData({...data, email: e.target.value})}
+                                                onChange={(e) => setData({ ...data, email: e.target.value })}
                                             />
                                         </fieldset>
 
                                         {/* 手机号 */}
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <PhoneTelephone theme="outline" size="14"/>
+                                                <PhoneTelephone theme="outline" size="14" />
                                                 <span className="label-text">手机号</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
@@ -328,7 +333,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                 className="input input-sm w-full validator"
                                                 required
                                                 value={data.phone || ""}
-                                                onChange={(e) => setData({...data, phone: e.target.value})}
+                                                onChange={(e) => setData({ ...data, phone: e.target.value })}
                                             />
                                         </fieldset>
 
@@ -338,7 +343,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                 {/* 部门 */}
                                                 <fieldset className="form-control">
                                                     <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                        <GreenHouse theme="outline" size="14"/>
+                                                        <GreenHouse theme="outline" size="14" />
                                                         <span className="label-text">部门</span>
                                                         <span className="text-red-500">*</span>
                                                     </legend>
@@ -348,7 +353,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                         required
                                                         value={data.department ?? ""}
                                                         onChange={(e) =>
-                                                            setData({...data, department: e.target.value})
+                                                            setData({ ...data, department: e.target.value })
                                                         }
                                                     />
                                                 </fieldset>
@@ -356,7 +361,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                 {/* 权限类型 */}
                                                 <fieldset className="form-control">
                                                     <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                        <HamburgerButton theme="outline" size="14"/>
+                                                        <HamburgerButton theme="outline" size="14" />
                                                         <span className="label-text">权限类型</span>
                                                         <span className="text-red-500">*</span>
                                                     </legend>
@@ -364,7 +369,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                         className="select select-sm w-full validator"
                                                         value={data.type ?? ""}
                                                         onChange={(e) =>
-                                                            setData({...data, type: Number(e.target.value)})
+                                                            setData({ ...data, type: Number(e.target.value) })
                                                         }
                                                         required
                                                     >
@@ -379,7 +384,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                         )}
                                         <fieldset className="flex flex-col md:col-span-2 flex-grow">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Permissions theme="outline" size="14"/>
+                                                <Permissions theme="outline" size="14" />
                                                 <span>权限</span>
                                             </legend>
                                             <div className="flex-grow">
@@ -387,7 +392,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                                                     dataSource={permissionList}
                                                     titles={['可选权限', '已选权限']}
                                                     targetKeys={targetKeys}
-                                                    onChange={data =>handleTransferChange(data as string[])}
+                                                    onChange={data => handleTransferChange(data as string[])}
                                                     filterOption={filterOption}
                                                     render={item => item.title}
                                                     showSearch
@@ -405,14 +410,14 @@ export function AdminUserAddPage(): React.JSX.Element {
                                             className="btn btn-sm btn-outline"
                                             onClick={resetForm}
                                         >
-                                            <Refresh theme="outline" size="14"/>
+                                            <Refresh theme="outline" size="14" />
                                             <span>重置</span>
                                         </button>
                                         <button
                                             type="submit"
                                             className="btn btn-sm btn-primary"
                                         >
-                                            <CheckOne theme="outline" size="14"/>
+                                            <CheckOne theme="outline" size="14" />
                                             <span>提交</span>
                                         </button>
                                     </div>
@@ -423,7 +428,7 @@ export function AdminUserAddPage(): React.JSX.Element {
                     {/* 右侧辅助卡片区域 */}
                     <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6" style={{ height: '100%' }}>
                         <div className="card card-border bg-base-100 w-full  shadow-md">
-                            <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                            <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18" />操作提示</h2>
                             <div className="card-body">
                                 <ul className="space-y-2 text-gray-700">
                                     <li className="flex items-start">
