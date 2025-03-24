@@ -58,8 +58,8 @@ const getThreadStateLabel = (state: string | undefined) => {
  */
 const getThreadTypeLabel = (isDaemon: boolean | undefined) => {
     if (isDaemon === undefined) return <LabelComponent style={"badge-outline"} type="secondary" text="未知" />;
-    return isDaemon ? 
-        <LabelComponent style={"badge-outline"} type="primary" text="守护线程" /> : 
+    return isDaemon ?
+        <LabelComponent style={"badge-outline"} type="primary" text="守护线程" /> :
         <LabelComponent style={"badge-outline"} type="success" text="用户线程" />;
 };
 
@@ -165,7 +165,7 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
         <div className="grid grid-cols-12 gap-4 p-6">
             <div className="col-span-12 flex justify-between items-center">
                 <h2 className="text-2xl font-bold">JVM 堆栈监控</h2>
-                <button 
+                <button
                     className="btn btn-circle btn-ghost"
                     onClick={() => setRefreshKey(prev => prev + 1)}
                 >
@@ -231,9 +231,9 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
             {/* 内存使用进度条 */}
             <CardComponent col={12} className="mb-4">
                 <h3 className="text-lg font-bold mb-4">内存使用情况</h3>
-                <progress 
+                <progress
                     className={`progress w-full ${calculateMemoryUsagePercentage() > 80 ? 'progress-error' : 'progress-success'}`}
-                    value={calculateMemoryUsagePercentage()} 
+                    value={calculateMemoryUsagePercentage()}
                     max="100"
                 />
                 <p className="text-right mt-2">{calculateMemoryUsagePercentage().toFixed(2)}%</p>
@@ -242,13 +242,13 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
             {/* 标签页 */}
             <div className="col-span-12">
                 <div className="tabs tabs-boxed mb-4">
-                    <a 
+                    <a
                         className={`tab ${activeTab === 'threads' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('threads')}
                     >
                         线程信息
                     </a>
-                    <a 
+                    <a
                         className={`tab ${activeTab === 'properties' ? 'tab-active' : ''}`}
                         onClick={() => setActiveTab('properties')}
                     >
@@ -319,7 +319,7 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
                                             <span className="loading loading-spinner loading-lg" />
                                         </td>
                                     </tr>
-                                ) : (    
+                                ) : (
                                     jvmInfo?.system_properties && Object.entries(jvmInfo.system_properties).map(([key, value]) => (
                                         <tr key={key}>
                                             <td className="font-mono">{key}</td>
@@ -327,9 +327,11 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
                                                 {key === 'java.class.path' ? (
                                                     <div className="max-h-40 overflow-auto">
                                                         <ul className="space-y-1">
-                                                            {String(value).split(':').map((path, index) => (
-                                                                <li key={index} className="break-all">{path}</li>
-                                                            ))}
+                                                            {
+                                                                String(value).split(':').map((path, index) => (
+                                                                    <li key={index} className="break-all">{path}</li>
+                                                                ))
+                                                            }
                                                         </ul>
                                                     </div>
                                                 ) : (

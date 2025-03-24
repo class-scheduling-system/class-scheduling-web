@@ -31,7 +31,6 @@ import {useEffect, useState} from "react";
 import {GetSystemInfoAPI} from "../../apis/public_api.ts";
 import {SystemInfoEntity} from "../../models/entity/system_info_entity.ts";
 import {message} from "antd";
-import {animated, useSpring} from "@react-spring/web";
 import {Cpu, Server, HardDisk, Memory} from "@icon-park/react";
 import {CardComponent} from "../../components/card_component.tsx";
 
@@ -62,12 +61,6 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
         const interval = setInterval(fetchSystemInfo, 30000);
         return () => clearInterval(interval);
     }, [site.name]);
-
-    const fadeIn = useSpring({
-        from: {opacity: 0, transform: "translateY(20px)"},
-        to: {opacity: 1, transform: "translateY(0)"},
-        config: {tension: 280, friction: 60},
-    });
 
     const formatBytes = (bytes: number): string => {
         if (bytes === 0) return "0 MB";
@@ -119,7 +112,7 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
     );
 
     return (
-        <animated.div style={fadeIn} className="w-full max-w-7xl mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4">
             {loading ? (
                 <div className="w-full flex justify-center items-center min-h-[400px]">
                     <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -205,6 +198,6 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
                     </CardComponent>
                 </div>
             )}
-        </animated.div>
+        </div>
     );
 }
