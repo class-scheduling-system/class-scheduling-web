@@ -29,6 +29,10 @@
 import {ListOfCampusEntity} from "../models/entity/list_of_campus_entity.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
+import {PageEntity} from "../models/entity/page_entity.ts";
+import {CampusEntity} from "../models/entity/campus_entity.ts";
+import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {CampusDTO} from "../models/dto/campus_dto.ts";
 
 /**
  * # GetCampusListAPI
@@ -48,6 +52,92 @@ const GetCampusListAPI = async (): Promise<BaseResponse<ListOfCampusEntity[]> | 
     );
 }
 
+
+/**
+ * # GetCampusPageListAPI
+ * > 该函数用于从服务器获取校园分页列表。通过发送一个GET请求到指定的API端点，返回校园列表数据。
+ *
+ * @returns Promise<BaseResponse<PageEntity<CampusEntity>> | undefined>  - 返回包含校园分页列表的BaseResponse对象或undefined。
+ * @throws {Error} - 如果请求过程中出现网络错误或者服务器响应异常时抛出。
+ */
+const GetCampusPageListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<CampusEntity>> | undefined> => {
+    return BaseApi<PageEntity<CampusEntity>>(
+        MethodType.GET,
+        "/api/v1/campus/page",
+        null,
+        data,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+
+/**
+ * # 增加校园
+ * > 该函数用于通过API请求添加校园。它利用了Bearer令牌认证方式来确保安全地访问校园数据。
+ *
+ * @returns {Promise<BaseResponse<CampusEntity> | undefined>} - 返回一个Promise，解析为包含校园信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const AddCampusAPI = async (data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
+    return BaseApi<CampusEntity>(
+        MethodType.POST,
+        "/api/v1/campus",
+        data,
+        null,
+        null,
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
+
+/**
+ * # 删除校园
+ * > 该函数用于通过API请求删除校园。它利用了Bearer令牌认证方式来确保安全地访问校园数据。
+ *
+ * @returns {Promise<BaseResponse<CampusEntity> | undefined>} - 返回一个Promise，解析为包含校园信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const DeleteCampusAPI = async (campus_uuid: string): Promise<BaseResponse<CampusEntity> | undefined> => {
+    return BaseApi<CampusEntity>(
+        MethodType.DELETE,
+        "/api/v1/campus",
+        null,
+        null,
+        campus_uuid,
+        { Authorization: `Bearer ${GetAuthorizationToken()}` }
+    );
+};
+
+
+/**
+ * # 编辑校园
+ * > 该函数用于通过API请求编辑校园。它利用了Bearer令牌认证方式来确保安全地访问校园数据。
+ *
+ * @returns {Promise<BaseResponse<CampusEntity> | undefined>} - 返回一个Promise，解析为包含校园信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const EditCampusAPI = async (campus_uuid: string, data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
+    return BaseApi<CampusEntity>(
+        MethodType.PUT,
+        `/api/v1/campus`,
+        data,
+        null,
+        campus_uuid,
+        {
+            Authorization: `Bearer ${GetAuthorizationToken()}`,
+            "Content-Type": "application/json"
+        }
+    );
+};
+
 export {
-    GetCampusListAPI
+    GetCampusListAPI,
+    GetCampusPageListAPI,
+    AddCampusAPI,
+    DeleteCampusAPI,
+    EditCampusAPI
 }

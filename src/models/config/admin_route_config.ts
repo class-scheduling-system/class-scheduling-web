@@ -12,5 +12,6 @@ export const adminRouteConfig: Record<string, string> = {
     'backup': '备份与恢复',
     'settings': '系统设置',
     'department': '部门管理',
-    'unit': '单位管理'
+    'unit': '单位管理',
+    'campus': '校区管理'
 };

@@ -43,7 +43,6 @@ import {AdminUserAddPage} from "./admin/user/user_add.tsx";
 import {AdminEditUserPage} from "./admin/user/user_edit.tsx";
 import {AdminDepartment} from "./admin/admin_department.tsx";
 import cookie from "react-cookies";
-import { message } from "antd";
 import { useBreadcrumbs } from "../hooks/use_breadcrumbs.tsx";
 import { adminRouteConfig } from "../models/config/admin_route_config.ts";
 import { DepartmentAdd } from "./admin/department/department_add.tsx";
@@ -53,6 +52,10 @@ import { AdminUnitCategoryAdd } from "./admin/unit/unit_category_add.tsx";
 import { AdminUnitCategoryEdit } from "./admin/unit/unit_category_edit.tsx";
 import { AdminUnitTypeAdd } from "./admin/unit/unit_type_add.tsx";
 import { AdminUnitTypeEdit } from "./admin/unit/unit_type_edit.tsx";
+import {message} from "antd";
+import {AdminCampus} from "./admin/campus/admin_campus.tsx";
+import { CampusAdd } from "./admin/campus/campus_add.tsx";
+import { CampusEdit } from "./admin/campus/campus_edit.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -176,6 +179,10 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/unit/type/add" element={<AdminUnitTypeAdd site={site} />} />
                                 <Route path="/unit/type/edit/:uuid" element={<AdminUnitTypeEdit site={site} />} />
                                 <Route path="/*" element={<AdminNotFound />} />
+                                <Route path="/campus" element={<AdminCampus site={site} />} />
+                                <Route path="/campus/add" element={<CampusAdd site={site} />} />
+                                <Route path="/campus/edit/:campusId" element={<CampusEdit site={site} />} />
+                                <Route path="/*" element={<AdminNotFound/>} />
                             </Routes>
                         </animated.div>
                     ))}
