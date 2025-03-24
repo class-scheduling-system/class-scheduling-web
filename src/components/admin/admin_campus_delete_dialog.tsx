@@ -28,7 +28,6 @@
 
 import {JSX, useEffect, useState} from "react";
 import {
-    AddUser,
     CheckOne,
     CloseOne, Delete,
 } from "@icon-park/react";
