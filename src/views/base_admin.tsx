@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -56,6 +56,7 @@ import {message} from "antd";
 import {AdminCampus} from "./admin/campus/admin_campus.tsx";
 import { CampusAdd } from "./admin/campus/campus_add.tsx";
 import { CampusEdit } from "./admin/campus/campus_edit.tsx";
+import { AdminSystemInfo } from "./admin/admin_system_info.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -178,11 +179,11 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/unit/category/edit/:uuid" element={<AdminUnitCategoryEdit site={site} />} />
                                 <Route path="/unit/type/add" element={<AdminUnitTypeAdd site={site} />} />
                                 <Route path="/unit/type/edit/:uuid" element={<AdminUnitTypeEdit site={site} />} />
-                                <Route path="/*" element={<AdminNotFound />} />
                                 <Route path="/campus" element={<AdminCampus site={site} />} />
                                 <Route path="/campus/add" element={<CampusAdd site={site} />} />
                                 <Route path="/campus/edit/:campusId" element={<CampusEdit site={site} />} />
-                                <Route path="/*" element={<AdminNotFound/>} />
+                                <Route path="/system-info" element={<AdminSystemInfo site={site} />} />
+                                <Route path="/*" element={<AdminNotFound />} />
                             </Routes>
                         </animated.div>
                     ))}

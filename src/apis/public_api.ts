@@ -26,13 +26,14 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseApi, MethodType} from "../assets/ts/base_api.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
 import {BaseResponse} from "../models/base_response.ts";
+import { SystemInfoEntity } from "../models/entity/system_info_entity.ts";
 
 /**
- * 获取站点信息的异步API调用。
- * 该函数通过发送GET请求到"/api/v1/web/info"来获取站点的相关信息。
+ * # 获取站点信息的异步API调用。
+ * > 该函数通过发送GET请求到"/api/v1/web/info"来获取站点的相关信息。
  *
  * @returns {Promise<BaseResponse<SiteInfoEntity> | undefined>} 返回一个Promise，解析为包含站点信息实体的BaseResponse对象，或在失败时返回undefined。
  */
@@ -47,6 +48,24 @@ const GetSiteInfoAPI = async (): Promise<BaseResponse<SiteInfoEntity> | undefine
     );
 }
 
+/**
+ * # 获取系统信息
+ * > 该函数通过发送GET请求到 "/api/v1/web/system" 来获取系统信息。
+ * 
+ * @returns {Promise<BaseResponse<SystemInfoEntity> | undefined>} 返回一个Promise，解析为包含系统信息实体的BaseResponse对象，或在失败时返回undefined。
+ */
+const GetSystemInfoAPI = async (): Promise<BaseResponse<SystemInfoEntity> | undefined> => {
+    return BaseApi<SystemInfoEntity>(
+        MethodType.GET,
+        "/api/v1/web/system",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
 export {
-    GetSiteInfoAPI
+    GetSiteInfoAPI,
+    GetSystemInfoAPI
 }
