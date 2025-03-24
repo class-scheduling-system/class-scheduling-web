@@ -32,7 +32,7 @@ import { JvmStackEntity, ThreadInfoEntity } from '../../models/entity/jvm_stack_
 import { CardComponent } from '../../components/card_component.tsx';
 import { LabelComponent } from '../../components/label_component.tsx';
 import { SiteInfoEntity } from '../../models/entity/site_info_entity.ts';
-import { Refresh } from '@icon-park/react';
+import { Refresh, Memory, TrendTwo, TrendingUp, Group } from '@icon-park/react';
 
 // 堆栈跟踪默认显示行数
 const DEFAULT_STACK_LINES = 3;
@@ -43,13 +43,13 @@ const DEFAULT_STACK_LINES = 3;
 const getThreadStateLabel = (state: string | undefined) => {
     switch (state) {
         case 'RUNNABLE':
-            return <LabelComponent style={"badge-outline"} type="success" text="运行中" />;
+            return <LabelComponent className="w-20" style={"badge-outline"} type="success" text="运行中" />;
         case 'WAITING':
-            return <LabelComponent style={"badge-outline"} type="warning" text="等待中" />;
+            return <LabelComponent className="w-20" style={"badge-outline"} type="warning" text="等待中" />;
         case 'TIMED_WAITING':
-            return <LabelComponent style={"badge-outline"} type="info" text="定时等待" />;
+            return <LabelComponent className="w-20" style={"badge-outline"} type="info" text="定时等待" />;
         default:
-            return <LabelComponent style={"badge-outline"} type="secondary" text={state || '未知'} />;
+            return <LabelComponent className="w-20" style={"badge-outline"} type="secondary" text={state || '未知'} />;
     }
 };
 
@@ -82,11 +82,11 @@ const StackTrace: React.FC<StackTraceProps> = ({ traces }) => {
 
     return (
         <div className="space-y-1">
-            {displayedTraces.map((trace: string, index: number) => (
+            {displayedTraces.length > 0 ? displayedTraces.map((trace: string, index: number) => (
                 <div key={index} className="font-mono text-xs whitespace-pre-wrap">
                     {trace}
                 </div>
-            ))}
+            )) : '无'}
             {hasMore && (
                 <button
                     className="btn btn-xs btn-ghost mt-1"
@@ -108,12 +108,35 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
     // 状态管理
     const [jvmInfo, setJvmInfo] = useState<JvmStackEntity>({} as JvmStackEntity);
     const [loading, setLoading] = useState<boolean>(true);
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [refreshKey, setRefreshKey] = useState<number>(0);
     const [activeTab, setActiveTab] = useState<'threads' | 'properties'>('threads');
+    const [countdown, setCountdown] = useState<number>(10);
 
     useEffect(() => {
         document.title = `JVM 堆栈监控 | ${site.name}`;
     }, [site]);
+
+    // 倒计时效果
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    return 10;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    // 手动刷新时重置倒计时
+    const handleRefresh = () => {
+        setRefreshKey(prev => prev + 1);
+        setCountdown(10);
+        setIsRefreshing(true);
+    };
 
     // 格式化内存大小
     const formatMemorySize = (bytes: number | undefined): string => {
@@ -135,13 +158,10 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
     // 获取 JVM 堆栈信息
     useEffect(() => {
         const fetchJvmInfo = async () => {
-            setLoading(true);
             try {
                 const response = await GetJvmStackInfoAPI();
-                console.log('JVM 信息响应:', response); // 添加日志
                 if (response?.code === 200 && response?.data) {
-                    console.log('JVM 数据:', response.data); // 添加日志
-                    setJvmInfo(response.data);
+                    setJvmInfo({ ...jvmInfo, ...response.data });
                 } else {
                     console.error('获取 JVM 信息失败:', response?.message || '未知错误');
                 }
@@ -149,14 +169,17 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
                 console.error('获取 JVM 信息出错:', error);
             } finally {
                 setLoading(false);
+                setIsRefreshing(false);
             }
         };
 
         fetchJvmInfo();
-        // 每 30 秒自动刷新一次
+        // 每 10 秒自动刷新一次
         const interval = setInterval(() => {
             setRefreshKey(prev => prev + 1);
-        }, 30000);
+            setCountdown(10);
+            setIsRefreshing(true);
+        }, 10000);
 
         return () => clearInterval(interval);
     }, [refreshKey]);
@@ -165,95 +188,133 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
         <div className="grid grid-cols-12 gap-4 p-6">
             <div className="col-span-12 flex justify-between items-center">
                 <h2 className="text-2xl font-bold">JVM 堆栈监控</h2>
-                <button
-                    className="btn btn-circle btn-ghost"
-                    onClick={() => setRefreshKey(prev => prev + 1)}
-                >
-                    <Refresh theme="outline" size="24" />
-                </button>
+                <div className="flex items-center gap-4">
+                    <div className="text-sm text-base-content/60">
+                        {countdown}秒后刷新
+                    </div>
+                    <button
+                        className="btn btn-circle btn-ghost relative group"
+                        onClick={handleRefresh}
+                    >
+                        <Refresh
+                            theme="outline"
+                            size="24"
+                            className={`transition-transform duration-500 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180'}`}
+                        />
+                    </button>
+                </div>
             </div>
 
             {/* 内存统计卡片 */}
             <div className="col-span-12 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">总内存</div>
-                        <div className="stat-value text-primary">
+                <CardComponent>
+                    <div className="flex flex-col gap-2">
+                        <div className="text-lg font-medium flex items-center gap-2">
+                            <Memory theme="outline" size="20" className="text-primary" />
+                            总内存
+                        </div>
+                        <div className="text-primary text-4xl font-bold">
                             {loading ? (
                                 <span className="loading loading-spinner loading-sm" />
                             ) : (
-                                formatMemorySize(jvmInfo?.total_memory)
+                                <span key={jvmInfo?.total_memory} className="inline-block animate-fade-in-down">
+                                    {formatMemorySize(jvmInfo?.total_memory)}
+                                </span>
                             )}
                         </div>
                     </div>
-                </div>
+                </CardComponent>
 
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">已用内存</div>
-                        <div className="stat-value text-secondary">
+                <CardComponent>
+                    <div className="flex flex-col gap-2">
+                        <div className="text-lg font-medium flex items-center gap-2">
+                            <TrendTwo theme="outline" size="20" className="text-secondary" />
+                            已用内存
+                        </div>
+                        <div className="text-secondary text-4xl font-bold">
                             {loading ? (
                                 <span className="loading loading-spinner loading-sm" />
                             ) : (
-                                formatMemorySize(jvmInfo?.used_memory)
+                                <span key={jvmInfo?.used_memory} className="inline-block animate-fade-in-down">
+                                    {formatMemorySize(jvmInfo?.used_memory)}
+                                </span>
                             )}
                         </div>
                     </div>
-                </div>
+                </CardComponent>
 
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">最大内存</div>
-                        <div className="stat-value text-accent">
+                <CardComponent>
+                    <div className="flex flex-col gap-2">
+                        <div className="text-lg font-medium flex items-center gap-2">
+                            <TrendingUp theme="outline" size="20" className="text-accent" />
+                            最大内存
+                        </div>
+                        <div className="text-accent text-4xl font-bold">
                             {loading ? (
                                 <span className="loading loading-spinner loading-sm" />
                             ) : (
-                                formatMemorySize(jvmInfo?.max_memory)
+                                <span key={jvmInfo?.max_memory} className="inline-block animate-fade-in-down">
+                                    {formatMemorySize(jvmInfo?.max_memory)}
+                                </span>
                             )}
                         </div>
                     </div>
-                </div>
+                </CardComponent>
 
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">活动线程数</div>
-                        <div className="stat-value">
+                <CardComponent>
+                    <div className="flex flex-col gap-2">
+                        <div className="text-lg font-medium flex items-center gap-2">
+                            <Group theme="outline" size="20" className="text-info" />
+                            活动线程数
+                        </div>
+                        <div className="text-info text-4xl font-bold">
                             {loading ? (
                                 <span className="loading loading-spinner loading-sm" />
                             ) : (
-                                jvmInfo?.active_thread_count || '-'
+                                <span key={jvmInfo?.active_thread_count} className="inline-block animate-fade-in-down">
+                                    {jvmInfo?.active_thread_count || '-'}
+                                </span>
                             )}
                         </div>
                     </div>
-                </div>
+                </CardComponent>
             </div>
 
             {/* 内存使用进度条 */}
             <CardComponent col={12} className="mb-4">
                 <h3 className="text-lg font-bold mb-4">内存使用情况</h3>
-                <progress
-                    className={`progress w-full ${calculateMemoryUsagePercentage() > 80 ? 'progress-error' : 'progress-success'}`}
-                    value={calculateMemoryUsagePercentage()}
-                    max="100"
-                />
-                <p className="text-right mt-2">{calculateMemoryUsagePercentage().toFixed(2)}%</p>
+                <div className="relative w-full h-4 bg-base-200 rounded-full overflow-hidden">
+                    <div
+                        className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-in-out ${
+                            calculateMemoryUsagePercentage() > 80 ? 'bg-error' : 
+                            calculateMemoryUsagePercentage() > 70 ? 'bg-warning' : 
+                            calculateMemoryUsagePercentage() > 50 ? 'bg-info' : 'bg-primary'
+                        }`}
+                        style={{ width: `${calculateMemoryUsagePercentage()}%` }}
+                    />
+                </div>
+                <p className="text-right mt-2 transition-all duration-500 ease-in-out">
+                    {calculateMemoryUsagePercentage().toFixed(2)}%
+                </p>
             </CardComponent>
 
             {/* 标签页 */}
             <div className="col-span-12">
-                <div className="tabs tabs-boxed mb-4">
-                    <a
-                        className={`tab ${activeTab === 'threads' ? 'tab-active' : ''}`}
+                <div className="tabs tabs-boxed bg-base-200/50 backdrop-blur-sm p-4 rounded-2xl shadow-sm space-x-2">
+                    <button
+                        className={`tab tab-lg gap-2 transition-all duration-200 rounded-lg ${activeTab === 'threads' ? 'tab-active bg-primary text-primary-content shadow-sm scale-105' : 'hover:bg-base-300'}`}
                         onClick={() => setActiveTab('threads')}
                     >
+                        <Group theme="outline" size="20" />
                         线程信息
-                    </a>
-                    <a
-                        className={`tab ${activeTab === 'properties' ? 'tab-active' : ''}`}
+                    </button>
+                    <button
+                        className={`tab tab-lg gap-2 transition-all duration-200 rounded-lg ${activeTab === 'properties' ? 'tab-active bg-primary text-primary-content shadow-sm scale-105' : 'hover:bg-base-300'}`}
                         onClick={() => setActiveTab('properties')}
                     >
+                        <TrendTwo theme="outline" size="20" />
                         系统属性
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -261,32 +322,37 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
             {activeTab === 'threads' && (
                 <CardComponent col={12}>
                     <div className="overflow-x-auto">
-                        <table className="table table-zebra w-full">
+                        <table className="table w-full">
                             <thead>
-                                <tr>
-                                    <th>线程名称</th>
-                                    <th>状态</th>
-                                    <th>优先级</th>
-                                    <th>类型</th>
-                                    <th>堆栈跟踪</th>
+                                <tr className="bg-base-200/50 backdrop-blur-sm">
+                                    <th className="font-bold text-base">线程名称</th>
+                                    <th className="font-bold text-base">状态</th>
+                                    <th className="font-bold text-base">优先级</th>
+                                    <th className="font-bold text-base">类型</th>
+                                    <th className="font-bold text-base">堆栈跟踪</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={5} className="text-center">
-                                            <span className="loading loading-spinner loading-lg" />
+                                        <td colSpan={5} className="text-center py-12">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <span className="loading loading-spinner loading-lg text-primary" />
+                                                <span className="text-base-content/60">加载中...</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     jvmInfo?.thread_infos?.map((thread: ThreadInfoEntity) => (
-                                        <tr key={thread.thread_name}>
-                                            <td>{thread.thread_name || '-'}</td>
+                                        <tr key={thread.thread_name} className="hover:bg-base-200/50 transition-colors duration-200">
+                                            <td className="font-medium text-secondary">{thread.thread_name || '-'}</td>
                                             <td>{getThreadStateLabel(thread.thread_state)}</td>
-                                            <td>{thread.priority || '-'}</td>
+                                            <td>
+                                                <LabelComponent style={"badge-soft"} type="secondary" text={String(thread.priority) || '-'} />
+                                            </td>
                                             <td>{getThreadTypeLabel(thread.is_daemon)}</td>
                                             <td>
-                                                <div className="max-h-40 overflow-auto">
+                                                <div className="max-h-40 overflow-auto bg-base-200/50 backdrop-blur-sm rounded-xl p-2">
                                                     {thread.stack_trace ? (
                                                         <StackTrace traces={thread.stack_trace} />
                                                     ) : '-'}
@@ -305,37 +371,44 @@ export const AdminJvmMonitor = ({ site }: Readonly<AdminJvmMonitorProps>): JSX.E
             {activeTab === 'properties' && (
                 <CardComponent col={12}>
                     <div className="overflow-x-auto">
-                        <table className="table table-zebra w-full">
+                        <table className="table w-full">
                             <thead>
-                                <tr>
-                                    <th>属性名</th>
-                                    <th>属性值</th>
+                                <tr className="bg-base-200/50 backdrop-blur-sm">
+                                    <th className="font-bold text-base w-1/3">属性名</th>
+                                    <th className="font-bold text-base">属性值</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={2} className="text-center">
-                                            <span className="loading loading-spinner loading-lg" />
+                                        <td colSpan={2} className="text-center py-12">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <span className="loading loading-spinner loading-lg text-primary" />
+                                                <span className="text-base-content/60">加载中...</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     jvmInfo?.system_properties && Object.entries(jvmInfo.system_properties).map(([key, value]) => (
-                                        <tr key={key}>
-                                            <td className="font-mono">{key}</td>
-                                            <td className="font-mono">
+                                        <tr key={key} className="hover:bg-base-200/50 transition-colors duration-200">
+                                            <td className="font-mono text-sm text-secondary font-medium">{key}</td>
+                                            <td className="font-mono text-sm">
                                                 {key === 'java.class.path' ? (
                                                     <div className="max-h-40 overflow-auto">
-                                                        <ul className="space-y-1">
+                                                        <ul className="space-y-2 bg-base-200/50 backdrop-blur-sm p-3 rounded-xl">
                                                             {
                                                                 String(value).split(':').map((path, index) => (
-                                                                    <li key={index} className="break-all">{path}</li>
+                                                                    <li key={index} className="break-all hover:bg-base-300/50 p-0.5 rounded-lg transition-colors duration-200">
+                                                                        {path}
+                                                                    </li>
                                                                 ))
                                                             }
                                                         </ul>
                                                     </div>
                                                 ) : (
-                                                    <div className="max-h-40 overflow-auto">{String(value)}</div>
+                                                    <div className="max-h-40 overflow-auto break-all bg-base-200/50 backdrop-blur-sm p-3 rounded-xl hover:bg-base-300/50 transition-colors duration-200">
+                                                        {String(value).trim() === '' ? '-' : String(value)}
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>

@@ -31,7 +31,7 @@ import {useEffect, useState} from "react";
 import {GetSystemInfoAPI} from "../../apis/public_api.ts";
 import {SystemInfoEntity} from "../../models/entity/system_info_entity.ts";
 import {message} from "antd";
-import {Cpu, Server, HardDisk, Memory} from "@icon-park/react";
+import {Cpu, Server, HardDisk, Memory, Refresh} from "@icon-park/react";
 import {CardComponent} from "../../components/card_component.tsx";
 
 interface RadialProgressStyle extends React.CSSProperties {
@@ -43,24 +43,64 @@ interface RadialProgressStyle extends React.CSSProperties {
 export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
     const [systemInfo, setSystemInfo] = useState<SystemInfoEntity | undefined>();
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [countdown, setCountdown] = useState(10);
 
     useEffect(() => {
         document.title = `系统信息 | ${site.name ?? "Frontleaves Technology"}`;
         
         const fetchSystemInfo = async () => {
+            try {
+                const response = await GetSystemInfoAPI();
+                if (response?.output === "Success" && response.data) {
+                    setSystemInfo(response.data);
+                } else {
+                    message.error("获取系统信息失败");
+                }
+            } catch (error) {
+                console.error('获取系统信息失败:', error);
+            } finally {
+                setLoading(false);
+                setIsRefreshing(false);
+            }
+        };
+        
+        fetchSystemInfo();
+        const interval = setInterval(fetchSystemInfo, 10000);
+        return () => clearInterval(interval);
+    }, [site.name]);
+
+    // 倒计时效果
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    return 10;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    // 手动刷新
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        setCountdown(10);
+        try {
             const response = await GetSystemInfoAPI();
             if (response?.output === "Success" && response.data) {
                 setSystemInfo(response.data);
             } else {
                 message.error("获取系统信息失败");
             }
-            setLoading(false);
-        };
-        
-        fetchSystemInfo();
-        const interval = setInterval(fetchSystemInfo, 30000);
-        return () => clearInterval(interval);
-    }, [site.name]);
+        } catch (error) {
+            console.error('获取系统信息失败:', error);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
 
     const formatBytes = (bytes: number): string => {
         if (bytes === 0) return "0 MB";
@@ -90,38 +130,62 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
         usage: number,
         colSpan?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
     }) => (
-        <CardComponent col={colSpan} howScreenFull="lg" padding={16}>
-            <div className="flex items-center gap-2 mb-4">
-                {icon}
-                <h3 className="card-title text-base m-0">{title}</h3>
-            </div>
-            <div className="flex items-center justify-between">
-                {data}
-                <div className={`radial-progress ${getProgressColor(usage)}`}
-                    style={{
-                        '--value': usage,
-                        '--size': '4.5rem',
-                        '--thickness': '0.4rem'
-                    } as RadialProgressStyle}>
-                    <span className="text-sm font-bold">
-                        {usage.toFixed(1)}%
-                    </span>
+        <CardComponent col={colSpan}>
+            <div className="flex flex-col gap-2">
+                <div className="text-lg font-medium flex items-center gap-2">
+                    {icon}
+                    {title}
+                </div>
+                <div className="flex items-center justify-between">
+                    {data}
+                    <div className={`radial-progress ${getProgressColor(usage)}`}
+                        style={{
+                            '--value': usage,
+                            '--size': '4.5rem',
+                            '--thickness': '0.4rem'
+                        } as RadialProgressStyle}>
+                        <span className="text-sm font-bold">
+                            {usage.toFixed(1)}%
+                        </span>
+                    </div>
                 </div>
             </div>
         </CardComponent>
     );
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-12 gap-4 p-6">
+            <div className="col-span-12 flex justify-between items-center">
+                <h2 className="text-2xl font-bold">系统信息</h2>
+                <div className="flex items-center gap-4">
+                    <div className="text-sm text-base-content/60">
+                        {countdown}秒后刷新
+                    </div>
+                    <button
+                        className="btn btn-circle btn-ghost relative group"
+                        onClick={handleRefresh}
+                    >
+                        <Refresh
+                            theme="outline"
+                            size="24"
+                            className={`transition-transform duration-500 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180'}`}
+                        />
+                    </button>
+                </div>
+            </div>
+
             {loading ? (
-                <div className="w-full flex justify-center items-center min-h-[400px]">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                <div className="col-span-12 flex justify-center items-center min-h-[400px]">
+                    <div className="flex flex-col items-center gap-4">
+                        <span className="loading loading-spinner loading-lg text-primary" />
+                        <span className="text-base-content/60">加载中...</span>
+                    </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-12 gap-4">
+                <>
                     <InfoCard
                         title="CPU"
-                        icon={<Cpu theme="filled" size="20" fill="#570DF8"/>}
+                        icon={<Cpu theme="outline" size="20" className="text-primary" />}
                         data={
                             <div className="space-y-1">
                                 <p className="text-sm text-base-content/70">处理器</p>
@@ -136,7 +200,7 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
 
                     <InfoCard
                         title="内存"
-                        icon={<Memory theme="filled" size="20" fill="#570DF8"/>}
+                        icon={<Memory theme="outline" size="20" className="text-secondary" />}
                         data={
                             <div className="space-y-1">
                                 <p className="text-sm text-base-content/70">总内存</p>
@@ -151,7 +215,7 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
 
                     <InfoCard
                         title="堆内存"
-                        icon={<Server theme="filled" size="20" fill="#570DF8"/>}
+                        icon={<Server theme="outline" size="20" className="text-accent" />}
                         data={
                             <div className="space-y-1">
                                 <p className="text-sm text-base-content/70">已分配</p>
@@ -166,7 +230,7 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
 
                     <InfoCard
                         title="磁盘"
-                        icon={<HardDisk theme="filled" size="20" fill="#570DF8"/>}
+                        icon={<HardDisk theme="outline" size="20" className="text-info" />}
                         data={
                             <div className="space-y-1">
                                 <p className="text-sm text-base-content/70">总空间</p>
@@ -176,27 +240,32 @@ export function AdminSystemInfo({site}: Readonly<{ site: SiteInfoEntity }>) {
                             </div>
                         }
                         usage={((systemInfo?.total_disk_space ?? 0) - (systemInfo?.free_disk_space ?? 0)) / (systemInfo?.total_disk_space ?? 1) * 100}
-                        colSpan={6}
+                        colSpan={12}
                     />
 
-                    <CardComponent col={6} howScreenFull="lg" padding={16}>
-                        <h3 className="card-title text-base mb-4">操作系统信息</h3>
-                        <div className="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <p className="text-sm text-base-content/70">系统名称</p>
-                                <p className="font-medium">{systemInfo?.os_name}</p>
+                    <CardComponent col={12}>
+                        <div className="flex flex-col gap-2">
+                            <div className="text-lg font-medium flex items-center gap-2">
+                                <Server theme="outline" size="20" className="text-primary" />
+                                操作系统信息
                             </div>
-                            <div>
-                                <p className="text-sm text-base-content/70">系统版本</p>
-                                <p className="font-medium">{systemInfo?.os_version}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-base-content/70">系统架构</p>
-                                <p className="font-medium">{systemInfo?.os_architecture}</p>
+                            <div className="grid md:grid-cols-3 gap-4 mt-2">
+                                <div>
+                                    <p className="text-sm text-base-content/70">系统名称</p>
+                                    <p className="font-medium">{systemInfo?.os_name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-base-content/70">系统版本</p>
+                                    <p className="font-medium">{systemInfo?.os_version}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-base-content/70">系统架构</p>
+                                    <p className="font-medium">{systemInfo?.os_architecture}</p>
+                                </div>
                             </div>
                         </div>
                     </CardComponent>
-                </div>
+                </>
             )}
         </div>
     );

@@ -41,12 +41,13 @@ import {JSX, useEffect, useState} from "react";
  *
  * @returns {JSX.Element} - 返回一个标签组件
  */
-export function LabelComponent({type, icon, text, style, size}: Readonly<{
+export function LabelComponent({type, icon, text, style, size, className}: Readonly<{
     type: "success" | "info" | "warning" | "error" | "primary" | "secondary" | "base";
     text?: string;
     icon?: JSX.Element;
     style?: "badge-soft" | "badge-dash" | "badge-outline";
     size?: "badge-xs" | "badge-sm" | "badge-lg" | "badge-xl";
+    className?: string;
 }>): JSX.Element {
     const [selectedStyle, setSelectedStyle] = useState<string>("");
 
@@ -77,7 +78,7 @@ export function LabelComponent({type, icon, text, style, size}: Readonly<{
     }, [type]);
 
     return (
-        <span className={`inline-flex items-center whitespace-nowrap rounded-full select-none ${size} ${style} ${selectedStyle}`}>
+        <span className={`inline-flex items-center whitespace-nowrap rounded-full select-none ${size} ${style} ${selectedStyle} ${className}`}>
             {icon}
             {text}
         </span>
