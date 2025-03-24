@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -43,6 +43,10 @@ import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {GetDepartmentPageAPI} from "../../apis/department_api.ts";
 import {DepartmentEntity} from "../../models/entity/department_entity.ts";
 import {AdminDepartmentDeleteDialog} from "../../components/admin/department/dialog/admin_department_delete_dialog.tsx";
+import {GetUnitCategoryListAPI} from "../../apis/unit_category_api.ts";
+import {GetUnitTypeListAPI} from "../../apis/unit_type_api.ts";
+import {UnitCategoryLiteEntity} from "../../models/entity/unit_category_lite_entity.ts";
+import {UnitTypeLiteEntity} from "../../models/entity/unit_type_lite_entity.ts";
 
 
 /**
@@ -76,6 +80,10 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
 
 
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
+
+    // 添加单位类别和单位办别的状态
+    const [unitCategories, setUnitCategories] = useState<UnitCategoryLiteEntity[]>([]);
+    const [unitTypes, setUnitTypes] = useState<UnitTypeLiteEntity[]>([]);
 
     useEffect(() => {
         document.title = `教学楼管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -135,6 +143,31 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
             return () => clearTimeout(timer);
         }
     }, [search]);
+
+    // 获取单位类别和单位办别列表
+    useEffect(() => {
+        const fetchUnitData = async () => {
+            try {
+                const [categoryResp, typeResp] = await Promise.all([
+                    GetUnitCategoryListAPI(),
+                    GetUnitTypeListAPI()
+                ]);
+
+                if (categoryResp?.output === "Success") {
+                    setUnitCategories(categoryResp.data!);
+                }
+
+                if (typeResp?.output === "Success") {
+                    setUnitTypes(typeResp.data!);
+                }
+            } catch (error) {
+                console.error("获取单位数据失败:", error);
+                message.error("获取单位数据失败");
+            }
+        };
+
+        fetchUnitData();
+    }, []);
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
@@ -236,7 +269,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                                         icon={<CloseOne theme="outline" size="12"/>}/>
                                                     )}
                                                 </td>
-                                                <td className={"hidden xl:block"}>
+                                                <td>
                                                     {department.is_entity ? (
                                                         <LabelComponent size={"badge-sm"} style={"badge-outline"}
                                                                         type={"success"} text={"是"}
@@ -258,8 +291,12 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                                         icon={<CloseOne theme="outline" size="12"/>}/>
                                                     )}
                                                 </td>
-                                                <td>{department.unit_category}</td>
-                                                <td>{department.unit_type}</td>
+                                                <td className="text-nowrap">
+                                                    {unitCategories.find(c => c.unit_category_uuid === department.unit_category)?.name ?? '-'}
+                                                </td>
+                                                <td className="text-nowrap">
+                                                    {unitTypes.find(t => t.unit_type_uuid === department.unit_type)?.name ?? '-'}
+                                                </td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
                                                         <button
@@ -268,7 +305,7 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                             <Eyes theme="outline" size="14"/>
                                                         </button>
                                                         <Link to={"/admin/department/edit/" + department.department_uuid}
-                                                            className="join-item btn btn-sm btn-soft btn-info inline-flex">
+                                                              className="join-item btn btn-sm btn-soft btn-info inline-flex">
                                                             <Editor theme="outline" size="14"/>
                                                         </Link>
                                                         <button
