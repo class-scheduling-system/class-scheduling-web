@@ -57,6 +57,8 @@ import {AdminCampus} from "./admin/campus/admin_campus.tsx";
 import { CampusAdd } from "./admin/campus/campus_add.tsx";
 import { CampusEdit } from "./admin/campus/campus_edit.tsx";
 import { AdminSystemInfo } from "./admin/admin_system_info.tsx";
+import { AdminSetting } from "./admin/admin_setting";
+import { AdminJvmMonitor } from "./admin/admin_jvm_monitor";
 
 /**
  * 生成一个管理员控制台组件。
@@ -183,6 +185,8 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/campus/add" element={<CampusAdd site={site} />} />
                                 <Route path="/campus/edit/:campusId" element={<CampusEdit site={site} />} />
                                 <Route path="/system-info" element={<AdminSystemInfo site={site} />} />
+                                <Route path="/jvm-monitor" element={<AdminJvmMonitor site={site} />} />
+                                <Route path="/setting" element={<AdminSetting site={site} />} />
                                 <Route path="/*" element={<AdminNotFound />} />
                             </Routes>
                         </animated.div>

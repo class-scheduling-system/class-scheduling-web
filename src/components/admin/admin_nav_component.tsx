@@ -30,7 +30,6 @@ import {
     BranchOne,
     BuildingTwo,
     Dashboard,
-    DatabaseAlert,
     People,
     Log, 
     School,
@@ -84,19 +83,16 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"系统信息"} icon={<System theme="outline" size="18" />}
                                        match={"system-info"}
                                        path={"/admin/system-info"}/>
-                <AdminNavLinkComponent title={"系统日志"} icon={<Log theme="outline" size="18" />}
-                                       match={"log"}
-                                       path={"/admin/log"}/>
-                <AdminNavLinkComponent title={"备份与恢复"} icon={<DatabaseAlert theme="outline" size="18" />}
-                                       match={"backup"}
-                                       path={"/admin/backup"}/>
+                <AdminNavLinkComponent title={"JVM 监控"} icon={<Log theme="outline" size="18" />}
+                                       match={"jvm-monitor"}
+                                       path={"/admin/jvm-monitor"}/>
                 <AdminNavLinkComponent title={"系统设置"} icon={<WatchOne theme="outline" size="18" />}
                                        match={"setting"}
                                        path={"/admin/setting"}/>
             </div>
             <div className="px-4 py-4 mt-auto bg-base-200 border-t border-gray-200 text-center text-xs text-gray-500">
                 <p>版本: v1.0.0</p>
-                <p>© 2025 锋楪技术团队</p>
+                <p>&copy; 2025 锋楪技术团队</p>
             </div>
         </div>
     );
