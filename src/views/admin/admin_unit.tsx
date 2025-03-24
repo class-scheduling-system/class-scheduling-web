@@ -409,8 +409,10 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             </div>
 
             {/* 删除对话框 */}
-            <AdminUnitDeleteDialog show={dialogDelete} emit={setDialogDelete} uuid={deleteUuid}
-                name={deleteName} type={activeTab} onDeletedSuccess={() => setRefreshOperate(true)} />
+            <AdminUnitDeleteDialog
+                show={dialogDelete} emit={setDialogDelete} uuid={deleteUuid}
+                name={deleteName} type={activeTab} onDeletedSuccess={() => setRefreshOperate(true)}
+            />
         </>
     );
 }
