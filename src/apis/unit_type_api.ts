@@ -63,8 +63,8 @@ const GetUnitTypePageAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
     return BaseApi<PageEntity<UnitTypeEntity>>(
         MethodType.GET,
         "/api/v1/unit/type/page",
-        data,
         null,
+        data,
         null,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -98,8 +98,8 @@ const AddUnitTypeAPI = async (data: UnitTypeDTO): Promise<BaseResponse<UnitTypeE
     return BaseApi<UnitTypeEntity>(
         MethodType.POST,
         "/api/v1/unit/type",
-        null,
         data,
+        null,
         null,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -113,12 +113,12 @@ const AddUnitTypeAPI = async (data: UnitTypeDTO): Promise<BaseResponse<UnitTypeE
  * @param data 单位办别信息
  * @returns 单位办别信息
  */
-const UpdateUnitTypeAPI = async (typeUuid: string, data: UnitTypeDTO): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
+const EditUnitTypeAPI = async (typeUuid: string, data: UnitTypeDTO): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
     return BaseApi<UnitTypeEntity>(
         MethodType.PUT,
         "/api/v1/unit/type/",
-        null,
         data,
+        null,
         typeUuid,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -147,6 +147,6 @@ export {
     GetUnitTypePageAPI,
     GetUnitTypeListAPI,
     AddUnitTypeAPI,
-    UpdateUnitTypeAPI,
+    EditUnitTypeAPI,
     DeleteUnitTypeAPI,
 }

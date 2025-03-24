@@ -32,6 +32,7 @@ import {
     Dashboard,
     DatabaseAlert,
     Log,
+    People,
     System,
     User,
     UserPositioning,
@@ -69,6 +70,9 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
                                        match={"department"}
                                        path={"/admin/department"}/>
+                <AdminNavLinkComponent title={"单位管理"} icon={<People theme="outline" size="18"/>}
+                                       match={"unit"}
+                                       path={"/admin/unit"}/>
 
                 <div className="divider my-2"></div>
 

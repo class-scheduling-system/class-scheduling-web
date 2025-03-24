@@ -63,8 +63,8 @@ const GetUnitCategoryPageAPI = async (data: PageSearchDTO): Promise<BaseResponse
     return BaseApi<PageEntity<UnitCategoryEntity>>(
         MethodType.GET,
         "/api/v1/unit/category/page",
-        data,
         null,
+        data,
         null,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -98,8 +98,8 @@ const AddUnitCategoryAPI = async (data: UnitCategoryDTO): Promise<BaseResponse<U
     return BaseApi<UnitCategoryEntity>(
         MethodType.POST,
         "/api/v1/unit/category",
-        null,
         data,
+        null,
         null,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -113,12 +113,12 @@ const AddUnitCategoryAPI = async (data: UnitCategoryDTO): Promise<BaseResponse<U
  * @param data 单位类别信息
  * @returns 单位类别信息
  */
-const UpdateUnitCategoryAPI = async (categoryUuid: string, data: UnitCategoryDTO): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
+const EditUnitCategoryAPI = async (categoryUuid: string, data: UnitCategoryDTO): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
     return BaseApi<UnitCategoryEntity>(
         MethodType.PUT,
         "/api/v1/unit/category/",
-        null,
         data,
+        null,
         categoryUuid,
         {"Authorization": GetAuthorizationToken()},
     );
@@ -147,6 +147,6 @@ export {
     GetUnitCategoryPageAPI,
     GetUnitCategoryListAPI,
     AddUnitCategoryAPI,
-    UpdateUnitCategoryAPI,
+    EditUnitCategoryAPI,
     DeleteUnitCategoryAPI,
 }

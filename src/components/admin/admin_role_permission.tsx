@@ -1,12 +1,10 @@
 import {JSX, useEffect, useState} from "react";
 import {
-    CloseOne, Correct, Error, MoreApp,
+    CloseOne, MoreApp,
 } from "@icon-park/react";
 import {message, Modal} from "antd";
 import {GetRoleListAPI} from "../../apis/role_api.ts";
 import {RoleEntity} from "../../models/entity/role_entity.ts";
-import {useDispatch} from "react-redux";
-import {LabelComponent} from "../label_component.tsx";
 
 
 export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
@@ -14,7 +12,6 @@ export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
     emit: (data: boolean) => void;
     roleUuid: string;
 }>): JSX.Element {
-    const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 当前选中的角色
@@ -51,7 +48,7 @@ export function AdminRolePermissionDialog({ show, emit, roleUuid }: Readonly<{
 
                     if (response?.output === "Success") {
                         // 从返回的角色列表中找到匹配roleUuid的角色
-                        const targetRole = response.data.records.find(
+                        const targetRole = response.data!.records.find(
                             (role: RoleEntity) => role.role_uuid === roleUuid
                         );
 
