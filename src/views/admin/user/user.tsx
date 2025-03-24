@@ -108,7 +108,6 @@ export function AdminUser({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
     // 修改这个useEffect，添加refreshTrigger作为依赖，实现自动刷新
     useEffect(() => {
         const func = async () => {
-            setLoading(true);
             const getResp = await GetUserListAPI(searchRequest);
             if (getResp?.output === "Success") {
                 setUserList(getResp.data!);

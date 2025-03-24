@@ -47,6 +47,11 @@ import { useBreadcrumbs } from "../hooks/use_breadcrumbs.tsx";
 import { adminRouteConfig } from "../models/config/admin_route_config.ts";
 import { DepartmentAdd } from "./admin/department/department_add.tsx";
 import { DepartmentEdit } from "./admin/department/department_edit.tsx";
+import { AdminUnit } from "./admin/admin_unit.tsx";
+import { AdminUnitCategoryAdd } from "./admin/unit/unit_category_add.tsx";
+import { AdminUnitCategoryEdit } from "./admin/unit/unit_category_edit.tsx";
+import { AdminUnitTypeAdd } from "./admin/unit/unit_type_add.tsx";
+import { AdminUnitTypeEdit } from "./admin/unit/unit_type_edit.tsx";
 import {message} from "antd";
 import {AdminCampus} from "./admin/campus/admin_campus.tsx";
 import { CampusAdd } from "./admin/campus/campus_add.tsx";
@@ -168,6 +173,11 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/department" element={<AdminDepartment site={site} />} />
                                 <Route path="/department/add" element={<DepartmentAdd site={site} />} />
                                 <Route path="/department/edit/:uuid" element={<DepartmentEdit site={site} />} />
+                                <Route path="/unit" element={<AdminUnit site={site} />} />
+                                <Route path="/unit/category/add" element={<AdminUnitCategoryAdd site={site} />} />
+                                <Route path="/unit/category/edit/:uuid" element={<AdminUnitCategoryEdit site={site} />} />
+                                <Route path="/unit/type/add" element={<AdminUnitTypeAdd site={site} />} />
+                                <Route path="/unit/type/edit/:uuid" element={<AdminUnitTypeEdit site={site} />} />
                                 <Route path="/*" element={<AdminNotFound />} />
                                 <Route path="/campus" element={<AdminCampus site={site} />} />
                                 <Route path="/campus/add" element={<CampusAdd site={site} />} />

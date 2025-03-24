@@ -11,5 +11,6 @@ export const adminRouteConfig: Record<string, string> = {
     'log': '系统日志',
     'backup': '备份与恢复',
     'settings': '系统设置',
-    'department': '部门管理'
+    'department': '部门管理',
+    'unit': '单位管理'
 };
