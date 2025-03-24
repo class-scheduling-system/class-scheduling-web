@@ -39,7 +39,9 @@ import {AcademicDashboard} from "./academic/academic_dashboard.tsx";
 import {AcademicClass} from "./academic/academic_class.tsx";
 import {AcademicCourse} from "./academic/academic_course.tsx";
 import {AcademicSchedule} from "./academic/academic_schedule.tsx";
-import {AcademicTeacher} from "./academic/academic_teacher.tsx";
+import {AcademicTeacher} from "./academic/teacher/teacher.tsx";
+import {AcademicAddTeacher} from "./academic/teacher/add_teacher.tsx";
+import {AcademicEditTeacher} from "./academic/teacher/edit_teacher.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
 import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
@@ -157,6 +159,8 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/course" element={<AcademicCourse site={site}/>}/>
                                 <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
+                                <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
+                                <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>

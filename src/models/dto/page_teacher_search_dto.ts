@@ -26,76 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-/**
- * # TeacherEntity
- *
- * > 代表教师实体的数据结构，用于存储和传输关于教师的基本信息。
- *
- * 此类型定义了教师相关的各种属性，包括个人基本信息、联系方式以及在系统中的唯一标识等。
- */
-export type TeacherEntity = {
+export type PageTeacherSearchDTO = {
     /**
-     * 创建时间（单位：毫秒时间戳）
+     * 部门名称，可选参数，如果提供，则按部门筛选教师
      */
-    created_at?: number;
+    department?: string;
     /**
-     * 教师描述
+     * 是否降序，默认为true，表示结果按照降序排列
      */
-    desc?: string;
+    is_desc: boolean;
     /**
-     * 教师邮箱
-     */
-    email?: string;
-    /**
-     * 教师英文名
-     */
-    english_name?: string;
-    /**
-     * 教师民族
-     */
-    ethnic?: string;
-    /**
-     * 教师工号
-     */
-    id?: string;
-    /**
-     * 教师职称
-     */
-    job_title?: string;
-    /**
-     * 教师姓名
+     * 教师姓名，可选参数，如果提供，则按姓名筛选教师
      */
     name?: string;
     /**
-     * 教师电话
+     * 页码，默认为1，表示获取第一页数据
      */
-    phone?: string;
+    page: number;
     /**
-     * 教师性别（0：女，1：男）
+     * 每页记录数，默认为20，表示每页获取20条记录
      */
-    sex?: boolean;
+    size: number;
     /**
-     * 教师状态（0：禁用，1：启用，2：未注册）
+     * 状态，可选参数，如果提供，则按状态筛选教师
      */
-    status?: number;
-    /**
-     * 教师主键
-     */
-    teacher_uuid?: string;
-    /**
-     * 教师类型
-     */
-    type?: string;
-    /**
-     * 单位主键
-     */
-    unit_uuid?: string;
-    /**
-     * 更新时间（单位：毫秒时间戳）
-     */
-    updated_at?: number;
-    /**
-     * 用户主键
-     */
-    user_uuid?: string;
+    status?: string;
 }
