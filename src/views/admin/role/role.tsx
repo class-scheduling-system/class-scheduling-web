@@ -89,7 +89,6 @@ export function AdminRole({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
 
     useEffect(() => {
         const func = async () => {
-            setLoading(true);
             const getResp = await GetRoleListAPI(searchRequest);
             if (getResp?.output === "Success") {
                 setRoleList(getResp.data!);
