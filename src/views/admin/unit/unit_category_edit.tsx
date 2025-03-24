@@ -27,17 +27,16 @@
  */
 
 import { JSX, useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { message } from "antd";
 import { Return, AddUser } from "@icon-park/react";
 import { SiteInfoEntity } from "../../../models/entity/site_info_entity";
 import { UnitCategoryDTO } from "../../../models/dto/unit_category_dto";
-import { EditUnitCategoryAPI } from "../../../apis/unit_category_api";
+import { EditUnitCategoryAPI, GetUnitCategoryAPI } from "../../../apis/unit_category_api";
 
 export function AdminUnitCategoryEdit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const navigate = useNavigate();
-    const location = useLocation();
-    const unitCategoryInfo = location.state?.unitCategoryInfo;
+    const { uuid } = useParams();
 
     const [data, setData] = useState<UnitCategoryDTO>({
         name: "",
@@ -52,32 +51,46 @@ export function AdminUnitCategoryEdit({ site }: Readonly<{ site: SiteInfoEntity 
         document.title = `编辑单位类别 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
-    // 初始化单位类别信息
+    // 获取单位类别信息
     useEffect(() => {
-        if (unitCategoryInfo) {
-            setData({
-                name: unitCategoryInfo.name,
-                short_name: unitCategoryInfo.short_name,
-                english_name: unitCategoryInfo.english_name,
-                is_entity: unitCategoryInfo.is_entity,
-                order: unitCategoryInfo.order
-            });
-            setLoading(false);
-        } else {
-            message.error("未找到单位类别信息");
-            navigate("/admin/unit");
-        }
-    }, [unitCategoryInfo, navigate]);
+        const fetchData = async () => {
+            if (!uuid) {
+                message.error("未找到单位类别信息");
+                navigate("/admin/unit");
+                return;
+            }
+
+            const response = await GetUnitCategoryAPI(uuid);
+            if (response?.output === "Success" && response.data) {
+                setData({
+                    name: response.data.name ?? "",
+                    short_name: response.data.short_name ?? "",
+                    english_name: response.data.english_name ?? "",
+                    is_entity: response.data.is_entity ?? false,
+                    order: response.data.order ?? 0
+                });
+                setLoading(false);
+            } else {
+                message.error(response?.message ?? "获取单位类别信息失败");
+                navigate("/admin/unit");
+            }
+        };
+
+        fetchData();
+    }, [uuid, navigate]);
 
     // 重置表单
-    const resetForm = () => {
-        if (unitCategoryInfo) {
+    const resetForm = async () => {
+        if (!uuid) return;
+        
+        const response = await GetUnitCategoryAPI(uuid);
+        if (response?.output === "Success" && response.data) {
             setData({
-                name: unitCategoryInfo.name,
-                short_name: unitCategoryInfo.short_name,
-                english_name: unitCategoryInfo.english_name,
-                is_entity: unitCategoryInfo.is_entity,
-                order: unitCategoryInfo.order
+                name: response.data.name ?? "",
+                short_name: response.data.short_name ?? "",
+                english_name: response.data.english_name ?? "",
+                is_entity: response.data.is_entity ?? false,
+                order: response.data.order ?? 0
             });
             message.success("表单已重置");
         }
@@ -86,8 +99,10 @@ export function AdminUnitCategoryEdit({ site }: Readonly<{ site: SiteInfoEntity 
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (!uuid) return;
+
         try {
-            const response = await EditUnitCategoryAPI(unitCategoryInfo.unit_category_uuid, data);
+            const response = await EditUnitCategoryAPI(uuid, data);
             if (response?.output === "Success") {
                 message.success("编辑成功");
                 navigate("/admin/unit");

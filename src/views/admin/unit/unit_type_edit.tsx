@@ -27,17 +27,16 @@
  */
 
 import { JSX, useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { message } from "antd";
 import { Return, AddUser } from "@icon-park/react";
 import { SiteInfoEntity } from "../../../models/entity/site_info_entity";
 import { UnitTypeDTO } from "../../../models/dto/unit_type_dto";
-import { EditUnitTypeAPI } from "../../../apis/unit_type_api";
+import { EditUnitTypeAPI, GetUnitTypeAPI } from "../../../apis/unit_type_api";
 
 export function AdminUnitTypeEdit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const navigate = useNavigate();
-    const location = useLocation();
-    const unitTypeInfo = location.state?.unitTypeInfo;
+    const { uuid } = useParams();
 
     const [data, setData] = useState<UnitTypeDTO>({
         name: "",
@@ -51,30 +50,44 @@ export function AdminUnitTypeEdit({ site }: Readonly<{ site: SiteInfoEntity }>):
         document.title = `编辑单位办别 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
-    // 初始化单位办别信息
+    // 获取单位办别信息
     useEffect(() => {
-        if (unitTypeInfo) {
-            setData({
-                name: unitTypeInfo.name,
-                short_name: unitTypeInfo.short_name,
-                english_name: unitTypeInfo.english_name,
-                order: unitTypeInfo.order
-            });
-            setLoading(false);
-        } else {
-            message.error("未找到单位办别信息");
-            navigate("/admin/unit");
-        }
-    }, [unitTypeInfo, navigate]);
+        const fetchData = async () => {
+            if (!uuid) {
+                message.error("未找到单位办别信息");
+                navigate("/admin/unit");
+                return;
+            }
+
+            const response = await GetUnitTypeAPI(uuid);
+            if (response?.output === "Success" && response.data) {
+                setData({
+                    name: response.data.name ?? "",
+                    short_name: response.data.short_name ?? "",
+                    english_name: response.data.english_name ?? "",
+                    order: response.data.order ?? 0
+                });
+                setLoading(false);
+            } else {
+                message.error(response?.message ?? "获取单位办别信息失败");
+                navigate("/admin/unit");
+            }
+        };
+
+        fetchData();
+    }, [uuid, navigate]);
 
     // 重置表单
-    const resetForm = () => {
-        if (unitTypeInfo) {
+    const resetForm = async () => {
+        if (!uuid) return;
+        
+        const response = await GetUnitTypeAPI(uuid);
+        if (response?.output === "Success" && response.data) {
             setData({
-                name: unitTypeInfo.name,
-                short_name: unitTypeInfo.short_name,
-                english_name: unitTypeInfo.english_name,
-                order: unitTypeInfo.order
+                name: response.data.name ?? "",
+                short_name: response.data.short_name ?? "",
+                english_name: response.data.english_name ?? "",
+                order: response.data.order ?? 0
             });
             message.success("表单已重置");
         }
@@ -83,8 +96,10 @@ export function AdminUnitTypeEdit({ site }: Readonly<{ site: SiteInfoEntity }>):
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (!uuid) return;
+
         try {
-            const response = await EditUnitTypeAPI(unitTypeInfo.unit_type_uuid, data);
+            const response = await EditUnitTypeAPI(uuid, data);
             if (response?.output === "Success") {
                 message.success("编辑成功");
                 navigate("/admin/unit");

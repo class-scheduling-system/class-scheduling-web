@@ -30,17 +30,20 @@ import { JSX, useEffect, useRef, useState } from "react";
 import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
 import { useSelector } from "react-redux";
 import { animated, useTransition } from "@react-spring/web";
-import { message, Modal } from "antd";
+import { message } from "antd";
 import { CardComponent } from "../../components/card_component.tsx";
-import { Add, Delete, Editor, Search } from "@icon-park/react";
+import { Add, Check, Close, Delete, Editor, Search } from "@icon-park/react";
 import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
 import { PageEntity } from "../../models/entity/page_entity.ts";
 import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
 import { UnitCategoryEntity } from "../../models/entity/unit_category_entity.ts";
 import { UnitTypeEntity } from "../../models/entity/unit_type_entity.ts";
-import { DeleteUnitCategoryAPI, GetUnitCategoryPageAPI } from "../../apis/unit_category_api.ts";
-import { DeleteUnitTypeAPI, GetUnitTypePageAPI } from "../../apis/unit_type_api.ts";
+import { GetUnitCategoryPageAPI } from "../../apis/unit_category_api.ts";
+import { GetUnitTypePageAPI } from "../../apis/unit_type_api.ts";
 import { useNavigate } from "react-router";
+import cardImage from "../../assets/images/card-background.webp";
+import { LabelComponent } from "../../components/label_component.tsx";
+import { AdminUnitDeleteDialog } from "../../components/admin/admin_unit_delete_dialog.tsx";
 
 /**
  * # AdminUnit
@@ -76,6 +79,11 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     const [search, setSearch] = useState<string>();
     const [loading, setLoading] = useState(true);
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
+
+    // 删除对话框状态
+    const [dialogDelete, setDialogDelete] = useState<boolean>(false);
+    const [deleteUuid, setDeleteUuid] = useState<string>("");
+    const [deleteName, setDeleteName] = useState<string>("");
 
     useEffect(() => {
         document.title = `单位管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -156,25 +164,10 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     /**
      * 处理删除操作
      */
-    const handleDelete = async (uuid: string) => {
-        Modal.confirm({
-            title: '确认删除',
-            content: `确定要删除这个${activeTab === 'category' ? '单位类别' : '单位办别'}吗？`,
-            okText: '确认',
-            cancelText: '取消',
-            onOk: async () => {
-                const deleteResp = activeTab === 'category'
-                    ? await DeleteUnitCategoryAPI(uuid)
-                    : await DeleteUnitTypeAPI(uuid);
-
-                if (deleteResp?.output === "Success") {
-                    message.success(`删除${activeTab === 'category' ? '单位类别' : '单位办别'}成功`);
-                    setRefreshOperate(true);
-                } else {
-                    message.error(deleteResp?.message ?? `删除${activeTab === 'category' ? '单位类别' : '单位办别'}失败`);
-                }
-            }
-        });
+    const handleDelete = (uuid: string, name: string) => {
+        setDeleteUuid(uuid);
+        setDeleteName(name);
+        setDialogDelete(true);
     };
 
     /**
@@ -214,22 +207,6 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
         <>
             <div className={"grid grid-cols-10 gap-4 pb-4"}>
                 <div className={"col-span-full lg:col-span-7 flex flex-col gap-2 h-[calc(100vh-117px)]"}>
-                    {/* 标签页切换 */}
-                    <div className="tabs tabs-boxed">
-                        <button className={`tab ${activeTab === 'category' ? 'tab-active' : ''}`}
-                            onClick={() => {
-                                setActiveTab('category');
-                                setCategorySearchRequest({ ...categorySearchRequest, page: 1 });
-                                setRefreshOperate(true);
-                            }}>单位类别</button>
-                        <button className={`tab ${activeTab === 'type' ? 'tab-active' : ''}`}
-                            onClick={() => {
-                                setActiveTab('type');
-                                setTypeSearchRequest({ ...typeSearchRequest, page: 1 });
-                                setRefreshOperate(true);
-                            }}>单位办别</button>
-                    </div>
-
                     <CardComponent padding={0} className={"flex-1 flex overflow-y-auto"}>
                         {transitionSearch((style, item) => item ? (
                             <animated.div style={style} className={"flex h-full justify-center"}>
@@ -246,6 +223,7 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                             <th>名称</th>
                                             <th>简称</th>
                                             <th>英文名</th>
+                                            {activeTab === 'category' && <th>是否实体</th>}
                                             <th>修改时间</th>
                                             <th className={"text-end"}>操作</th>
                                         </tr>
@@ -259,6 +237,17 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                     <td>{category.name}</td>
                                                     <td>{category.short_name}</td>
                                                     <td>{category.english_name}</td>
+                                                    {activeTab === 'category' &&
+                                                        <td>
+                                                            {category.is_entity ? (
+                                                                <LabelComponent text="是" icon={<Check theme="outline" size="12" />}
+                                                                    type="success" style="badge-outline" />
+                                                            ) : (
+                                                                <LabelComponent text="否" icon={<Close theme="outline" size="12" />}
+                                                                    type="error" style="badge-outline" />
+                                                            )}
+                                                        </td>
+                                                    }
                                                     <td>{category.updated_at ? new Date(category.updated_at).toLocaleString() : '-'}</td>
                                                     <td className={"flex justify-end"}>
                                                         <div className="join">
@@ -269,7 +258,7 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                                 <span>编辑</span>
                                                             </button>
                                                             <button
-                                                                onClick={() => handleDelete(category.unit_category_uuid!)}
+                                                                onClick={() => handleDelete(category.unit_category_uuid!, category.name!)}
                                                                 className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                                 <Delete theme="outline" size="12" />
                                                                 <span>删除</span>
@@ -296,7 +285,7 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                                 <span>编辑</span>
                                                             </button>
                                                             <button
-                                                                onClick={() => handleDelete(type.unit_type_uuid!)}
+                                                                onClick={() => handleDelete(type.unit_type_uuid!, type.name!)}
                                                                 className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                                 <Delete theme="outline" size="12" />
                                                                 <span>删除</span>
@@ -361,36 +350,67 @@ export function AdminUnit({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                 </div>
 
                 <div className={"col-span-full lg:col-span-3 flex flex-col gap-2"}>
-                    {/* 搜索栏 */}
-                    <CardComponent>
-                        <div className="form-control">
-                            <div className="input-group">
-                                <input type="text"
-                                    ref={inputFocus}
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder={`搜索${activeTab === 'category' ? '单位类别' : '单位办别'}...`}
-                                    className="input input-bordered w-full" />
-                                <button className="btn btn-square">
-                                    <Search theme="outline" size="18" />
+                    <CardComponent padding={0} className={"overflow-y-auto"}>
+                        <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl" />
+                        <div className="p-4 flex flex-col gap-1">
+                            <h2 className="text-xl font-bold">单位管理</h2>
+                            <p className="text-base-content text-sm border-l-4 border-base-content ps-2">
+                                这里是所有单位类别和单位办别的列表，你可以在这里查看、编辑和删除相关信息。
+                            </p>
+                        </div>
+                        <div className="px-4 pb-4 flex flex-col gap-3">
+                            {/* 标签页切换 */}
+                            <div className="tabs tabs-boxed bg-base-200 rounded-lg overflow-hidden">
+                                <button
+                                    className={`tab flex-1 tab-sm ${activeTab === 'category' ? 'tab-active bg-primary text-primary-content' : ''}`}
+                                    onClick={() => {
+                                        setActiveTab('category');
+                                        setCategorySearchRequest({ ...categorySearchRequest, page: 1 });
+                                        setRefreshOperate(true);
+                                    }}>
+                                    单位类别
+                                </button>
+                                <button
+                                    className={`tab flex-1 tab-sm ${activeTab === 'type' ? 'tab-active bg-primary text-primary-content' : ''}`}
+                                    onClick={() => {
+                                        setActiveTab('type');
+                                        setTypeSearchRequest({ ...typeSearchRequest, page: 1 });
+                                        setRefreshOperate(true);
+                                    }}>
+                                    单位办别
+                                </button>
+                            </div>
+                            <div>
+                                <label className="input transition w-full">
+                                    <Search theme="outline" size="12" />
+                                    <input
+                                        ref={inputFocus}
+                                        type="search"
+                                        className="grow"
+                                        placeholder={`搜索${activeTab === 'category' ? '单位类别' : '单位办别'}...`}
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                    <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
+                                    <kbd className="kbd kbd-sm">K</kbd>
+                                </label>
+                            </div>
+                            <div className={"grid grid-cols-1 gap-3"}>
+                                <button
+                                    onClick={() => navigate(`/admin/unit/${activeTab === 'category' ? 'category' : 'type'}/add`)}
+                                    className="transition shadow btn btn-outline btn-primary inline-flex">
+                                    <Add theme="outline" size="16" />
+                                    <span>添加{activeTab === 'category' ? '单位类别' : '单位办别'}</span>
                                 </button>
                             </div>
                         </div>
                     </CardComponent>
-
-                    {/* 操作按钮组 */}
-                    <CardComponent>
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => navigate(`/admin/unit/${activeTab === 'category' ? 'category' : 'type'}/add`)}
-                                className="btn btn-primary btn-block inline-flex">
-                                <Add theme="outline" size="18" />
-                                <span>添加{activeTab === 'category' ? '单位类别' : '单位办别'}</span>
-                            </button>
-                        </div>
-                    </CardComponent>
                 </div>
             </div>
+
+            {/* 删除对话框 */}
+            <AdminUnitDeleteDialog show={dialogDelete} emit={setDialogDelete} uuid={deleteUuid}
+                name={deleteName} type={activeTab} onDeletedSuccess={() => setRefreshOperate(true)} />
         </>
     );
 }
