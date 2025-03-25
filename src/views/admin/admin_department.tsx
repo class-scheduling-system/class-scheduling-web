@@ -32,7 +32,7 @@ import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useRef, useState} from "react";
 import {Link} from "react-router";
 import {PageEntity} from "../../models/entity/page_entity.ts";
-import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../../models/dto/page/page_search_dto.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";

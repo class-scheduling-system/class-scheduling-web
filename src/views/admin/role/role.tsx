@@ -31,7 +31,7 @@ import { Correct, Error, MoreApp, Newlybuild, Search } from "@icon-park/react";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
 import { animated, useTransition } from "@react-spring/web";
 import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
-import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
+import { PageSearchDTO } from "../../../models/dto/page/page_search_dto.ts";
 import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrentInfoStore } from "../../../models/store/current_info_store.ts";

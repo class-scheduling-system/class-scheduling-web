@@ -30,7 +30,7 @@ import {BaseResponse} from "../models/base_response.ts";
 import {TeacherTypeEntity} from "../models/entity/teacher_type_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
-import {PageTeacherTypeSearchDTO} from "../models/dto/page_teacher_type_search_dto.ts";
+import {PageTeacherTypeSearchDTO} from "../models/dto/page/page_teacher_type_search_dto.ts";
 
 
 /**

@@ -19,7 +19,7 @@ import { animated, useTransition } from "@react-spring/web";
 import { AcademicDeleteTeacherDialog } from "../../../components/academic/academic_teacher_delete_dialog.tsx";
 import { GetDepartmentSimpleListAPI } from "../../../apis/department_api.ts";
 import { useNavigate } from "react-router";
-import { PageTeacherSearchDTO } from "../../../models/dto/page_teacher_search_dto.ts";
+import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_search_dto.ts";
 import { useSelector } from "react-redux";
 import { CurrentInfoStore } from "../../../models/store/current_info_store.ts";
 import { CardComponent } from "../../../components/card_component.tsx";

@@ -31,7 +31,7 @@ import {DepartmentDTO} from "../models/dto/department_dto.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {DepartmentEntity} from "../models/entity/department_entity.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
-import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../models/dto/page/page_search_dto.ts";
 
 /**
  * # 根据部门id获取部门信息

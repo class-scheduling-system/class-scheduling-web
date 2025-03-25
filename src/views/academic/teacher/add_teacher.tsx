@@ -47,7 +47,7 @@ import {useEffect, useState} from "react";
 import { message} from "antd";
 import { AddTeacherAPI } from "../../../apis/teacher_api.ts";
 import {Link} from "react-router";
-import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../../../models/dto/page/page_search_dto.ts";
 import {GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
 import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";

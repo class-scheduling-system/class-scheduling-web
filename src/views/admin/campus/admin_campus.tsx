@@ -31,7 +31,7 @@ import {JSX, useEffect, useRef, useState} from "react";
 import {CampusEntity} from "../../../models/entity/campus_entity.ts";
 import {PageEntity} from "../../../models/entity/page_entity.ts";
 import {GetCampusPageListAPI} from "../../../apis/campus_api.ts";
-import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../../../models/dto/page/page_search_dto.ts";
 import {message} from "antd";
 import {useDispatch, useSelector} from "react-redux";
 import {CardComponent} from "../../../components/card_component.tsx";

@@ -43,7 +43,7 @@ import {
 import { EditUserAPI } from "../../../apis/user_api.ts";
 import { message, Transfer } from "antd";
 import * as React from "react";
-import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
+import { PageSearchDTO } from "../../../models/dto/page/page_search_dto.ts";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
 import { RoleEntity } from "../../../models/entity/role_entity.ts";
 import { UserEditDTO } from "../../../models/dto/user_edit_dto.ts";

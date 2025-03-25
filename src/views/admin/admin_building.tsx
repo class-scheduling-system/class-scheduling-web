@@ -33,7 +33,7 @@ import {JSX, useEffect, useRef, useState} from "react";
 import {PageEntity} from "../../models/entity/page_entity.ts";
 import {BuildingEntity} from "../../models/entity/building_entity.ts";
 import {GetBuildingPageAPI} from "../../apis/building_api.ts";
-import {PageSearchDTO} from "../../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../../models/dto/page/page_search_dto.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";

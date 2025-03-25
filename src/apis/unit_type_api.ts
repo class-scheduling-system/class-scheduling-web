@@ -28,7 +28,7 @@
 
 import { BaseApi, GetAuthorizationToken, MethodType } from "../assets/ts/base_api";
 import { BaseResponse } from "../models/base_response";
-import { PageSearchDTO } from "../models/dto/page_search_dto";
+import { PageSearchDTO } from "../models/dto/page/page_search_dto";
 import { UnitTypeDTO } from "../models/dto/unit_type_dto";
 import { PageEntity } from "../models/entity/page_entity";
 import { UnitTypeEntity } from "../models/entity/unit_type_entity";

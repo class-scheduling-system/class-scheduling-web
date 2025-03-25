@@ -29,7 +29,7 @@
 import {BaseResponse} from "../models/base_response.ts";
 import {RoleEntity} from "../models/entity/role_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {PageSearchDTO} from "../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../models/dto/page/page_search_dto.ts";
 import {PageEntity} from "../models/entity/page_entity.ts";
 
 

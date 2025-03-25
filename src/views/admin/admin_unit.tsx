@@ -35,7 +35,7 @@ import { CardComponent } from "../../components/card_component.tsx";
 import { Add, Check, Close, Delete, Editor, Search } from "@icon-park/react";
 import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
 import { PageEntity } from "../../models/entity/page_entity.ts";
-import { PageSearchDTO } from "../../models/dto/page_search_dto.ts";
+import { PageSearchDTO } from "../../models/dto/page/page_search_dto.ts";
 import { UnitCategoryEntity } from "../../models/entity/unit_category_entity.ts";
 import { UnitTypeEntity } from "../../models/entity/unit_type_entity.ts";
 import { GetUnitCategoryPageAPI } from "../../apis/unit_category_api.ts";

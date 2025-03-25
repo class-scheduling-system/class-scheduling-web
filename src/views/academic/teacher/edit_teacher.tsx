@@ -39,7 +39,7 @@ import {
 import {message} from "antd";
 import * as React from "react";
 import { GetDepartmentSimpleListAPI} from "../../../apis/department_api.ts";
-import {PageSearchDTO} from "../../../models/dto/page_search_dto.ts";
+import {PageSearchDTO} from "../../../models/dto/page/page_search_dto.ts";
 import {EditTeacherAPI} from "../../../apis/teacher_api.ts";
 import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
 import {Link, useLocation, useNavigate, useParams} from "react-router";

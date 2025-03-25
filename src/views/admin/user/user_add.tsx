@@ -46,7 +46,7 @@ import { UserAddDTO } from "../../../models/dto/user_add_dto.ts";
 import { RoleEntity } from "../../../models/entity/role_entity.ts";
 import { GetRoleListAPI } from "../../../apis/role_api.ts";
 import { GetPermissionListAPI } from "../../../apis/permission_api.ts";
-import { PageSearchDTO } from "../../../models/dto/page_search_dto.ts";
+import { PageSearchDTO } from "../../../models/dto/page/page_search_dto.ts";
 import { Link } from "react-router";
 import { SiteInfoEntity } from '../../../models/entity/site_info_entity.ts';
 
