@@ -46,11 +46,12 @@ export function AcademicStudent({ site }: Readonly<{
         size: 20,
         is_desc: true,
         is_graduated: false,
-        name: ''
+        name: undefined
     });
 
     const [nameSearch, setNameSearch] = useState<string>("");
     const [statusSearch, setStatusSearch] = useState<string>("");
+    const isFirstRender = useRef(true);
 
     const [loading, setLoading] = useState(true);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
@@ -81,6 +82,7 @@ export function AcademicStudent({ site }: Readonly<{
     // 获取学生列表
     useEffect(() => {
         const fetchStudentList = async () => {
+            setLoading(true);
             const getResp = await GetStudentPageAPI(searchRequest);
             if (getResp?.output === "Success") {
                 const students = getResp.data!.records;
@@ -88,15 +90,33 @@ export function AcademicStudent({ site }: Readonly<{
                     ...getResp.data!,
                     records: students
                 });
-                setLoading(false);
             } else {
                 console.log(getResp);
                 message.error(getResp?.error_message ?? "获取学生列表失败");
-                setLoading(false);
             }
+            setLoading(false);
         };
         fetchStudentList().then();
     }, [searchRequest, refreshFlag]);
+
+    // 搜索防抖动
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        setLoading(true);
+        const timer = setTimeout(() => {
+            setSearchRequest({
+                ...searchRequest,
+                page: 1,
+                name: nameSearch || undefined,
+                is_graduated: statusSearch === "1" ? true : false
+            });
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [nameSearch, statusSearch]);
 
     useEffect(() => {
         // 当对话框关闭时，刷新表格数据
@@ -149,34 +169,44 @@ export function AcademicStudent({ site }: Readonly<{
     }
 
     function renderStudentStatus(student: StudentEntity) {
-        if (!student.user_uuid) {
-            return (
-                <LabelComponent
-                    size={"badge-sm"}
-                    style={"badge-outline"}
-                    type={"warning"}
-                    text={"未注册"}
-                />
-            );
+        switch (student.status) {
+            case 0:
+                return (
+                    <LabelComponent
+                        size={"badge-sm"}
+                        style={"badge-outline"}
+                        type={"error"}
+                        text={"在读"}
+                    />
+                );
+            case 1:
+                return (
+                    <LabelComponent
+                        size={"badge-sm"}
+                        style={"badge-outline"}
+                        type={"success"}
+                        text={"已毕业"}
+                    />
+                );
+            case 2:
+                return (
+                    <LabelComponent
+                        size={"badge-sm"}
+                        style={"badge-outline"}
+                        type={"warning"}
+                        text={"未注册"}
+                    />
+                );
+            default:
+                return (
+                    <LabelComponent
+                        size={"badge-sm"}
+                        style={"badge-outline"}
+                        type={"error"}
+                        text={"未知"}
+                    />
+                );
         }
-        if (!student.grade) {
-            return (
-                <LabelComponent
-                    size={"badge-sm"}
-                    style={"badge-outline"}
-                    type={"error"}
-                    text={"已毕业"}
-                />
-            );
-        }
-        return (
-            <LabelComponent
-                size={"badge-sm"}
-                style={"badge-outline"}
-                type={"success"}
-                text={"在读"}
-            />
-        );
     }
 
     // 处理添加学生
@@ -197,17 +227,17 @@ export function AcademicStudent({ site }: Readonly<{
         setDialogDelete(true);
     };
 
-    // 搜索按钮点击处理
+    // 处理搜索
     const handleSearch = () => {
         setSearchRequest({
             ...searchRequest,
             page: 1,
             name: nameSearch || undefined,
-            is_graduated: false
+            is_graduated: statusSearch === "1" ? true : false
         });
     };
 
-    // 重置按钮点击处理
+    // 处理重置
     const handleReset = () => {
         setNameSearch('');
         setStatusSearch('');
@@ -309,7 +339,7 @@ export function AcademicStudent({ site }: Readonly<{
                                                 <tr key={student.student_uuid} className="transition hover:bg-base-200">
                                                     <td>{student.id}</td>
                                                     <td className={"text-nowrap"}>{student.name}</td>
-                                                    <td>{student.gender === 0 ? '女' : '男'}</td>
+                                                    <td>{student.gender === 1 ? '女' : '男'}</td>
                                                     <td className={"text-nowrap"}>{student.clazz}</td>
                                                     <td>
                                                         {renderStudentStatus(student)}
@@ -381,7 +411,6 @@ export function AcademicStudent({ site }: Readonly<{
                             </h2>
 
                             <div className="grid gap-1 grid-cols-2">
-                                {/* 学生姓名搜索 */}
                                 <div className="w-full col-span-full">
                                     <label className="input input-sm transition flex items-center w-full validator">
                                         <Me theme="outline" size="14" />
@@ -409,15 +438,14 @@ export function AcademicStudent({ site }: Readonly<{
                                             onChange={(e) => setStatusSearch(e.target.value)}
                                         >
                                             <option value="">请选择学生状态</option>
-                                            <option value="1">在读</option>
-                                            <option value="0">已毕业</option>
-                                            <option value="2">未注册</option>
+                                            <option value="0">未注册</option>
+                                            <option value="1">已注册</option>
+                                            <option value="2">已停用</option>
                                         </select>
                                     </label>
                                 </div>
                             </div>
 
-                            {/* 按钮组 */}
                             <div className="grid grid-cols-2 gap-1">
                                 <button
                                     className="btn btn-sm btn-primary shadow-md hover:shadow-lg transition py-3"

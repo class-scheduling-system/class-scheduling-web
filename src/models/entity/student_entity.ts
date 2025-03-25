@@ -94,4 +94,8 @@ export type StudentEntity = {
      * 对应用户主键
      */
     user_uuid?: string;
+    /**
+     * 学生状态
+     */
+    status: number;
 }

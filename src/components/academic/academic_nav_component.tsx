@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import {Book, Calendar, Dashboard, Hexagonal, People, Schedule, School} from "@icon-park/react";
+import {Book, Calendar, Dashboard, Hexagonal, People, Schedule, School, User} from "@icon-park/react";
 import {JSX} from "react";
 import {AcademicNavLinkComponent} from "./academic_nav_link_component.tsx";
 
@@ -56,7 +56,7 @@ export function AcademicNavComponent(): JSX.Element {
                                        path={"/academic/schedule"}/>
                 <AcademicNavLinkComponent title={"教师管理"} icon={<People theme="outline" size="16"/>}
                                        path={"/academic/teacher"}/>
-                <AcademicNavLinkComponent title={"学生管理"} icon={<People theme="outline" size="16"/>}
+                <AcademicNavLinkComponent title={"学生管理"} icon={<User theme="outline" size="16"/>}
                                        path={"/academic/student"}/>
 
                 <div className="divider my-2"></div>
