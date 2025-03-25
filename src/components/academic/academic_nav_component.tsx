@@ -56,12 +56,12 @@ export function AcademicNavComponent(): JSX.Element {
                                        path={"/academic/schedule"}/>
                 <AcademicNavLinkComponent title={"教师管理"} icon={<People theme="outline" size="16"/>}
                                        path={"/academic/teacher"}/>
+                <AcademicNavLinkComponent title={"学生管理"} icon={<People theme="outline" size="16"/>}
+                                       path={"/academic/student"}/>
 
                 <div className="divider my-2"></div>
 
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">其他功能</h2>
-                <AcademicNavLinkComponent title={"学生管理"} icon={<People theme="outline" size="16"/>}
-                                       path={"/academic/student"}/>
                 <AcademicNavLinkComponent title={"考试管理"} icon={<Hexagonal theme="outline" size="16"/>}
                                        path={"/academic/exam"}/>
                 <AcademicNavLinkComponent title={"学期管理"} icon={<Calendar theme="outline" size="16"/>}

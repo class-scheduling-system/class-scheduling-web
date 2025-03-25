@@ -43,7 +43,7 @@ import {
     UserBusiness, AddUser, Info
 } from "@icon-park/react";
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {JSX, useEffect, useState} from "react";
 import { message} from "antd";
 import { AddTeacherAPI } from "../../../apis/teacher_api.ts";
 import {Link} from "react-router";
@@ -53,9 +53,12 @@ import {TeacherTypeEntity} from "../../../models/entity/teacher_type_entity.ts";
 import {GetTeacherTypeSimpleListAPI} from "../../../apis/teacher_type_api.ts";
 import {DepartmentEntity} from "../../../models/entity/department_entity.ts";
 import {TeacherDTO} from "../../../models/dto/teacher_dto.ts";
+import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
 
 
-export function AcademicAddTeacher(): React.JSX.Element {
+export function AcademicAddTeacher({site}: Readonly<{
+    site: SiteInfoEntity
+}>): JSX.Element {
     const [data, setData] = useState<TeacherDTO>(
         {
             phone: "",
@@ -83,6 +86,10 @@ export function AcademicAddTeacher(): React.JSX.Element {
         const savedTeachers = localStorage.getItem('recentAddedTeachers');
         return savedTeachers ? JSON.parse(savedTeachers) : [];
     });
+
+    useEffect(() => {
+        document.title = `添加教师 | ${site.name ?? "Frontleaves Technology"}`;
+    }, [site.name]);
 
     // 获取部门列表
     useEffect(() => {

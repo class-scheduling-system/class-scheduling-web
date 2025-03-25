@@ -1,5 +1,5 @@
 import { JSX, useEffect, useRef, useState } from "react";
-import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
+import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
 import {
     AddOne, AllApplication, CategoryManagement,
     ChartGraph,
@@ -11,22 +11,22 @@ import {
     Refresh,
     Search
 } from "@icon-park/react";
-import { GetTeacherListAPI } from "../../../apis/teacher_api.ts";
+import { GetTeacherListAPI } from "../../apis/teacher_api.ts";
 import { message } from "antd";
-import { PageEntity } from "../../../models/entity/page_entity.ts";
-import { TeacherEntity } from "../../../models/entity/teacher_entity.ts";
+import { PageEntity } from "../../models/entity/page_entity.ts";
+import { TeacherEntity } from "../../models/entity/teacher_entity.ts";
 import { animated, useTransition } from "@react-spring/web";
-import { AcademicDeleteTeacherDialog } from "../../../components/academic/academic_teacher_delete_dialog.tsx";
-import { GetDepartmentSimpleListAPI } from "../../../apis/department_api.ts";
+import { AcademicDeleteTeacherDialog } from "../../components/academic/academic_teacher_delete_dialog.tsx";
+import { GetDepartmentSimpleListAPI } from "../../apis/department_api.ts";
 import { useNavigate } from "react-router";
-import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_search_dto.ts";
+import { PageTeacherSearchDTO } from "../../models/dto/page/page_teacher_search_dto.ts";
 import { useSelector } from "react-redux";
-import { CurrentInfoStore } from "../../../models/store/current_info_store.ts";
-import { CardComponent } from "../../../components/card_component.tsx";
-import { TeacherTypeEntity } from "../../../models/entity/teacher_type_entity.ts";
-import { GetTeacherTypeSimpleListAPI } from "../../../apis/teacher_type_api.ts";
-import { LabelComponent } from "../../../components/label_component.tsx";
-import { DepartmentEntity } from "../../../models/entity/department_entity.ts";
+import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
+import { CardComponent } from "../../components/card_component.tsx";
+import { TeacherTypeEntity } from "../../models/entity/teacher_type_entity.ts";
+import { GetTeacherTypeSimpleListAPI } from "../../apis/teacher_type_api.ts";
+import { LabelComponent } from "../../components/label_component.tsx";
+import { DepartmentEntity } from "../../models/entity/department_entity.ts";
 
 
 export function AcademicTeacher({ site }: Readonly<{

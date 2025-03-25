@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -39,9 +39,12 @@ import {AcademicDashboard} from "./academic/academic_dashboard.tsx";
 import {AcademicClass} from "./academic/academic_class.tsx";
 import {AcademicCourse} from "./academic/academic_course.tsx";
 import {AcademicSchedule} from "./academic/academic_schedule.tsx";
-import {AcademicTeacher} from "./academic/teacher/teacher.tsx";
+import {AcademicTeacher} from "./academic/academic_teacher.tsx";
 import {AcademicAddTeacher} from "./academic/teacher/add_teacher.tsx";
 import {AcademicEditTeacher} from "./academic/teacher/edit_teacher.tsx";
+import {AcademicStudent} from "./academic/academic_student.tsx";
+import {AcademicAddStudent} from "./academic/student/add_student.tsx";
+import {AcademicEditStudent} from "./academic/student/edit_student.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
 import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
@@ -161,6 +164,9 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>
+                                <Route path="/student" element={<AcademicStudent site={site}/>}/>
+                                <Route path="/student/add" element={<AcademicAddStudent site={site}/>}/>
+                                <Route path="/student/edit/:studentId" element={<AcademicEditStudent site={site}/>}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>
