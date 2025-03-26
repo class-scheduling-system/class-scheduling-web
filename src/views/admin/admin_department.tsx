@@ -155,10 +155,12 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
 
                 if (categoryResp?.output === "Success") {
                     setUnitCategories(categoryResp.data!);
+                    console.log('单位类别数据:', categoryResp.data);
                 }
 
                 if (typeResp?.output === "Success") {
                     setUnitTypes(typeResp.data!);
+                    console.log('单位办别数据:', typeResp.data);
                 }
             } catch (error) {
                 console.error("获取单位数据失败:", error);
@@ -168,6 +170,10 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
 
         fetchUnitData();
     }, []);
+
+    useEffect(() => {
+        console.log('部门列表数据:', departmentList);
+    }, [departmentList]);
 
     const transitionSearch = useTransition(loading ?? 0, {
         from: {opacity: 0},
@@ -240,17 +246,17 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                         <th>#</th>
                                         <th>部门编号</th>
                                         <th>部门名字</th>
-                                        <th>是否启用</th>
-                                        <th>实体部门</th>
-                                        <th className={"hidden xl:block"}>上课院系</th>
                                         <th>单位类别</th>
                                         <th>单位办别</th>
+                                        <th>是否启用</th>
+                                        <th>实体部门</th>
+                                        <th className={"hidden xl:table-cell"}>上课院系</th>
                                         <th className={"text-end"}>操作</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {
-                                        departmentList.records.map((department, index) => (
+                                        departmentList.records?.map((department, index) => (
                                             <tr
                                                 key={department.department_uuid}
                                                 className="transition hover:bg-base-200"
@@ -258,44 +264,46 @@ export function AdminDepartment({site}: Readonly<{ site: SiteInfoEntity }>): JSX
                                                 <td>{index + 1 + (departmentList.current - 1) * departmentList.size}</td>
                                                 <td className={"text-nowrap"}>{department.department_code}</td>
                                                 <td className={"text-nowrap"}>{department.department_name}</td>
-                                                <td>
-                                                    {department.is_enabled ? (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"success"} text={"是"}
-                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
-                                                    ) : (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"error"} text={"否"}
-                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {department.is_entity ? (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"success"} text={"是"}
-                                                                        icon={<CheckOne theme="outline" size="12"/>}/>
-                                                    ) : (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"error"} text={"否"}
-                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {department.is_attending_college ? (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"success"} text={"是"}
-                                                                        icon={<BookOpen theme="outline" size="12"/>}/>
-                                                    ) : (
-                                                        <LabelComponent size={"badge-sm"} style={"badge-outline"}
-                                                                        type={"error"} text={"否"}
-                                                                        icon={<CloseOne theme="outline" size="12"/>}/>
-                                                    )}
+                                                <td className="text-nowrap">
+                                                    {department.unit_category ? 
+                                                        (unitCategories.find(c => c.unit_category_uuid === department.unit_category)?.name ?? "未知类别") : "-"}
                                                 </td>
                                                 <td className="text-nowrap">
-                                                    {unitCategories.find(c => c.unit_category_uuid === department.unit_category)?.name ?? '-'}
+                                                    {department.unit_type ? 
+                                                        (unitTypes.find(t => t.unit_type_uuid === department.unit_type)?.name ?? "未知办别") : "-"}
                                                 </td>
-                                                <td className="text-nowrap">
-                                                    {unitTypes.find(t => t.unit_type_uuid === department.unit_type)?.name ?? '-'}
+                                                <td>
+                                                    <LabelComponent 
+                                                        size={"badge-sm"} 
+                                                        style={"badge-outline"}
+                                                        type={department.is_enabled ? "success" : "error"} 
+                                                        text={department.is_enabled ? "是" : "否"}
+                                                        icon={department.is_enabled ? 
+                                                            <CheckOne theme="outline" size="12"/> : 
+                                                            <CloseOne theme="outline" size="12"/>}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <LabelComponent 
+                                                        size={"badge-sm"} 
+                                                        style={"badge-outline"}
+                                                        type={department.is_entity ? "success" : "error"} 
+                                                        text={department.is_entity ? "是" : "否"}
+                                                        icon={department.is_entity ? 
+                                                            <CheckOne theme="outline" size="12"/> : 
+                                                            <CloseOne theme="outline" size="12"/>}
+                                                    />
+                                                </td>
+                                                <td className={"hidden xl:table-cell"}>
+                                                    <LabelComponent 
+                                                        size={"badge-sm"} 
+                                                        style={"badge-outline"}
+                                                        type={department.is_attending_college ? "success" : "error"} 
+                                                        text={department.is_attending_college ? "是" : "否"}
+                                                        icon={department.is_attending_college ? 
+                                                            <BookOpen theme="outline" size="12"/> : 
+                                                            <CloseOne theme="outline" size="12"/>}
+                                                    />
                                                 </td>
                                                 <td className={"flex justify-end"}>
                                                     <div className="join">
