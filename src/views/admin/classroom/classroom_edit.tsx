@@ -33,10 +33,12 @@ import { GetClassroomAPI, GetClassroomTagsAPI, GetClassroomTypeAPI, UpdateClassr
 import { ClassroomDTO } from "../../../models/dto/classroom_dto.ts";
 import { ClassroomTagEntity } from "../../../models/entity/classroom_tag_entity.ts";
 import { ClassroomTypeEntity } from "../../../models/entity/classroom_type_entity.ts";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router";
 import { SiteInfoEntity } from '../../../models/entity/site_info_entity.ts';
 import { GetBuildingListAPI } from "../../../apis/building_api.ts";
+import { GetCampusListAPI } from "../../../apis/campus_api.ts";
 import { BuildingLiteEntity } from "../../../models/entity/building_lite_entity.ts";
+import { ListOfCampusEntity } from "../../../models/entity/list_of_campus_entity.ts";
 import { ClassroomInfoEntity } from "../../../models/entity/classroom_info_entity.ts";
 import { Key } from "antd/es/table/interface";
 
@@ -47,15 +49,17 @@ interface TransferItem {
 }
 
 export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+    const navigate = useNavigate();
+
     const { classroomUuid } = useParams<{ classroomUuid: string }>();
     const [data, setData] = useState<Partial<ClassroomDTO>>({});
     const [tagList, setTagList] = useState<ClassroomTagEntity[]>([]);
     const [typeList, setTypeList] = useState<ClassroomTypeEntity[]>([]);
     const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
+    const [campusList, setCampusList] = useState<ListOfCampusEntity[]>([]);
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [classroom, setClassroom] = useState<ClassroomInfoEntity | null>(null);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         document.title = `编辑教室 | ${site.name}`;
     }, [site.name]);
@@ -138,6 +142,25 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
         fetchBuildings().then();
     }, []);
 
+    // 获取校区列表
+    useEffect(() => {
+        const fetchCampus = async () => {
+            try {
+                const response = await GetCampusListAPI();
+                if (response?.output === "Success") {
+                    console.log("获取校区列表成功:", response.data);
+                    setCampusList(response.data!);
+                } else {
+                    message.error(response?.message ?? "获取校区列表失败");
+                }
+            } catch (error) {
+                console.error("校区列表请求失败:", error);
+                message.error("获取校区列表失败");
+            }
+        };
+        fetchCampus().then();
+    }, []);
+
     // 获取教室信息
     useEffect(() => {
         if (classroom) {
@@ -145,8 +168,18 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                 name: classroom.classroom?.name,
                 type: classroom.type?.class_type_uuid,
                 building_uuid: classroom.building?.building_uuid,
+                campus_uuid: classroom.campus?.campus_uuid,
                 capacity: classroom.classroom?.capacity,
                 tag: classroom.tag?.map(tag => tag.class_tag_uuid) ?? [],
+                area: classroom.classroom?.area ?? undefined,
+                number: classroom.classroom?.number ?? undefined,
+                floor: classroom.classroom?.floor ?? undefined,
+                examination_room: classroom.classroom?.examination_room ?? false,
+                examination_room_capacity: classroom.classroom?.examination_room_capacity ?? undefined,
+                is_multimedia: classroom.classroom?.is_multimedia ?? false,
+                is_air_conditioned: classroom.classroom?.is_air_conditioned ?? false,
+                description: classroom.classroom?.description ?? undefined,
+                status: classroom.classroom?.status ?? true
             });
             setTargetKeys(classroom.tag?.map(tag => tag.class_tag_uuid) ?? []);
         }
@@ -159,6 +192,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                 name: classroom.classroom?.name,
                 type: classroom.type?.class_type_uuid,
                 building_uuid: classroom.building?.building_uuid,
+                campus_uuid: classroom.campus?.campus_uuid,
                 capacity: classroom.classroom?.capacity,
                 tag: classroom.tag?.map(tag => tag.class_tag_uuid) ?? [],
             });
@@ -176,8 +210,11 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
             const getResp = await UpdateClassroomAPI(classroomUuid!, payload);
             if (getResp?.output === "Success") {
                 message.success("更新成功");
+                setTimeout(() => {
+                    navigate("/admin/classroom");
+                }, 500);
             } else {
-                message.error(getResp?.message ?? "更新失败");
+                message.error(getResp?.error_message ?? "更新失败");
             }
         } catch (error) {
             console.error("更新教室失败:", error);
@@ -290,6 +327,28 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                 </select>
                                             </fieldset>
 
+                                            {/* 所属校区 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <GreenHouse theme="outline" size="14" />
+                                                    <span>所属校区</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <select
+                                                    className="select select-sm w-full validator"
+                                                    required
+                                                    value={data.campus_uuid ?? ""}
+                                                    onChange={(e) => setData({ ...data, campus_uuid: e.target.value })}
+                                                >
+                                                    <option value="">请选择所属校区</option>
+                                                    {campusList.map((campus) => (
+                                                        <option key={campus.campus_uuid} value={campus.campus_uuid}>
+                                                            {campus.campus_name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </fieldset>
+
                                             {/* 容纳人数 */}
                                             <fieldset className="flex flex-col">
                                                 <legend className="flex items-center space-x-1 mb-1 text-sm">
@@ -304,6 +363,131 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     min="1"
                                                     value={data.capacity ?? ""}
                                                     onChange={(e) => setData({ ...data, capacity: parseInt(e.target.value) })}
+                                                />
+                                            </fieldset>
+
+                                            {/* 教室面积 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <GreenHouse theme="outline" size="14" />
+                                                    <span>教室面积</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="number"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={data.area ?? ""}
+                                                    onChange={(e) => setData({ ...data, area: parseFloat(e.target.value) })}
+                                                    placeholder="请输入教室面积（平方米）"
+                                                />
+                                            </fieldset>
+
+                                            {/* 教室编号 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Info theme="outline" size="14" />
+                                                    <span>教室编号</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    value={data.number ?? ""}
+                                                    onChange={(e) => setData({ ...data, number: e.target.value })}
+                                                    placeholder="请输入教室编号"
+                                                />
+                                            </fieldset>
+
+                                            {/* 楼层 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <GreenHouse theme="outline" size="14" />
+                                                    <span>楼层</span>
+                                                    <span className="text-red-500">*</span>
+                                                </legend>
+                                                <input
+                                                    type="text"
+                                                    className="input input-sm w-full validator"
+                                                    required
+                                                    pattern="^(B?\d+|G){1,4}$"
+                                                    value={data.floor ?? ""}
+                                                    onChange={(e) => setData({ ...data, floor: e.target.value })}
+                                                    placeholder="请输入楼层 (如: 0001, B001, G001)"
+                                                />
+                                            </fieldset>
+
+                                            {/* 考场设置 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Info theme="outline" size="14" />
+                                                    <span>考场设置</span>
+                                                </legend>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="checkbox checkbox-sm"
+                                                            checked={data.examination_room}
+                                                            onChange={(e) => setData({ ...data, examination_room: e.target.checked })}
+                                                        />
+                                                        <span>是否为考场</span>
+                                                    </label>
+                                                    {data.examination_room && (
+                                                        <input
+                                                            type="number"
+                                                            className="input input-sm w-full"
+                                                            min="1"
+                                                            value={data.examination_room_capacity ?? ""}
+                                                            onChange={(e) => setData({ ...data, examination_room_capacity: parseInt(e.target.value) })}
+                                                            placeholder="请输入考场容量"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </fieldset>
+
+                                            {/* 设备设置 */}
+                                            <fieldset className="flex flex-col">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Info theme="outline" size="14" />
+                                                    <span>设备设置</span>
+                                                </legend>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="checkbox checkbox-sm"
+                                                            checked={data.is_multimedia}
+                                                            onChange={(e) => setData({ ...data, is_multimedia: e.target.checked })}
+                                                        />
+                                                        <span>多媒体教室</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="checkbox checkbox-sm"
+                                                            checked={data.is_air_conditioned}
+                                                            onChange={(e) => setData({ ...data, is_air_conditioned: e.target.checked })}
+                                                        />
+                                                        <span>空调设备</span>
+                                                    </label>
+                                                </div>
+                                            </fieldset>
+
+                                            {/* 教室描述 */}
+                                            <fieldset className="flex flex-col md:col-span-2">
+                                                <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                    <Info theme="outline" size="14" />
+                                                    <span>教室描述</span>
+                                                </legend>
+                                                <textarea
+                                                    className="textarea textarea-sm w-full h-24"
+                                                    value={data.description ?? ""}
+                                                    onChange={(e) => setData({ ...data, description: e.target.value })}
+                                                    placeholder="请输入教室描述信息"
                                                 />
                                             </fieldset>
 
