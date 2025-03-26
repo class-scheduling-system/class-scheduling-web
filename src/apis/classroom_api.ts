@@ -127,6 +127,24 @@ const DeleteClassroomAPI = async (classroomUuid: string): Promise<BaseResponse<C
     );
 }
 
+/**
+ * # 获取教室信息
+ * > 获取单个教室的详细信息
+ * 
+ * @param classroomUuid 教室主键
+ * @returns 教室信息
+ */
+const GetClassroomAPI = async (classroomUuid: string): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
+    return BaseApi<ClassroomInfoEntity>(
+        MethodType.GET,
+        "/api/v1/classroom/",
+        null,
+        null,
+        classroomUuid,
+        { "Authorization": `Bearer ${GetAuthorizationToken()}` }
+    );
+}
+
 export {
     GetClassroomTagsAPI,
     GetClassroomTypeAPI,
@@ -134,5 +152,6 @@ export {
     GetClassroomListAPI,
     CreateClassroomAPI,
     UpdateClassroomAPI,
-    DeleteClassroomAPI
+    DeleteClassroomAPI,
+    GetClassroomAPI
 };

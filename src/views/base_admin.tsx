@@ -59,6 +59,9 @@ import { CampusEdit } from "./admin/campus/campus_edit.tsx";
 import { AdminSystemInfo } from "./admin/admin_system_info.tsx";
 import { AdminSetting } from "./admin/admin_setting";
 import { AdminJvmMonitor } from "./admin/admin_jvm_monitor";
+import { AdminClassroomAddPage } from "./admin/classroom/classroom_add.tsx";
+import { AdminClassroomEditPage } from "./admin/classroom/classroom_edit.tsx";
+import { AdminClassroom } from "./admin/admin_classroom.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -183,7 +186,10 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/unit/type/edit/:uuid" element={<AdminUnitTypeEdit site={site} />} />
                                 <Route path="/campus" element={<AdminCampus site={site} />} />
                                 <Route path="/campus/add" element={<CampusAdd site={site} />} />
-                                <Route path="/campus/edit/:campusId" element={<CampusEdit site={site} />} />
+                                <Route path="/campus/edit/:campusUuid" element={<CampusEdit site={site} />} />
+                                <Route path="/classroom" element={<AdminClassroom site={site} />} />
+                                <Route path="/classroom/add" element={<AdminClassroomAddPage site={site} />} />
+                                <Route path="/classroom/edit/:classroomUuid" element={<AdminClassroomEditPage site={site} />} />
                                 <Route path="/system-info" element={<AdminSystemInfo site={site} />} />
                                 <Route path="/jvm-monitor" element={<AdminJvmMonitor site={site} />} />
                                 <Route path="/setting" element={<AdminSetting site={site} />} />

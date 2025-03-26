@@ -52,7 +52,7 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(true);
-    const { campusId } = useParams();
+    const { campusUuid } = useParams();
     const campusInfo = location.state?.CampusInfo;
 
     const [data, setData] = useState<CampusDTO>({} as CampusDTO);
@@ -80,7 +80,7 @@ export function CampusEdit({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         try {
-            const getResp = await EditCampusAPI(campusId || '', data);
+            const getResp = await EditCampusAPI(campusUuid || '', data);
             if (getResp?.output === "Success") {
                 message.success("编辑校区成功");
                 navigate("/admin/campus");

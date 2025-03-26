@@ -1,0 +1,405 @@
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2022-NOW(至今) 锋楪技术团队
+ * Author: 锋楪技术团队 (https://www.frontleaves.com)
+ *
+ * 本文件包含锋楪技术团队项目的源代码，项目的所有源代码均遵循 MIT 开源许可证协议。
+ * --------------------------------------------------------------------------------
+ * 许可证声明：
+ *
+ * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
+ *
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
+ * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
+ * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
+ *
+ * 使用本软件即表示您了解此声明并同意其条款。
+ *
+ * 有关 MIT 许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
+ * https://opensource.org/licenses/MIT
+ * --------------------------------------------------------------------------------
+ * 免责声明：
+ *
+ * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
+ * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
+ * --------------------------------------------------------------------------------
+ */
+
+import React, { JSX, useEffect, useState } from 'react';
+import { Return, Refresh, Info, Editor, GreenHouse, UserPositioning, CheckOne } from "@icon-park/react";
+import { message, Transfer } from "antd";
+import { CreateClassroomAPI, GetClassroomTagsAPI, GetClassroomTypeAPI } from "../../../apis/classroom_api.ts";
+import { ClassroomDTO } from "../../../models/dto/classroom_dto.ts";
+import { ClassroomTagEntity } from "../../../models/entity/classroom_tag_entity.ts";
+import { ClassroomTypeEntity } from "../../../models/entity/classroom_type_entity.ts";
+import { Link } from "react-router";
+import { SiteInfoEntity } from '../../../models/entity/site_info_entity.ts';
+import { GetBuildingListAPI } from "../../../apis/building_api.ts";
+import { BuildingLiteEntity } from "../../../models/entity/building_lite_entity.ts";
+import { Key } from "antd/es/table/interface";
+
+interface TransferItem {
+    key: string;
+    title: string;
+    description: string;
+}
+
+interface RecentClassroom {
+    name: string;
+    type: string;
+    time: string;
+}
+
+export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+    const [data, setData] = useState<Partial<ClassroomDTO>>({
+        tag: [],
+        status: true,
+        is_multimedia: false,
+        is_air_conditioned: false,
+        examination_room: false,
+    });
+    const [tagList, setTagList] = useState<ClassroomTagEntity[]>([]);
+    const [typeList, setTypeList] = useState<ClassroomTypeEntity[]>([]);
+    const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
+    const [targetKeys, setTargetKeys] = useState<string[]>([]);
+
+    useEffect(() => {
+        document.title = `添加教室 | ${site.name}`;
+    }, [site.name]);
+
+    // 最近添加的教室列表状态 - 从localStorage获取或使用空数组作为默认值
+    const [recentClassrooms, setRecentClassrooms] = useState<RecentClassroom[]>(() => {
+        const savedClassrooms = localStorage.getItem('recentAddedClassrooms');
+        return savedClassrooms ? JSON.parse(savedClassrooms) : [];
+    });
+
+    // 获取教室标签列表
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await GetClassroomTagsAPI();
+                if (response?.output === "Success") {
+                    console.log("获取教室标签列表成功:", response.data);
+                    setTagList(response.data!);
+                } else {
+                    message.error(response?.message ?? "获取教室标签列表失败");
+                }
+            } catch (error) {
+                console.error("教室标签列表请求失败:", error);
+                message.error("获取教室标签列表失败");
+            }
+        };
+        fetchTags().then();
+    }, []);
+
+    // 获取教室类型列表
+    useEffect(() => {
+        const fetchTypes = async () => {
+            try {
+                const response = await GetClassroomTypeAPI();
+                if (response?.output === "Success") {
+                    console.log("获取教室类型列表成功:", response.data);
+                    setTypeList(response.data!);
+                } else {
+                    message.error(response?.message ?? "获取教室类型列表失败");
+                }
+            } catch (error) {
+                console.error("教室类型列表请求失败:", error);
+                message.error("获取教室类型列表失败");
+            }
+        };
+        fetchTypes().then();
+    }, []);
+
+    // 获取建筑列表
+    useEffect(() => {
+        const fetchBuildings = async () => {
+            try {
+                const response = await GetBuildingListAPI("");
+                if (response?.output === "Success") {
+                    console.log("获取建筑列表成功:", response.data);
+                    setBuildingList(response.data!);
+                } else {
+                    message.error(response?.message ?? "获取建筑列表失败");
+                }
+            } catch (error) {
+                console.error("建筑列表请求失败:", error);
+                message.error("获取建筑列表失败");
+            }
+        };
+        fetchBuildings().then();
+    }, []);
+
+    // 重置表单
+    const resetForm = () => {
+        setData({
+            tag: [],
+            status: true,
+            is_multimedia: false,
+            is_air_conditioned: false,
+            examination_room: false,
+        });
+        setTargetKeys([]);
+    };
+
+    // 更新最近添加的教室列表
+    const updateRecentClassrooms = (newClassroom: Partial<ClassroomDTO>) => {
+        const now = new Date();
+        const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const classroomRecord: RecentClassroom = {
+            name: newClassroom.name ?? "",
+            type: typeList.find(type => type.class_type_uuid === newClassroom.type)?.name ?? "",
+            time: timeString
+        };
+
+        const updatedRecentClassrooms = [classroomRecord, ...recentClassrooms.slice(0, 2)];
+        setRecentClassrooms(updatedRecentClassrooms);
+        localStorage.setItem('recentAddedClassrooms', JSON.stringify(updatedRecentClassrooms));
+    };
+
+    // 提交表单
+    async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const payload = { ...data, tag: targetKeys } as ClassroomDTO;
+
+        try {
+            const getResp = await CreateClassroomAPI(payload);
+            if (getResp?.output === "Success") {
+                updateRecentClassrooms(payload);
+                message.success("添加成功");
+                resetForm();
+            } else {
+                message.error(getResp?.message ?? "添加失败");
+            }
+        } catch (error) {
+            console.error("添加教室失败:", error);
+            message.error("添加教室失败");
+        }
+    }
+
+    // 处理标签选择变化
+    const handleTransferChange = (newTargetKeys: Key[]) => {
+        const stringKeys = newTargetKeys.map(key => key.toString());
+        setTargetKeys(stringKeys);
+        setData({ ...data, tag: stringKeys });
+    };
+
+    // 标签过滤选项
+    const filterOption = (inputValue: string, option: TransferItem) => {
+        if (!inputValue) {
+            return true;
+        }
+        return option.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
+    };
+
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="flex items-center space-x-2">
+                <Link to={"/admin/classroom"}>
+                    <Return theme="outline" size="24" />
+                </Link>
+                <h2 className="text-2xl font-bold flex items-center space-x-2">
+                    <span>添加新教室</span>
+                </h2>
+            </div>
+            <div className="w-full">
+                <div className="grid grid-cols-12 gap-x-6">
+                    <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
+                        <div className="card card-border bg-base-100 w-full shadow-md">
+                            <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Editor theme="outline" size="18" />添加教室信息</h2>
+                            <div className="card-body">
+                                <form id="classroom_add" onSubmit={onSubmit} className="flex flex-col flex-grow space-y-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                                        {/* 教室名称 */}
+                                        <fieldset className="flex flex-col">
+                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                <GreenHouse theme="outline" size="14" />
+                                                <span>教室名称</span>
+                                                <span className="text-red-500">*</span>
+                                            </legend>
+                                            <input
+                                                type="text"
+                                                className="input input-sm w-full validator"
+                                                required
+                                                value={data.name ?? ""}
+                                                onChange={(e) => setData({ ...data, name: e.target.value })}
+                                                placeholder="请输入教室名称"
+                                            />
+                                        </fieldset>
+
+                                        {/* 教室类型 */}
+                                        <fieldset className="flex flex-col">
+                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                <UserPositioning theme="outline" size="14" />
+                                                <span>教室类型</span>
+                                                <span className="text-red-500">*</span>
+                                            </legend>
+                                            <select
+                                                className="select select-sm w-full validator"
+                                                required
+                                                value={data.type ?? ""}
+                                                onChange={(e) => setData({ ...data, type: e.target.value })}
+                                            >
+                                                <option value="">请选择教室类型</option>
+                                                {typeList.map((type) => (
+                                                    <option key={type.class_type_uuid} value={type.class_type_uuid}>
+                                                        {type.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </fieldset>
+
+                                        {/* 所属建筑 */}
+                                        <fieldset className="flex flex-col">
+                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                <GreenHouse theme="outline" size="14" />
+                                                <span>所属建筑</span>
+                                                <span className="text-red-500">*</span>
+                                            </legend>
+                                            <select
+                                                className="select select-sm w-full validator"
+                                                required
+                                                value={data.building_uuid ?? ""}
+                                                onChange={(e) => setData({ ...data, building_uuid: e.target.value })}
+                                            >
+                                                <option value="">请选择所属建筑</option>
+                                                {buildingList.map((building) => (
+                                                    <option key={building.building_uuid} value={building.building_uuid}>
+                                                        {building.building_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </fieldset>
+
+                                        {/* 容纳人数 */}
+                                        <fieldset className="flex flex-col">
+                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                <UserPositioning theme="outline" size="14" />
+                                                <span>容纳人数</span>
+                                                <span className="text-red-500">*</span>
+                                            </legend>
+                                            <input
+                                                type="number"
+                                                className="input input-sm w-full validator"
+                                                required
+                                                min="1"
+                                                value={data.capacity ?? ""}
+                                                onChange={(e) => setData({ ...data, capacity: parseInt(e.target.value) })}
+                                                placeholder="请输入容纳人数"
+                                            />
+                                        </fieldset>
+
+                                        {/* 教室标签 */}
+                                        <fieldset className="flex flex-col md:col-span-2 flex-grow">
+                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                                <Info theme="outline" size="14" />
+                                                <span>教室标签</span>
+                                            </legend>
+                                            <div className="flex-grow">
+                                                <Transfer<TransferItem>
+                                                    dataSource={tagList.map(tag => ({
+                                                        key: tag.class_tag_uuid,
+                                                        title: tag.name,
+                                                        description: tag.description
+                                                    }))}
+                                                    showSearch
+                                                    filterOption={filterOption}
+                                                    targetKeys={targetKeys}
+                                                    onChange={handleTransferChange}
+                                                    render={(item) => (
+                                                        <div>
+                                                            <div>{item.title}</div>
+                                                            {item.description && (
+                                                                <div className="text-xs text-gray-500">{item.description}</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    listStyle={{
+                                                        width: '100%',
+                                                        height: 280,
+                                                    }}
+                                                />
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div className="card-actions justify-end flex">
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline"
+                                            onClick={resetForm}
+                                        >
+                                            <Refresh theme="outline" size="14" />
+                                            <span>重置</span>
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-sm btn-primary"
+                                        >
+                                            <CheckOne theme="outline" size="14" />
+                                            <span>提交</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="lg:col-span-4 md:col-span-12 sm:col-span-12 flex flex-col space-y-6">
+                        <div className="card card-border bg-base-100 w-full shadow-md">
+                            <h2 className="card-title bg-secondary/55 rounded-t-lg p-3"><Info theme="outline" size="18" />操作提示</h2>
+                            <div className="card-body">
+                                <ul className="space-y-2 text-gray-700">
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>教室名称应该简洁明了，便于识别</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>教室类型决定了教室的主要用途</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>所属建筑用于定位教室的具体位置</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>容纳人数影响教室的分配策略</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>标签可以帮助更好地筛选和管理教室</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>重置按钮可恢复表单到初始状态</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        {recentClassrooms.length > 0 && (
+                            <div className="card card-border bg-base-100 w-full shadow-md">
+                                <h2 className="card-title bg-neutral/10 rounded-t-lg p-3"><Info theme="outline" size="18" />最近添加</h2>
+                                <div className="card-body">
+                                    <div className="space-y-4">
+                                        {recentClassrooms.map((classroom, index) => (
+                                            <div key={index} className="bg-base-200 p-4 rounded-lg">
+                                                <div className="font-semibold">{classroom.name}</div>
+                                                <div className="text-sm text-gray-500">
+                                                    类型: {classroom.type}
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                    {classroom.time}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+} 

@@ -60,7 +60,7 @@ const GetBuildingPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
  * @param keyword
  * @constructor
  */
-const GetBuildingListAPI = async (keyword: string): Promise<BaseResponse<BuildingLiteEntity[]> | undefined> => {
+const GetBuildingListAPI = async (keyword?: string): Promise<BaseResponse<BuildingLiteEntity[]> | undefined> => {
     return BaseApi<BuildingLiteEntity[]>(
         MethodType.GET,
         "/api/v1/building/list",

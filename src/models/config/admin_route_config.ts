@@ -14,5 +14,6 @@ export const adminRouteConfig: Record<string, string> = {
     'department': '部门管理',
     'unit': '单位管理',
     'campus': '校区管理',
-    'jvm-monitor': 'JVM 监控'
+    'jvm-monitor': 'JVM 监控',
+    'classroom': '教室管理'
 };
