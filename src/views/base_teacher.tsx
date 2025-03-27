@@ -133,7 +133,7 @@ export function BaseTeacher(): JSX.Element {
                 <TeacherNavComponent/>
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
+                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm flex justify-between items-center z-10 bg-gradient-to-r from-base-100  to-primary/10">
                     <div className="breadcrumbs text-sm">
                         <ul>
                             {useBreadcrumbs("/teacher", teacherRouteConfig)}

@@ -47,13 +47,20 @@ export function TeacherNavComponent(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
 
     return (
-        <div className={"flex flex-col"}>
-            <div className={"px-4 py-8 text-center w-full"}>
-                <h1 className={"text-2xl font-bold text-primary"}>{site.name ?? "课程管理系统"}</h1>
-                <div className="divider divider-primary"></div>
+        <div className={"flex flex-col h-full bg-gradient-to-r from-base-200 to-base-100"}>
+            <div className={"px-4 py-8 text-center w-full "}>
+                <h1 className={"text-2xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent"}>
+                    教师工作台
+                </h1>
+                <div className="h-0.5 mt-4 bg-gradient-to-r from-secondary to-primary rounded-full mx-8 opacity-50"></div>
             </div>
-            <div className={"px-4 grid gap-2"}>
-                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">主要功能</h2>
+            <div className={"px-4 grid gap-2 py-4"}>
+                <div className="relative">
+                    <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-2 flex items-center">
+                        <span className="w-1 h-4 bg-secondary rounded-full mr-2"></span>
+                        主要功能
+                    </h2>
+                </div>
                 <TeacherNavLinkComponent title={"工作台"} icon={<Dashboard theme="outline" size="16"/>}
                                        path={"/teacher/dashboard"}/>
                 <TeacherNavLinkComponent title={"课程表"} icon={<Calendar theme="outline" size="16"/>}
@@ -63,16 +70,21 @@ export function TeacherNavComponent(): JSX.Element {
                 <TeacherNavLinkComponent title={"班级管理"} icon={<School theme="outline" size="16"/>}
                                        path={"/teacher/class"}/>
 
-                <div className="divider my-2"></div>
+                <div className="h-px my-4 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
-                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">个人中心</h2>
+                <div className="relative">
+                    <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-2 flex items-center">
+                        <span className="w-1 h-4 bg-primary rounded-full mr-2"></span>
+                        个人中心
+                    </h2>
+                </div>
                 <TeacherNavLinkComponent title={"个人信息"} icon={<User theme="outline" size="16"/>}
                                        path={"/teacher/profile"}/>
             </div>
-            <div className="mt-auto p-4 border-t border-gray-200">
+            <div className="mt-auto p-6 border-t border-gray-200/50 bg-gradient-to-t from-base-200 to-transparent">
                 <div className="text-xs text-gray-500 text-center">
-                    <p>© {new Date().getFullYear()} {site.name ?? "课程管理系统"}</p>
-                    <p className="mt-1">由 锋楪技术团队 提供技术支持</p>
+                    <p className="font-medium">{site.name ?? "课程管理系统"}</p>
+                    <p className="mt-1 text-[10px] opacity-75">由 锋楪技术团队 提供技术支持</p>
                 </div>
             </div>
         </div>

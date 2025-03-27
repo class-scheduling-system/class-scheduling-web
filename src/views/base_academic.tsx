@@ -142,7 +142,7 @@ export function BaseAcademic(): JSX.Element {
                 <AcademicNavComponent/>
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-md flex justify-between items-center z-10">
+                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm flex justify-between items-center z-10 bg-gradient-to-r from-base-100 to-secondary/10">
                     <div className="breadcrumbs text-sm">
                         <ul>
                             {useBreadcrumbs("/academic", academicRouteConfig)}
@@ -155,7 +155,7 @@ export function BaseAcademic(): JSX.Element {
                                     <span className="text-sm font-medium">{getUser.user?.name ?? "未登录用户"}</span>
                                     <span className="text-xs text-gray-500">{getUser.user?.email ?? "未登录"}</span>
                                 </div>
-                                <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white">
+                                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white">
                                     <People theme="filled" size="20" fill="#FFFFFF" />
                                 </div>
                             </button>

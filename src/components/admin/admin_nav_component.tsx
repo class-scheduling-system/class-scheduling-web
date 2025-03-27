@@ -51,8 +51,8 @@ import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
 export function AdminNavComponent(): JSX.Element {
     return (
         <div className={"flex flex-col h-full"}>
-            <div className={"px-6 py-6 w-full bg-base-200 border-b border-gray-200"}>
-                <h1 className={"text-2xl font-bold text-primary-content text-center"}>管理员控制台</h1>
+            <div className={"px-6 py-5 w-full bg-gradient-to-r from-base-300 to-base-100 border-b border-gray-200"}>
+                <h1 className={"text-xl font-bold text-primary-content text-center"}>管理员控制台</h1>
             </div>
             <div className={"px-4 grid gap-2 overflow-y-auto pt-4"}>
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">系统管理</h2>

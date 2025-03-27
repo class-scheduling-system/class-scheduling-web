@@ -155,7 +155,7 @@ export function BaseAdmin(): JSX.Element {
                 <AdminNavComponent />
             </animated.div>
             <div className="w-full flex flex-col flex-1">
-                <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
+                <animated.div style={topFade} className="w-full bg-gradient-to-r from-base-100 to-base-200/50 px-6 py-4 border-b border-gray-200 flex justify-between items-center z-10">
                     <div className="breadcrumbs text-sm">
                         <ul>
                             {useBreadcrumbs('/admin', adminRouteConfig)}

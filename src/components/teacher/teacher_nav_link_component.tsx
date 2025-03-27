@@ -26,44 +26,53 @@
  * --------------------------------------------------------------------------------
  */
 
-import {JSX} from "react";
-import {Link} from "react-router";
+import {JSX, ReactNode} from "react";
+import {Link, useLocation} from "react-router";
+
+interface TeacherNavLinkComponentProps {
+    title: string;
+    icon: ReactNode;
+    path: string;
+}
 
 /**
- * 创建一个导航链接组件，用于教师界面中显示特定的导航项。
- *
- * @param {Readonly<{title: string, icon: JSX.Element, path: string}>} - 该参数对象包含三个属性：
- * - title: 导航链接显示的文字标题
- * - icon: 与标题一同展示的图标元素
- * - path: 点击导航链接后跳转的目标路径
- *
- * @return {JSX.Element} 返回一个React组件，该组件渲染为一个带有指定标题、图标及目标路径的可点击链接。此链接根据其是否指向当前激活的路由自动应用不同的样式。
+ * 生成一个教师导航链接组件。
+ * 该函数返回一个包含导航链接的组件。
+ * @param {TeacherNavLinkComponentProps} props 组件属性
+ * @return {JSX.Element} 包含导航链接的组件
  */
-export function TeacherNavLinkComponent({title, icon, path}: Readonly<{
-    title: string,
-    icon: JSX.Element,
-    path: string
-}>): JSX.Element {
+export function TeacherNavLinkComponent(props: TeacherNavLinkComponentProps): JSX.Element {
+    const location = useLocation();
 
-    /**
-     * 根据当前路径是否匹配给定的路由，返回相应的CSS类名。
-     *
-     * @param {string} route - 需要检查的路由路径。
-     * @return {string} 如果当前路径与给定的路由匹配，则返回表示激活状态的CSS类名；否则，返回表示非激活状态的CSS类名。
-     */
-    function selectedRoute(route: string): string {
-        if (location.pathname === route) {
-            return "bg-primary text-white shadow-md";
-        } else {
-            return "hover:bg-primary-content hover:text-primary hover:shadow-md transition-all";
-        }
+    // 判断当前路由是否被选中
+    function selectedRoute(): boolean {
+        return location.pathname.startsWith(props.path);
     }
 
     return (
-        <Link to={path}
-              className={`transition-all duration-200 rounded-lg p-2 flex space-x-2 items-center ${selectedRoute(path)}`}>
-            <div className="text-lg">{icon}</div>
-            <span className="font-medium">{title}</span>
+        <Link to={props.path}
+              className={`flex items-center px-4 py-2.5 rounded-xl group relative overflow-hidden ${
+                  selectedRoute()
+                      ? "text-primary-content"
+                      : "text-gray-600 hover:text-primary-content"
+              }`}>
+            <div className={`absolute inset-0 transition-opacity duration-300 ease-in-out opacity-0 bg-gradient-to-r from-secondary/20 to-primary/20 ${
+                selectedRoute() ? "opacity-100" : "group-hover:opacity-100"
+            }`} />
+            <div className={`relative z-10 mr-3 transition-all duration-300 ease-in-out transform ${
+                selectedRoute() 
+                    ? "text-primary scale-110" 
+                    : "text-gray-400 group-hover:text-primary group-hover:scale-110"
+            }`}>
+                {props.icon}
+            </div>
+            <span className={`relative z-10 text-sm font-medium transition-all duration-300 ease-in-out ${
+                selectedRoute()
+                    ? "bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent"
+                    : "group-hover:text-primary"
+            }`}>
+                {props.title}
+            </span>
         </Link>
     );
 } 
