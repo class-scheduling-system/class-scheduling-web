@@ -41,6 +41,7 @@ import {setUserInfo} from "./stores/user_store.ts";
 import {PageNotFound} from "./views/404/page_not_found.tsx";
 import {BaseAcademic} from "./views/base_academic.tsx";
 import {BaseUser} from "./views/base_user.tsx";
+import {BaseTeacher} from "./views/base_teacher.tsx";
 
 /**
  * # Index
@@ -86,7 +87,7 @@ export function Index(): JSX.Element {
                             case "教务":
                                 navigate("/academic/dashboard");
                                 break;
-                            case "老师":
+                            case "教师":
                                 navigate("/teacher/dashboard");
                                 break;
                             default:
@@ -113,6 +114,7 @@ export function Index(): JSX.Element {
                 <Route path={"/admin/*"} element={<BaseAdmin/>}/>
                 <Route path={"/academic/*"} element={<BaseAcademic/>}/>
                 <Route path={"/user/*"} element={<BaseUser/>}/>
+                <Route path={"/teacher/*"} element={<BaseTeacher/>}/>
                 <Route path={"/*"} element={<PageNotFound/>}/>
             </Routes>
         </>
