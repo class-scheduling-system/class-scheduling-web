@@ -26,22 +26,53 @@
  * --------------------------------------------------------------------------------
  */
 
-import {defineConfig} from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from "@tailwindcss/vite";
-import { resolve } from 'path';
+/**
+ * # 教师课程偏好实体类
+ * > 该类用于表示教师对课程的偏好设置，包括时间段偏好、教室偏好等信息
+ */
+export type TeacherPreferenceEntity = {
+    /**
+     * 偏好UUID
+     */
+    preference_uuid: string;
 
-export default defineConfig({
-    plugins: [
-        react(),
-        tailwindcss(),
-    ],
-    server: {
-        host: "0.0.0.0"
-    },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, './src')
-        }
-    }
-})
+    /**
+     * 教师UUID
+     */
+    teacher_uuid: string;
+
+    /**
+     * 学期UUID
+     */
+    semester_uuid: string;
+
+    /**
+     * 星期几（1-7，1代表周一）
+     */
+    day_of_week: number;
+
+    /**
+     * 时间段（1-5，代表第几节课）
+     */
+    time_slot: number;
+
+    /**
+     * 偏好级别（1-5，1代表最不喜欢，5代表最喜欢）
+     */
+    preference_level: number;
+
+    /**
+     * 原因说明
+     */
+    reason?: string;
+
+    /**
+     * 创建时间（Unix时间戳，毫秒）
+     */
+    created_at: number;
+
+    /**
+     * 更新时间（Unix时间戳，毫秒）
+     */
+    updated_at: number;
+} 

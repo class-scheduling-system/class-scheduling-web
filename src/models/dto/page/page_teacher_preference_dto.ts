@@ -26,22 +26,16 @@
  * --------------------------------------------------------------------------------
  */
 
-import {defineConfig} from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from "@tailwindcss/vite";
-import { resolve } from 'path';
-
-export default defineConfig({
-    plugins: [
-        react(),
-        tailwindcss(),
-    ],
-    server: {
-        host: "0.0.0.0"
-    },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, './src')
-        }
-    }
-})
+/**
+ * # PageTeacherPreferenceDTO
+ * > 教师课程偏好分页查询结果实体
+ *
+ * 该类继承自 PageEntity，专门用于处理教师课程偏好的分页数据。
+ */
+export type PageTeacherPreferenceDTO = {
+    page: number;
+    size: number;
+    is_desc: boolean;
+    teacher_uuid: string;
+    semester_uuid: string;
+}
