@@ -53,10 +53,29 @@ export function BaseTeacher(): JSX.Element {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (getUser.loading) {
+            return;
+        }
+
+        // 检查用户是否已登录
+        if (!getUser.user) {
+            message.error("请先登录");
+            navigate("/auth/login");
+            return;
+        }
+
+        // 检查用户是否具有教师角色
+        if (getUser.user.role.role_name !== "教师") {
+            message.error("您没有教师权限");
+            navigate("/");
+            return;
+        }
+
+        // 重定向到仪表盘
         if (location.pathname === "/teacher") {
             navigate("/teacher/dashboard");
         }
-    }, [location.pathname, navigate]);
+    }, [location.pathname, navigate, getUser.user]);
 
     // 设置路由切换动画
     const transitions = useTransition(location, {

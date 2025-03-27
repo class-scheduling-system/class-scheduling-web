@@ -75,10 +75,29 @@ export function BaseAdmin(): JSX.Element {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (getUser.loading) {
+            return;
+        }
+
+        // 检查用户是否已登录
+        if (!getUser.user) {
+            message.error("请先登录");
+            navigate("/auth/login");
+            return;
+        }
+
+        // 检查用户是否具有管理员角色
+        if (getUser.user.role.role_name !== "管理员") {
+            message.error("您没有管理员权限");
+            navigate("/");
+            return;
+        }
+
+        // 重定向到仪表盘
         if (location.pathname === "/admin") {
             navigate("/admin/dashboard");
         }
-    }, [location.pathname, navigate]);
+    }, [location.pathname, navigate, getUser.user]);
 
     // 设置路由切换动画
     const transitions = useTransition(location, {

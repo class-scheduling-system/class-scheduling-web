@@ -38,7 +38,7 @@ import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
  */
 export const userStore = createSlice({
     name: "user",
-    initialState: {} as UserInfoEntity,
+    initialState: {loading: true} as UserInfoEntity,
     reducers: {
         /**
          * # setUserInfo
@@ -51,6 +51,7 @@ export const userStore = createSlice({
             state.user = action.payload.user;
             state.student = action.payload.student;
             state.teacher = action.payload.teacher;
+            state.loading = false;
         },
     }
 });

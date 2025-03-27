@@ -54,4 +54,8 @@ export type UserInfoEntity = {
      * 用户数据传输对象，若用户未注册则为{@code null}
      */
     user?: UserEntity;
+    /**
+     * 是否正在加载用户数据
+     */
+    loading?: boolean;
 }
