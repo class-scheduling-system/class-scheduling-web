@@ -32,10 +32,25 @@
  *
  * 该类继承自 PageEntity，专门用于处理教师课程偏好的分页数据。
  */
-export type PageTeacherPreferenceDTO = {
-    page: number;
-    size: number;
+export type PageTeacherPreferenceSearchDTO = {
+    /**
+     * 是否按降序排序，默认值为true
+     */
     is_desc: boolean;
-    teacher_uuid: string;
-    semester_uuid: string;
+    /**
+     * 分页的页码，从1开始，默认值为1
+     */
+    page: number;
+    /**
+     * 学期UUID，可选参数
+     */
+    semester_uuid?: string;
+    /**
+     * 每页显示的数据条数，默认值为20，最大值为200
+     */
+    size: number;
+    /**
+     * 教师UUID，可选参数
+     */
+    teacher_uuid?: string;
 }

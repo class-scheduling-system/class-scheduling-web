@@ -30,7 +30,7 @@ import { BaseApi, GetAuthorizationToken, MethodType } from '../assets/ts/base_ap
 import { BaseResponse } from '../models/base_response';
 import { TeacherPreferenceEntity } from '../models/entity/teacher_preference_entity';
 import { TeacherPreferenceDTO } from '../models/dto/teacher_preference_dto';
-import { PageTeacherPreferenceDTO } from '../models/dto/page/page_teacher_preference_dto';
+import { PageTeacherPreferenceDTO } from '../models/dto/page/page_teacher_preference_search_dto.ts';
 import { PageEntity } from '../models/entity/page_entity';
 
 /**
