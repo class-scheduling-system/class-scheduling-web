@@ -51,6 +51,23 @@ const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse
     )
 }
 
+/**
+ * # 获取教师简洁列表
+ * > 该函数用于通过API请求获取教师简洁列表。它利用了Bearer令牌认证方式来确保安全地访问教师数据。
+ *
+ * @returns {Promise<BaseResponse<TeacherEntity> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetTeacherSimpleListAPI = async ():Promise<BaseResponse<TeacherEntity> | undefined> => {
+    return BaseApi<TeacherEntity>(
+        MethodType.GET,
+        "/api/v1/teacher/list",
+        null,
+        null,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
 
 /**
  * # 增加教师
@@ -117,6 +134,7 @@ const EditTeacherAPI = async (teacher_uuid: string, data: TeacherDTO): Promise<B
 
 export{
     GetTeacherListAPI,
+    GetTeacherSimpleListAPI,
     AddTeacherAPI,
     DeleteTeacherAPI,
     EditTeacherAPI

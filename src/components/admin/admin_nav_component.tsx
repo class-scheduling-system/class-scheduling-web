@@ -37,7 +37,8 @@ import {
     User,
     UserPositioning,
     WatchOne,
-    Classroom
+    Classroom,
+    Like
 } from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
@@ -80,6 +81,9 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"单位管理"} icon={<People theme="outline" size="18"/>}
                                        match={"unit"}
                                        path={"/admin/unit"}/>
+                <AdminNavLinkComponent title={"教师课程偏好管理"} icon={<Like theme="outline" size="18"/>}
+                                       match={"teacher-preference"}
+                                       path={"/admin/teacher-preference"}/>
 
                 <div className="divider my-2"></div>
 

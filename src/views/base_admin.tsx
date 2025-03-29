@@ -62,6 +62,7 @@ import { AdminJvmMonitor } from "./admin/admin_jvm_monitor";
 import { AdminClassroomAddPage } from "./admin/classroom/classroom_add.tsx";
 import { AdminClassroomEditPage } from "./admin/classroom/classroom_edit.tsx";
 import { AdminClassroom } from "./admin/admin_classroom.tsx";
+import { AdminTeacherPreference } from "./admin/admin_teacher-preference.tsx";
 
 /**
  * 生成一个管理员控制台组件。
@@ -203,6 +204,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/unit/category/edit/:uuid" element={<AdminUnitCategoryEdit site={site} />} />
                                 <Route path="/unit/type/add" element={<AdminUnitTypeAdd site={site} />} />
                                 <Route path="/unit/type/edit/:uuid" element={<AdminUnitTypeEdit site={site} />} />
+                                <Route path="/teacher-preference" element={<AdminTeacherPreference site={site} />} />
                                 <Route path="/campus" element={<AdminCampus site={site} />} />
                                 <Route path="/campus/add" element={<CampusAdd site={site} />} />
                                 <Route path="/campus/edit/:campusUuid" element={<CampusEdit site={site} />} />
