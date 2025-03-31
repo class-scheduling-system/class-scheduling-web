@@ -42,7 +42,7 @@ import {TeacherNavComponent} from "../components/teacher/teacher_nav_component.t
 import {TeacherDashboard} from "./teacher/teacher_dashboard.tsx";
 import {TeacherPreferences} from "./teacher/teacher_preferences.tsx";
 import {TeacherPreferencesAdd} from "./teacher/teacher_preferences_add.tsx";
-
+import {TeacherPreferencesEdit} from "./teacher/teacher_preferences_edit.tsx";
 
 /**
  * 生成一个教师控制台组件。
@@ -173,6 +173,7 @@ export function BaseTeacher(): JSX.Element {
                                 <Route path="/dashboard" element={<TeacherDashboard site={site}/>}/>
                                 <Route path="/teacher-preferences" element={<TeacherPreferences site={site}/>}/>
                                 <Route path="/teacher-preferences/add" element={<TeacherPreferencesAdd site={site}/>}/>
+                                <Route path="/teacher-preferences/edit/:preference_uuid" element={<TeacherPreferencesEdit site={site}/>}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>

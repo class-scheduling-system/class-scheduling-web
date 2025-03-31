@@ -34,7 +34,7 @@ import { CreateTeacherPreferenceAPI } from "@/apis/teacher_preferences_api";
 import { useNavigate } from "react-router";
 import { message } from "antd";
 import { TeacherPreferenceDTO } from "@/models/dto/teacher_preference_dto";
-import { Return, Info, Calendar, Time, Star, Write, CheckOne, Refresh, AddMode } from "@icon-park/react";
+import { Return, Info, Calendar, Time, Star, Write, CheckOne, Refresh, AddMode, ListView } from "@icon-park/react";
 import { Link } from "react-router";
 
 export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
@@ -110,7 +110,7 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-2">
-                <Link to="/teacher/preferences">
+                <Link to="/teacher/teacher-preferences">
                     <Return theme="outline" size="24"/>
                 </Link>
                 <h2 className="text-2xl font-bold flex items-center space-x-2">
@@ -130,7 +130,7 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Calendar theme="outline" size="14"/>
+                                                <ListView theme="outline" size="14"/>
                                                 <span>学期</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
@@ -198,15 +198,15 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
                                                 <span>偏好程度</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
-                                            <input 
-                                                type="number"
-                                                name="preference_level"
-                                                min="1"
-                                                max="5"
-                                                className="input input-sm w-full validator"
-                                                placeholder="请输入1-5之间的数字"
-                                                required
-                                            />
+                                            <div className="flex flex-col gap-2">
+                                                <div className="rating rating-sm">
+                                                    <input type="radio" name="preference_level" value="1" className="mask mask-star-2 bg-red-400" required/>
+                                                    <input type="radio" name="preference_level" value="2" className="mask mask-star-2 bg-orange-400" required/>
+                                                    <input type="radio" name="preference_level" value="3" className="mask mask-star-2 bg-yellow-400" required/>
+                                                    <input type="radio" name="preference_level" value="4" className="mask mask-star-2 bg-lime-400" required/>
+                                                    <input type="radio" name="preference_level" value="5" className="mask mask-star-2 bg-green-400" required/>
+                                                </div>
+                                            </div>
                                         </fieldset>
 
                                         <fieldset className="flex flex-col">

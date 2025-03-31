@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -45,6 +45,7 @@ import { useRef } from "react";
 import cardImage from "@/assets/images/card-background.webp";
 import { TeacherDeleteTeacherPreferencesDialog } from "@/components/teacher/teacher_teacher_preferences_delete_dialog.tsx";
 import { useNavigate } from "react-router";
+import { Star as StarFilled } from "@icon-park/react";
 
 export function TeacherPreferences({ site }: Readonly<{
     site: SiteInfoEntity
@@ -138,6 +139,12 @@ export function TeacherPreferences({ site }: Readonly<{
         navigate("/teacher/teacher-preferences/add");
     }
 
+    function handleEditTeacherPreferences(preferenceInfo: TeacherPreferenceEntity): void {
+        navigate(`/teacher/teacher-preferences/edit/${preferenceInfo.preference_uuid}`, {
+            state: { preferenceInfo: preferenceInfo }
+        });
+    }
+
     return (
        <>
            <div className={"grid grid-cols-10 gap-4 pb-4"}>
@@ -174,13 +181,60 @@ export function TeacherPreferences({ site }: Readonly<{
                                                <td className={"text-nowrap"}>{myTeacherPreferences.semester_uuid}</td>
                                                <td className={"text-nowrap"}>{myTeacherPreferences.day_of_week}</td>
                                                <td className={"text-nowrap"}>{myTeacherPreferences.time_slot}</td> 
-                                               <td className={"text-nowrap"}>{myTeacherPreferences.preference_level}</td>
+                                               <td className={"text-nowrap"}>
+                                                   <div className="flex flex-col gap-1">
+                                                       {(() => {
+                                                           const getStarColor = (level: number, starIndex: number) => {
+                                                               if (starIndex >= level) return 'text-gray-300';
+                                                               switch (level) {
+                                                                   case 1: return 'text-error';
+                                                                   case 2: return 'text-warning';
+                                                                   case 3: return 'text-info';
+                                                                   case 4: return 'text-accent';
+                                                                   case 5: return 'text-success';
+                                                                   default: return 'text-gray-300';
+                                                               }
+                                                           };
+                                                           
+                                                           const getProgressColor = (level: number) => {
+                                                               switch (level) {
+                                                                   case 1: return 'progress-error';
+                                                                   case 2: return 'progress-warning';
+                                                                   case 3: return 'progress-info';
+                                                                   case 4: return 'progress-accent';
+                                                                   case 5: return 'progress-success';
+                                                                   default: return 'progress-neutral';
+                                                               }
+                                                           };
+
+                                                           return (
+                                                               <>
+                                                                   <div className="flex items-center gap-1">
+                                                                       {Array.from({ length: 5 }).map((_, index) => (
+                                                                           <StarFilled
+                                                                               key={index}
+                                                                               theme={index < myTeacherPreferences.preference_level ? "filled" : "outline"}
+                                                                               size="16"
+                                                                               className={getStarColor(myTeacherPreferences.preference_level, index)}
+                                                                           />
+                                                                       ))}
+                                                                   </div>
+                                                                   <progress 
+                                                                       className={`progress ${getProgressColor(myTeacherPreferences.preference_level)} w-full h-2`} 
+                                                                       value={myTeacherPreferences.preference_level * 20} 
+                                                                       max="100"
+                                                                   ></progress>
+                                                               </>
+                                                           );
+                                                       })()}
+                                                   </div>
+                                               </td>
                                                <td className={"text-nowrap"}>{myTeacherPreferences.reason}</td>
                                             
                                                <td className={"flex justify-end"}>
                                                    <div className="join">
                                                        <button
-                                            
+                                                           onClick={() => handleEditTeacherPreferences(myTeacherPreferences.preference_uuid!)}
                                                            className="join-item btn btn-sm btn-soft btn-primary inline-flex">
                                                            <Editor theme="outline" size="14"/>
                                                        </button>
