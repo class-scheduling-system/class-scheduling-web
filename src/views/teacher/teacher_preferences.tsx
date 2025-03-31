@@ -44,6 +44,7 @@ import { CurrentInfoStore } from "@/models/store/current_info_store.ts";
 import { useRef } from "react";
 import cardImage from "@/assets/images/card-background.webp";
 import { TeacherDeleteTeacherPreferencesDialog } from "@/components/teacher/teacher_teacher_preferences_delete_dialog.tsx";
+import { useNavigate } from "react-router";
 
 export function TeacherPreferences({ site }: Readonly<{
     site: SiteInfoEntity
@@ -62,6 +63,7 @@ export function TeacherPreferences({ site }: Readonly<{
     const [search, setSearch] = useState<string>("");
     const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
     const [preferenceUuid, setPreferenceUuid] = useState<string>("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `教师课程偏好管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -77,6 +79,7 @@ export function TeacherPreferences({ site }: Readonly<{
                     ...getResp.data!,
                     records: teachers
                 });
+                console.log(getResp.data);
                 setLoading(false);
             } else {
                 console.log(getResp);
@@ -131,6 +134,10 @@ export function TeacherPreferences({ site }: Readonly<{
         setPreferenceUuid(preferenceUuid);
     }
 
+    function handleAddTeacherPreferences(): void {
+        navigate("/teacher/teacher-preferences/add");
+    }
+
     return (
        <>
            <div className={"grid grid-cols-10 gap-4 pb-4"}>
@@ -173,9 +180,9 @@ export function TeacherPreferences({ site }: Readonly<{
                                                <td className={"flex justify-end"}>
                                                    <div className="join">
                                                        <button
-                                                          
+                                            
                                                            className="join-item btn btn-sm btn-soft btn-primary inline-flex">
-                                                           <Eyes theme="outline" size="14"/>
+                                                           <Editor theme="outline" size="14"/>
                                                        </button>
                                                     
                                                        <button
@@ -236,11 +243,12 @@ export function TeacherPreferences({ site }: Readonly<{
                            </label>
                        </div>
                        <div className={"grid grid-cols-2 gap-3"}>
-                           <Link to="/admin/department/add"
+                           <button 
+                                onClick={handleAddTeacherPreferences}
                                  className="transition shadow btn btn-outline btn-primary">
                                <Add theme="outline" size="16"/>
                                <span>添加</span>
-                           </Link>
+                           </button>
                            <button className="transition shadow btn btn-outline btn-secondary">
                                <Newlybuild theme="outline" size="16"/>
                                <span>批量导入</span>
