@@ -26,15 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-import React from 'react';
+
 import {SiteInfoEntity} from "@/models/entity/site_info_entity.ts";
-import {useEffect, useRef, useState} from "react";
+import {JSX, useEffect, useRef, useState} from "react";
 import {CardComponent} from "@/components/card_component.tsx";
 import {animated, useTransition} from "@react-spring/web";
-import {LabelComponent} from "@/components/label_component.tsx";
-import {Add, Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
-import cardImage from "@/assets/images/card-background.webp";
-import {PageSearchDTO} from "@/models/dto/page/page_search_dto.ts";
+import { Search, Star} from "@icon-park/react";
 import {PageEntity} from "@/models/entity/page_entity.ts";
 import {TeacherPreferenceEntity} from "@/models/entity/teacher_preference_entity.ts";
 import {GetTeacherPreferencesPageAPI} from "@/apis/teacher_preferences_api.ts";
@@ -42,7 +39,7 @@ import {message} from "antd";
 import {PageTeacherPreferenceDTO} from "@/models/dto/page/page_teacher_preference_dto.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {CurrentInfoStore} from "@/models/store/current_info_store.ts";
-import {TeacherEntity} from "@/models/entity/teacher_entity.ts";
+import {TeacherLiteEntity} from "@/models/entity/teacher_lite_entity.ts";
 import {GetTeacherSimpleListAPI} from "@/apis/teacher_api.ts";
 
 
@@ -67,9 +64,8 @@ export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }
     const[teacherPreferencesList, setTeacherPreferencesList] = useState<PageEntity<TeacherPreferenceEntity>>({} as PageEntity<TeacherPreferenceEntity>);
     const dispatch = useDispatch();
     const [refreshOperate, setRefreshOperate] = useState(0);
-    const [search, setSearch] = useState<string>();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
-    const [teacherList, setTeacherList] = useState<TeacherEntity[]>([]);
+    const [teacherList, setTeacherList] = useState<TeacherLiteEntity[]>([]);
     const [teacherSearch, setTeacherSearch] = useState<string>("");
     const [semesterSearch, setSemesterSearch] = useState<string>("");
 
@@ -104,7 +100,7 @@ export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }
                 console.log(teacherListResp);
                 if (teacherListResp?.output === "Success" && teacherListResp.data) {
                     setTeacherList(Array.isArray(teacherListResp.data) ? teacherListResp.data : [teacherListResp.data]);
-                    console.log(teacherList);
+                    console.log("teacherList", teacherList);
                 } else {
                     message.error(teacherListResp?.error_message ?? "获取教师列表失败");
                 }
@@ -187,9 +183,57 @@ return (
                                         <td>{index + 1 + (teacherPreferencesList.current - 1) * teacherPreferencesList.size}</td>
                                         <td className={"text-nowrap"}>{teacherList.filter(teacher => teacher.teacher_uuid === record.teacher_uuid)[0]?.teacher_name || '未知教师'}</td>
                                         <td className={"text-nowrap"}>{record.semester_uuid}</td>
-                                        <td className={"text-nowrap"}>{record.day_of_week}</td>
+                                        <td className="px-4 py-2 text-center">
+                                                   {(() => {
+                                                       const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+                                                       return days[record.day_of_week - 1];
+                                                   })()}
+                                               </td>
                                         <td className={"text-nowrap"}>{record.time_slot}</td>
-                                        <td className={"text-nowrap"}>{record.preference_level}</td>
+                                        <td className={"text-nowrap"}>
+                                                   <div className="flex flex-col gap-1">
+                                                       {(() => {
+                                                           const getStarColor = (level: number, starIndex: number) => {
+                                                               if (starIndex >= level) return 'text-gray-300';
+                                                               switch (level) {
+                                                                   case 1: return 'text-error';
+                                                                   case 2: return 'text-warning';
+                                                                   case 3: return 'text-info';
+                                                                   case 4: return 'text-accent';
+                                                                   case 5: return 'text-success';
+                                                                   default: return 'text-gray-300';
+                                                               }
+                                                           };
+                                                           
+                                                           const getProgressColor = (level: number) => {
+                                                               switch (level) {
+                                                                   case 1: return 'progress-error';
+                                                                   case 2: return 'progress-warning';
+                                                                   case 3: return 'progress-info';
+                                                                   case 4: return 'progress-accent';
+                                                                   case 5: return 'progress-success';
+                                                                   default: return 'progress-neutral';
+                                                               }
+                                                           };
+
+                                                           return (
+                                                               <>
+                                                                   <div className="flex items-center gap-1">
+                                                                       {Array.from({ length: 5 }).map((_, index) => (
+                                                                           <Star      
+                                                                               key={index}
+                                                                               theme={index < record.preference_level ? "filled" : "outline"}
+                                                                               size="16"
+                                                                               className={getStarColor(record.preference_level, index)}
+                                                                           />
+                                                                       ))}
+                                                                   </div>
+                                                                   
+                                                               </>
+                                                           );
+                                                       })()}
+                                                   </div>
+                                               </td>
                                         <td className={"text-nowrap"}>{record.reason}</td>
                                     </tr>
                                 ))}
