@@ -337,7 +337,7 @@ export function AcademicStudent({ site }: Readonly<{
                                         <tbody>
                                             {studentList.records.map((student) => (
                                                 <tr key={student.student_uuid} className="transition hover:bg-base-200">
-                                                    <td>{student.id}</td>
+                                                    <td className={"text-nowrap font-bold"}>{student.id}</td>
                                                     <td className={"text-nowrap"}>{student.name}</td>
                                                     <td>{student.gender === 1 ? '女' : '男'}</td>
                                                     <td className={"text-nowrap"}>{student.clazz}</td>
