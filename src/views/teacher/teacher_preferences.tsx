@@ -27,7 +27,7 @@
  */
 
 import {SiteInfoEntity} from "@/models/entity/site_info_entity.ts";
-import {useEffect, useState} from "react";
+import {JSX, useEffect, useState} from "react";
 import {GetMyTeacherPreferencesPageAPI} from "@/apis/teacher_preferences_api.ts";
 import {
     PageTeacherPreferenceSearchDTO
@@ -37,8 +37,7 @@ import {TeacherPreferenceEntity} from "@/models/entity/teacher_preference_entity
 import {animated, useTransition} from "@react-spring/web";
 import {message} from "antd";
 import {CardComponent} from "@/components/card_component.tsx";
-import {Add, BookOpen, CheckOne, CloseOne, Delete, Editor, Eyes, Newlybuild, Search} from "@icon-park/react";
-import {Link} from "react-router";
+import {Add, Delete, Editor, Newlybuild, Search} from "@icon-park/react";
 import { useSelector } from "react-redux";
 import { CurrentInfoStore } from "@/models/store/current_info_store.ts";
 import { useRef } from "react";
@@ -178,9 +177,14 @@ export function TeacherPreferences({ site }: Readonly<{
                                                className="transition hover:bg-base-200"
                                            >
                                                <td>{index + 1 + (myTeacherPreferencesList.current - 1) * myTeacherPreferencesList.size}</td>
-                                               <td className={"text-nowrap"}>{myTeacherPreferences.semester_uuid}</td>
-                                               <td className={"text-nowrap"}>{myTeacherPreferences.day_of_week}</td>
-                                               <td className={"text-nowrap"}>{myTeacherPreferences.time_slot}</td> 
+                                               <td className="px-4 py-2 text-center">{myTeacherPreferences.semester_uuid}</td>
+                                               <td className="px-4 py-2 text-center">
+                                                   {(() => {
+                                                       const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+                                                       return days[myTeacherPreferences.day_of_week - 1];
+                                                   })()}
+                                               </td>
+                                               <td className="px-4 py-2 text-center">第{myTeacherPreferences.time_slot}节</td>
                                                <td className={"text-nowrap"}>
                                                    <div className="flex flex-col gap-1">
                                                        {(() => {
@@ -234,7 +238,7 @@ export function TeacherPreferences({ site }: Readonly<{
                                                <td className={"flex justify-end"}>
                                                    <div className="join">
                                                        <button
-                                                           onClick={() => handleEditTeacherPreferences(myTeacherPreferences.preference_uuid!)}
+                                                           onClick={() => handleEditTeacherPreferences(myTeacherPreferences)}
                                                            className="join-item btn btn-sm btn-soft btn-primary inline-flex">
                                                            <Editor theme="outline" size="14"/>
                                                        </button>

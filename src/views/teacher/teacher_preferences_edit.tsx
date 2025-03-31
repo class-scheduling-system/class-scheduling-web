@@ -32,13 +32,15 @@ import { message } from "antd";
 import { TeacherPreferenceDTO } from "@/models/dto/teacher_preference_dto";
 import { Return, Info, Calendar, Time, Star, Write, CheckOne, Refresh, Edit, ListView } from "@icon-park/react";
 import { UpdateTeacherPreferenceAPI} from "@/apis/teacher_preferences_api";
-
+import { useSelector } from "react-redux";
+import { UserInfoEntity } from "@/models/entity/user_info_entity";
 
 export function TeacherPreferencesEdit({ site }: Readonly<{
     site: SiteInfoEntity;
 }>) {
     const navigate = useNavigate();
     const location = useLocation();
+    const userInfo = useSelector((state: { user: UserInfoEntity }) => state.user);
     const preferenceInfo = location.state?.preferenceInfo;
     const { preference_uuid } = useParams();
     const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
         if (preferenceInfo) {
             // 使用传递过来的教师信息初始化表单
             setData({
-                teacher_uuid: preferenceInfo.teacher_uuid,
+                teacher_uuid: userInfo.teacher?.teacher_uuid ?? "",
                 semester_uuid: preferenceInfo.semester_uuid,
                 day_of_week: preferenceInfo.day_of_week,
                 time_slot: preferenceInfo.time_slot,
@@ -130,14 +132,12 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <ListView theme="outline" size="14"/>
                                             <span>学期</span>
-                                            <span className="text-red-500">*</span>
                                         </legend> 
                                     </fieldset>
                                     <fieldset className="flex flex-col">
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <Calendar theme="outline" size="14"/>
                                             <span>星期几</span>
-                                            <span className="text-red-500">*</span>
                                         </legend>
                                         <select 
                                             name="day_of_week"
@@ -160,7 +160,6 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <Time theme="outline" size="14"/>
                                             <span>第几节课</span>
-                                            <span className="text-red-500">*</span>
                                         </legend>
                                         <select 
                                             name="time_slot"
@@ -189,7 +188,6 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
                                             <Star theme="outline" size="14"/>
                                             <span>偏好程度</span>
-                                            <span className="text-red-500">*</span>
                                         </legend>
                                         <div className="flex flex-col gap-2">
                                             <div className="rating rating-sm">

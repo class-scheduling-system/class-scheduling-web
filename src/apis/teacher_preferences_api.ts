@@ -30,7 +30,7 @@ import { BaseApi, GetAuthorizationToken, MethodType } from '../assets/ts/base_ap
 import { BaseResponse } from '../models/base_response';
 import { TeacherPreferenceEntity } from '../models/entity/teacher_preference_entity';
 import { TeacherPreferenceDTO } from '../models/dto/teacher_preference_dto';
-import { PageTeacherPreferenceDTO } from '../models/dto/page/page_teacher_preference_search_dto.ts';
+import { PageTeacherPreferenceSearchDTO } from '../models/dto/page/page_teacher_preference_search_dto.ts';
 import { PageEntity } from '../models/entity/page_entity';
 
 /**
@@ -40,7 +40,7 @@ import { PageEntity } from '../models/entity/page_entity';
  * @param data 分页搜索数据
  * @returns 分页列表
  */
-const GetTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
+const GetTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceSearchDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
   return BaseApi<PageEntity<TeacherPreferenceEntity>>(
     MethodType.GET,
     '/api/v1/teacher/preferences/page',
@@ -58,7 +58,7 @@ const GetTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Pro
  * @param data 分页搜索数据
  * @returns 分页列表
  */
-const GetMyTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
+const GetMyTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceSearchDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
   return BaseApi<PageEntity<TeacherPreferenceEntity>>(
     MethodType.GET,
     '/api/v1/teacher/preferences/page/me',

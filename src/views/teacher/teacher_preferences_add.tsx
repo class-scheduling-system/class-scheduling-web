@@ -28,83 +28,64 @@
 
 import React, { useEffect, useState } from "react";
 import { SiteInfoEntity } from "@/models/entity/site_info_entity";
-import { TeacherEntity } from "@/models/entity/teacher_entity";
-import { GetTeacherListAPI } from "@/apis/teacher_api";
 import { CreateTeacherPreferenceAPI } from "@/apis/teacher_preferences_api";
 import { useNavigate } from "react-router";
 import { message } from "antd";
 import { TeacherPreferenceDTO } from "@/models/dto/teacher_preference_dto";
-import { Return, Info, Calendar, Time, Star, Write, CheckOne, Refresh, AddMode, ListView } from "@icon-park/react";
+import { useSelector } from "react-redux";
+import { UserInfoEntity } from "@/models/entity/user_info_entity";
+import { AddMode, Info, Return, ListView, Calendar, Time, Star, Write, CheckOne, Refresh } from "@icon-park/react";
 import { Link } from "react-router";
 
-export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
+
+export function TeacherPreferencesAdd({ site }: Readonly<{
     site: SiteInfoEntity;
-    teacher_uuid: string;
 }>) {
     const navigate = useNavigate();
+    const userInfo = useSelector((state: { user: UserInfoEntity }) => state.user);
     const [loading, setLoading] = useState(false);
-    const [teacherList, setTeacherList] = useState<TeacherEntity[]>([]);
+    const [formData, setFormData] = useState<TeacherPreferenceDTO>({
+        teacher_uuid: userInfo.teacher?.teacher_uuid ?? "",
+        semester_uuid: "",
+        day_of_week: 0,
+        time_slot: 0,
+        preference_level: 0,
+        reason: ""
+    });
 
     useEffect(() => {
-        document.title = `添加课程偏好 | ${site.name ?? "Frontleaves Technology"}`;
-        fetchTeacherList();
-
+        document.title = `添加教师课程偏好 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
-    // 获取教师列表
-    const fetchTeacherList = async () => {
-        try {
-            const teacherListResp = await GetTeacherListAPI({
-                page: 1,
-                size: 1000,
-                is_desc: true
-            });
-            if (teacherListResp?.output === "Success" && teacherListResp.data) {
-                setTeacherList(teacherListResp.data.records);
-            } else {
-                message.error(teacherListResp?.error_message ?? "获取教师列表失败");
-            }
-        } catch (error) {
-            console.error("获取教师列表失败", error);
-            message.error("获取教师列表失败");
-        }
-    };
 
 
-    // 处理表单提交
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setLoading(true);
-
-        const formData = new FormData(event.currentTarget);
-        const values: TeacherPreferenceDTO = {
-            teacher_uuid,
-            semester_uuid: formData.get('semester_uuid')?.toString() || "",
-            day_of_week: Number(formData.get('day_of_week')),
-            time_slot: Number(formData.get('time_slot')),
-            preference_level: Number(formData.get('preference_level')),
-            reason: formData.get('reason')?.toString() || ""
-        };
-
         try {
-            const response = await CreateTeacherPreferenceAPI(values);
+            const response = await CreateTeacherPreferenceAPI(formData);
             if (response?.output === "Success") {
                 message.success("添加成功");
-                navigate("/teacher/preferences");
+                navigate("/teacher/teacher-preferences");
             } else {
                 message.error(response?.error_message ?? "添加失败");
             }
         } catch (error) {
-            console.error("添加课程偏好失败:", error);
             message.error("添加失败");
         } finally {
             setLoading(false);
         }
     };
 
-    // 重置表单
-    const resetForm = (form: HTMLFormElement) => {
-        form.reset();
+    const resetForm = () => {
+        setFormData({
+            teacher_uuid: userInfo.teacher?.teacher_uuid ?? "",
+            semester_uuid: "",
+            day_of_week: 0,
+            time_slot: 0,
+            preference_level: 0,
+            reason: ""
+        });
     };
 
     return (
@@ -126,126 +107,135 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
                                 <AddMode theme="outline" size="18"/>添加偏好信息
                             </h2>
                             <div className="card-body">
-                                <form id="preference_add" onSubmit={handleSubmit} className="flex flex-col flex-grow space-y-5">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <ListView theme="outline" size="14"/>
-                                                <span>学期</span>
-                                                <span className="text-red-500">*</span>
-                                            </legend>
-                                            <select 
-                                                name="semester_uuid"
-                                                className="select select-sm w-full validator"
-                                                required
-                                            >
-                                                <option value="">请选择学期</option>
-                                                <option value="1">第一学期</option>
-                                                <option value="2">第二学期</option>
-                                                <option value="3">第三学期</option>
-                                                <option value="4">第四学期</option>
-                                                <option value="5">第五学期</option>
-                                                <option value="6">第六学期</option>
-                                                <option value="7">第七学期</option>
-                                                <option value="8">第八学期</option>
-                                            </select>
-                                        </fieldset>
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Calendar theme="outline" size="14"/>
-                                                <span>星期几</span>
-                                                <span className="text-red-500">*</span>
-                                            </legend>
-                                            <select 
-                                                name="day_of_week"
-                                                className="select select-sm w-full validator"
-                                                required
-                                            >
-                                                <option value="">请选择星期</option>
-                                                <option value="1">星期一</option>
-                                                <option value="2">星期二</option>
-                                                <option value="3">星期三</option>
-                                                <option value="4">星期四</option>
-                                                <option value="5">星期五</option>
-                                                <option value="6">星期六</option>
-                                                <option value="7">星期日</option>
-                                            </select>
-                                        </fieldset>
+                            <form onSubmit={handleSubmit} className="flex flex-col flex-grow space-y-5">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <ListView theme="outline" size="14"/>
+                                            <span>学期</span>
+                                            <span className="text-red-500">*</span>
+                                        </legend> 
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <Calendar theme="outline" size="14"/>
+                                            <span>星期几</span>
+                                            <span className="text-red-500">*</span>
+                                        </legend>
+                                        <select 
+                                            name="day_of_week"
+                                            className="select select-sm w-full validator"
+                                            value={formData.day_of_week}
+                                            onChange={(e) => setFormData({...formData, day_of_week: Number(e.target.value)})}
+                                            required
+                                        >
+                                            <option value="">请选择星期</option>
+                                            <option value="1">星期一</option>
+                                            <option value="2">星期二</option>
+                                            <option value="3">星期三</option>
+                                            <option value="4">星期四</option>
+                                            <option value="5">星期五</option>
+                                            <option value="6">星期六</option>
+                                            <option value="7">星期日</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <Time theme="outline" size="14"/>
+                                            <span>第几节课</span>
+                                            <span className="text-red-500">*</span>
+                                        </legend>
+                                        <select 
+                                            name="time_slot"
+                                            className="select select-sm w-full validator"
+                                            value={formData.time_slot}
+                                            onChange={(e) => setFormData({...formData, time_slot: Number(e.target.value)})}
+                                            required
+                                        >
+                                            <option value="">请选择课节</option>
+                                            <option value="1">第一节</option>
+                                            <option value="2">第二节</option>
+                                            <option value="3">第三节</option>
+                                            <option value="4">第四节</option>
+                                            <option value="5">第五节</option>
+                                            <option value="6">第六节</option>
+                                            <option value="7">第七节</option>
+                                            <option value="8">第八节</option>
+                                            <option value="9">第九节</option>
+                                            <option value="10">第十节</option>
+                                            <option value="11">第十一节</option>
+                                            <option value="12">第十二节</option>
+                                        </select>
+                                    </fieldset>
 
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Time theme="outline" size="14"/>
-                                                <span>第几节课</span>
-                                                <span className="text-red-500">*</span>
-                                            </legend>
-                                            <select 
-                                                name="time_slot"
-                                                className="select select-sm w-full validator"
-                                                required
-                                            >
-                                                <option value="">请选择课节</option>
-                                                <option value="1">第一节</option>
-                                                <option value="2">第二节</option>
-                                                <option value="3">第三节</option>
-                                                <option value="4">第四节</option>
-                                                <option value="5">第五节</option>
-                                            </select>
-                                        </fieldset>
-
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Star theme="outline" size="14"/>
-                                                <span>偏好程度</span>
-                                                <span className="text-red-500">*</span>
-                                            </legend>
-                                            <div className="flex flex-col gap-2">
-                                                <div className="rating rating-sm">
-                                                    <input type="radio" name="preference_level" value="1" className="mask mask-star-2 bg-red-400" required/>
-                                                    <input type="radio" name="preference_level" value="2" className="mask mask-star-2 bg-orange-400" required/>
-                                                    <input type="radio" name="preference_level" value="3" className="mask mask-star-2 bg-yellow-400" required/>
-                                                    <input type="radio" name="preference_level" value="4" className="mask mask-star-2 bg-lime-400" required/>
-                                                    <input type="radio" name="preference_level" value="5" className="mask mask-star-2 bg-green-400" required/>
-                                                </div>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <Star theme="outline" size="14"/>
+                                            <span>偏好程度</span>
+                                            <span className="text-red-500">*</span>
+                                        </legend>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="rating rating-sm">
+                                                {[1,2,3,4,5].map((level) => (
+                                                    <input
+                                                        key={level}
+                                                        type="radio"
+                                                        name="preference_level"
+                                                        value={level}
+                                                        checked={formData.preference_level === level}
+                                                        onChange={(e) => setFormData({...formData, preference_level: Number(e.target.value)})}
+                                                        className={`mask mask-star-2 ${
+                                                            level === 1 ? 'bg-red-400' :
+                                                            level === 2 ? 'bg-orange-400' :
+                                                            level === 3 ? 'bg-yellow-400' :
+                                                            level === 4 ? 'bg-lime-400' :
+                                                            'bg-green-400'
+                                                        }`}
+                                                        required
+                                                    />
+                                                ))}
                                             </div>
-                                        </fieldset>
+                                        </div>
+                                    </fieldset>
 
-                                        <fieldset className="flex flex-col">
-                                            <legend className="flex items-center space-x-1 mb-1 text-sm">
-                                                <Write theme="outline" size="14"/>
-                                                <span>原因说明</span>
-                                            </legend>
-                                            <textarea 
-                                                name="reason"
-                                                className="textarea textarea-bordered textarea-sm w-full validator h-[38px] resize-none"
-                                                placeholder="请详细说明选择该时间段的原因..."
-                                                rows={1}
-                                            />
-                                        </fieldset>
-                                    </div>
+                                    <fieldset className="flex flex-col">
+                                        <legend className="flex items-center space-x-1 mb-1 text-sm">
+                                            <Write theme="outline" size="14"/>
+                                            <span>原因说明</span>
+                                        </legend>
+                                        <input
+                                            type="text"
+                                            name="reason"
+                                            className="input input-sm w-full validator"
+                                            placeholder="请输入选择该时间段的原因"
+                                            value={formData.reason}
+                                            onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                                        />
+                                    </fieldset>
+                                </div>
 
-                                    <div className="card-actions justify-end flex">
-                                        <button
-                                            type="button"
-                                            className="btn btn-sm btn-outline"
-                                            onClick={(e) => resetForm(e.currentTarget.form!)}
-                                        >
-                                            <Refresh theme="outline" size="14"/>
-                                            <span>重置</span>
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="btn btn-sm btn-primary"
-                                            disabled={loading}
-                                        >
-                                            <CheckOne theme="outline" size="14"/>
-                                            <span>{loading ? '提交中...' : '提交'}</span>
-                                        </button>
-                                    </div>
-                                </form>
+                                <div className="card-actions justify-end flex">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline"
+                                        onClick={resetForm}
+                                    >
+                                        <Refresh theme="outline" size="14"/>
+                                        <span>重置</span>
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-sm btn-primary"
+                                        disabled={loading}
+                                    >
+                                        <CheckOne theme="outline" size="14"/>
+                                        <span>{loading ? '提交中...' : '提交'}</span>
+                                    </button>
+                                </div>
+                            </form>
                             </div>
                         </div>
                     </div>
-
                     <div className="lg:col-span-4 md:col-span-12 sm:col-span-12">
                         <div className="card card-border bg-base-100 w-full shadow-md">
                             <h2 className="card-title bg-secondary/55 rounded-t-lg p-3">
@@ -255,11 +245,31 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
                                 <ul className="space-y-1 text-gray-700">
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
-                                        <span>星期和课节为必填项</span>
+                                        <span>学期、星期和课节为必填项</span>
                                     </li>
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
-                                        <span>偏好程度范围为1-5，1代表最不喜欢，5代表最喜欢</span>
+                                        <span>偏好程度使用星星评分表示：</span>
+                                    </li>
+                                    <li className="flex items-start ml-4">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>1星（红色）：非常不喜欢</span>
+                                    </li>
+                                    <li className="flex items-start ml-4">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>2星（橙色）：不喜欢</span>
+                                    </li>
+                                    <li className="flex items-start ml-4">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>3星（黄色）：一般</span>
+                                    </li>
+                                    <li className="flex items-start ml-4">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>4星（浅绿色）：喜欢</span>
+                                    </li>
+                                    <li className="flex items-start ml-4">
+                                        <span className="text-secondary mr-2">•</span>
+                                        <span>5星（绿色）：非常喜欢</span>
                                     </li>
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
@@ -267,7 +277,7 @@ export function TeacherPreferencesAdd({ site, teacher_uuid }: Readonly<{
                                     </li>
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
-                                        <span>提交后可以在偏好列表中查看和管理</span>
+                                        <span>提交后可以在偏好列表中查看添加结果</span>
                                     </li>
                                     <li className="flex items-start">
                                         <span className="text-secondary mr-2">•</span>
