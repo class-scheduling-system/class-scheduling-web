@@ -16,7 +16,7 @@ import { DisableEntity } from "../models/entity/diable_entity";
 const GetStudentPageAPI = async (data: PageStudentSearchDTO): Promise<BaseResponse<PageEntity<StudentEntity>> | undefined> => {
     return BaseApi<PageEntity<StudentEntity>>(
         MethodType.GET,
-        "/api/students/list",
+        "/api/v1/students/page",
         null,
         data,
         null,
@@ -34,15 +34,13 @@ const GetStudentPageAPI = async (data: PageStudentSearchDTO): Promise<BaseRespon
 const GetStudentAPI = async (student_uuid: string): Promise<BaseResponse<StudentEntity> | undefined> => {
     return BaseApi<StudentEntity>(
         MethodType.GET,
-        `/api/students/`,
+        `/api/v1/students/`,
         null,
         null,
         student_uuid,
         { "Authorization": `Bearer ${GetAuthorizationToken()}` }
     )
 }
-
-// /api/students
 
 /**
  * # 创建学生
@@ -54,7 +52,7 @@ const GetStudentAPI = async (student_uuid: string): Promise<BaseResponse<Student
 const CreateStudentAPI = async (data: StudentDTO): Promise<BaseResponse<StudentEntity> | undefined> => {
     return BaseApi<StudentEntity>(
         MethodType.POST,
-        `/api/students/`,
+        `/api/v1/students/`,
         data,
         null,
         null,
@@ -73,7 +71,7 @@ const CreateStudentAPI = async (data: StudentDTO): Promise<BaseResponse<StudentE
 const DisableStudentAPI = async (student_uuid: string, disable: boolean): Promise<BaseResponse<DisableEntity> | undefined> => {
     return BaseApi<DisableEntity>(
         MethodType.PUT,
-        `/api/students/disable/${student_uuid}`,
+        `/api/v1/students/disable/${student_uuid}`,
         null,
         { "disable": disable },
         null,
@@ -91,7 +89,7 @@ const DisableStudentAPI = async (student_uuid: string, disable: boolean): Promis
 const DeleteStudentAPI = async (student_uuid: string): Promise<BaseResponse<void> | undefined> => {
     return BaseApi<void>(
         MethodType.DELETE,
-        "/api/students/",
+        "/api/v1/students/",
         null,
         null,   
         student_uuid,
@@ -110,7 +108,7 @@ const DeleteStudentAPI = async (student_uuid: string): Promise<BaseResponse<void
 const EditStudentAPI = async (student_uuid: string, data: StudentDTO): Promise<BaseResponse<StudentEntity> | undefined> => {
     return BaseApi<StudentEntity>(
         MethodType.PUT,
-        "/api/students/disable/",
+        "/api/v1/students/disable/",
         data,
         null,
         student_uuid,
