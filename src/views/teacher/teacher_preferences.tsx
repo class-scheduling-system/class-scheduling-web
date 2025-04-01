@@ -62,13 +62,11 @@ export function TeacherPreferences({ site }: Readonly<{
         semester_uuid:"",
     } as PageTeacherPreferenceSearchDTO);
     const [loading, setLoading] = useState(true);
-    const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
-    const inputFocus = useRef<HTMLInputElement | null>(null);
-    const [search, setSearch] = useState<string>("");
     const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
     const [preferenceUuid, setPreferenceUuid] = useState<string>("");
     const navigate = useNavigate();
     const [semesterList, setSemesterList] = useState<SemesterEntity[]>([]);
+    const [semesterSearch, setSemesterSearch] = useState<string>("");
 
     useEffect(() => {
         document.title = `教师课程偏好管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -112,10 +110,10 @@ export function TeacherPreferences({ site }: Readonly<{
     useEffect(() => {
         setLoading(true);
         const timer = setTimeout(() => {
-            setSearchRequest({...searchRequest, semester_uuid: search});
+            setSearchRequest({...searchRequest, semester_uuid: semesterSearch});
         }, 500);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [semesterSearch]);
 
 
     const transitionSearch = useTransition(loading ?? 0, {
@@ -310,14 +308,21 @@ export function TeacherPreferences({ site }: Readonly<{
                    </div>
                    <div className="px-4 pb-4 flex flex-col gap-3">
                        <div>
-                           <label className="input transition w-full">
-                               <Search theme="outline" size="12"/>
-                               <input ref={inputFocus} type="search" className="grow" placeholder="查询"
-                                      onChange={(event) => setSearch(event.target.value)}/>
-                               <kbd className="kbd kbd-sm">{getCurrent.system ? "⌘" : "Ctrl"}</kbd>
-                               <kbd className="kbd kbd-sm">K</kbd>
-                           </label>
-                       </div>
+                       <label className="select select-sm transition flex items-center w-full validator">
+                            <select
+                                className="grow ps-1 flex-1"
+                                value={semesterSearch}
+                                onChange={(e) => setSemesterSearch(e.target.value)}
+                            >
+                                <option value="">请选择学期</option>
+                                {semesterList.map((semester) => (
+                                    <option key={semester.semester_uuid} value={semester.semester_uuid}>
+                                        {semester.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        </div>
                        <div className={"grid grid-cols-2 gap-3"}>
                            <button 
                                 onClick={handleAddTeacherPreferences}

@@ -136,7 +136,7 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                 </h2>
             </div>
 
-            <div className="grid grid-cols-12 gap-x-6">
+            <div className="grid grid-cols-12 gap-x-6 gap-y-4">
                 <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
                     <div className="card card-border bg-base-100 w-full shadow-md">
                         <h2 className="card-title bg-neutral/10 rounded-t-lg p-3">
@@ -288,11 +288,7 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                             <Info theme="outline" size="18"/>操作提示
                         </h2>
                         <div className="card-body">
-                            <ul className="space-y-1 text-gray-700">
-                                <li className="flex items-start">
-                                    <span className="text-secondary mr-2">•</span>
-                                    <span>学期、星期和课节为必填项</span>
-                                </li>
+                            <ul className="space-y-2 text-gray-700">
                                 <li className="flex items-start">
                                     <span className="text-secondary mr-2">•</span>
                                     <span>偏好程度使用星星评分表示：</span>
