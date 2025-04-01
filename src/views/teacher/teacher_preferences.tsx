@@ -45,6 +45,10 @@ import cardImage from "@/assets/images/card-background.webp";
 import { TeacherDeleteTeacherPreferencesDialog } from "@/components/teacher/teacher_teacher_preferences_delete_dialog.tsx";
 import { useNavigate } from "react-router";
 import { Star as StarFilled } from "@icon-park/react";
+import { SemesterEntity } from "@/models/entity/semester_entity.ts";
+import { GetEnabledSemesterListAPI } from "@/apis/semester_api.ts";
+
+
 
 export function TeacherPreferences({ site }: Readonly<{
     site: SiteInfoEntity
@@ -64,6 +68,7 @@ export function TeacherPreferences({ site }: Readonly<{
     const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
     const [preferenceUuid, setPreferenceUuid] = useState<string>("");
     const navigate = useNavigate();
+    const [semesterList, setSemesterList] = useState<SemesterEntity[]>([]);
 
     useEffect(() => {
         document.title = `教师课程偏好管理 | ${site.name ?? "Frontleaves Technology"}`;
@@ -74,12 +79,11 @@ export function TeacherPreferences({ site }: Readonly<{
         const fetchMyTeacherPreferencesList = async () => {
             const getResp = await GetMyTeacherPreferencesPageAPI(searchRequest);
             if (getResp?.output === "Success") {
-                const teachers = getResp.data!.records;
+                const preferences = getResp.data!.records;
                 setMyTeacherPreferencesList({
                     ...getResp.data!,
-                    records: teachers
+                    records: preferences
                 });
-                console.log(getResp.data);
                 setLoading(false);
             } else {
                 console.log(getResp);
@@ -89,6 +93,20 @@ export function TeacherPreferences({ site }: Readonly<{
         };
         fetchMyTeacherPreferencesList().then();
     }, [searchRequest]);
+
+    // 获取学期列表
+    useEffect(() => {
+        const fetchSemesterList = async () => {
+            const getResp = await GetEnabledSemesterListAPI();
+            if (getResp?.output === "Success") {
+                setSemesterList(getResp.data!);
+            } else {
+                message.error(getResp?.error_message ?? "获取学期列表失败");
+            }
+        };
+        fetchSemesterList().then();
+    }, []);
+
 
     // 搜索防抖动
     useEffect(() => {
@@ -177,7 +195,7 @@ export function TeacherPreferences({ site }: Readonly<{
                                                className="transition hover:bg-base-200"
                                            >
                                                <td>{index + 1 + (myTeacherPreferencesList.current - 1) * myTeacherPreferencesList.size}</td>
-                                               <td className="px-4 py-2 text-center">{myTeacherPreferences.semester_uuid}</td>
+                                               <td className="px-4 py-2 text-center">{semesterList.filter(semester => semester.semester_uuid === myTeacherPreferences.semester_uuid)[0]?.name || '未知学期'}</td>
                                                <td className="px-4 py-2 text-center">
                                                    {(() => {
                                                        const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];

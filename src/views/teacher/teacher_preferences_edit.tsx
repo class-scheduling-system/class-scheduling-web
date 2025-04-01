@@ -34,6 +34,9 @@ import { Return, Info, Calendar, Time, Star, Write, CheckOne, Refresh, Edit, Lis
 import { UpdateTeacherPreferenceAPI} from "@/apis/teacher_preferences_api";
 import { useSelector } from "react-redux";
 import { UserInfoEntity } from "@/models/entity/user_info_entity";
+import { SemesterEntity } from "@/models/entity/semester_entity.ts";
+import { GetEnabledSemesterListAPI } from "@/apis/semester_api.ts";
+
 
 export function TeacherPreferencesEdit({ site }: Readonly<{
     site: SiteInfoEntity;
@@ -45,6 +48,7 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
     const { preference_uuid } = useParams();
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<TeacherPreferenceDTO>({} as TeacherPreferenceDTO);
+    const [semesterList, setSemesterList] = useState<SemesterEntity[]>([]);
 
     // 设置文档标题
     useEffect(() => {
@@ -68,6 +72,19 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
             navigate("/teacher/teacher-preferences");
         }
     }, [preferenceInfo, navigate]);
+
+    // 获取学期列表
+    useEffect(() => {
+        const fetchSemesterList = async () => {
+            const getResp = await GetEnabledSemesterListAPI();
+            if (getResp?.output === "Success") {
+                setSemesterList(getResp.data!);
+            } else {
+                message.error(getResp?.error_message ?? "获取学期列表失败");
+            }
+        };
+        fetchSemesterList().then();
+    }, []);
 
 
     // 重置表单
@@ -133,6 +150,19 @@ export function TeacherPreferencesEdit({ site }: Readonly<{
                                             <ListView theme="outline" size="14"/>
                                             <span>学期</span>
                                         </legend> 
+                                        <select 
+                                            name="semester_uuid"
+                                            className="select select-sm w-full validator"
+                                            value={data.semester_uuid}
+                                            onChange={(e) => setData({...data, semester_uuid: e.target.value})}
+                                            required
+                                        >
+                                            {semesterList.map((semester) => (
+                                                <option key={semester.semester_uuid} value={semester.semester_uuid}>
+                                                    {semester.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </fieldset>
                                     <fieldset className="flex flex-col">
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">

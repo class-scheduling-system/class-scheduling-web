@@ -36,6 +36,8 @@ import { useSelector } from "react-redux";
 import { UserInfoEntity } from "@/models/entity/user_info_entity";
 import { AddMode, Info, Return, ListView, Calendar, Time, Star, Write, CheckOne, Refresh } from "@icon-park/react";
 import { Link } from "react-router";
+import { SemesterEntity } from "@/models/entity/semester_entity.ts";
+import { GetEnabledSemesterListAPI } from "@/apis/semester_api.ts";
 
 
 export function TeacherPreferencesAdd({ site }: Readonly<{
@@ -52,12 +54,24 @@ export function TeacherPreferencesAdd({ site }: Readonly<{
         preference_level: 0,
         reason: ""
     });
+    const [semesterList, setSemesterList] = useState<SemesterEntity[]>([]);
 
     useEffect(() => {
         document.title = `添加教师课程偏好 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
-
+    // 获取学期列表
+    useEffect(() => {
+        const fetchSemesterList = async () => {
+            const getResp = await GetEnabledSemesterListAPI();
+            if (getResp?.output === "Success") {
+                setSemesterList(getResp.data!);
+            } else {
+                message.error(getResp?.error_message ?? "获取学期列表失败");
+            }
+        };
+        fetchSemesterList().then();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -115,6 +129,20 @@ export function TeacherPreferencesAdd({ site }: Readonly<{
                                             <span>学期</span>
                                             <span className="text-red-500">*</span>
                                         </legend> 
+                                        <select 
+                                            name="semester_uuid"
+                                            className="select select-sm w-full validator"
+                                            value={formData.semester_uuid}
+                                            onChange={(e) => setFormData({...formData, semester_uuid: e.target.value})}
+                                            required
+                                        >
+                                            <option value="" disabled>请选择学期</option>
+                                            {semesterList.map((semester) => (
+                                                <option key={semester.semester_uuid} value={semester.semester_uuid}>
+                                                    {semester.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </fieldset>
                                     <fieldset className="flex flex-col">
                                         <legend className="flex items-center space-x-1 mb-1 text-sm">
