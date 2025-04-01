@@ -41,9 +41,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {CurrentInfoStore} from "@/models/store/current_info_store.ts";
 import {TeacherLiteEntity} from "@/models/entity/teacher_lite_entity.ts";
 import {GetTeacherSimpleListAPI} from "@/apis/teacher_api.ts";
-
-
-
+import {GetEnabledSemesterListAPI} from "@/apis/semester_api.ts";
+import {SemesterEntity} from "@/models/entity/semester_entity.ts";
 export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }>){
     const [loading, setLoading] = useState(true);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -67,6 +66,7 @@ export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
     const [teacherList, setTeacherList] = useState<TeacherLiteEntity[]>([]);
     const [teacherSearch, setTeacherSearch] = useState<string>("");
+    const [semesterList, setSemesterList] = useState<SemesterEntity[]>([]);
     const [semesterSearch, setSemesterSearch] = useState<string>("");
 
 
@@ -111,6 +111,24 @@ export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }
         };
 
         fetchTeacherList().then();
+    }, []);
+
+    // 获取学期列表
+    useEffect(() => {
+        const fetchSemesterList = async () => {
+            try {
+                const getResp = await GetEnabledSemesterListAPI();
+                if (getResp?.output === "Success" && getResp.data) {
+                    setSemesterList(getResp.data);
+                } else {
+                    message.error(getResp?.error_message ?? "获取学期列表失败");
+                }
+            } catch (error) {
+                console.error("获取学期列表失败", error);
+                message.error("获取学期列表失败");
+            }
+        };
+        fetchSemesterList().then();
     }, []);
     
 
@@ -182,7 +200,7 @@ return (
                                     <tr key={record.preference_uuid} className="transition hover:bg-base-200">
                                         <td>{index + 1 + (teacherPreferencesList.current - 1) * teacherPreferencesList.size}</td>
                                         <td className={"text-nowrap"}>{teacherList.filter(teacher => teacher.teacher_uuid === record.teacher_uuid)[0]?.teacher_name || '未知教师'}</td>
-                                        <td className={"text-nowrap"}>{record.semester_uuid}</td>
+                                        <td className={"text-nowrap"}>{semesterList.filter(semester => semester.semester_uuid === record.semester_uuid)[0]?.name || '未知学期'}</td>
                                         <td className="px-4 py-2 text-center">
                                                    {(() => {
                                                        const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
@@ -275,7 +293,7 @@ return (
                         <div className={"space-y-3"}>
                             <h2 className="text-lg font-bold flex gap-2 items-center text-primary-content">
                                 <Search theme="outline" size="20" />
-                                <span>搜索教师</span>
+                                <span>搜索教师课程偏好</span>
                             </h2>
 
                             <div className="grid gap-1 grid-cols-2">
@@ -303,21 +321,14 @@ return (
                                             onChange={(e) => setSemesterSearch(e.target.value)}
                                         >
                                             <option value="">请选择学期</option>
-                                            {teacherList.map((teacher) => (
-                                                <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                                                    {teacher.teacher_name}
+                                            {semesterList.map((semester) => (
+                                                <option key={semester.semester_uuid} value={semester.semester_uuid}>
+                                                    {semester.name}
                                                 </option>
                                             ))}
                                         </select>
                                     </label>
                                 </div>
-                            </div>
-
-                            <div className="flex items-center justify-end gap-0.5 text-xs text-base-content/60">
-                                <span>快速搜索：</span>
-                                <kbd className="kbd kbd-xs bg-base-300">{getCurrent?.system ? "⌘" : "Ctrl"}</kbd>
-                                <span>+</span>
-                                <kbd className="kbd kbd-xs bg-base-300">K</kbd>
                             </div>
                         </div>
                 </CardComponent>
