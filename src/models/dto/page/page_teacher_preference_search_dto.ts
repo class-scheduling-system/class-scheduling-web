@@ -32,7 +32,7 @@
  *
  * 该类继承自 PageEntity，专门用于处理教师课程偏好的分页数据。
  */
-export type PageTeacherPreferenceDTO = {
+export type PageTeacherPreferenceSearchDTO = {
     /**
      * 是否按降序排序，默认值为true
      */

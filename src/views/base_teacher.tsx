@@ -40,6 +40,9 @@ import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
 import {teacherRouteConfig} from "../models/config/teacher_route_config";
 import {TeacherNavComponent} from "../components/teacher/teacher_nav_component.tsx";
 import {TeacherDashboard} from "./teacher/teacher_dashboard.tsx";
+import {TeacherPreferences} from "./teacher/teacher_preferences.tsx";
+import {TeacherPreferencesAdd} from "./teacher/teacher_preferences_add.tsx";
+import {TeacherPreferencesEdit} from "./teacher/teacher_preferences_edit.tsx";
 
 /**
  * 生成一个教师控制台组件。
@@ -168,6 +171,9 @@ export function BaseTeacher(): JSX.Element {
                         <animated.div style={{...style, flex: 1}}>
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<TeacherDashboard site={site}/>}/>
+                                <Route path="/teacher-preferences" element={<TeacherPreferences site={site}/>}/>
+                                <Route path="/teacher-preferences/add" element={<TeacherPreferencesAdd site={site}/>}/>
+                                <Route path="/teacher-preferences/edit/:preference_uuid" element={<TeacherPreferencesEdit site={site}/>}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>
