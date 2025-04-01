@@ -34,7 +34,8 @@ import {
     Dashboard,
     School,
     Book,
-    User
+    User,
+    Like
 } from "@icon-park/react";
 import {TeacherNavLinkComponent} from "./teacher_nav_link_component.tsx";
 
@@ -69,7 +70,8 @@ export function TeacherNavComponent(): JSX.Element {
                                        path={"/teacher/course"}/>
                 <TeacherNavLinkComponent title={"班级管理"} icon={<School theme="outline" size="16"/>}
                                        path={"/teacher/class"}/>
-
+                <TeacherNavLinkComponent title={"教师课程偏好"} icon={<Like theme="outline" size="16"/>}
+                                       path={"/teacher/teacher-preferences"}/>
                 <div className="h-px my-4 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
                 <div className="relative">
