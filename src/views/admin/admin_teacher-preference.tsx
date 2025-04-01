@@ -43,6 +43,9 @@ import {TeacherLiteEntity} from "@/models/entity/teacher_lite_entity.ts";
 import {GetTeacherSimpleListAPI} from "@/apis/teacher_api.ts";
 import {GetEnabledSemesterListAPI} from "@/apis/semester_api.ts";
 import {SemesterEntity} from "@/models/entity/semester_entity.ts";
+import cardImage from "../../assets/images/card-background.webp";
+
+
 export function AdminTeacherPreference({site}: Readonly<{ site: SiteInfoEntity }>){
     const [loading, setLoading] = useState(true);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -288,51 +291,47 @@ return (
                 </div>
             </div>
             {/* 搜索卡片 */}
-            <div className={"lg:col-span-3 md:col-span-10 sm:col-span-10 flex flex-col gap-4 h-full pb-2"}>
-                <CardComponent padding={18}>
-                        <div className={"space-y-3"}>
-                            <h2 className="text-lg font-bold flex gap-2 items-center text-primary-content">
-                                <Search theme="outline" size="20" />
-                                <span>搜索教师课程偏好</span>
-                            </h2>
-
-                            <div className="grid gap-1 grid-cols-2">
-                                <div className="w-full">
-                                    <label className="select select-sm transition flex items-center w-full validator">
-                                        <select
-                                            className="grow ps-1 flex-1"
-                                            value={teacherSearch}
-                                            onChange={(e) => setTeacherSearch(e.target.value)}
-                                        >
-                                            <option value="">请选择教师</option>
-                                            {teacherList.map((teacher) => (
-                                                <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                                                    {teacher.teacher_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                </div>
-                                <div className="w-full">
-                                    <label className="select select-sm transition flex items-center w-full validator">
-                                        <select
-                                            className="grow ps-1 flex-1"
-                                            value={semesterSearch}
-                                            onChange={(e) => setSemesterSearch(e.target.value)}
-                                        >
-                                            <option value="">请选择学期</option>
-                                            {semesterList.map((semester) => (
-                                                <option key={semester.semester_uuid} value={semester.semester_uuid}>
-                                                    {semester.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                </div>
-                            </div>
+            <CardComponent col={3} padding={0} howScreenHide={"lg"}>
+                    <img src={cardImage} alt="Card Background" className="w-full h-full object-cover rounded-t-xl"/>
+                    <div className="p-4 flex flex-col gap-1">
+                        <h2 className="text-xl font-bold">教师偏好列表</h2>
+                        <p className="text-base-content text-sm border-l-4 border-base-content ps-2">这里是教师偏好列表，您可以查看、筛选教师偏好信息。</p>
+                    </div>
+                    <div className="px-4 pb-4 flex gap-3">
+                        <div className="w-full">
+                            <label className="select select-sm transition flex items-center w-full validator">
+                                <select
+                                    className="grow ps-1 flex-1"
+                                    value={teacherSearch}
+                                    onChange={(e) => setTeacherSearch(e.target.value)}
+                                >
+                                    <option value="">请选择教师</option>
+                                    {teacherList.map((teacher) => (
+                                        <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
+                                            {teacher.teacher_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
                         </div>
+                        <div className="w-full">
+                            <label className="select select-sm transition flex items-center w-full validator">
+                                <select
+                                    className="grow ps-1 flex-1"
+                                    value={semesterSearch}
+                                    onChange={(e) => setSemesterSearch(e.target.value)}
+                                >
+                                    <option value="">请选择学期</option>
+                                    {semesterList.map((semester) => (
+                                        <option key={semester.semester_uuid} value={semester.semester_uuid}>
+                                            {semester.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                    </div>
                 </CardComponent>
-            </div>
         </div>
     </>
 )
