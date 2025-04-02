@@ -126,21 +126,67 @@ export function AiChatComponent(): JSX.Element {
 
     // 处理 WebSocket 接收到的消息
     const handleWebSocketMessage = (data: WebSocketAiResponse) => {
+        // 首先检查并处理可能的错误消息
+        if (!data.success && data.error_message) {
+            message.error(`AI助手错误: ${data.error_message}`);
+            setIsLoading(false);
+            return;
+        }
+
         switch (data.type) {
             case 'event': {
-                const eventData = data.data as { type: string; result: string }
-                switch (eventData.type) {
-                    case 'node_started': {
-                        AiOperate.nodeStarted(chatHistory, eventData.result);
-                        break;
-                    }
-                    case 'workflow_finished': {
-                        const route = AiOperate.nodeFinished(chatHistory, eventData.result);
-                        navigate(route);
-                        break;
+                // 处理事件类型消息
+                if (data.data) {
+                    const eventData = data.data as { type: string; result: string; step: string };
+                    switch (eventData.type) {
+                        case 'node_started': {
+                            // 获取 AiOperate.nodeStarted 返回的更新后的消息历史
+                            const updatedHistory = AiOperate.nodeStarted(eventData.step);
+                            // 只更新聊天历史，不替换
+                            setChatHistory(prev => [...prev, updatedHistory]);
+                            break;
+                        }
+                        case 'workflow_finished': {
+                            // 获取 AiOperate.nodeFinished 返回的更新后的消息历史和路由
+                            const [updatedHistory, route] = AiOperate.nodeFinished(eventData.result);
+                            // 只更新聊天历史，不替换
+                            setChatHistory(prev => [...prev, updatedHistory]);
+                            navigate(route);
+                            setIsLoading(false);
+                            break;
+                        }
                     }
                 }
                 break;
+            }
+            case 'connected': {
+                console.log("收到连接成功消息:", data);
+                break;
+            }
+            case 'error': {
+                console.log("收到错误消息:", data);
+                const aiResponse: ChatMessageDTO = {
+                    type: 'assistant',
+                    message: data.error_message || '收到错误消息',
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                setChatHistory(prev => [...prev, aiResponse]);
+                setIsLoading(false);
+                break;
+            }
+            default: {
+                // 处理其他未知类型的消息
+                console.log("收到未知类型的消息:", data);
+                if (data.output) {
+                    // 如果有输出内容，默认显示为助手消息
+                    const aiResponse: ChatMessageDTO = {
+                        type: 'assistant',
+                        message: data.output,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+                    setChatHistory(prev => [...prev, aiResponse]);
+                    setIsLoading(false);
+                }
             }
         }
     };
@@ -152,7 +198,7 @@ export function AiChatComponent(): JSX.Element {
             message.warning('正在连接AI助手，请稍后再试...');
             return false;
         }
-        let messagePayload;
+        let messagePayload: { user_input: string; role?: string | undefined; html?: null; };
         try {
             if (mode === 'operation') {
                 messagePayload = {
@@ -165,7 +211,9 @@ export function AiChatComponent(): JSX.Element {
                     user_input: content,
                 };
             }
-            wsRef.current.send(JSON.stringify(messagePayload));
+            setTimeout(() => {
+                wsRef.current?.send(JSON.stringify(messagePayload));
+            }, 500);
             return true;
         } catch (error) {
             console.error('发送消息失败:', error);
@@ -187,6 +235,29 @@ export function AiChatComponent(): JSX.Element {
             connectWebSocket();
         }
     }, [isAiChatOpen, wsStatus]);
+
+    // 组件加载时自动连接 WebSocket
+    useEffect(() => {
+        // 组件挂载时连接 WebSocket
+        connectWebSocket();
+
+        // 添加自动重连逻辑
+        const reconnectInterval = setInterval(() => {
+            if (wsRef.current?.readyState !== WebSocket.OPEN && wsRef.current?.readyState !== WebSocket.CONNECTING) {
+                console.log("WebSocket 连接已断开，尝试重新连接...");
+                connectWebSocket();
+            }
+        }, 10000); // 每10秒检查一次连接状态
+
+        // 组件卸载时清理 WebSocket 连接和重连定时器
+        return () => {
+            clearInterval(reconnectInterval);
+            if (wsRef.current) {
+                wsRef.current.close();
+                wsRef.current = null;
+            }
+        };
+    }, []); // 仅在组件挂载和卸载时执行
 
     // AI 对话框弹出动画
     const chatSpring = useSpring({
@@ -218,15 +289,8 @@ export function AiChatComponent(): JSX.Element {
 
         setChatHistory(prev => [...prev, userMessage]);
 
-        // 整合数据
-        const messagePayload = {
-            user_input: aiMessage.trim(),
-            role: userInfo.user?.role.role_name,
-            html: null
-        }
-
         // 发送消息到 WebSocket
-        const messageSent = sendWebSocketMessage(JSON.stringify(messagePayload), chatMode);
+        const messageSent = sendWebSocketMessage(aiMessage, chatMode);
         if (messageSent) {
             setAiMessage("");
             setIsLoading(true);
@@ -311,21 +375,6 @@ export function AiChatComponent(): JSX.Element {
                                 </div>
                             </div>
                         ))}
-                        {isLoading && (
-                            <div className="chat chat-start mb-3">
-                                <div className="chat-image avatar">
-                                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
-                                        <div className="bg-secondary w-full h-full flex items-center justify-center">
-                                            <Robot theme="filled" size="18" fill="#FFFFFF" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="chat-bubble chat-bubble-secondary flex items-center gap-2">
-                                    <Loading theme="outline" size="16" fill="currentColor" className="animate-spin" />
-                                    <span>正在思考中...</span>
-                                </div>
-                            </div>
-                        )}
                     </div>
                     <div className="p-4 bg-base-100 border-t border-gray-200">
                         <div className="relative mb-2">

@@ -9,15 +9,15 @@ export class AiOperate {
      * @param result 结果
      * @returns 最后一个机器人消息
      */
-    public static nodeStarted(chatHistory: Array<ChatMessageDTO>, result: string): ChatMessageDTO {
-        // 获取最后一个机器人消息
-        const lastRobotMessage = chatHistory
-            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-            .find(message => message.type === 'assistant');
-        if (lastRobotMessage) {
-            lastRobotMessage.message = result;
-        }
-        return lastRobotMessage!;
+    public static nodeStarted(result: string): ChatMessageDTO {
+        const lastMessage = {
+            type: 'assistant',
+            message: `正在进行${result}......`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        } as ChatMessageDTO;
+
+        // 返回新的聊天历史副本
+        return lastMessage;
     }
 
     /**
@@ -28,14 +28,14 @@ export class AiOperate {
      * @param result 结果
      * @returns 路由
      */
-    static nodeFinished(chatHistory: ChatMessageDTO[], result: string): string {
-        const lastRobotMessage = chatHistory
-            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-            .find(message => message.type === 'assistant');
-        if (lastRobotMessage) {
-            lastRobotMessage.message = "操作完成";
-        }
-        // 返回路由
-        return JSON.parse(result).route as string;
+    static nodeFinished(result: string): [ChatMessageDTO, string] {
+        const lastMessage = {
+            type: 'assistant',
+            message: "操作完成",
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        } as ChatMessageDTO;
+
+        // 返回新的聊天历史副本
+        return [lastMessage, JSON.parse(result).route as string];
     }
 }
