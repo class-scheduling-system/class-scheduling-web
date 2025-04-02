@@ -63,6 +63,9 @@ import { AdminClassroomAddPage } from "./admin/classroom/classroom_add.tsx";
 import { AdminClassroomEditPage } from "./admin/classroom/classroom_edit.tsx";
 import { AdminClassroom } from "./admin/admin_classroom.tsx";
 
+// 导入AI聊天组件
+import {AiChatComponent} from "../components/ai/ai_chat_component.tsx";
+
 /**
  * 生成一个管理员控制台组件。
  * 该函数返回一个包含管理员控制台的框架页面。
@@ -218,6 +221,8 @@ export function BaseAdmin(): JSX.Element {
                     ))}
                 </animated.div>
             </div>
+            {/* AI聊天组件 */}
+            <AiChatComponent />
         </animated.div>
     );
 }
