@@ -30,11 +30,13 @@ import {configureStore} from "@reduxjs/toolkit";
 import {siteStore} from "./site_store.ts";
 import {userStore} from "./user_store.ts";
 import {currentStore} from "./current_store.ts";
+import { aiFormChatStore } from "./ai_form_chat.ts";
 
 export default configureStore({
     reducer: {
         site: siteStore.reducer,
         user: userStore.reducer,
-        current: currentStore.reducer
+        current: currentStore.reducer,
+        aiFormChat: aiFormChatStore.reducer
     }
 })

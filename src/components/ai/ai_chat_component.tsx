@@ -36,6 +36,7 @@ import { UserInfoEntity } from "@/models/entity/user_info_entity";
 import { AiOperate } from "@/assets/ts/ai_operate";
 import { ChatMessageDTO } from "../../models/dto/chat_message_dto";
 import { useNavigate } from "react-router";
+import { AiFormStore } from "@/models/store/ai_form_store";
 // 定义聊天模式
 type ChatMode = 'chat' | 'operation';
 
@@ -59,6 +60,7 @@ interface WebSocketAiResponse {
  */
 export function AiChatComponent(): JSX.Element {
     const userInfo = useSelector((state: { user: UserInfoEntity }) => state.user);
+    const aiFormChat = useSelector((state: { aiFormChat: AiFormStore }) => state.aiFormChat);
 
     const navigate = useNavigate();
 
@@ -198,22 +200,22 @@ export function AiChatComponent(): JSX.Element {
             message.warning('正在连接AI助手，请稍后再试...');
             return false;
         }
-        let messagePayload: { user_input: string; role?: string | undefined; html?: null; };
         try {
             if (mode === 'operation') {
-                messagePayload = {
+                const messagePayload = {
                     user_input: content,
                     role: userInfo.user?.role.role_name,
-                    html: null
+                    form: aiFormChat.form,
+                    other_data: aiFormChat.other_data,
+                    record: aiFormChat.record,
+                    this_page: aiFormChat.this_page
                 };
+                setTimeout(() => {
+                    wsRef.current?.send(JSON.stringify(messagePayload));
+                }, 500);
             } else {
-                messagePayload = {
-                    user_input: content,
-                };
+                // TODO: 发送消息到 WebSocket
             }
-            setTimeout(() => {
-                wsRef.current?.send(JSON.stringify(messagePayload));
-            }, 500);
             return true;
         } catch (error) {
             console.error('发送消息失败:', error);
@@ -417,6 +419,7 @@ export function AiChatComponent(): JSX.Element {
                             <div className="text-xs text-gray-500 flex gap-3">
                                 <span>Shift + Enter 换行</span>
                                 <span>Esc 关闭窗口</span>
+                                <span>当前页面: {aiFormChat.this_page}</span>
                             </div>
                         </div>
                     </div>

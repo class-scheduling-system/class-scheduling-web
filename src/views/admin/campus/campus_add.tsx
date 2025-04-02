@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -26,22 +26,75 @@
  * --------------------------------------------------------------------------------
  */
 
-import {AddUser, CheckOne, Info, Refresh, Return} from "@icon-park/react";
-import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
-import {JSX, useEffect, useState} from "react";
-import {Link, useNavigate} from "react-router";
+import { AddUser, CheckOne, Info, Refresh, Return } from "@icon-park/react";
+import { SiteInfoEntity } from "../../../models/entity/site_info_entity.ts";
+import { JSX, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { CampusDTO } from "../../../models/dto/campus_dto.ts";
 import { AddCampusAPI } from "../../../apis/campus_api.ts";
 import { message } from "antd";
+import { useDispatch } from "react-redux";
+import { addRecord, setThisPage } from "../../../stores/ai_form_chat.ts";
+import { HtmlRecordStore } from "@/models/store/ai_form_store.ts";
 
-export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
+    const dispatch = useDispatch();
 
     const [data, setData] = useState<CampusDTO>({} as CampusDTO);
     const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `添加校区 | ${site.name ?? "Frontleaves Technology"}`;
-    }, [site.name]);
+
+        // 保存原有的onload处理函数（如果存在）
+        const originalOnload = window.onload;
+
+        // 设置新的onload处理函数
+        window.onload = () => {
+            // 获取表单中的所有可输入操作元素
+            const element = document.querySelectorAll('input, select, textarea');
+
+            // 遍历所有可输入元素
+            element.forEach(ele => {
+                // 基本属性
+                const record: Partial<HtmlRecordStore> = {
+                    type: '',
+                    value: '',
+                    required: false,
+                    readonly: false,
+                };
+                
+                // 根据元素类型设置特定属性
+                if (ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement) {
+                    record.type = ele.type;
+                    record.value = ele.value;
+                    record.placeholder = ele.placeholder;
+                    record.required = ele.required;
+                    record.readonly = ele.readOnly;
+                } else if (ele instanceof HTMLSelectElement) {
+                    record.type = 'select';
+                    record.value = ele.value;
+                    record.required = ele.required;
+                    // select元素没有placeholder和readOnly属性
+                }
+                
+                // 使用元素ID作为键
+                const elementId = ele.id || `element_${Math.random().toString(36).substr(2, 9)}`;
+                dispatch(addRecord({
+                    key: elementId,
+                    value: record as HtmlRecordStore
+                }));
+            });
+            
+            // 设置当前页面
+            dispatch(setThisPage("添加校区"));
+
+            // 清理函数
+            return () => {
+                window.onload = originalOnload; // 还原原始的onload
+            };
+        }
+    }, [site.name, dispatch]);
 
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -51,7 +104,6 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
             if (getResp?.output === "Success") {
                 message.success("添加校区成功");
                 navigate("/admin/campus");
-
             } else {
                 message.error(getResp?.error_message ?? "添加校区失败");
             }
@@ -76,7 +128,7 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
         <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-2">
                 <Link to={"/admin/campus"}>
-                    <Return theme="outline" size="24"/>
+                    <Return theme="outline" size="24" />
                 </Link>
                 <h2 className="text-2xl font-bold flex items-center space-x-2">
                     <span>添加新校区</span>
@@ -87,34 +139,34 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                 <div className="grid grid-cols-12 gap-x-6">
                     <div className="lg:col-span-8 md:col-span-12 sm:col-span-12 flex">
                         <div className="card card-border bg-base-100 w-full shadow-md">
-                            <h2 className="card-title bg-primary/10 rounded-t-lg p-3"><AddUser theme="outline" size="18"/>添加校区信息</h2>
+                            <h2 className="card-title bg-primary/10 rounded-t-lg p-3"><AddUser theme="outline" size="18" />添加校区信息</h2>
                             <div className="card-body">
-                                <form id="campus_add" onSubmit={onSubmit}  className="flex flex-col flex-grow space-y-5">
+                                <form id="campus_add" onSubmit={onSubmit} className="flex flex-col flex-grow space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-
                                                 <span>校区名</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
                                             <input
+                                                id="campus_name"
                                                 type="text"
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_name || ""}
-                                                onChange={(e) => setData({...data, campus_name: e.target.value})}
+                                                onChange={(e) => setData({ ...data, campus_name: e.target.value })}
                                             />
                                         </fieldset>
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-
                                                 <span>校区编码</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
                                             <input
+                                                id="campus_code"
                                                 type="text"
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_code || ""}
-                                                onChange={(e) => setData({...data, campus_code: e.target.value})}
+                                                onChange={(e) => setData({ ...data, campus_code: e.target.value })}
                                             />
                                         </fieldset>
 
@@ -124,10 +176,11 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                 <span className="text-red-500">*</span>
                                             </legend>
                                             <input
+                                                id="campus_desc"
                                                 type="text"
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_desc || ""}
-                                                onChange={(e) => setData({...data, campus_desc: e.target.value})}
+                                                onChange={(e) => setData({ ...data, campus_desc: e.target.value })}
                                             />
                                         </fieldset>
                                         <fieldset className="flex flex-col">
@@ -136,9 +189,10 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                                 <span className="text-red-500">*</span>
                                             </legend>
                                             <select
+                                                id="campus_status"
                                                 className="select select-sm w-full validator"
                                                 value={data.campus_status !== undefined ? String(data.campus_status) : ""}
-                                                onChange={(e) => setData({...data, campus_status: e.target.value === "true"})}
+                                                onChange={(e) => setData({ ...data, campus_status: e.target.value === "true" })}
                                             >
                                                 <option value="" disabled>请选择状态</option>
                                                 <option value="true">启用</option>
@@ -147,15 +201,15 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                         </fieldset>
                                         <fieldset className="flex flex-col">
                                             <legend className="flex items-center space-x-1 mb-1 text-sm">
-
                                                 <span>校区地址</span>
                                                 <span className="text-red-500">*</span>
                                             </legend>
                                             <input
+                                                id="campus_address"
                                                 type="text"
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_address || ""}
-                                                onChange={(e) => setData({...data, campus_address: e.target.value})}
+                                                onChange={(e) => setData({ ...data, campus_address: e.target.value })}
                                             />
                                         </fieldset>
                                     </div>
@@ -165,14 +219,14 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                                             className="btn btn-sm btn-outline"
                                             onClick={resetForm}
                                         >
-                                            <Refresh theme="outline" size="14"/>
+                                            <Refresh theme="outline" size="14" />
                                             <span>重置</span>
                                         </button>
                                         <button
                                             type="submit"
                                             className="btn btn-sm btn-primary"
                                         >
-                                            <CheckOne theme="outline" size="14"/>
+                                            <CheckOne theme="outline" size="14" />
                                             <span>提交</span>
                                         </button>
                                     </div>
@@ -182,7 +236,7 @@ export function CampusAdd({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Eleme
                     </div>
                     <div className="lg:col-span-4 md:col-span-12 sm:col-span-12">
                         <div className="card card-border bg-base-100 w-full  shadow-md">
-                            <h2 className="card-title bg-secondary/10 rounded-t-lg p-3"><Info theme="outline" size="18"/>操作提示</h2>
+                            <h2 className="card-title bg-secondary/10 rounded-t-lg p-3"><Info theme="outline" size="18" />操作提示</h2>
                             <div className="card-body">
                                 <ul className="space-y-1 text-gray-700">
                                     <li className="flex items-start">
