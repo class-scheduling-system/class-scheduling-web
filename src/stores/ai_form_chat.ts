@@ -30,6 +30,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AiFormStore, HtmlRecordStore } from "../models/store/ai_form_store.ts";
 
 // 定义 addRecord 方法的 payload 类型
+interface AddFormPayload {
+    key: string;
+    value: HtmlRecordStore;
+}
+
+// 定义 addRecord 方法的 payload 类型
 interface AddRecordPayload {
     key: string;
     value: HtmlRecordStore;
@@ -43,7 +49,7 @@ export const aiFormChatStore = createSlice({
     initialState: {
         user_input: '',
         role: '',
-        form: '',
+        form: {},
         other_data: {}, // 改为使用普通对象而不是 Map
         this_page: '',
         record: {} // 改为使用普通对象而不是 Map
@@ -55,8 +61,10 @@ export const aiFormChatStore = createSlice({
          * @param state 
          * @param action 
          */
-        setForm: (state, action: PayloadAction<string>) => {
-            state.form = action.payload;
+        addForm: (state, action: PayloadAction<AddFormPayload>) => {
+            // 使用对象属性赋值而不是 Map.set()
+            const { key, value } = action.payload;
+            state.form[key] = value;
         },
 
         /**
@@ -78,7 +86,7 @@ export const aiFormChatStore = createSlice({
         addRecord: (state, action: PayloadAction<AddRecordPayload>) => {
             // 使用对象属性赋值而不是 Map.set()
             const { key, value } = action.payload;
-            state.record[key] = value;
+            state.record![key] = value;
         },
 
         /**
@@ -93,5 +101,5 @@ export const aiFormChatStore = createSlice({
     }
 });
 
-export const { setForm, setOtherData, addRecord, setThisPage } = aiFormChatStore.actions;
+export const { addForm, setOtherData, addRecord, setThisPage } = aiFormChatStore.actions;
 export default aiFormChatStore.reducer;

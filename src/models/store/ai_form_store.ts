@@ -14,7 +14,7 @@ export type AiFormStore = {
     /**
      * 表单数据
      */
-    form: string,
+    form: Record<string, HtmlRecordStore>,
 
     /**
      * 其他数据
@@ -24,12 +24,17 @@ export type AiFormStore = {
     /**
      * 记录
      */
-    record: Record<string, HtmlRecordStore>,
+    record?: Record<string, HtmlRecordStore>,
 
     /**
      * 当前页面
      */
-    this_page: string
+    this_page: string,
+
+    /**
+     * 聊天历史
+     */
+    chat: string
 }
 
 /**

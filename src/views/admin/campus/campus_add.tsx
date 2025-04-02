@@ -34,7 +34,7 @@ import { CampusDTO } from "../../../models/dto/campus_dto.ts";
 import { AddCampusAPI } from "../../../apis/campus_api.ts";
 import { message } from "antd";
 import { useDispatch } from "react-redux";
-import { addRecord, setThisPage } from "../../../stores/ai_form_chat.ts";
+import { addForm, setThisPage } from "../../../stores/ai_form_chat.ts";
 import { HtmlRecordStore } from "@/models/store/ai_form_store.ts";
 
 export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
@@ -75,13 +75,12 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                     record.type = 'select';
                     record.value = ele.value;
                     record.required = ele.required;
-                    // select元素没有placeholder和readOnly属性
+                    record.options = Array.from(ele.options).map(option => option.value);
                 }
                 
                 // 使用元素ID作为键
-                const elementId = ele.id || `element_${Math.random().toString(36).substr(2, 9)}`;
-                dispatch(addRecord({
-                    key: elementId,
+                dispatch(addForm({
+                    key: ele.id!,
                     value: record as HtmlRecordStore
                 }));
             });
@@ -154,6 +153,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_name || ""}
                                                 onChange={(e) => setData({ ...data, campus_name: e.target.value })}
+                                                required
                                             />
                                         </fieldset>
                                         <fieldset className="flex flex-col">
@@ -167,6 +167,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_code || ""}
                                                 onChange={(e) => setData({ ...data, campus_code: e.target.value })}
+                                                required
                                             />
                                         </fieldset>
 
@@ -181,6 +182,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_desc || ""}
                                                 onChange={(e) => setData({ ...data, campus_desc: e.target.value })}
+                                                required
                                             />
                                         </fieldset>
                                         <fieldset className="flex flex-col">
@@ -193,6 +195,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 className="select select-sm w-full validator"
                                                 value={data.campus_status !== undefined ? String(data.campus_status) : ""}
                                                 onChange={(e) => setData({ ...data, campus_status: e.target.value === "true" })}
+                                                required
                                             >
                                                 <option value="" disabled>请选择状态</option>
                                                 <option value="true">启用</option>
@@ -210,6 +213,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
                                                 className="input input-sm w-full validator"
                                                 value={data.campus_address || ""}
                                                 onChange={(e) => setData({ ...data, campus_address: e.target.value })}
+                                                required
                                             />
                                         </fieldset>
                                     </div>

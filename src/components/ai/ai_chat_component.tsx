@@ -149,13 +149,27 @@ export function AiChatComponent(): JSX.Element {
                             break;
                         }
                         case 'workflow_finished': {
-                            // 获取 AiOperate.nodeFinished 返回的更新后的消息历史和路由
-                            const [updatedHistory, route] = AiOperate.nodeFinished(eventData.result);
-                            // 只更新聊天历史，不替换
-                            setChatHistory(prev => [...prev, updatedHistory]);
-                            navigate(route);
-                            setIsLoading(false);
-                            break;
+                            if (AiOperate.getType(eventData.result) === 'route') {
+                                // 获取 AiOperate.nodeFinished 返回的更新后的消息历史和路由
+                                const [updatedHistory, route] = AiOperate.nodeFinishedGetRoute(eventData.result);
+                                // 只更新聊天历史，不替换
+                                setChatHistory(prev => [...prev, updatedHistory]);
+                                navigate(route);
+                                setIsLoading(false);
+                                break;
+                            } else {
+                                // 获取 AiOperate.nodeFinished 返回的更新后的消息历史和路由
+                                const [updatedHistory, route] = AiOperate.nodeFinishGetJs(eventData.result);
+                                // 只更新聊天历史，不替换
+                                setChatHistory(prev => [...prev, updatedHistory]);
+                                setIsLoading(false);
+                                // 执行 JavaScript 代码
+                                const blob = new Blob([route], { type: 'application/javascript' });
+                                const url = URL.createObjectURL(blob);
+                                const script = document.createElement('script');
+                                script.src = url;
+                                document.head.appendChild(script);
+                            }
                         }
                     }
                 }
@@ -208,8 +222,9 @@ export function AiChatComponent(): JSX.Element {
                     form: aiFormChat.form,
                     other_data: aiFormChat.other_data,
                     record: aiFormChat.record,
-                    this_page: aiFormChat.this_page
-                };
+                    this_page: aiFormChat.this_page,
+                    chat: JSON.stringify(chatHistory)
+                } as AiFormStore;
                 setTimeout(() => {
                     wsRef.current?.send(JSON.stringify(messagePayload));
                 }, 500);
