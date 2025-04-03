@@ -33,12 +33,14 @@ import { Link, useNavigate } from "react-router";
 import { CampusDTO } from "../../../models/dto/campus_dto.ts";
 import { AddCampusAPI } from "../../../apis/campus_api.ts";
 import { message } from "antd";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addForm, setThisPage } from "../../../stores/ai_form_chat.ts";
 import { HtmlRecordStore } from "@/models/store/ai_form_store.ts";
+import { AiFormStore } from "@/models/store/ai_form_store.ts";
 
 export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const dispatch = useDispatch();
+    const aiFormChat = useSelector((state: { aiFormChat: AiFormStore }) => state.aiFormChat);
 
     const [data, setData] = useState<CampusDTO>({} as CampusDTO);
     const navigate = useNavigate();
@@ -94,6 +96,51 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             };
         }
     }, [site.name, dispatch]);
+
+    useEffect(() => {
+        if (aiFormChat.forBackData) {
+            const blob = new Blob([aiFormChat.forBackData], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const script = document.createElement('script');
+            script.src = url;
+            
+            // 添加脚本执行完成的事件监听器
+            script.onload = () => {
+                // 脚本执行后，检查表单元素的值并更新状态
+                const campusNameInput = document.getElementById('campus_name') as HTMLInputElement;
+                const campusCodeInput = document.getElementById('campus_code') as HTMLInputElement;
+                const campusDescInput = document.getElementById('campus_desc') as HTMLInputElement;
+                const campusAddressInput = document.getElementById('campus_address') as HTMLInputElement;
+                const campusStatusSelect = document.getElementById('campus_status') as HTMLSelectElement;
+                
+                // 更新状态，但只更新有值的字段
+                const updatedData = { ...data };
+                if (campusNameInput && campusNameInput.value) {
+                    updatedData.campus_name = campusNameInput.value;
+                }
+                if (campusCodeInput && campusCodeInput.value) {
+                    updatedData.campus_code = campusCodeInput.value;
+                }
+                if (campusDescInput && campusDescInput.value) {
+                    updatedData.campus_desc = campusDescInput.value;
+                }
+                if (campusAddressInput && campusAddressInput.value) {
+                    updatedData.campus_address = campusAddressInput.value;
+                }
+                if (campusStatusSelect && campusStatusSelect.value) {
+                    updatedData.campus_status = campusStatusSelect.value === "true";
+                }
+                
+                // 更新状态
+                setData(updatedData);
+                
+                // 释放资源
+                URL.revokeObjectURL(url);
+            };
+            
+            document.head.appendChild(script);
+        }
+    }, [aiFormChat.forBackData]);
 
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {

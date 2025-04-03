@@ -52,7 +52,8 @@ export const aiFormChatStore = createSlice({
         form: {},
         other_data: {}, // 改为使用普通对象而不是 Map
         this_page: '',
-        record: {} // 改为使用普通对象而不是 Map
+        record: {}, // 改为使用普通对象而不是 Map
+        forBackData: '',
     } as AiFormStore,
     reducers: {
         /**
@@ -97,9 +98,19 @@ export const aiFormChatStore = createSlice({
          */
         setThisPage: (state, action: PayloadAction<string>) => {
             state.this_page = action.payload;
+        },
+
+        /**
+         * 设置返回数据
+         * 
+         * @param state 
+         * @param action 
+         */
+        setForBackData: (state, action: PayloadAction<string>) => {
+            state.forBackData = action.payload;
         }
     }
 });
 
-export const { addForm, setOtherData, addRecord, setThisPage } = aiFormChatStore.actions;
+export const { addForm, setOtherData, addRecord, setThisPage, setForBackData } = aiFormChatStore.actions;
 export default aiFormChatStore.reducer;

@@ -12,6 +12,10 @@ export type AiFormStore = {
      */
     role: string,
     /**
+     * 类型
+     */
+    type: "operate" | "chat",
+    /**
      * 表单数据
      */
     form: Record<string, HtmlRecordStore>,
@@ -34,7 +38,17 @@ export type AiFormStore = {
     /**
      * 聊天历史
      */
-    chat: string
+    chat: string,
+
+    /**
+     * 返回数据
+     */
+    forBackData: string,
+
+    /**
+     * 对话ID
+     */
+    metadata?: string,
 }
 
 /**

@@ -31,12 +31,14 @@ import { animated, useSpring } from "@react-spring/web";
 import { Comment, Loading, People, Robot } from "@icon-park/react";
 import { message } from "antd";
 import { GetAuthorizationToken } from "../../assets/ts/base_api";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { UserInfoEntity } from "@/models/entity/user_info_entity";
 import { AiOperate } from "@/assets/ts/ai_operate";
 import { ChatMessageDTO } from "../../models/dto/chat_message_dto";
 import { useNavigate } from "react-router";
 import { AiFormStore } from "@/models/store/ai_form_store";
+import { setForBackData } from "@/stores/ai_form_chat";
+
 // 定义聊天模式
 type ChatMode = 'chat' | 'operation';
 
@@ -60,6 +62,7 @@ interface WebSocketAiResponse {
  */
 export function AiChatComponent(): JSX.Element {
     const userInfo = useSelector((state: { user: UserInfoEntity }) => state.user);
+    const dispatch = useDispatch();
     const aiFormChat = useSelector((state: { aiFormChat: AiFormStore }) => state.aiFormChat);
 
     const navigate = useNavigate();
@@ -71,6 +74,8 @@ export function AiChatComponent(): JSX.Element {
     const [wsStatus, setWsStatus] = useState<WebSocketStatus>('disconnected');
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const wsRef = useRef<WebSocket | null>(null);
+    const currentAiMessage = useRef<string>("");
+    const [buffer, setBuffer] = useState<string>("");
     const [chatHistory, setChatHistory] = useState<ChatMessageDTO[]>([
         {
             type: 'assistant',
@@ -78,6 +83,10 @@ export function AiChatComponent(): JSX.Element {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
     ]);
+
+    useEffect(() => {
+        console.log("chatHistory:", chatHistory);
+    }, [chatHistory]);
 
     // 连接 WebSocket
     const connectWebSocket = () => {
@@ -127,25 +136,27 @@ export function AiChatComponent(): JSX.Element {
     };
 
     // 处理 WebSocket 接收到的消息
-    const handleWebSocketMessage = (data: WebSocketAiResponse) => {
+    const handleWebSocketMessage = (response: WebSocketAiResponse) => {
         // 首先检查并处理可能的错误消息
-        if (!data.success && data.error_message) {
-            message.error(`AI助手错误: ${data.error_message}`);
+        if (!response.success && response.error_message) {
+            message.error(`AI助手错误: ${response.error_message}`);
             setIsLoading(false);
+            if (response.error_message === "用户未登录") {
+                navigate("/auth/login");
+            }
             return;
         }
 
-        switch (data.type) {
+        switch (response.type) {
             case 'event': {
                 // 处理事件类型消息
-                if (data.data) {
-                    const eventData = data.data as { type: string; result: string; step: string };
+                if (response.data) {
+                    const eventData = response.data as { type: string; result: string; step: string; message: string; metadata: string };
                     switch (eventData.type) {
                         case 'node_started': {
                             // 获取 AiOperate.nodeStarted 返回的更新后的消息历史
                             const updatedHistory = AiOperate.nodeStarted(eventData.step);
-                            // 只更新聊天历史，不替换
-                            setChatHistory(prev => [...prev, updatedHistory]);
+                            setBuffer(updatedHistory.message);
                             break;
                         }
                         case 'workflow_finished': {
@@ -159,31 +170,54 @@ export function AiChatComponent(): JSX.Element {
                                 break;
                             } else {
                                 // 获取 AiOperate.nodeFinished 返回的更新后的消息历史和路由
-                                const [updatedHistory, route] = AiOperate.nodeFinishGetJs(eventData.result);
+                                const [updatedHistory, jsScript] = AiOperate.nodeFinishGetJs(eventData.result);
                                 // 只更新聊天历史，不替换
                                 setChatHistory(prev => [...prev, updatedHistory]);
                                 setIsLoading(false);
                                 // 执行 JavaScript 代码
-                                const blob = new Blob([route], { type: 'application/javascript' });
-                                const url = URL.createObjectURL(blob);
-                                const script = document.createElement('script');
-                                script.src = url;
-                                document.head.appendChild(script);
+                                dispatch(setForBackData(jsScript));
                             }
+                            setBuffer("");
+                            break;
+                        }
+                        case 'agent_message': {
+                            console.log("收到事件消息:", currentAiMessage.current);
+                            // 获取消息内容
+                            const message = eventData.message;
+
+                            // 将消息添加到缓冲区
+                            currentAiMessage.current += message;
+                            setBuffer(prev => prev + message);
+                            break;
+                        }
+                        case 'message_end': {
+                            setChatHistory(prev => {
+                                // 在这里直接引用 currentAiMessage，确保获取的是最新值
+                                return [...prev, {
+                                    type: 'assistant',
+                                    message: currentAiMessage.current,
+                                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                }];
+                            });
+
+                            // 清空当前消息必须在历史记录更新后进行
+                            setIsLoading(false);
+                            setBuffer("");
+                            break;
                         }
                     }
                 }
                 break;
-            }
+            };
             case 'connected': {
-                console.log("收到连接成功消息:", data);
+                console.log("收到连接成功消息:", response);
                 break;
             }
             case 'error': {
-                console.log("收到错误消息:", data);
+                console.log("收到错误消息:", response);
                 const aiResponse: ChatMessageDTO = {
                     type: 'assistant',
-                    message: data.error_message || '收到错误消息',
+                    message: response.error_message || '收到错误消息',
                     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };
                 setChatHistory(prev => [...prev, aiResponse]);
@@ -192,12 +226,12 @@ export function AiChatComponent(): JSX.Element {
             }
             default: {
                 // 处理其他未知类型的消息
-                console.log("收到未知类型的消息:", data);
-                if (data.output) {
+                console.log("收到未知类型的消息:", response);
+                if (response.output) {
                     // 如果有输出内容，默认显示为助手消息
                     const aiResponse: ChatMessageDTO = {
                         type: 'assistant',
-                        message: data.output,
+                        message: response.output,
                         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                     setChatHistory(prev => [...prev, aiResponse]);
@@ -223,13 +257,22 @@ export function AiChatComponent(): JSX.Element {
                     other_data: aiFormChat.other_data,
                     record: aiFormChat.record,
                     this_page: aiFormChat.this_page,
-                    chat: JSON.stringify(chatHistory)
+                    chat: JSON.stringify(chatHistory),
+                    type: "operate"
                 } as AiFormStore;
                 setTimeout(() => {
                     wsRef.current?.send(JSON.stringify(messagePayload));
                 }, 500);
             } else {
                 // TODO: 发送消息到 WebSocket
+                const messagePayload = {
+                    user_input: content,
+                    type: "chat",
+                    chat: JSON.stringify(chatHistory)
+                } as AiFormStore;
+                setTimeout(() => {
+                    wsRef.current?.send(JSON.stringify(messagePayload));
+                }, 500);
             }
             return true;
         } catch (error) {
@@ -296,6 +339,9 @@ export function AiChatComponent(): JSX.Element {
             message.warning("请输入对话内容");
             return;
         }
+
+        currentAiMessage.current = "";
+        setBuffer("");
 
         // 添加用户消息到历史记录
         const userMessage: ChatMessageDTO = {
@@ -388,10 +434,44 @@ export function AiChatComponent(): JSX.Element {
                                     <time className="ml-1">{chat.timestamp}</time>
                                 </div>
                                 <div className={`chat-bubble ${chat.type === 'user' ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
-                                    {chat.message}
+                                    <div className="flex flex-col gap-2 space-y-1">
+                                        {chat.type === 'user' ? (
+                                            chat.message
+                                        ) : (
+                                            <div
+                                                className="whitespace-pre-wrap"
+                                                dangerouslySetInnerHTML={{ __html: chat.message }}
+                                            ></div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
+                        {isLoading && (
+                            <div className="chat chat-start mb-3">
+                                <div className="chat-image avatar">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+                                        <div className="bg-secondary w-full h-full flex items-center justify-center">
+                                            <Robot theme="filled" size="18" fill="#FFFFFF" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="chat-header opacity-70 text-xs mb-1">
+                                    AI助手
+                                    <time className="ml-1">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
+                                </div>
+                                <div className="chat-bubble chat-bubble-secondary relative min-w-[100px]">
+                                    <div className="flex flex-col gap-2 space-y-1">
+                                        {isLoading && buffer.trim() !== "" ? (
+                                            <div
+                                                className="whitespace-pre-wrap"
+                                                dangerouslySetInnerHTML={{ __html: buffer }}
+                                            ></div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="p-4 bg-base-100 border-t border-gray-200">
                         <div className="relative mb-2">
