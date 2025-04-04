@@ -41,19 +41,16 @@ interface AddRecordPayload {
     value: HtmlRecordStore;
 }
 
-// 为 other_data 定义更具体的类型，与 AiFormStore 中定义兼容
-type OtherDataType = Record<string, object>;
-
 export const aiFormChatStore = createSlice({
     name: "aiFormChat",
     initialState: {
         user_input: '',
         role: '',
         form: {},
-        other_data: {}, // 改为使用普通对象而不是 Map
+        other_data: '',
         this_page: '',
-        record: {}, // 改为使用普通对象而不是 Map
-        forBackData: '',
+        record: {},
+        for_back_data: '',
     } as AiFormStore,
     reducers: {
         /**
@@ -74,7 +71,7 @@ export const aiFormChatStore = createSlice({
          * @param state 
          * @param action 
          */
-        setOtherData: (state, action: PayloadAction<OtherDataType>) => {
+        setOtherData: (state, action: PayloadAction<string>) => {
             state.other_data = action.payload;
         },
 
@@ -107,7 +104,7 @@ export const aiFormChatStore = createSlice({
          * @param action 
          */
         setForBackData: (state, action: PayloadAction<string>) => {
-            state.forBackData = action.payload;
+            state.for_back_data = action.payload;
         }
     }
 });

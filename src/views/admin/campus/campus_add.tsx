@@ -49,49 +49,45 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
         document.title = `添加校区 | ${site.name ?? "Frontleaves Technology"}`;
 
         dispatch(setThisPage("添加校区"));
-        // 设置新的onload处理函数
-        window.onload = () => {
-            // 获取表单中的所有可输入操作元素
-            const element = document.querySelectorAll('input, select, textarea');
 
-            // 遍历所有可输入元素
-            element.forEach(ele => {
-                // 基本属性
-                const record: Partial<HtmlRecordStore> = {
-                    type: '',
-                    value: '',
-                    required: false,
-                    readonly: false,
-                };
-                
-                // 根据元素类型设置特定属性
-                if (ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement) {
-                    record.type = ele.type;
-                    record.value = ele.value;
-                    record.placeholder = ele.placeholder;
-                    record.required = ele.required;
-                    record.readonly = ele.readOnly;
-                } else if (ele instanceof HTMLSelectElement) {
-                    record.type = 'select';
-                    record.value = ele.value;
-                    record.required = ele.required;
-                    record.options = Array.from(ele.options).map(option => option.value);
-                }
-                
-                // 使用元素ID作为键
-                dispatch(addForm({
-                    key: ele.id!,
-                    value: record as HtmlRecordStore
-                }));
-            });
+        const element = document.querySelectorAll('input, select, textarea');
+
+        // 遍历所有可输入元素
+        element.forEach(ele => {
+            // 基本属性
+            const record: Partial<HtmlRecordStore> = {
+                type: '',
+                value: '',
+                required: false,
+                readonly: false,
+            };
             
-            // 设置当前页面
-        }
+            // 根据元素类型设置特定属性
+            if (ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement) {
+                record.type = ele.type;
+                record.value = ele.value;
+                record.placeholder = ele.placeholder;
+                record.required = ele.required;
+                record.readonly = ele.readOnly;
+            } else if (ele instanceof HTMLSelectElement) {
+                record.type = 'select';
+                record.value = ele.value;
+                record.required = ele.required;
+                record.options = Array.from(ele.options).map(option => option.value);
+            }
+            
+            // 使用元素ID作为键
+            dispatch(addForm({
+                key: ele.id!,
+                value: record as HtmlRecordStore
+            }));
+        });
+
     }, [site.name, dispatch]);
 
     useEffect(() => {
-        if (aiFormChat.forBackData) {
-            const blob = new Blob([aiFormChat.forBackData], { type: 'application/javascript' });
+        if (aiFormChat.for_back_data) {
+            const blob = new Blob([aiFormChat.for_back_data], { type: 'application/javascript' });
             const url = URL.createObjectURL(blob);
             const script = document.createElement('script');
             script.src = url;
@@ -132,7 +128,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             
             document.head.appendChild(script);
         }
-    }, [aiFormChat.forBackData]);
+    }, [aiFormChat.for_back_data]);
 
     // 提交表单
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {

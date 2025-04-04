@@ -23,7 +23,7 @@ export type AiFormStore = {
     /**
      * 其他数据
      */
-    other_data: Record<string, object>,
+    other_data: string,
 
     /**
      * 记录
@@ -43,7 +43,7 @@ export type AiFormStore = {
     /**
      * 返回数据
      */
-    forBackData: string,
+    for_back_data: string,
 
     /**
      * 对话ID

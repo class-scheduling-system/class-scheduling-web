@@ -85,7 +85,7 @@ const GetClassroomListAPI = async (keyword?: string): Promise<BaseResponse<Class
 const CreateClassroomAPI = async (data: ClassroomDTO): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
     return BaseApi<BaseResponse<ClassroomInfoEntity>>(
         MethodType.POST,
-        "/api/v1/classroom/create",
+        "/api/v1/classroom",
         data,
         null,
         null,
