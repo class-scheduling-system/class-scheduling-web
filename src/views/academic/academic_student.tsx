@@ -25,7 +25,7 @@ import { LabelComponent } from "../../components/label_component.tsx";
 import { StudentEntity } from "../../models/entity/student_entity";
 import { GetStudentPageAPI } from "../../apis/student_api";
 import { PageStudentSearchDTO } from "../../models/dto/page/page_student_search_dto";
-import { AcademicDeleteStudentDialog } from "../../components/academic/academic_student_delete_dialog";
+import { AcademicDeleteStudentDialog } from "../../components/academic/student/academic_student_delete_dialog";
 import { Newlybuild } from "@icon-park/react";
 
 export function AcademicStudent({ site }: Readonly<{

@@ -31,7 +31,7 @@ import {JSX, useEffect, useState} from "react";
 import {message, Modal, Upload as AntUpload} from "antd";
 import {RcFile} from "antd/es/upload";
 import {UploadRequestOption} from "rc-upload/lib/interface";
-import {BatchImportBuildingAPI, GetBuildingTemplateAPI} from "../../../apis/building_api.ts";
+import {BatchImportStudentAPI, GetStudentTemplateAPI} from "../../../apis/student_api.ts";
 
 /**
  * # AcademicStudentBatchImportDialog
@@ -72,7 +72,7 @@ export function AcademicStudentBatchImportDialog({show, emit, requestRefresh}: R
 
     const downloadTemplate = async () => {
         try {
-            const getResp = await GetBuildingTemplateAPI();
+            const getResp = await GetStudentTemplateAPI();
             
             if (getResp?.output !== 'Success' || !getResp?.data) {
                 throw new Error(getResp?.message || '下载模板失败：服务器返回为空');
@@ -136,7 +136,7 @@ export function AcademicStudentBatchImportDialog({show, emit, requestRefresh}: R
                 // 不移除 base64 的前缀，直接使用完整的 base64Content
                 
                 try {
-                    const result = await BatchImportBuildingAPI(base64Content, ignoreError);
+                    const result = await BatchImportStudentAPI(base64Content, ignoreError);
                     
                     if (result?.output === 'Success' && result.data) {
                         const { total_count, success_count, failed_count, failed_details } = result.data;

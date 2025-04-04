@@ -119,6 +119,25 @@ const EditStudentAPI = async (student_uuid: string, data: StudentDTO): Promise<B
 }
 
 
+/**
+ * # GetStudentTemplateAPI
+ * > 该函数用于获取学生导入模板。它会返回一个 Excel 文件的二进制数据，特别适用于教务角色。
+ * > 后端接口使用了 RequestRole 注解来限制只有具有"教务"角色的用户才能访问此端点。
+ * > 返回的响应将是一个包含模板文件的响应实体，设置为附件形式，文件名为"学生导入模板.xlsx"
+ *
+ * @returns {Promise<BaseResponse<FileEntity> | undefined>} - 如果操作成功，则返回一个包含文件实体的 BaseResponse；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const GetStudentTemplateAPI = async (): Promise<BaseResponse<FileEntity> | undefined> => {
+    return BaseApi<BaseResponse<FileEntity>>(
+        MethodType.GET,
+        "/api/v1/students/get-template",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
 
 /**
  * # BatchImportStudentAPI
@@ -149,5 +168,6 @@ export {
     DisableStudentAPI,
     DeleteStudentAPI,
     EditStudentAPI,
+    GetStudentTemplateAPI,
     BatchImportStudentAPI
 };
