@@ -236,12 +236,6 @@ export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity 
                 if (response?.output === "Success") {
                     console.log("获取教室标签列表成功:", response.data);
                     setTagList(response.data!);
-                    
-                    // 更新AI可用的数据
-                    dispatch(setOtherData(JSON.stringify({
-                        type: "tagList",
-                        data: response.data
-                    })));
                 } else {
                     message.error(response?.message ?? "获取教室标签列表失败");
                 }
@@ -261,12 +255,6 @@ export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity 
                 if (response?.output === "Success") {
                     console.log("获取教室类型列表成功:", response.data);
                     setTypeList(response.data!);
-                    
-                    // 更新AI可用的数据
-                    dispatch(setOtherData(JSON.stringify({
-                        type: "typeList",
-                        data: response.data
-                    })));
                 } else {
                     message.error(response?.message ?? "获取教室类型列表失败");
                 }
@@ -286,12 +274,6 @@ export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity 
                 if (response?.output === "Success") {
                     console.log("获取建筑列表成功:", response.data);
                     setBuildingList(response.data!);
-                    
-                    // 更新AI可用的数据
-                    dispatch(setOtherData(JSON.stringify({
-                        type: "buildingList",
-                        data: response.data
-                    })));
                 } else {
                     message.error(response?.message ?? "获取建筑列表失败");
                 }
@@ -311,12 +293,6 @@ export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity 
                 if (response?.output === "Success") {
                     console.log("获取校区列表成功:", response.data);
                     setCampusList(response.data!);
-                    
-                    // 更新AI可用的数据
-                    dispatch(setOtherData(JSON.stringify({
-                        type: "campusList",
-                        data: response.data
-                    })));
                 } else {
                     message.error(response?.message ?? "获取校区列表失败");
                 }
@@ -571,7 +547,7 @@ export function AdminClassroomAddPage({ site }: Readonly<{ site: SiteInfoEntity 
                                                 pattern="^(B?\d+|G){1,4}$"
                                                 value={data.floor ?? ""}
                                                 onChange={(e) => setData({ ...data, floor: e.target.value })}
-                                                placeholder="请输入楼层 (如: 0001, B001, G001)"
+                                                placeholder="请输入楼层 (如: 001, B001, G001)"
                                             />
                                         </fieldset>
 

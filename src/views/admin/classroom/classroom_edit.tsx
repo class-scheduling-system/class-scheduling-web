@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import React, { JSX, useEffect, useState } from 'react';
+import React, { JSX, useEffect, useLayoutEffect, useState } from 'react';
 import { Return, Refresh, Info, Editor, GreenHouse, UserPositioning, CheckOne } from "@icon-park/react";
 import { message, Transfer } from "antd";
 import { GetClassroomAPI, GetClassroomTagsAPI, GetClassroomTypeAPI, UpdateClassroomAPI } from "../../../apis/classroom_api.ts";
@@ -41,6 +41,9 @@ import { BuildingLiteEntity } from "../../../models/entity/building_lite_entity.
 import { ListOfCampusEntity } from "../../../models/entity/list_of_campus_entity.ts";
 import { ClassroomInfoEntity } from "../../../models/entity/classroom_info_entity.ts";
 import { Key } from "antd/es/table/interface";
+import { useDispatch, useSelector } from "react-redux";
+import { addForm, setForBackData, setOtherData, setThisPage } from "../../../stores/ai_form_chat.ts";
+import { HtmlRecordStore, AiFormStore } from "@/models/store/ai_form_store.ts";
 
 interface TransferItem {
     key: string;
@@ -50,6 +53,8 @@ interface TransferItem {
 
 export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const aiFormChat = useSelector((state: { aiFormChat: AiFormStore }) => state.aiFormChat);
 
     const { classroomUuid } = useParams<{ classroomUuid: string }>();
     const [data, setData] = useState<Partial<ClassroomDTO>>({});
@@ -60,9 +65,17 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
     const [classroom, setClassroom] = useState<ClassroomInfoEntity | null>(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
+    
+    // 使用useLayoutEffect初始化页面设置
+    useLayoutEffect(() => {
         document.title = `编辑教室 | ${site.name}`;
-    }, [site.name]);
+        
+        // 设置当前页面名称，用于AI
+        dispatch(setThisPage("编辑教室"));
+        
+        dispatch(setOtherData(""));
+        dispatch(setForBackData(""));
+    }, [site.name, dispatch]);
 
     // 获取教室信息
     useEffect(() => {
@@ -74,6 +87,12 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                     console.log("获取教室信息成功:", response.data);
                     setClassroom(response.data!);
                     setLoading(false);
+                    
+                    // 向AI提供当前教室数据
+                    dispatch(setOtherData(JSON.stringify({
+                        currentClassroom: response.data,
+                        type: "currentClassroomData"
+                    })));
                 } else {
                     message.error(response?.message ?? "获取教室信息失败");
                 }
@@ -83,7 +102,149 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
             }
         };
         fetchClassroom().then();
-    }, [classroomUuid]);
+    }, [classroomUuid, dispatch]);
+
+    // 在教室数据加载后收集表单元素，为AI准备数据
+    useEffect(() => {
+        if (!loading && classroom) {
+            // 记录表单元素以供AI使用
+            const element = document.querySelectorAll('input, select, textarea');
+            
+            // 遍历所有可输入元素
+            element.forEach(ele => {
+                // 基本属性
+                const record: Partial<HtmlRecordStore> = {
+                    type: '',
+                    value: '',
+                    required: false,
+                    readonly: false,
+                };
+                
+                // 根据元素类型设置特定属性
+                if (ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement) {
+                    record.type = ele.type;
+                    record.value = ele.value;
+                    record.placeholder = ele.placeholder;
+                    record.required = ele.required;
+                    record.readonly = ele.readOnly;
+                } else if (ele instanceof HTMLSelectElement) {
+                    record.type = 'select';
+                    record.value = ele.value;
+                    record.required = ele.required;
+                    record.options = Array.from(ele.options).map(option => option.value);
+                }
+                
+                // 使用元素ID作为键
+                if (ele.id) {
+                    dispatch(addForm({
+                        key: ele.id,
+                        value: record as HtmlRecordStore
+                    }));
+                }
+            });
+            
+            // 收集其他数据
+            const otherData = [
+                { name: "tagList", data: tagList },
+                { name: "typeList", data: typeList },
+                { name: "buildingList", data: buildingList },
+                { name: "campusList", data: campusList },
+                { name: "currentClassroom", data: classroom }
+            ];
+            dispatch(setOtherData(JSON.stringify(otherData)));
+        }
+    }, [loading, classroom, dispatch, tagList, typeList, buildingList, campusList]);
+
+    // 处理AI表单数据回填
+    useEffect(() => {
+        if (aiFormChat.for_back_data) {
+            const blob = new Blob([aiFormChat.for_back_data], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const script = document.createElement('script');
+            script.src = url;
+            
+            // 添加脚本执行完成的事件监听器
+            script.onload = () => {
+                const updatedData = { ...data };
+                
+                // 获取并更新各个字段
+                const nameInput = document.getElementById('classroom_name') as HTMLInputElement;
+                const typeSelect = document.getElementById('classroom_type') as HTMLSelectElement;
+                const buildingSelect = document.getElementById('building_uuid') as HTMLSelectElement;
+                const campusSelect = document.getElementById('campus_uuid') as HTMLSelectElement;
+                const capacityInput = document.getElementById('classroom_capacity') as HTMLInputElement;
+                const areaInput = document.getElementById('classroom_area') as HTMLInputElement;
+                const numberInput = document.getElementById('classroom_number') as HTMLInputElement;
+                const floorInput = document.getElementById('classroom_floor') as HTMLInputElement;
+                const descriptionTextarea = document.getElementById('classroom_description') as HTMLTextAreaElement;
+                const isMultimediaCheckbox = document.getElementById('is_multimedia') as HTMLInputElement;
+                const isAirConditionedCheckbox = document.getElementById('is_air_conditioned') as HTMLInputElement;
+                const examinationRoomCheckbox = document.getElementById('examination_room') as HTMLInputElement;
+                const examinationRoomCapacityInput = document.getElementById('examination_room_capacity') as HTMLInputElement;
+                
+                // 更新数据，仅更新有值的字段
+                if (nameInput && nameInput.value) {
+                    updatedData.name = nameInput.value;
+                }
+                
+                if (typeSelect && typeSelect.value) {
+                    updatedData.type = typeSelect.value;
+                }
+                
+                if (buildingSelect && buildingSelect.value) {
+                    updatedData.building_uuid = buildingSelect.value;
+                }
+                
+                if (campusSelect && campusSelect.value) {
+                    updatedData.campus_uuid = campusSelect.value;
+                }
+                
+                if (capacityInput && capacityInput.value) {
+                    updatedData.capacity = parseInt(capacityInput.value);
+                }
+                
+                if (areaInput && areaInput.value) {
+                    updatedData.area = parseFloat(areaInput.value);
+                }
+                
+                if (numberInput && numberInput.value) {
+                    updatedData.number = numberInput.value;
+                }
+                
+                if (floorInput && floorInput.value) {
+                    updatedData.floor = floorInput.value;
+                }
+                
+                if (descriptionTextarea && descriptionTextarea.value) {
+                    updatedData.description = descriptionTextarea.value;
+                }
+                
+                if (isMultimediaCheckbox) {
+                    updatedData.is_multimedia = isMultimediaCheckbox.checked;
+                }
+                
+                if (isAirConditionedCheckbox) {
+                    updatedData.is_air_conditioned = isAirConditionedCheckbox.checked;
+                }
+                
+                if (examinationRoomCheckbox) {
+                    updatedData.examination_room = examinationRoomCheckbox.checked;
+                }
+                
+                if (examinationRoomCapacityInput && examinationRoomCapacityInput.value && updatedData.examination_room) {
+                    updatedData.examination_room_capacity = parseInt(examinationRoomCapacityInput.value);
+                }
+                
+                // 更新状态
+                setData(updatedData);
+                
+                // 释放资源
+                URL.revokeObjectURL(url);
+            };
+            
+            document.head.appendChild(script);
+        }
+    }, [aiFormChat.for_back_data]);
 
     // 获取教室标签列表
     useEffect(() => {
@@ -275,6 +436,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <input
+                                                    id="classroom_name"
                                                     type="text"
                                                     className="input input-sm w-full validator"
                                                     required
@@ -291,6 +453,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <select
+                                                    id="classroom_type"
                                                     className="select select-sm w-full validator"
                                                     required
                                                     value={data.type ?? ""}
@@ -313,6 +476,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <select
+                                                    id="building_uuid"
                                                     className="select select-sm w-full validator"
                                                     required
                                                     value={data.building_uuid ?? ""}
@@ -335,6 +499,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <select
+                                                    id="campus_uuid"
                                                     className="select select-sm w-full validator"
                                                     required
                                                     value={data.campus_uuid ?? ""}
@@ -357,6 +522,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <input
+                                                    id="classroom_capacity"
                                                     type="number"
                                                     className="input input-sm w-full validator"
                                                     required
@@ -374,6 +540,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <input
+                                                    id="classroom_area"
                                                     type="number"
                                                     className="input input-sm w-full validator"
                                                     required
@@ -393,6 +560,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <input
+                                                    id="classroom_number"
                                                     type="text"
                                                     className="input input-sm w-full validator"
                                                     required
@@ -410,13 +578,14 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span className="text-red-500">*</span>
                                                 </legend>
                                                 <input
+                                                    id="classroom_floor"
                                                     type="text"
                                                     className="input input-sm w-full validator"
                                                     required
                                                     pattern="^(B?\d+|G){1,4}$"
                                                     value={data.floor ?? ""}
                                                     onChange={(e) => setData({ ...data, floor: e.target.value })}
-                                                    placeholder="请输入楼层 (如: 0001, B001, G001)"
+                                                    placeholder="请输入楼层 (如: 001, B001, G001)"
                                                 />
                                             </fieldset>
 
@@ -429,6 +598,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                 <div className="flex flex-col gap-2">
                                                     <label className="flex items-center gap-2">
                                                         <input
+                                                            id="examination_room"
                                                             type="checkbox"
                                                             className="checkbox checkbox-sm"
                                                             checked={data.examination_room}
@@ -438,6 +608,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     </label>
                                                     {data.examination_room && (
                                                         <input
+                                                            id="examination_room_capacity"
                                                             type="number"
                                                             className="input input-sm w-full"
                                                             min="1"
@@ -458,6 +629,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                 <div className="flex flex-col gap-2">
                                                     <label className="flex items-center gap-2">
                                                         <input
+                                                            id="is_multimedia"
                                                             type="checkbox"
                                                             className="checkbox checkbox-sm"
                                                             checked={data.is_multimedia}
@@ -467,6 +639,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     </label>
                                                     <label className="flex items-center gap-2">
                                                         <input
+                                                            id="is_air_conditioned"
                                                             type="checkbox"
                                                             className="checkbox checkbox-sm"
                                                             checked={data.is_air_conditioned}
@@ -484,6 +657,7 @@ export function AdminClassroomEditPage({ site }: Readonly<{ site: SiteInfoEntity
                                                     <span>教室描述</span>
                                                 </legend>
                                                 <textarea
+                                                    id="classroom_description"
                                                     className="textarea textarea-sm w-full h-24"
                                                     value={data.description ?? ""}
                                                     onChange={(e) => setData({ ...data, description: e.target.value })}
