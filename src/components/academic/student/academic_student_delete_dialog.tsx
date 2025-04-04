@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DeleteStudentAPI } from "../../apis/student_api";
+import { DeleteStudentAPI } from "../../../apis/student_api";
 import { message } from "antd";
 import { Delete } from "@icon-park/react";
 

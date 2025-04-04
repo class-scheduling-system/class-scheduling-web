@@ -26,6 +26,7 @@ import { StudentEntity } from "../../models/entity/student_entity";
 import { GetStudentPageAPI } from "../../apis/student_api";
 import { PageStudentSearchDTO } from "../../models/dto/page/page_student_search_dto";
 import { AcademicDeleteStudentDialog } from "../../components/academic/academic_student_delete_dialog";
+import { Newlybuild } from "@icon-park/react";
 
 export function AcademicStudent({ site }: Readonly<{
     site: SiteInfoEntity
@@ -58,6 +59,7 @@ export function AcademicStudent({ site }: Readonly<{
     const [deleteStudentUuid, setDeleteStudentUuid] = useState("");
     const [showStats, setShowStats] = useState(false);
     const [refreshFlag, setRefreshFlag] = useState(0);
+    const [dialogBatchImport, setDialogBatchImport] = useState<boolean>(false);
 
     // 键盘快捷键
     useEffect(() => {
@@ -503,6 +505,12 @@ export function AcademicStudent({ site }: Readonly<{
                                     <span>显示统计</span>
                                 </button>
                             )}
+                            <button
+                                className="btn btn-sm btn-outline btn-info w-full flex items-center justify-center gap-2"
+                                onClick={() => setDialogBatchImport(true)}>
+                                <Newlybuild theme="outline" size="16"/>
+                                <span>批量导入</span>
+                            </button>
                         </div>
                     </CardComponent>
                 </div>

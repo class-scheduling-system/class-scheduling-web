@@ -5,6 +5,8 @@ import { StudentEntity } from "../models/entity/student_entity";
 import { BaseResponse } from "../models/base_response";
 import { StudentDTO } from "../models/dto/student_dto";
 import { DisableEntity } from "../models/entity/diable_entity";
+import {BatchImportResponseDTO} from "../models/dto/building/batch_import_response_dto.ts";
+import {FileEntity} from "../models/entity/file_entity.ts";
 
 /**
  * # 获取学生分页列表
@@ -116,11 +118,36 @@ const EditStudentAPI = async (student_uuid: string, data: StudentDTO): Promise<B
     )
 }
 
+
+
+/**
+ * # BatchImportStudentAPI
+ * > 该函数用于批量导入学生信息。它接受一个包含学生信息的 Excel 文件的 base64 字符串，并将其发送到指定的后端接口进行处理。
+ *
+ * @param {string} base64Content - Excel 文件的 base64 编码内容。
+ * @param {boolean} ignoreError - 是否忽略错误继续导入。
+ * @returns {Promise<BaseResponse<BatchImportResponseDTO> | undefined>} - 如果操作成功，则返回一个包含导入结果的 BaseResponse 对象；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const BatchImportStudentAPI = async (base64Content: string, ignoreError: boolean): Promise<BaseResponse<BatchImportResponseDTO> | undefined> => {
+    return BaseApi<BaseResponse<BatchImportResponseDTO>>(
+        MethodType.POST,
+        "/api/v1/students/batch-import",
+        {
+            file: base64Content,
+            ignore_error: ignoreError
+        },
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+} 
+
 export {
     GetStudentPageAPI,
     GetStudentAPI,
     CreateStudentAPI,
     DisableStudentAPI,
     DeleteStudentAPI,
-    EditStudentAPI
+    EditStudentAPI,
+    BatchImportStudentAPI
 };
