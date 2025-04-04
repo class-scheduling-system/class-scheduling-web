@@ -48,9 +48,7 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
     useEffect(() => {
         document.title = `添加校区 | ${site.name ?? "Frontleaves Technology"}`;
 
-        // 保存原有的onload处理函数（如果存在）
-        const originalOnload = window.onload;
-
+        dispatch(setThisPage("添加校区"));
         // 设置新的onload处理函数
         window.onload = () => {
             // 获取表单中的所有可输入操作元素
@@ -88,12 +86,6 @@ export function CampusAdd({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Ele
             });
             
             // 设置当前页面
-            dispatch(setThisPage("添加校区"));
-
-            // 清理函数
-            return () => {
-                window.onload = originalOnload; // 还原原始的onload
-            };
         }
     }, [site.name, dispatch]);
 
