@@ -40,7 +40,7 @@ import {UserLoginEntity} from "../models/entity/user_login_entity.ts";
  * @throws 当网络请求失败、服务器响应异常或传入参数不符合要求时，可能会抛出错误。
  */
 const AuthLoginAPI = async (data: AuthLoginDTO): Promise<BaseResponse<UserLoginEntity> | undefined> => {
-    return BaseApi<UserLoginEntity>(
+    return BaseApi<BaseResponse<UserLoginEntity>>(
         MethodType.POST,
         "/api/v1/auth/login",
         data,

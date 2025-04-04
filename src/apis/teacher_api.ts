@@ -41,7 +41,7 @@ import {TeacherDTO} from "../models/dto/teacher_dto.ts";
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
-    return BaseApi<PageEntity<TeacherEntity>>(
+    return BaseApi<BaseResponse<PageEntity<TeacherEntity>>>(
         MethodType.GET,
         "/api/v1/teacher/page",
         null,
@@ -60,7 +60,7 @@ const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const AddTeacherAPI = async (data:TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
-    return BaseApi<TeacherEntity>(
+    return BaseApi<BaseResponse<TeacherEntity>>(
         MethodType.POST,
         "/api/v1/teacher",
         data,
@@ -82,7 +82,7 @@ const AddTeacherAPI = async (data:TeacherDTO): Promise<BaseResponse<TeacherEntit
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const DeleteTeacherAPI = async (teacher_uuid: string): Promise<BaseResponse<TeacherEntity> | undefined> => {
-    return BaseApi<TeacherEntity>(
+    return BaseApi<BaseResponse<TeacherEntity>>(
         MethodType.DELETE,
         "/api/v1/teacher/",
         null,
@@ -102,7 +102,7 @@ const DeleteTeacherAPI = async (teacher_uuid: string): Promise<BaseResponse<Teac
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const EditTeacherAPI = async (teacher_uuid: string, data: TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
-    return BaseApi<TeacherEntity>(
+    return BaseApi<BaseResponse<TeacherEntity>>(
         MethodType.PUT,
         `/api/v1/teacher`,
         data,

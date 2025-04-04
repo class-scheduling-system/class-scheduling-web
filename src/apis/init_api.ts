@@ -40,7 +40,7 @@ import {SystemInitCheckEntity} from "../models/entity/system_init_check_entity.t
  * @throws {Error} - 当网络请求失败或服务端返回错误时抛出异常。
  */
 const InitAPI = async (data: SystemInitDTO): Promise<BaseResponse<void> | undefined> => {
-    return BaseApi<void>(
+    return BaseApi<BaseResponse<void>>(
         MethodType.POST,
         "/api/v1/init",
         data,
@@ -58,7 +58,7 @@ const InitAPI = async (data: SystemInitDTO): Promise<BaseResponse<void> | undefi
  * @throws {Error} - 当网络请求失败或响应状态码非 2xx 时抛出异常。
  */
 const InitCheckAPI = async (): Promise<BaseResponse<SystemInitCheckEntity> | undefined> => {
-    return BaseApi<SystemInitCheckEntity>(
+    return BaseApi<BaseResponse<SystemInitCheckEntity>>(
         MethodType.GET,
         "/api/v1/init/check",
         null,

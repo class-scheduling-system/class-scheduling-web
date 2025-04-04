@@ -41,7 +41,7 @@ import { PageEntity } from '../models/entity/page_entity';
  * @returns 分页列表
  */
 const GetTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
-  return BaseApi<PageEntity<TeacherPreferenceEntity>>(
+  return BaseApi<BaseResponse<PageEntity<TeacherPreferenceEntity>>>(
     MethodType.GET,
     '/api/v1/teacher/preferences/page',
     null,
@@ -59,7 +59,7 @@ const GetTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Pro
  * @returns 分页列表
  */
 const GetMyTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): Promise<BaseResponse<PageEntity<TeacherPreferenceEntity>> | undefined> => {
-  return BaseApi<PageEntity<TeacherPreferenceEntity>>(
+  return BaseApi<BaseResponse<PageEntity<TeacherPreferenceEntity>>>(
     MethodType.GET,
     '/api/v1/teacher/preferences/page/me',
     null,
@@ -78,7 +78,7 @@ const GetMyTeacherPreferencesPageAPI = async (data: PageTeacherPreferenceDTO): P
  * @returns 课程偏好列表
  */
 const GetTeacherPreferencesListAPI = async (teacherUuid: string, semesterUuid: string): Promise<BaseResponse<TeacherPreferenceEntity[]> | undefined> => {
-  return BaseApi<TeacherPreferenceEntity[]>(
+  return BaseApi<BaseResponse<TeacherPreferenceEntity[]>>(
     MethodType.GET,
     '/api/v1/teacher/preferences/list',
     null,
@@ -99,7 +99,7 @@ const GetTeacherPreferencesListAPI = async (teacherUuid: string, semesterUuid: s
  * @returns 课程偏好信息
  */
 const GetTeacherPreferenceAPI = async (preferenceUuid: string): Promise<BaseResponse<TeacherPreferenceEntity> | undefined> => {
-  return BaseApi<TeacherPreferenceEntity>(
+  return BaseApi<BaseResponse<TeacherPreferenceEntity>>(
     MethodType.GET,
     '/api/v1/teacher/preferences',
     null,
@@ -118,7 +118,7 @@ const GetTeacherPreferenceAPI = async (preferenceUuid: string): Promise<BaseResp
  * @returns 更新后的课程偏好信息
  */
 const UpdateTeacherPreferenceAPI = async (preferenceUuid: string, data: TeacherPreferenceDTO): Promise<BaseResponse<TeacherPreferenceEntity> | undefined> => {
-  return BaseApi<TeacherPreferenceEntity>(
+  return BaseApi<BaseResponse<TeacherPreferenceEntity>>(
     MethodType.PUT,
     '/api/v1/teacher/preferences',
     data,
@@ -136,7 +136,7 @@ const UpdateTeacherPreferenceAPI = async (preferenceUuid: string, data: TeacherP
  * @returns void
  */
 const DeleteTeacherPreferenceAPI = async (preferenceUuid: string): Promise<BaseResponse<void> | undefined> => {
-  return BaseApi<void>(
+  return BaseApi<BaseResponse<void>>(
     MethodType.DELETE,
     '/api/v1/teacher/preferences',
     null,
@@ -154,7 +154,7 @@ const DeleteTeacherPreferenceAPI = async (preferenceUuid: string): Promise<BaseR
  * @returns 创建的课程偏好信息
  */
 const CreateTeacherPreferenceAPI = async (data: TeacherPreferenceDTO): Promise<BaseResponse<TeacherPreferenceEntity> | undefined> => {
-  return BaseApi<TeacherPreferenceEntity>(
+  return BaseApi<BaseResponse<TeacherPreferenceEntity>>(
     MethodType.POST,
     '/api/v1/teacher/preferences',
     data,

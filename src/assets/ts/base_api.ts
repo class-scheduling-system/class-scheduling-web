@@ -28,7 +28,6 @@
 
 import axios, {type AxiosResponse} from "axios";
 import cookie from 'react-cookies';
-import type {BaseResponse} from "../../models/base_response.ts";
 
 const BASE_API_URL: string = import.meta.env.VITE_BASE_API_URL;
 
@@ -66,18 +65,18 @@ async function BaseApi<E>(
     paramData: Record<string, unknown> | null,
     pathData: string | null,
     headers: Record<string, string> | null
-): Promise<BaseResponse<E> | undefined> {
+): Promise<E | undefined> {
     return axios({
         method: method,
         url: makeURL(url, pathData),
         data: makeData(bodyData),
         params: paramData,
         headers: pushHeader(headers)
-    }).then((response: AxiosResponse<BaseResponse<E>, object>) => {
+    }).then((response: AxiosResponse<E, object>) => {
         return response.data;
     }).catch((error) => {
         console.error("[API] 请求出现问题", error);
-        const getResponse: BaseResponse<E> = error.response.data
+        const getResponse: E = error.response.data
         if (getResponse) {
             return getResponse;
         }

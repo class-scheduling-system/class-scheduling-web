@@ -42,7 +42,7 @@ import {PageSearchDTO} from "../models/dto/page/page_search_dto.ts";
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetDepartmentInfoAPI = async (department_uuid: string): Promise<BaseResponse<DepartmentEntity> | undefined> => {
-    return BaseApi<DepartmentEntity>(
+    return BaseApi<BaseResponse<DepartmentEntity>>(
         MethodType.GET,
         "/api/v1/department",
         null,
@@ -60,7 +60,7 @@ const GetDepartmentInfoAPI = async (department_uuid: string): Promise<BaseRespon
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const DeleteDepartmentAPI = async (data: string): Promise<BaseResponse<void> | undefined> => {
-    return BaseApi<void>(
+    return BaseApi<BaseResponse<void>>(
         MethodType.DELETE,
         "/api/v1/department/",
         null,
@@ -79,7 +79,7 @@ const DeleteDepartmentAPI = async (data: string): Promise<BaseResponse<void> | u
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetDepartmentSimpleListAPI = async (): Promise<BaseResponse<DepartmentEntity> | undefined> => {
-    return BaseApi<DepartmentEntity>(
+    return BaseApi<BaseResponse<DepartmentEntity>>(
         MethodType.GET,
         "/api/v1/department/list",
         null,
@@ -97,7 +97,7 @@ const GetDepartmentSimpleListAPI = async (): Promise<BaseResponse<DepartmentEnti
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const DepartmentAddAPI = async (data: DepartmentDTO): Promise<BaseResponse<DepartmentEntity> | undefined> => {
-    return BaseApi<DepartmentEntity>(
+    return BaseApi<BaseResponse<DepartmentEntity>>(
         MethodType.POST,
         "/api/v1/department",
         data,
@@ -115,7 +115,7 @@ const DepartmentAddAPI = async (data: DepartmentDTO): Promise<BaseResponse<Depar
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const GetDepartmentAPI = async (data: string): Promise<BaseResponse<DepartmentEntity> | undefined> => {
-    return BaseApi<DepartmentEntity>(
+    return BaseApi<BaseResponse<DepartmentEntity>>(
         MethodType.GET,
         "/api/v1/department/",
         null,
@@ -134,7 +134,7 @@ const GetDepartmentAPI = async (data: string): Promise<BaseResponse<DepartmentEn
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const EditDepartmentAPI = async (uuid: string, data: DepartmentDTO): Promise<BaseResponse<DepartmentEntity> | undefined> => {
-    return BaseApi<DepartmentEntity>(
+    return BaseApi<BaseResponse<DepartmentEntity>>(
         MethodType.PUT,
         "/api/v1/department/",
         data,
@@ -152,7 +152,7 @@ const EditDepartmentAPI = async (uuid: string, data: DepartmentDTO): Promise<Bas
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门分页数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const GetDepartmentPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<DepartmentEntity>> | undefined> => {
-    return BaseApi<PageEntity<DepartmentEntity>>(
+    return BaseApi<BaseResponse<PageEntity<DepartmentEntity>>>(
         MethodType.GET,
         "/api/v1/department/page",
         null,
@@ -169,7 +169,7 @@ const GetDepartmentPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<P
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的部门列表数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const GetDepartmentListAPI = async (): Promise<BaseResponse<DepartmentEntity[]> | undefined> => {
-    return BaseApi<DepartmentEntity[]>(
+    return BaseApi<BaseResponse<DepartmentEntity[]>>(
         MethodType.GET,
         "/api/v1/department/list",
         null,

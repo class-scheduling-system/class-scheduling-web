@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -44,6 +44,7 @@ import {CurrentInfoStore} from "../../models/store/current_info_store.ts";
 import {AdminBuildingAddDialog} from "../../components/admin/building/admin_building_add_dialog.tsx";
 import {AdminBuildingDeleteDialog} from "../../components/admin/building/admin_building_delete_dialog.tsx";
 import {AdminBuildingEditDialog} from "../../components/admin/building/admin_building_edit_dialog.tsx";
+import { AdminBuildingBatchImportDialog } from "@/components/admin/building/admin_building_batch_import_dialog.tsx";
 
 /**
  * # AdminBuilding
@@ -75,6 +76,7 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
     const [dialogAdd, setDialogAdd] = useState<boolean>(false);
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     const [dialogEdit, setDialogEdit] = useState<boolean>(false);
+    const [dialogBatchImport, setDialogBatchImport] = useState<boolean>(false);
     const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
     const [operateUuid, setOperateUuid] = useState<string>("");
 
@@ -315,7 +317,8 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
                                 <Add theme="outline" size="16"/>
                                 <span>添加</span>
                             </button>
-                            <button className="transition shadow btn btn-outline btn-secondary">
+                            <button className="transition shadow btn btn-outline btn-secondary"
+                                    onClick={() => setDialogBatchImport(true)}>
                                 <Newlybuild theme="outline" size="16"/>
                                 <span>批量导入</span>
                             </button>
@@ -327,6 +330,8 @@ export function AdminBuilding({site}: Readonly<{ site: SiteInfoEntity }>): JSX.E
             <AdminBuildingDeleteDialog building={building} show={dialogDelete} emit={setDialogDelete}
                                        requestRefresh={setRefreshOperate}/>
             <AdminBuildingEditDialog show={dialogEdit} editBuildingUuid={operateUuid} emit={setDialogEdit}
+                                     requestRefresh={setRefreshOperate}/>
+            <AdminBuildingBatchImportDialog show={dialogBatchImport} emit={setDialogBatchImport}
                                      requestRefresh={setRefreshOperate}/>
         </>
     );

@@ -14,7 +14,7 @@ import { ClassroomDTO } from "../models/dto/classroom_dto";
  * @returns 教室标签列表
  */
 const GetClassroomTagsAPI = async (): Promise<BaseResponse<ClassroomTagEntity[]> | undefined> => {
-    return BaseApi<ClassroomTagEntity[]>(
+    return BaseApi<BaseResponse<ClassroomTagEntity[]>>(
         MethodType.GET,
         "/api/v1/classroom/tags",
         null,
@@ -31,7 +31,7 @@ const GetClassroomTagsAPI = async (): Promise<BaseResponse<ClassroomTagEntity[]>
  * @returns 教室类型列表
  */
 const GetClassroomTypeAPI = async (): Promise<BaseResponse<ClassroomTypeEntity[]> | undefined> => {
-    return BaseApi<ClassroomTypeEntity[]>(
+    return BaseApi<BaseResponse<ClassroomTypeEntity[]>>(
         MethodType.GET,
         "/api/v1/classroom/types",
         null,
@@ -48,7 +48,7 @@ const GetClassroomTypeAPI = async (): Promise<BaseResponse<ClassroomTypeEntity[]
  * @returns 教室分页列表
  */
 const GetClassroomPageAPI = async (data: PageClassroomDTO): Promise<BaseResponse<PageEntity<ClassroomInfoEntity>> | undefined> => {
-    return BaseApi<PageEntity<ClassroomInfoEntity>>(
+    return BaseApi<BaseResponse<PageEntity<ClassroomInfoEntity>>>(
         MethodType.GET,
         "/api/v1/classroom/page",
         null,
@@ -65,7 +65,7 @@ const GetClassroomPageAPI = async (data: PageClassroomDTO): Promise<BaseResponse
  * @returns 教室列表
  */
 const GetClassroomListAPI = async (keyword?: string): Promise<BaseResponse<ClassroomLiteEntity[]> | undefined> => {
-    return BaseApi<ClassroomLiteEntity[]>(
+    return BaseApi<BaseResponse<ClassroomLiteEntity[]>>(
         MethodType.GET,
         "/api/v1/classroom/list",
         null,
@@ -83,7 +83,7 @@ const GetClassroomListAPI = async (keyword?: string): Promise<BaseResponse<Class
  * @returns 教室信息
  */
 const CreateClassroomAPI = async (data: ClassroomDTO): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
-    return BaseApi<ClassroomInfoEntity>(
+    return BaseApi<BaseResponse<ClassroomInfoEntity>>(
         MethodType.POST,
         "/api/v1/classroom/create",
         data,
@@ -100,7 +100,7 @@ const CreateClassroomAPI = async (data: ClassroomDTO): Promise<BaseResponse<Clas
  * @param data 教室信息
  */
 const UpdateClassroomAPI = async (classroomUuid: string, data: ClassroomDTO): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
-    return BaseApi<ClassroomInfoEntity>(
+    return BaseApi<BaseResponse<ClassroomInfoEntity>>(
         MethodType.PUT,
         "/api/v1/classroom/",
         data,
@@ -117,7 +117,7 @@ const UpdateClassroomAPI = async (classroomUuid: string, data: ClassroomDTO): Pr
  * @param classroomUuid 教室主键
  */
 const DeleteClassroomAPI = async (classroomUuid: string): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
-    return BaseApi<ClassroomInfoEntity>(
+    return BaseApi<BaseResponse<ClassroomInfoEntity>>(
         MethodType.DELETE,
         "/api/v1/classroom/",
         null,
@@ -135,7 +135,7 @@ const DeleteClassroomAPI = async (classroomUuid: string): Promise<BaseResponse<C
  * @returns 教室信息
  */
 const GetClassroomAPI = async (classroomUuid: string): Promise<BaseResponse<ClassroomInfoEntity> | undefined> => {
-    return BaseApi<ClassroomInfoEntity>(
+    return BaseApi<BaseResponse<ClassroomInfoEntity>>(
         MethodType.GET,
         "/api/v1/classroom/",
         null,

@@ -47,7 +47,7 @@ export interface PermissionEntity {
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetPermissionListAPI = async (): Promise<BaseResponse<PermissionEntity[]> | undefined> => {
-    return BaseApi<PermissionEntity[]>(
+    return BaseApi<BaseResponse<PermissionEntity[]>>(
         MethodType.GET,
         "/api/v1/permission/list",
         null,

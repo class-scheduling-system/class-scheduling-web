@@ -14,7 +14,7 @@ import { DisableEntity } from "../models/entity/diable_entity";
  * @returns 分页列表
  */
 const GetStudentPageAPI = async (data: PageStudentSearchDTO): Promise<BaseResponse<PageEntity<StudentEntity>> | undefined> => {
-    return BaseApi<PageEntity<StudentEntity>>(
+    return BaseApi<BaseResponse<PageEntity<StudentEntity>>>(
         MethodType.GET,
         "/api/v1/students/page",
         null,
@@ -32,7 +32,7 @@ const GetStudentPageAPI = async (data: PageStudentSearchDTO): Promise<BaseRespon
  * @returns 学生信息
  */
 const GetStudentAPI = async (student_uuid: string): Promise<BaseResponse<StudentEntity> | undefined> => {
-    return BaseApi<StudentEntity>(
+    return BaseApi<BaseResponse<StudentEntity>>(
         MethodType.GET,
         `/api/v1/students/`,
         null,
@@ -50,7 +50,7 @@ const GetStudentAPI = async (student_uuid: string): Promise<BaseResponse<Student
  * @returns 学生信息
  */
 const CreateStudentAPI = async (data: StudentDTO): Promise<BaseResponse<StudentEntity> | undefined> => {
-    return BaseApi<StudentEntity>(
+    return BaseApi<BaseResponse<StudentEntity>>(
         MethodType.POST,
         `/api/v1/students/`,
         data,
@@ -69,7 +69,7 @@ const CreateStudentAPI = async (data: StudentDTO): Promise<BaseResponse<StudentE
  * @returns 学生信息
  */
 const DisableStudentAPI = async (student_uuid: string, disable: boolean): Promise<BaseResponse<DisableEntity> | undefined> => {
-    return BaseApi<DisableEntity>(
+    return BaseApi<BaseResponse<DisableEntity>>(
         MethodType.PUT,
         `/api/v1/students/disable/${student_uuid}`,
         null,
@@ -87,7 +87,7 @@ const DisableStudentAPI = async (student_uuid: string, disable: boolean): Promis
  * @returns 空
  */
 const DeleteStudentAPI = async (student_uuid: string): Promise<BaseResponse<void> | undefined> => {
-    return BaseApi<void>(
+    return BaseApi<BaseResponse<void>>(
         MethodType.DELETE,
         "/api/v1/students/",
         null,
@@ -106,7 +106,7 @@ const DeleteStudentAPI = async (student_uuid: string): Promise<BaseResponse<void
  * @returns 学生信息
  */
 const EditStudentAPI = async (student_uuid: string, data: StudentDTO): Promise<BaseResponse<StudentEntity> | undefined> => {
-    return BaseApi<StudentEntity>(
+    return BaseApi<BaseResponse<StudentEntity>>(
         MethodType.PUT,
         "/api/v1/students/disable/",
         data,

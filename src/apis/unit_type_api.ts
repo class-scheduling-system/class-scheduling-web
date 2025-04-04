@@ -42,7 +42,7 @@ import { UnitTypeLiteEntity } from "../models/entity/unit_type_lite_entity";
  * @returns 单位办别信息
  */
 const GetUnitTypeAPI = async (unitType: string): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
-    return BaseApi<UnitTypeEntity>(
+    return BaseApi<BaseResponse<UnitTypeEntity>>(
         MethodType.GET,
         "/api/v1/unit/type",
         null,
@@ -60,7 +60,7 @@ const GetUnitTypeAPI = async (unitType: string): Promise<BaseResponse<UnitTypeEn
  * @returns 单位办别分页信息
  */
 const GetUnitTypePageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<UnitTypeEntity>> | undefined> => {
-    return BaseApi<PageEntity<UnitTypeEntity>>(
+    return BaseApi<BaseResponse<PageEntity<UnitTypeEntity>>>(
         MethodType.GET,
         "/api/v1/unit/type/page",
         null,
@@ -77,7 +77,7 @@ const GetUnitTypePageAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
  * @returns 单位办别列表信息
  */
 const GetUnitTypeListAPI = async (): Promise<BaseResponse<UnitTypeLiteEntity[]> | undefined> => {
-    return BaseApi<UnitTypeLiteEntity[]>(
+    return BaseApi<BaseResponse<UnitTypeLiteEntity[]>>(
         MethodType.GET,
         "/api/v1/unit/type/list",
         null,
@@ -95,7 +95,7 @@ const GetUnitTypeListAPI = async (): Promise<BaseResponse<UnitTypeLiteEntity[]> 
  * @returns 单位办别信息
  */
 const AddUnitTypeAPI = async (data: UnitTypeDTO): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
-    return BaseApi<UnitTypeEntity>(
+    return BaseApi<BaseResponse<UnitTypeEntity>>(
         MethodType.POST,
         "/api/v1/unit/type",
         data,
@@ -114,7 +114,7 @@ const AddUnitTypeAPI = async (data: UnitTypeDTO): Promise<BaseResponse<UnitTypeE
  * @returns 单位办别信息
  */
 const EditUnitTypeAPI = async (typeUuid: string, data: UnitTypeDTO): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
-    return BaseApi<UnitTypeEntity>(
+    return BaseApi<BaseResponse<UnitTypeEntity>>(
         MethodType.PUT,
         "/api/v1/unit/type/",
         data,
@@ -132,7 +132,7 @@ const EditUnitTypeAPI = async (typeUuid: string, data: UnitTypeDTO): Promise<Bas
  * @returns 单位办别信息
  */
 const DeleteUnitTypeAPI = async (typeUuid: string): Promise<BaseResponse<UnitTypeEntity> | undefined> => {
-    return BaseApi<UnitTypeEntity>(
+    return BaseApi<BaseResponse<UnitTypeEntity>>(
         MethodType.DELETE,
         "/api/v1/unit/type",
         null,

@@ -42,7 +42,7 @@ import { UnitCategoryLiteEntity } from "../models/entity/unit_category_lite_enti
  * @returns 单位类别信息
  */
 const GetUnitCategoryAPI = async (unitCategory: string): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
-    return BaseApi<UnitCategoryEntity>(
+    return BaseApi<BaseResponse<UnitCategoryEntity>>(
         MethodType.GET,
         "/api/v1/unit/category",
         null,
@@ -60,7 +60,7 @@ const GetUnitCategoryAPI = async (unitCategory: string): Promise<BaseResponse<Un
  * @returns 单位类别分页信息
  */
 const GetUnitCategoryPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<UnitCategoryEntity>> | undefined> => {
-    return BaseApi<PageEntity<UnitCategoryEntity>>(
+    return BaseApi<BaseResponse<PageEntity<UnitCategoryEntity>>>(
         MethodType.GET,
         "/api/v1/unit/category/page",
         null,
@@ -77,7 +77,7 @@ const GetUnitCategoryPageAPI = async (data: PageSearchDTO): Promise<BaseResponse
  * @returns 单位类别列表信息
  */
 const GetUnitCategoryListAPI = async (): Promise<BaseResponse<UnitCategoryLiteEntity[]> | undefined> => {
-    return BaseApi<UnitCategoryLiteEntity[]>(
+    return BaseApi<BaseResponse<UnitCategoryLiteEntity[]>>(
         MethodType.GET,
         "/api/v1/unit/category/list",
         null,
@@ -95,7 +95,7 @@ const GetUnitCategoryListAPI = async (): Promise<BaseResponse<UnitCategoryLiteEn
  * @returns 单位类别信息
  */
 const AddUnitCategoryAPI = async (data: UnitCategoryDTO): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
-    return BaseApi<UnitCategoryEntity>(
+    return BaseApi<BaseResponse<UnitCategoryEntity>>(
         MethodType.POST,
         "/api/v1/unit/category",
         data,
@@ -114,7 +114,7 @@ const AddUnitCategoryAPI = async (data: UnitCategoryDTO): Promise<BaseResponse<U
  * @returns 单位类别信息
  */
 const EditUnitCategoryAPI = async (categoryUuid: string, data: UnitCategoryDTO): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
-    return BaseApi<UnitCategoryEntity>(
+    return BaseApi<BaseResponse<UnitCategoryEntity>>(
         MethodType.PUT,
         "/api/v1/unit/category/",
         data,
@@ -132,7 +132,7 @@ const EditUnitCategoryAPI = async (categoryUuid: string, data: UnitCategoryDTO):
  * @returns 单位类别信息
  */
 const DeleteUnitCategoryAPI = async (categoryUuid: string): Promise<BaseResponse<UnitCategoryEntity> | undefined> => {
-    return BaseApi<UnitCategoryEntity>(
+    return BaseApi<BaseResponse<UnitCategoryEntity>>(
         MethodType.DELETE,
         "/api/v1/unit/category",
         null,

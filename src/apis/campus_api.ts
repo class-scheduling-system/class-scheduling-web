@@ -42,7 +42,7 @@ import {CampusDTO} from "../models/dto/campus_dto.ts";
  * @throws {Error} - 如果请求过程中出现网络错误或者服务器响应异常时抛出。
  */
 const GetCampusListAPI = async (): Promise<BaseResponse<ListOfCampusEntity[]> | undefined> => {
-    return BaseApi<ListOfCampusEntity[]>(
+    return BaseApi<BaseResponse<ListOfCampusEntity[]>>(
         MethodType.GET,
         "/api/v1/campus/list",
         null,
@@ -61,7 +61,7 @@ const GetCampusListAPI = async (): Promise<BaseResponse<ListOfCampusEntity[]> | 
  * @throws {Error} - 如果请求过程中出现网络错误或者服务器响应异常时抛出。
  */
 const GetCampusPageListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<CampusEntity>> | undefined> => {
-    return BaseApi<PageEntity<CampusEntity>>(
+    return BaseApi<BaseResponse<PageEntity<CampusEntity>>>(
         MethodType.GET,
         "/api/v1/campus/page",
         null,
@@ -80,7 +80,7 @@ const GetCampusPageListAPI = async (data: PageSearchDTO): Promise<BaseResponse<P
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const AddCampusAPI = async (data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
-    return BaseApi<CampusEntity>(
+    return BaseApi<BaseResponse<CampusEntity>>(
         MethodType.POST,
         "/api/v1/campus",
         data,
@@ -102,7 +102,7 @@ const AddCampusAPI = async (data: CampusDTO): Promise<BaseResponse<CampusEntity>
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const DeleteCampusAPI = async (campus_uuid: string): Promise<BaseResponse<CampusEntity> | undefined> => {
-    return BaseApi<CampusEntity>(
+    return BaseApi<BaseResponse<CampusEntity>>(
         MethodType.DELETE,
         "/api/v1/campus",
         null,
@@ -121,7 +121,7 @@ const DeleteCampusAPI = async (campus_uuid: string): Promise<BaseResponse<Campus
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const EditCampusAPI = async (campus_uuid: string, data: CampusDTO): Promise<BaseResponse<CampusEntity> | undefined> => {
-    return BaseApi<CampusEntity>(
+    return BaseApi<BaseResponse<CampusEntity>>(
         MethodType.PUT,
         `/api/v1/campus`,
         data,

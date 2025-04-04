@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -26,31 +26,22 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseResponse} from "../models/base_response.ts";
-import {RoleEntity} from "../models/entity/role_entity.ts";
-import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {PageSearchDTO} from "../models/dto/page/page_search_dto.ts";
-import {PageEntity} from "../models/entity/page_entity.ts";
-
-
 /**
- * # 获取角色列表
- * > 该函数用于通过API请求获取角色列表。它利用了Bearer令牌认证方式来确保安全地访问角色数据。
- *
- * @returns {Promise<BaseResponse<Page<UserInfoEntity>> | undefined>} - 返回一个Promise，解析为包含角色信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
- * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ * # FileEntity
+ * > 该类型用于表示一个文件实体，包含了文件的基本信息，如文件数据、文件名和文件类型。
+ * > 主要用于处理文件上传、下载等操作，特别是在处理教学楼导入模板等文件时使用。
  */
-const GetRoleListAPI = async (data: PageSearchDTO):Promise<BaseResponse<PageEntity<RoleEntity>>  | undefined> => {
-    return BaseApi<BaseResponse<PageEntity<RoleEntity>>>(
-        MethodType.GET,
-        "/api/v1/role/page",
-        null,
-        data,
-        null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
-    )
-}
-
-export{
-    GetRoleListAPI
-}
+export type FileEntity = {
+    /**
+     * 文件数据
+     */
+    data: string;
+    /**
+     * 文件名
+     */
+    name: string;
+    /**
+     * 文件类型
+     */
+    type: string;
+} 

@@ -39,7 +39,7 @@ import { JvmStackEntity } from "../models/entity/jvm_stack_entity.ts";
  * @returns {Promise<BaseResponse<SiteInfoEntity> | undefined>} 返回一个Promise，解析为包含站点信息实体的BaseResponse对象，或在失败时返回undefined。
  */
 const GetSiteInfoAPI = async (): Promise<BaseResponse<SiteInfoEntity> | undefined> => {
-    return BaseApi<SiteInfoEntity>(
+    return BaseApi<BaseResponse<SiteInfoEntity>>(
         MethodType.GET,
         "/api/v1/web/info",
         null,
@@ -56,7 +56,7 @@ const GetSiteInfoAPI = async (): Promise<BaseResponse<SiteInfoEntity> | undefine
  * @returns {Promise<BaseResponse<SystemInfoEntity> | undefined>} 返回一个Promise，解析为包含系统信息实体的BaseResponse对象，或在失败时返回undefined。
  */
 const GetSystemInfoAPI = async (): Promise<BaseResponse<SystemInfoEntity> | undefined> => {
-    return BaseApi<SystemInfoEntity>(
+    return BaseApi<BaseResponse<SystemInfoEntity>>(
         MethodType.GET,
         "/api/v1/web/system",
         null,
@@ -73,7 +73,7 @@ const GetSystemInfoAPI = async (): Promise<BaseResponse<SystemInfoEntity> | unde
  * @returns {Promise<BaseResponse<JvmStackEntity> | undefined>} 返回一个Promise，解析为包含 JVM 堆栈信息实体的BaseResponse对象，或在失败时返回undefined。
  */
 const GetJvmStackInfoAPI = async (): Promise<BaseResponse<JvmStackEntity> | undefined> => {
-    return BaseApi<JvmStackEntity>(
+    return BaseApi<BaseResponse<JvmStackEntity>>(
         MethodType.GET,
         "/api/v1/web/jvm-stack",
         null,

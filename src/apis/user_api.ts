@@ -40,7 +40,7 @@ import {PageEntity} from "../models/entity/page_entity.ts";
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetCurrentUserAPI = async (): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
+    return BaseApi<BaseResponse<UserInfoEntity>>(
         MethodType.GET,
         "/api/v1/user/current",
         null,
@@ -58,7 +58,7 @@ const GetCurrentUserAPI = async (): Promise<BaseResponse<UserInfoEntity> | undef
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetUserInfoAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
+    return BaseApi<BaseResponse<UserInfoEntity>>(
         MethodType.GET,
         "/api/v1/user",
         null,
@@ -78,7 +78,7 @@ const GetUserInfoAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoE
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetUserListAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<UserInfoEntity>> | undefined> => {
-    return BaseApi<PageEntity<UserInfoEntity>>(
+    return BaseApi<BaseResponse<PageEntity<UserInfoEntity>>>(
         MethodType.GET,
         "/api/v1/user/list",
         null,
@@ -105,7 +105,7 @@ const AddUserAPI = async (data: {
     phone: string;
     permission?: string[];
 }): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
+    return BaseApi<BaseResponse<UserInfoEntity>>(
         MethodType.POST,
         "/api/v1/user",
         data,
@@ -128,7 +128,7 @@ const AddUserAPI = async (data: {
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const DeleteUserAPI = async (user_uuid: string): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
+    return BaseApi<BaseResponse<UserInfoEntity>>(
         MethodType.DELETE,
         "/api/v1/user",
         null,
@@ -156,12 +156,12 @@ const EditUserAPI = async (user_uuid: string, data: {
     role_uuid?: string;
     permission?: string[];
 }): Promise<BaseResponse<UserInfoEntity> | undefined> => {
-    return BaseApi<UserInfoEntity>(
-        MethodType.PUT,  // 🔹 使用 PUT 方法
-        `/api/v1/user`,  // 🔹 直接拼接 user_uuid
+    return BaseApi<BaseResponse<UserInfoEntity>>(
+        MethodType.PUT,
+        `/api/v1/user`,
         data,
-        null,  // 无 query 参数
-        user_uuid,  // 无 path 参数
+        null,
+        user_uuid,
         {
             Authorization: `Bearer ${GetAuthorizationToken()}`,
             "Content-Type": "application/json"

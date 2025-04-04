@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -33,6 +33,8 @@ import {PageEntity} from "../models/entity/page_entity.ts";
 import {BuildingEntity} from "../models/entity/building_entity.ts";
 import {BuildingDTO} from "../models/dto/building_add_dto.ts";
 import {BuildingLiteEntity} from "../models/entity/building_lite_entity.ts";
+import {BatchImportResponseDTO} from "../models/dto/building/batch_import_response_dto.ts";
+import {FileEntity} from "../models/entity/file_entity.ts";
 
 /**
  * # 获取建筑列表 API
@@ -43,7 +45,7 @@ import {BuildingLiteEntity} from "../models/entity/building_lite_entity.ts";
  * @throws {Error} 当网络请求失败或服务器返回错误时抛出异常。
  */
 const GetBuildingPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<BuildingEntity>> | undefined> => {
-    return BaseApi<PageEntity<BuildingEntity>>(
+    return BaseApi<BaseResponse<PageEntity<BuildingEntity>>>(
         MethodType.GET,
         "/api/v1/building/page",
         null,
@@ -61,7 +63,7 @@ const GetBuildingPageAPI = async (data: PageSearchDTO): Promise<BaseResponse<Pag
  * @constructor
  */
 const GetBuildingListAPI = async (keyword?: string): Promise<BaseResponse<BuildingLiteEntity[]> | undefined> => {
-    return BaseApi<BuildingLiteEntity[]>(
+    return BaseApi<BaseResponse<BuildingLiteEntity[]>>(
         MethodType.GET,
         "/api/v1/building/list",
         null,
@@ -79,7 +81,7 @@ const GetBuildingListAPI = async (keyword?: string): Promise<BaseResponse<Buildi
  * @return 如果操作成功，则返回一个BaseResponse对象，其中包含具体的建筑数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const GetBuildingAPI = async (data: string): Promise<BaseResponse<BuildingEntity> | undefined> => {
-    return BaseApi<BuildingEntity>(
+    return BaseApi<BaseResponse<BuildingEntity>>(
         MethodType.GET,
         "/api/v1/building",
         null,
@@ -97,7 +99,7 @@ const GetBuildingAPI = async (data: string): Promise<BaseResponse<BuildingEntity
  * @return 如果操作成功，则返回一个BaseResponse对象，其中不包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const EditBuildingAPI = async (buildingUuid: string, data: BuildingDTO): Promise<BaseResponse<null> | undefined> => {
-    return BaseApi<null>(
+    return BaseApi<BaseResponse<null>>(
         MethodType.PUT,
         "/api/v1/building",
         data,
@@ -116,7 +118,7 @@ const EditBuildingAPI = async (buildingUuid: string, data: BuildingDTO): Promise
  @returns {Promise<BaseResponse<null> | undefined>} - 如果操作成功，则返回一个BaseResponse对象，其中不包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const AddBuildingAPI = async (data: BuildingDTO): Promise<BaseResponse<null> | undefined> => {
-    return BaseApi<null>(
+    return BaseApi<BaseResponse<null>>(
         MethodType.POST,
         "/api/v1/building",
         data,
@@ -135,12 +137,53 @@ const AddBuildingAPI = async (data: BuildingDTO): Promise<BaseResponse<null> | u
  @returns {Promise<BaseResponse<null> | undefined>} - 如果操作成功，则返回一个BaseResponse对象，其中不包含具体的结果数据；若请求失败或遇到错误，则可能返回undefined。
  */
 const DeleteBuildingAPI = async (data: string): Promise<BaseResponse<null> | undefined> => {
-    return BaseApi<null>(
+    return BaseApi<BaseResponse<null>>(
         MethodType.DELETE,
         "/api/v1/building/",
         null,
         null,
         data,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # GetBuildingTemplateAPI
+ * > 该函数用于获取教学楼导入模板。它会返回一个 Excel 文件的二进制数据，特别适用于管理员角色。
+ * > 后端接口使用了 RequestRole 注解来限制只有具有"管理员"角色的用户才能访问此端点。
+ * > 返回的响应将是一个包含模板文件的响应实体，设置为附件形式，文件名为"教学楼导入模板.xlsx"
+ *
+ * @returns {Promise<BaseResponse<FileEntity> | undefined>} - 如果操作成功，则返回一个包含文件实体的 BaseResponse；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const GetBuildingTemplateAPI = async (): Promise<BaseResponse<FileEntity> | undefined> => {
+    return BaseApi<BaseResponse<FileEntity>>(
+        MethodType.GET,
+        "/api/v1/building/get-template",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+/**
+ * # BatchImportBuildingAPI
+ * > 该函数用于批量导入教学楼信息。它接受一个包含教学楼信息的 Excel 文件的 base64 字符串，并将其发送到指定的后端接口进行处理。
+ *
+ * @param {string} base64Content - Excel 文件的 base64 编码内容。
+ * @param {boolean} ignoreError - 是否忽略错误继续导入。
+ * @returns {Promise<BaseResponse<BatchImportResponseDTO> | undefined>} - 如果操作成功，则返回一个包含导入结果的 BaseResponse 对象；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const BatchImportBuildingAPI = async (base64Content: string, ignoreError: boolean): Promise<BaseResponse<BatchImportResponseDTO> | undefined> => {
+    return BaseApi<BaseResponse<BatchImportResponseDTO>>(
+        MethodType.POST,
+        "/api/v1/building/batch-import",
+        {
+            file: base64Content,
+            ignore_error: ignoreError
+        },
+        null,
+        null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`}
     );
 }
@@ -151,5 +194,7 @@ export {
     DeleteBuildingAPI,
     EditBuildingAPI,
     GetBuildingAPI,
-    GetBuildingListAPI
+    GetBuildingListAPI,
+    GetBuildingTemplateAPI,
+    BatchImportBuildingAPI
 }

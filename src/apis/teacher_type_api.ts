@@ -41,7 +41,7 @@ import {PageTeacherTypeSearchDTO} from "../models/dto/page/page_teacher_type_sea
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetTeacherTypeListAPI = async (data: PageTeacherTypeSearchDTO): Promise<BaseResponse<PageEntity<TeacherTypeEntity>> | undefined> => {
-    return BaseApi<PageEntity<TeacherTypeEntity>>(
+    return BaseApi<BaseResponse<PageEntity<TeacherTypeEntity>>>(
         MethodType.GET,
         "/api/v1/teacher-type/page",
         null,
@@ -59,7 +59,7 @@ const GetTeacherTypeListAPI = async (data: PageTeacherTypeSearchDTO): Promise<Ba
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetTeacherTypeSimpleListAPI = async (): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
-    return BaseApi<TeacherTypeEntity>(
+    return BaseApi<BaseResponse<TeacherTypeEntity>>(
         MethodType.GET,
         "/api/v1/teacher-type/list",
         null,
@@ -77,7 +77,7 @@ const GetTeacherTypeSimpleListAPI = async (): Promise<BaseResponse<TeacherTypeEn
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
 const GetTeacherTypeInfoByTypeUuidAPI = async (teacher_type_uuid:string): Promise<BaseResponse<TeacherTypeEntity> | undefined> => {
-    return BaseApi<TeacherTypeEntity>(
+    return BaseApi<BaseResponse<TeacherTypeEntity>>(
         MethodType.GET,
         "/api/v1/teacher-type",
         null,
