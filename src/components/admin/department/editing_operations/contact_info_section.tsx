@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -61,7 +61,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
     // 加载已分配的教学楼
     useEffect(() => {
         const getBuilding = data.assigned_teaching_building;
-        const building = buildingList.filter(building => getBuilding!.includes(building.building_uuid));
+        const building = buildingList.filter(building => getBuilding?.includes(building.building_uuid));
         setSelectedBuildings(building);
     }, [data.assigned_teaching_building, hasSelected]);
 
@@ -124,6 +124,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_address"
                     type="text"
                     className="input input-bordered w-full"
                     value={data.department_address || ""}
@@ -140,6 +141,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                 showHelpText={showHelpText}
             >
                 <input
+                    id="fixed_phone"
                     type="tel"
                     className="input input-bordered w-full"
                     value={data.fixed_phone || ""}
@@ -157,6 +159,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                 showHelpText={showHelpText}
             >
                 <input
+                    id="administrative_head"
                     type="text"
                     className="input input-bordered w-full"
                     value={data.administrative_head || ""}
@@ -173,6 +176,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                 showHelpText={showHelpText}
             >
                 <input
+                    id="party_committee_head"
                     type="text"
                     className="input input-bordered w-full"
                     value={data.party_committee_head || ""}
@@ -195,6 +199,7 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                     {/* 搜索框 */}
                     <div className="flex w-full items-center">
                         <input
+                            id="building_search"
                             type="text"
                             className="input input-bordered w-full"
                             value={searchKeyword}
@@ -256,6 +261,13 @@ export function ContactInfoSection({data, setData, showHelpText, hasSelected}: R
                             </div>
                         )}
                     </div>
+
+                    {/* 隐藏字段用于存储分配的教学楼 */}
+                    <input
+                        id="assigned_teaching_building"
+                        type="hidden"
+                        value={selectedBuildings.map(b => b.building_uuid).join(',')}
+                    />
                 </div>
             </FormFieldComponent>
         </FormSectionComponent>

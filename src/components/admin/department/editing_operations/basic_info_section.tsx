@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -33,11 +33,15 @@ import {DepartmentDTO} from "../../../../models/dto/department_dto.ts";
 import {DepartmentEntity} from "../../../../models/entity/department_entity.ts";
 import {FormFieldComponent} from "../../../form/form_field_component.tsx";
 import {FormSectionComponent} from "../../../form/form_section_component.tsx";
+import {UnitCategoryLiteEntity} from "../../../../models/entity/unit_category_lite_entity.ts";
+import {UnitTypeLiteEntity} from "../../../../models/entity/unit_type_lite_entity.ts";
 
 interface BasicInfoSectionProps {
     data: DepartmentDTO;
     setData: React.Dispatch<React.SetStateAction<DepartmentDTO>>;
     departmentList: DepartmentEntity[];
+    unitCategories: UnitCategoryLiteEntity[];
+    unitTypes: UnitTypeLiteEntity[];
     showHelpText: boolean;
     today: string;
 }
@@ -50,6 +54,8 @@ export function BasicInfoSection({
     data,
     setData,
     departmentList,
+    unitCategories,
+    unitTypes,
     showHelpText,
     today
 }: Readonly<BasicInfoSectionProps>): JSX.Element {
@@ -69,6 +75,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_name"
                     type="text"
                     className="input input-bordered w-full"
                     required
@@ -88,6 +95,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_code"
                     type="text"
                     className="input input-bordered w-full"
                     required
@@ -106,6 +114,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_short_name"
                     type="text"
                     className="input input-bordered w-full"
                     value={data.department_short_name || ""}
@@ -122,6 +131,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_english_name"
                     type="text"
                     className="input input-bordered w-full"
                     value={data.department_english_name || ""}
@@ -140,19 +150,18 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <select
+                    id="unit_category"
                     className="select select-bordered w-full"
                     required
                     value={data.unit_category}
                     onChange={(e) => setData({...data, unit_category: e.target.value})}
                 >
                     <option value="" disabled>请选择单位类别</option>
-                    <option value="学院">学院</option>
-                    <option value="部门">部门</option>
-                    <option value="中心">中心</option>
-                    <option value="处室">处室</option>
-                    <option value="研究所">研究所</option>
-                    <option value="实验室">实验室</option>
-                    <option value="其他">其他</option>
+                    {unitCategories.map((category) => (
+                        <option key={category.unit_category_uuid} value={category.unit_category_uuid}>
+                            {category.name}
+                        </option>
+                    ))}
                 </select>
             </FormFieldComponent>
 
@@ -165,18 +174,18 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <select
+                    id="unit_type"
                     className="select select-bordered w-full"
                     required
                     value={data.unit_type}
                     onChange={(e) => setData({...data, unit_type: e.target.value})}
                 >
                     <option value="" disabled>请选择单位办别</option>
-                    <option value="教学">教学</option>
-                    <option value="科研">科研</option>
-                    <option value="行政">行政</option>
-                    <option value="教辅">教辅</option>
-                    <option value="后勤">后勤</option>
-                    <option value="其他">其他</option>
+                    {unitTypes.map((type) => (
+                        <option key={type.unit_type_uuid} value={type.unit_type_uuid}>
+                            {type.name}
+                        </option>
+                    ))}
                 </select>
             </FormFieldComponent>
 
@@ -190,6 +199,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="department_order"
                     type="number"
                     className="input input-bordered w-full"
                     required
@@ -208,6 +218,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <select
+                    id="parent_department"
                     className="select select-bordered w-full"
                     value={data.parent_department || ""}
                     onChange={(e) => setData({
@@ -233,6 +244,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="establishment_date"
                     type="date"
                     className="input input-bordered w-full"
                     required
@@ -253,6 +265,7 @@ export function BasicInfoSection({
                 showHelpText={showHelpText}
             >
                 <input
+                    id="expiration_date"
                     type="date"
                     className="input input-bordered w-full"
                     value={data.expiration_date || ""}

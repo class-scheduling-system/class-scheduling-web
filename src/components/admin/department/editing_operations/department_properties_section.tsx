@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -58,6 +58,7 @@ export function DepartmentPropertiesSection({data, setData}: Readonly<Department
                             <div className="flex items-center justify-between bg-base-100 p-3 rounded-md">
                                 <span className="text-sm">启用部门</span>
                                 <input
+                                    id="is_enabled"
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={data.is_enabled ?? false}
@@ -70,6 +71,7 @@ export function DepartmentPropertiesSection({data, setData}: Readonly<Department
                             <div className="flex items-center justify-between bg-base-100 p-3 rounded-md">
                                 <span className="text-sm">实体部门</span>
                                 <input
+                                    id="is_entity"
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={data.is_entity}
@@ -87,6 +89,7 @@ export function DepartmentPropertiesSection({data, setData}: Readonly<Department
                             <div className="flex items-center justify-between bg-base-100 p-3 rounded-md">
                                 <span className="text-sm">上课院系</span>
                                 <input
+                                    id="is_attending_college"
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={data.is_attending_college}
@@ -102,6 +105,7 @@ export function DepartmentPropertiesSection({data, setData}: Readonly<Department
                             <div className="flex items-center justify-between bg-base-100 p-3 rounded-md">
                                 <span className="text-sm">开课院系</span>
                                 <input
+                                    id="is_teaching_college"
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={data.is_teaching_college}
@@ -117,6 +121,7 @@ export function DepartmentPropertiesSection({data, setData}: Readonly<Department
                             <div className="flex items-center justify-between bg-base-100 p-3 rounded-md">
                                 <span className="text-sm">开课教研室</span>
                                 <input
+                                    id="is_teaching_office"
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={data.is_teaching_office}
