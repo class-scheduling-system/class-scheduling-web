@@ -27,6 +27,7 @@ import { GetStudentPageAPI } from "../../apis/student_api";
 import { PageStudentSearchDTO } from "../../models/dto/page/page_student_search_dto";
 import { AcademicDeleteStudentDialog } from "../../components/academic/student/academic_student_delete_dialog";
 import { Newlybuild } from "@icon-park/react";
+import {AcademicStudentBatchImportDialog} from "@/components/academic/student/acdemic_student_batch_import_dialog.tsx";
 
 export function AcademicStudent({ site }: Readonly<{
     site: SiteInfoEntity
@@ -522,6 +523,8 @@ export function AcademicStudent({ site }: Readonly<{
                 emit={setDialogDelete}
                 studentUuid={deleteStudentUuid}
             />
+            <AcademicStudentBatchImportDialog show={dialogBatchImport} emit={setDialogBatchImport}
+                                            requestRefresh={setRefreshFlag}/>
         </>
     );
 } 

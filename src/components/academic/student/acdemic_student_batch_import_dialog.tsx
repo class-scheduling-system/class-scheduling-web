@@ -26,12 +26,13 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BuildingOne, CheckOne, CloseOne, Download, Upload} from "@icon-park/react";
+import { CheckOne, CloseOne, Download, Upload, User} from "@icon-park/react";
 import {JSX, useEffect, useState} from "react";
 import {message, Modal, Upload as AntUpload} from "antd";
 import {RcFile} from "antd/es/upload";
 import {UploadRequestOption} from "rc-upload/lib/interface";
 import {BatchImportStudentAPI, GetStudentTemplateAPI} from "../../../apis/student_api.ts";
+
 
 /**
  * # AcademicStudentBatchImportDialog
@@ -80,7 +81,7 @@ export function AcademicStudentBatchImportDialog({show, emit, requestRefresh}: R
             
             // 从 FileEntity 中获取文件数据
             let fileData = getResp.data.data;
-            const fileName = getResp.data.name || '教学楼导入模板.xlsx';
+            const fileName = getResp.data.name || '学生导入模板.xlsx';
             const fileType = getResp.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             
             // 检查并去除 data URI 前缀
@@ -232,7 +233,7 @@ export function AcademicStudentBatchImportDialog({show, emit, requestRefresh}: R
                 onError?.(error as Error);
             }
         }
-    };
+    }
 
     return (
         <Modal 
@@ -243,7 +244,7 @@ export function AcademicStudentBatchImportDialog({show, emit, requestRefresh}: R
             width={600}
             title={
                 <div className="text-xl font-bold text-primary flex items-center gap-2 py-2">
-                    <BuildingOne theme="outline" size="24"/>
+                    <User theme="outline" size="18"/>
                     <span>批量导入学生</span>
                 </div>
             }
