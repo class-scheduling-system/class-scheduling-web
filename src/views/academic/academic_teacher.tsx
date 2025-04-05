@@ -9,14 +9,15 @@ import {
     Me,
     MoreApp,
     Refresh,
-    Search
+    Search,
+    Newlybuild
 } from "@icon-park/react";
 import { GetTeacherListAPI } from "../../apis/teacher_api.ts";
 import { message } from "antd";
 import { PageEntity } from "../../models/entity/page_entity.ts";
 import { TeacherEntity } from "../../models/entity/teacher_entity.ts";
 import { animated, useTransition } from "@react-spring/web";
-import { AcademicDeleteTeacherDialog } from "../../components/academic/academic_teacher_delete_dialog.tsx";
+import { AcademicDeleteTeacherDialog } from "../../components/academic/teacher/academic_teacher_delete_dialog.tsx";
 import { GetDepartmentSimpleListAPI } from "../../apis/department_api.ts";
 import { useNavigate } from "react-router";
 import { PageTeacherSearchDTO } from "../../models/dto/page/page_teacher_search_dto.ts";
@@ -27,7 +28,7 @@ import { TeacherTypeEntity } from "../../models/entity/teacher_type_entity.ts";
 import { GetTeacherTypeSimpleListAPI } from "../../apis/teacher_type_api.ts";
 import { LabelComponent } from "../../components/label_component.tsx";
 import { DepartmentEntity } from "../../models/entity/department_entity.ts";
-
+import { AcademicTeacherBatchImportDialog } from "../../components/academic/teacher/academic_teacher_batch_import_dialog.tsx";
 
 export function AcademicTeacher({ site }: Readonly<{
     site: SiteInfoEntity
@@ -71,6 +72,8 @@ export function AcademicTeacher({ site }: Readonly<{
     const [showStats, setShowStats] = useState(false);
 
     const [refreshFlag, setRefreshFlag] = useState(0);
+    const [dialogBatchImport, setDialogBatchImport] = useState<boolean>(false);
+    const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
 
     // 获取部门列表
     useEffect(() => {
@@ -146,8 +149,11 @@ export function AcademicTeacher({ site }: Readonly<{
                 setLoading(false);
             }
         };
-        fetchTeacherList().then();
-    }, [searchRequest, departmentList, teacherTypeList, refreshFlag]);
+        if (refreshOperate || refreshFlag > 0) {
+            fetchTeacherList().then();
+            setRefreshOperate(false);
+        }
+    }, [searchRequest, departmentList, teacherTypeList, refreshFlag, refreshOperate]);
 
     useEffect(() => {
         // 当对话框关闭时，刷新表格数据
@@ -630,6 +636,12 @@ export function AcademicTeacher({ site }: Readonly<{
                                     <span>显示统计</span>
                                 </button>
                             )}
+                            <button
+                                className="btn btn-sm btn-outline btn-secondary w-full flex items-center justify-center gap-2"
+                                onClick={() => setDialogBatchImport(true)}>
+                                <Newlybuild theme="outline" size="16"/>
+                                <span>批量导入</span>
+                            </button>
                         </div>
                     </CardComponent>
                 </div>
@@ -640,6 +652,11 @@ export function AcademicTeacher({ site }: Readonly<{
                 show={dialogDelete}
                 emit={setDialogDelete}
                 teacherUuid={deleteTeacherUuid}
+            />
+            <AcademicTeacherBatchImportDialog
+                show={dialogBatchImport}
+                emit={setDialogBatchImport}
+                requestRefresh={setRefreshOperate}
             />
         </>
     );

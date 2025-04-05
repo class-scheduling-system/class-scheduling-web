@@ -35,7 +35,7 @@ import {
 
 import * as React from "react";
 import { message, Modal } from "antd";
-import { DeleteTeacherAPI } from "../../apis/teacher_api.ts";
+import { DeleteTeacherAPI } from "../../../apis/teacher_api.ts";
 
 
 /**

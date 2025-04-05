@@ -32,6 +32,9 @@ import {PageEntity} from "../models/entity/page_entity.ts";
 import {TeacherEntity} from "../models/entity/teacher_entity.ts";
 import {PageTeacherSearchDTO} from "../models/dto/page/page_teacher_search_dto.ts";
 import {TeacherDTO} from "../models/dto/teacher_dto.ts";
+import {FileEntity} from "../models/entity/file_entity.ts";
+import {BatchImportResponseDTO} from "@/models/dto/building/batch_import_response_dto.ts";
+
 
 /**
  * # 获取教师列表
@@ -115,9 +118,55 @@ const EditTeacherAPI = async (teacher_uuid: string, data: TeacherDTO): Promise<B
     );
 };
 
+
+/**
+ * # GetTeacherTemplateAPI
+ * > 该函数用于获取教师导入模板。它会返回一个 Excel 文件的二进制数据，特别适用于管理员角色。
+ * > 后端接口使用了 RequestRole 注解来限制只有具有"管理员"角色的用户才能访问此端点。
+ * > 返回的响应将是一个包含模板文件的响应实体，设置为附件形式，文件名为"教师导入模板.xlsx"
+ *
+ * @returns {Promise<BaseResponse<FileEntity> | undefined>} - 如果操作成功，则返回一个包含文件实体的 BaseResponse；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const GetTeacherTemplateAPI = async (): Promise<BaseResponse<FileEntity> | undefined> => {
+    return BaseApi<BaseResponse<FileEntity>>(
+        MethodType.GET,
+        "/api/v1/teacher/get-template",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+
+/**
+ * # BatchImportTeacherAPI
+ * > 该函数用于批量导入教师信息。它接受一个包含教师信息的 Excel 文件的 base64 字符串，并将其发送到指定的后端接口进行处理。
+ *
+ * @param {string} base64Content - Excel 文件的 base64 编码内容。
+ * @param {boolean} ignoreError - 是否忽略错误继续导入。
+ * @returns {Promise<BaseResponse<BatchImportResponseDTO> | undefined>} - 如果操作成功，则返回一个包含导入结果的 BaseResponse 对象；若请求失败或遇到错误，则可能返回 undefined。
+ */
+const BatchImportTeacherAPI = async (base64Content: string, ignoreError: boolean): Promise<BaseResponse<BatchImportResponseDTO> | undefined> => {
+    return BaseApi<BaseResponse<BatchImportResponseDTO>>(
+        MethodType.POST,
+        "/api/v1/teacher/batch-import",
+        {
+            file: base64Content,
+            ignore_error: ignoreError
+        },
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`}
+    );
+}
+
+
 export{
     GetTeacherListAPI,
     AddTeacherAPI,
     DeleteTeacherAPI,
-    EditTeacherAPI
+    EditTeacherAPI,
+    GetTeacherTemplateAPI,
+    BatchImportTeacherAPI
 }
