@@ -61,6 +61,7 @@ export function AcademicStudent({ site }: Readonly<{
     const [showStats, setShowStats] = useState(false);
     const [refreshFlag, setRefreshFlag] = useState(0);
     const [dialogBatchImport, setDialogBatchImport] = useState<boolean>(false);
+    const [refreshOperate, setRefreshOperate] = useState<boolean>(true);
 
     // 键盘快捷键
     useEffect(() => {
@@ -99,8 +100,11 @@ export function AcademicStudent({ site }: Readonly<{
             }
             setLoading(false);
         };
-        fetchStudentList().then();
-    }, [searchRequest, refreshFlag]);
+        if (refreshOperate || refreshFlag > 0) {
+            fetchStudentList().then();
+            setRefreshOperate(false);
+        }
+    }, [searchRequest, refreshFlag, refreshOperate]);
 
     // 搜索防抖动
     useEffect(() => {
@@ -524,7 +528,7 @@ export function AcademicStudent({ site }: Readonly<{
                 studentUuid={deleteStudentUuid}
             />
             <AcademicStudentBatchImportDialog show={dialogBatchImport} emit={setDialogBatchImport}
-                                            requestRefresh={setRefreshFlag}/>
+                                            requestRefresh={setRefreshOperate}/>
         </>
     );
 } 
