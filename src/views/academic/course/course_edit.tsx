@@ -32,13 +32,11 @@ import {
   ArrowLeft, CheckOne, CloseOne, Book, School
 } from "@icon-park/react";
 import { useNavigate, useParams } from "react-router";
-import { Button, Form, Input, InputNumber, message, Select, Switch } from "antd";
+import { message } from "antd";
 import { CourseLibraryDTO } from "../../../models/dto/course_library_dto";
 import { GetCourseAPI, UpdateCourseAPI } from "../../../apis/course_api";
-import { CardComponent } from "../../../components/card_component";
 import { GetDepartmentListAPI } from "../../../apis/department_api";
 import { DepartmentEntity } from "../../../models/entity/department_entity";
-import { CourseLibraryEntity } from "../../../models/entity/course_library_entity";
 
 /**
  * # 教务课程编辑页面
@@ -50,11 +48,9 @@ import { CourseLibraryEntity } from "../../../models/entity/course_library_entit
 export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
     const navigate = useNavigate();
     const { course_uuid } = useParams<{ course_uuid: string }>();
-    const [form] = Form.useForm();
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
-    const [courseData, setCourseData] = useState<CourseLibraryEntity | null>(null);
 
     // 初始化表单数据
     const [formData, setFormData] = useState<CourseLibraryDTO>({
@@ -88,13 +84,9 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
             try {
                 const response = await GetCourseAPI(course_uuid);
                 if (response?.output === "Success" && response.data) {
-                    setCourseData(response.data);
+                    // setCourseData(response.data);
                     // 设置表单初始值
-                    const formInitialValues = {
-                        ...response.data
-                    };
-                    form.setFieldsValue(formInitialValues);
-                    setFormData(formInitialValues);
+                    setFormData(response.data);
                 } else {
                     message.error(response?.error_message || "获取课程信息失败");
                     navigate("/academic/course");
@@ -109,7 +101,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
         };
 
         fetchCourseInfo();
-    }, [course_uuid, form, navigate]);
+    }, [course_uuid, navigate]);
 
     // 获取部门列表
     useEffect(() => {
@@ -141,13 +133,12 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
     };
 
     // 提交表单
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         if (!course_uuid) return;
-
+        
+        setSubmitting(true);
         try {
-            await form.validateFields();
-            
-            setSubmitting(true);
             const totalHours = calculateTotalHours();
             const submissionData = {
                 ...formData,
@@ -162,11 +153,36 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                 message.error(response?.error_message || "更新课程失败");
             }
         } catch (error) {
-            console.error("表单验证或提交失败:", error);
-            message.error("表单验证失败，请检查输入内容");
+            console.error("表单提交失败:", error);
+            message.error("提交失败，请检查输入内容");
         } finally {
             setSubmitting(false);
         }
+    };
+
+    // 处理输入框变化
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        
+        if (type === 'number') {
+            setFormData({
+                ...formData,
+                [name]: parseFloat(value) || 0
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
+    };
+
+    // 处理开关变化
+    const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            is_enabled: e.target.checked
+        });
     };
 
     // 自定义课程类型选项
@@ -184,31 +200,32 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
             {/* 顶部导航 */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                    <Button 
-                        icon={<ArrowLeft />} 
+                    <button 
+                        className="btn btn-sm btn-outline" 
                         onClick={() => navigate("/academic/course")}
                     >
+                        <ArrowLeft />
                         返回列表
-                    </Button>
+                    </button>
                     <h2 className="text-2xl font-bold">编辑课程</h2>
                 </div>
                 
                 <div className="flex gap-2">
-                    <Button 
-                        danger 
-                        icon={<CloseOne />}
+                    <button 
+                        className="btn btn-sm btn-error" 
                         onClick={() => navigate("/academic/course")}
                     >
+                        <CloseOne />
                         取消
-                    </Button>
-                    <Button 
-                        type="primary" 
-                        icon={<CheckOne />} 
+                    </button>
+                    <button 
+                        className="btn btn-sm btn-primary" 
                         onClick={handleSubmit}
-                        loading={submitting}
+                        disabled={submitting}
                     >
+                        {submitting ? <span className="loading loading-spinner loading-sm"></span> : <CheckOne />}
                         保存
-                    </Button>
+                    </button>
                 </div>
             </div>
 
@@ -218,225 +235,348 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                     <p>加载中...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
                     {/* 课程信息卡片 */}
-                    <CardComponent>
-                        <div className="bg-primary/10 p-4 flex items-center space-x-2 mb-4">
-                            <Book theme="outline" size="20" className="text-primary"/>
-                            <h2 className="card-title text-lg m-0">课程基本信息</h2>
-                        </div>
-
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            initialValues={courseData || {}}
-                            onValuesChange={(_, values) => setFormData(values)}
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Form.Item 
-                                    name="id" 
-                                    label="课程代码" 
-                                    rules={[{ required: true, message: "请输入课程代码" }]}
-                                >
-                                    <Input placeholder="请输入课程代码，如CS101" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="name" 
-                                    label="课程名称" 
-                                    rules={[{ required: true, message: "请输入课程名称" }]}
-                                >
-                                    <Input placeholder="请输入课程名称" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="english_name" 
-                                    label="课程英文名称"
-                                >
-                                    <Input placeholder="请输入课程英文名称" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="department" 
-                                    label="所属院系" 
-                                    rules={[{ required: true, message: "请选择所属院系" }]}
-                                >
-                                    <Select 
-                                        placeholder="请选择所属院系"
-                                        options={departments.map(dept => ({ 
-                                            label: dept.department_name, 
-                                            value: dept.department_uuid 
-                                        }))}
-                                    />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="type" 
-                                    label="课程类型" 
-                                    rules={[{ required: true, message: "请选择课程类型" }]}
-                                >
-                                    <Select 
-                                        placeholder="请选择课程类型"
-                                        options={courseTypeOptions}
-                                    />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="credit" 
-                                    label="学分" 
-                                    rules={[{ required: true, message: "请输入学分" }]}
-                                >
-                                    <InputNumber 
-                                        min={0} 
-                                        max={10} 
-                                        step={0.5} 
-                                        style={{ width: '100%' }} 
-                                        placeholder="请输入学分"
-                                    />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="is_enabled" 
-                                    label="是否启用" 
-                                    valuePropName="checked"
-                                >
-                                    <Switch />
-                                </Form.Item>
+                    <div className="card bg-base-100 shadow-sm border border-base-200">
+                        <div className="card-body">
+                            <div className="bg-primary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
+                                <Book theme="outline" size="20" className="text-primary"/>
+                                <h2 className="card-title text-lg m-0">课程基本信息</h2>
                             </div>
-                        </Form>
-                    </CardComponent>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* 课程代码 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">课程代码<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="id"
+                                        placeholder="请输入课程代码，如CS101" 
+                                        className="input input-bordered w-full" 
+                                        required
+                                        value={formData.id}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 课程名称 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">课程名称<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="name"
+                                        placeholder="请输入课程名称" 
+                                        className="input input-bordered w-full" 
+                                        required
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 课程英文名称 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">课程英文名称</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="english_name"
+                                        placeholder="请输入课程英文名称" 
+                                        className="input input-bordered w-full"
+                                        value={formData.english_name || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 所属院系 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">所属院系<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <select 
+                                        className="select select-bordered w-full" 
+                                        name="department"
+                                        required
+                                        value={formData.department}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="" disabled>请选择所属院系</option>
+                                        {departments.map(dept => (
+                                            <option key={dept.department_uuid} value={dept.department_uuid}>
+                                                {dept.department_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* 课程类型 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">课程类型<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <select 
+                                        className="select select-bordered w-full" 
+                                        name="type"
+                                        required
+                                        value={formData.type}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="" disabled>请选择课程类型</option>
+                                        {courseTypeOptions.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* 学分 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">学分<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="credit"
+                                        placeholder="请输入学分" 
+                                        className="input input-bordered w-full" 
+                                        required
+                                        min="0"
+                                        step="0.5"
+                                        value={formData.credit}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 是否启用 */}
+                                <div className="form-control">
+                                    <label className="label cursor-pointer justify-start gap-4">
+                                        <span className="label-text font-medium">是否启用</span>
+                                        <input 
+                                            type="checkbox" 
+                                            className="toggle toggle-primary" 
+                                            checked={formData.is_enabled}
+                                            onChange={handleSwitchChange}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* 课时信息卡片 */}
-                    <CardComponent>
-                        <div className="bg-primary/10 p-4 flex items-center space-x-2 mb-4">
-                            <School theme="outline" size="20" className="text-primary"/>
-                            <h2 className="card-title text-lg m-0">课时设置</h2>
-                        </div>
+                    <div className="card bg-base-100 shadow-sm border border-base-200">
+                        <div className="card-body">
+                            <div className="bg-secondary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
+                                <School theme="outline" size="20" className="text-secondary"/>
+                                <h2 className="card-title text-lg m-0">课时设置</h2>
+                            </div>
 
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            initialValues={courseData || {}}
-                            onValuesChange={(_, values) => setFormData(values)}
-                        >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Form.Item 
-                                    name="week_hours" 
-                                    label="周课时" 
-                                    rules={[{ required: true, message: "请输入周课时" }]}
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入周课时" />
-                                </Form.Item>
+                                {/* 周课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">周课时<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="week_hours"
+                                        placeholder="请输入周课时" 
+                                        className="input input-bordered w-full" 
+                                        required
+                                        min="0"
+                                        value={formData.week_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
 
+                                {/* 总课时 */}
                                 <div className="flex items-center bg-base-200 p-4 rounded-lg">
                                     <span className="text-lg font-semibold">总课时: {calculateTotalHours()}</span>
                                 </div>
 
-                                <Form.Item 
-                                    name="theory_hours" 
-                                    label="理论课时"
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入理论课时" />
-                                </Form.Item>
+                                {/* 理论课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">理论课时</span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="theory_hours"
+                                        placeholder="请输入理论课时" 
+                                        className="input input-bordered w-full" 
+                                        min="0"
+                                        value={formData.theory_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
 
-                                <Form.Item 
-                                    name="experiment_hours" 
-                                    label="实验课时"
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入实验课时" />
-                                </Form.Item>
+                                {/* 实验课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">实验课时</span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="experiment_hours"
+                                        placeholder="请输入实验课时" 
+                                        className="input input-bordered w-full" 
+                                        min="0"
+                                        value={formData.experiment_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
 
-                                <Form.Item 
-                                    name="practice_hours" 
-                                    label="实践课时"
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入实践课时" />
-                                </Form.Item>
+                                {/* 实践课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">实践课时</span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="practice_hours"
+                                        placeholder="请输入实践课时" 
+                                        className="input input-bordered w-full" 
+                                        min="0"
+                                        value={formData.practice_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
 
-                                <Form.Item 
-                                    name="computer_hours" 
-                                    label="上机课时"
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入上机课时" />
-                                </Form.Item>
+                                {/* 上机课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">上机课时</span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="computer_hours"
+                                        placeholder="请输入上机课时" 
+                                        className="input input-bordered w-full" 
+                                        min="0"
+                                        value={formData.computer_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
 
-                                <Form.Item 
-                                    name="other_hours" 
-                                    label="其他课时"
-                                >
-                                    <InputNumber min={0} style={{ width: '100%' }} placeholder="请输入其他课时" />
-                                </Form.Item>
+                                {/* 其他课时 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">其他课时</span>
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        name="other_hours"
+                                        placeholder="请输入其他课时" 
+                                        className="input input-bordered w-full" 
+                                        min="0"
+                                        value={formData.other_hours}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
                             </div>
-                        </Form>
-                    </CardComponent>
+                        </div>
+                    </div>
 
                     {/* 教室需求卡片 */}
-                    <CardComponent>
-                        <div className="bg-primary/10 p-4 flex items-center space-x-2 mb-4">
-                            <School theme="outline" size="20" className="text-primary"/>
-                            <h2 className="card-title text-lg m-0">教室需求</h2>
-                        </div>
-
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            initialValues={courseData || {}}
-                            onValuesChange={(_, values) => setFormData(values)}
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Form.Item 
-                                    name="theory_classroom_type" 
-                                    label="理论教室类型"
-                                >
-                                    <Input placeholder="请输入理论教室类型需求" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="experiment_classroom_type" 
-                                    label="实验教室类型"
-                                >
-                                    <Input placeholder="请输入实验教室类型需求" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="practice_classroom_type" 
-                                    label="实践教室类型"
-                                >
-                                    <Input placeholder="请输入实践教室类型需求" />
-                                </Form.Item>
-
-                                <Form.Item 
-                                    name="computer_classroom_type" 
-                                    label="上机教室类型"
-                                >
-                                    <Input placeholder="请输入上机教室类型需求" />
-                                </Form.Item>
+                    <div className="card bg-base-100 shadow-sm border border-base-200">
+                        <div className="card-body">
+                            <div className="bg-accent/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
+                                <School theme="outline" size="20" className="text-accent"/>
+                                <h2 className="card-title text-lg m-0">教室需求</h2>
                             </div>
-                        </Form>
-                    </CardComponent>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* 理论教室类型 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">理论教室类型</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="theory_classroom_type"
+                                        placeholder="请输入理论教室类型需求" 
+                                        className="input input-bordered w-full"
+                                        value={formData.theory_classroom_type || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 实验教室类型 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">实验教室类型</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="experiment_classroom_type"
+                                        placeholder="请输入实验教室类型需求" 
+                                        className="input input-bordered w-full"
+                                        value={formData.experiment_classroom_type || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 实践教室类型 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">实践教室类型</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="practice_classroom_type"
+                                        placeholder="请输入实践教室类型需求" 
+                                        className="input input-bordered w-full"
+                                        value={formData.practice_classroom_type || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* 上机教室类型 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">上机教室类型</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="computer_classroom_type"
+                                        placeholder="请输入上机教室类型需求" 
+                                        className="input input-bordered w-full"
+                                        value={formData.computer_classroom_type || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* 备注信息卡片 */}
-                    <CardComponent>
-                        <div className="bg-primary/10 p-4 flex items-center space-x-2 mb-4">
-                            <School theme="outline" size="20" className="text-primary"/>
-                            <h2 className="card-title text-lg m-0">备注信息</h2>
-                        </div>
+                    <div className="card bg-base-100 shadow-sm border border-base-200">
+                        <div className="card-body">
+                            <div className="bg-info/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
+                                <School theme="outline" size="20" className="text-info"/>
+                                <h2 className="card-title text-lg m-0">备注信息</h2>
+                            </div>
 
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            initialValues={courseData || {}}
-                            onValuesChange={(_, values) => setFormData(values)}
-                        >
-                            <Form.Item 
-                                name="description" 
-                                label="课程描述"
-                            >
-                                <Input.TextArea rows={4} />
-                            </Form.Item>
-                        </Form>
-                    </CardComponent>
-                </div>
+                            <div className="form-control w-full">
+                                <label className="label">
+                                    <span className="label-text font-medium">课程描述</span>
+                                </label>
+                                <textarea 
+                                    className="textarea textarea-bordered h-24"
+                                    name="description"
+                                    placeholder="请输入课程描述"
+                                    value={formData.description || ""}
+                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             )}
         </div>
     );

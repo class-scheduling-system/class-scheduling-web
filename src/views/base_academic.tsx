@@ -45,6 +45,8 @@ import {AcademicEditTeacher} from "./academic/teacher/edit_teacher.tsx";
 import {AcademicStudent} from "./academic/academic_student.tsx";
 import {AcademicAddStudent} from "./academic/student/add_student.tsx";
 import {AcademicEditStudent} from "./academic/student/edit_student.tsx";
+import {AcademicCourseAdd} from "./academic/course/course_add.tsx";
+import {AcademicCourseEdit} from "./academic/course/course_edit.tsx";
 import cookie from "react-cookies";
 import {message} from "antd";
 import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
@@ -179,6 +181,8 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/dashboard" element={<AcademicDashboard site={site}/>}/>
                                 <Route path="/class" element={<AcademicClass site={site}/>}/>
                                 <Route path="/course" element={<AcademicCourse site={site}/>}/>
+                                <Route path="/course/add" element={<AcademicCourseAdd site={site}/>}/>
+                                <Route path="/course/edit/:courseId" element={<AcademicCourseEdit site={site}/>}/>
                                 <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>

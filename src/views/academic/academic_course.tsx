@@ -36,6 +36,8 @@ import { DeleteCourseAPI, GetCoursePageAPI } from "@/apis/course_api";
 import { PageSearchDTO } from "@/models/dto/page/page_search_dto";
 import { DepartmentEntity } from "@/models/entity/department_entity";
 import { GetDepartmentListAPI } from "@/apis/department_api";
+import { CourseTypeEntity } from "@/models/entity/course_type_entity";
+import { GetCourseTypeListAPI } from "@/apis/course_type_api";
 
 /**
  * # 教务课程管理列表页
@@ -54,6 +56,7 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
     const [totalItems, setTotalItems] = useState(0);
     const [courses, setCourses] = useState<CourseLibraryEntity[]>([]);
     const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
+    const [courseTypes, setCourseTypes] = useState<CourseTypeEntity[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<CourseLibraryEntity | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const inputFocus = useRef<HTMLInputElement | null>(null);
@@ -96,10 +99,34 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
         fetchDepartments();
     }, []);
 
+    // 获取课程类型列表
+    useEffect(() => {
+        const fetchCourseTypes = async () => {
+            try {
+                const response = await GetCourseTypeListAPI();
+                if (response?.output === "Success" && response.data) {
+                    setCourseTypes(response.data);
+                } else {
+                    message.error(response?.error_message || "获取课程类型列表失败");
+                }
+            } catch (error) {
+                console.error("获取课程类型数据失败:", error);
+            }
+        };
+
+        fetchCourseTypes();
+    }, []);
+
     // 获取部门名称的函数
     const getDepartmentName = (departmentUuid: string): string => {
         const department = departments.find(dept => dept.department_uuid === departmentUuid);
         return department ? department.department_name || '未知部门' : '未知部门';
+    };
+
+    // 获取课程类型名称的函数
+    const getCourseTypeName = (courseTypeUuid: string): string => {
+        const courseType = courseTypes.find(type => type.course_type_uuid === courseTypeUuid);
+        return courseType ? courseType.name || '未知类型' : '未知类型';
     };
 
     // 获取课程数据
@@ -252,7 +279,7 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                             </td>
                                             <td>{course.credit}</td>
                                             <td>{getDepartmentName(course.department)}</td>
-                                            <td>{course.type}</td>
+                                            <td>{getCourseTypeName(course.type)}</td>
                                             <td>
                                                 <div className={`badge ${course.is_enabled ? 'badge-success' : 'badge-error'}`}>
                                                     {course.is_enabled ? '启用' : '禁用'}
