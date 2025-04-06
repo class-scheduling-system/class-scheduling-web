@@ -26,21 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {SiteInfoEntity} from "../../../models/entity/site_info_entity.ts";
+import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {JSX, useEffect, useRef, useState} from "react";
-import {CampusEntity} from "../../../models/entity/campus_entity.ts";
-import {PageEntity} from "../../../models/entity/page_entity.ts";
-import {GetCampusPageListAPI} from "../../../apis/campus_api.ts";
-import {PageSearchDTO} from "../../../models/dto/page/page_search_dto.ts";
+import {CampusEntity} from "../../models/entity/campus_entity.ts";
+import {PageEntity} from "../../models/entity/page_entity.ts";
+import {GetCampusPageListAPI} from "../../apis/campus_api.ts";
+import {PageSearchDTO} from "../../models/dto/page/page_search_dto.ts";
 import {message} from "antd";
 import {useDispatch, useSelector} from "react-redux";
-import {CardComponent} from "../../../components/card_component.tsx";
+import {CardComponent} from "../../components/card_component.tsx";
 import {animated, useTransition} from "@react-spring/web";
-import {LabelComponent} from "../../../components/label_component.tsx";
+import {LabelComponent} from "../../components/label_component.tsx";
 import {Add,  Correct, Delete, Editor, Error, Newlybuild, Search} from "@icon-park/react";
-import cardImage from "../../../assets/images/card-background.webp";
-import {CurrentInfoStore} from "../../../models/store/current_info_store.ts";
-import {AdminDeleteCampusDialog} from "../../../components/admin/admin_campus_delete_dialog.tsx";
+import cardImage from "@/assets/images/card-background.webp";
+import {CurrentInfoStore} from "@/models/store/current_info_store.ts";
+import {AdminDeleteCampusDialog} from "@/components/admin/admin_campus_delete_dialog.tsx";
 import {useNavigate} from "react-router";
 
 export function AdminCampus({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {

@@ -53,7 +53,7 @@ import { AdminUnitCategoryEdit } from "./admin/unit/unit_category_edit.tsx";
 import { AdminUnitTypeAdd } from "./admin/unit/unit_type_add.tsx";
 import { AdminUnitTypeEdit } from "./admin/unit/unit_type_edit.tsx";
 import {message} from "antd";
-import {AdminCampus} from "./admin/campus/admin_campus.tsx";
+import {AdminCampus} from "./admin/admin_campus.tsx";
 import { CampusAdd } from "./admin/campus/campus_add.tsx";
 import { CampusEdit } from "./admin/campus/campus_edit.tsx";
 import { AdminSystemInfo } from "./admin/admin_system_info.tsx";
