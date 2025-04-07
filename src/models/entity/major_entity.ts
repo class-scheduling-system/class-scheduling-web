@@ -26,19 +26,60 @@
  * --------------------------------------------------------------------------------
  */
 
-import { configureStore } from "@reduxjs/toolkit";
-import { siteStore } from "./site_store.ts";
-import { userStore } from "./user_store.ts";
-import { currentStore } from "./current_store.ts";
-import { aiFormChatStore } from "./ai_form_chat.ts";
-import { academicAffairsStore } from "./academic_affairs_store.ts";
-
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer,
-        academicAffairs: academicAffairsStore.reducer,
-        aiFormChat: aiFormChatStore.reducer
-    }
-})
+/**
+ * MajorEntity
+ */
+export type MajorEntity = {
+    /**
+     * 专业主键
+     */
+    major_uuid?: string;
+    /**
+     * 专业名称
+     */
+    major_name?: string;
+    /**
+     * 专业英文名称
+     */
+    major_english_name?: string;
+    /**
+     * 专业代码
+     */
+    major_code?: string;
+    /**
+     * 专业简称
+     */
+    major_short_name?: string;
+    /**
+     * 专业排序 默认100
+     */
+    major_order?: number;
+    /**
+     * 所属院系
+     */
+    department_uuid?: string;
+    /**
+     * 专业负责人
+     */
+    major_head?: string;
+    /**
+     * 专业介绍
+     */
+    major_introduction?: string;
+    /**
+     * 是否启用
+     */
+    is_enabled?: boolean;
+    /**
+     * 备注
+     */
+    remark?: string;
+    /**
+     * 创建时间
+     */
+    created_at?: number;
+    /**
+     * 更新时间
+     */
+    updated_at?: number;
+} 

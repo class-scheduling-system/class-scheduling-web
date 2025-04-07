@@ -26,19 +26,13 @@
  * --------------------------------------------------------------------------------
  */
 
-import { configureStore } from "@reduxjs/toolkit";
-import { siteStore } from "./site_store.ts";
-import { userStore } from "./user_store.ts";
-import { currentStore } from "./current_store.ts";
-import { aiFormChatStore } from "./ai_form_chat.ts";
-import { academicAffairsStore } from "./academic_affairs_store.ts";
-
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer,
-        academicAffairs: academicAffairsStore.reducer,
-        aiFormChat: aiFormChatStore.reducer
-    }
-})
+/**
+ * # 获取专业列表参数DTO
+ * > 该接口定义了获取专业列表的可选参数
+ */
+export type MajorListDTO = {
+    /** 部门名称或UUID (可选)，用于筛选特定部门下的专业 */
+    department?: string;
+    /** 专业名称 (可选)，用于模糊匹配专业名称 */
+    name?: string;
+} 

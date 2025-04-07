@@ -4,7 +4,7 @@
  */
 export const academicRouteConfig: Record<string, string> = {
     'dashboard': '看板',
-    'class': '班级管理',
+    'administrative-class': '行政班管理',
     'course': '课程管理',
     'schedule': '排课管理',
     'teacher': '教师管理',

@@ -110,4 +110,3 @@ export const aiFormChatStore = createSlice({
 });
 
 export const { addForm, setOtherData, addRecord, setThisPage, setForBackData } = aiFormChatStore.actions;
-export default aiFormChatStore.reducer;

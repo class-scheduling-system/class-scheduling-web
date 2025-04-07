@@ -127,29 +127,12 @@ const GetAdministrativeClassInfoAPI = async (
  * @param name 行政班级名称(可选)
  * @returns 行政班级分页列表
  */
-const GetAdministrativeClassListAdminAPI = async (
-    page: number,
-    size: number,
-    isDesc: boolean = true,
-    departmentUuid?: string,
-    majorUuid?: string,
-    name?: string
-): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
-    const params: PageAdministrativeClassDTO = {
-        page: page,
-        size: size,
-        is_desc: isDesc
-    };
-    
-    if (departmentUuid) params.department_uuid = departmentUuid;
-    if (majorUuid) params.major_uuid = majorUuid;
-    if (name) params.name = name;
-    
+const GetAdministrativeClassListAdminAPI = async (param: PageAdministrativeClassDTO): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
     return BaseApi<BaseResponse<PageEntity<AdministrativeClassEntity>>>(
         MethodType.GET,
         "/api/v1/administrative-class/list/admin",
         null,
-        params,
+        param,
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
     );
@@ -167,29 +150,12 @@ const GetAdministrativeClassListAdminAPI = async (
  * @param name 行政班级名称(可选)
  * @returns 行政班级分页列表
  */
-const GetAdministrativeClassListAcademicAPI = async (
-    page: number,
-    size: number,
-    isDesc: boolean = true,
-    departmentUuid?: string,
-    majorUuid?: string,
-    name?: string
-): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
-    const params: PageAdministrativeClassDTO = {
-        page: page,
-        size: size,
-        is_desc: isDesc
-    };
-    
-    if (departmentUuid) params.department_uuid = departmentUuid;
-    if (majorUuid) params.major_uuid = majorUuid;
-    if (name) params.name = name;
-    
+const GetAdministrativeClassListAcademicAPI = async (param: PageAdministrativeClassDTO): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
     return BaseApi<BaseResponse<PageEntity<AdministrativeClassEntity>>>(
         MethodType.GET,
         "/api/v1/administrative-class/list/academic",
         null,
-        params,
+        param,
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
     );
@@ -207,29 +173,12 @@ const GetAdministrativeClassListAcademicAPI = async (
  * @param name 行政班级名称(可选)
  * @returns 行政班级分页列表
  */
-const GetAdministrativeClassListStudentAPI = async (
-    page: number,
-    size: number,
-    isDesc: boolean = true,
-    departmentUuid?: string,
-    majorUuid?: string,
-    name?: string
-): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
-    const params: PageAdministrativeClassDTO = {
-        page: page,
-        size: size,
-        is_desc: isDesc
-    };
-    
-    if (departmentUuid) params.department_uuid = departmentUuid;
-    if (majorUuid) params.major_uuid = majorUuid;
-    if (name) params.name = name;
-    
+const GetAdministrativeClassListStudentAPI = async (param: PageAdministrativeClassDTO): Promise<BaseResponse<PageEntity<AdministrativeClassEntity>> | undefined> => {
     return BaseApi<BaseResponse<PageEntity<AdministrativeClassEntity>>>(
         MethodType.GET,
         "/api/v1/administrative-class/list/student",
         null,
-        params,
+        param,
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
     );

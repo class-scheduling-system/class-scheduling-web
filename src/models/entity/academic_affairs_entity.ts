@@ -26,19 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import { configureStore } from "@reduxjs/toolkit";
-import { siteStore } from "./site_store.ts";
-import { userStore } from "./user_store.ts";
-import { currentStore } from "./current_store.ts";
-import { aiFormChatStore } from "./ai_form_chat.ts";
-import { academicAffairsStore } from "./academic_affairs_store.ts";
-
-export default configureStore({
-    reducer: {
-        site: siteStore.reducer,
-        user: userStore.reducer,
-        current: currentStore.reducer,
-        academicAffairs: academicAffairsStore.reducer,
-        aiFormChat: aiFormChatStore.reducer
-    }
-})
+/**
+ * # 学术事务实体
+ * > 该接口用于定义学术事务的属性（教务权限信息）
+ */
+export type AcademicAffairsEntity = {
+    /** 学术事务权限ID */
+    academic_affairs_permission_uuid: string;
+    /** 授权用户 */
+    authorized_user: string;
+    /** 所属部门 */
+    department: string;
+    /** 类型 */
+    type: number;
+    /** 创建时间 */
+    created_at: number;
+    /** 更新时间 */
+    updated_at: number;
+} 

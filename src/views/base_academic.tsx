@@ -27,7 +27,7 @@
  */
 
 import {JSX, useEffect} from "react";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {SiteInfoEntity} from "../models/entity/site_info_entity.ts";
 import {Link, Route, Routes, useLocation, useNavigate} from "react-router";
 import {animated, useSpring, useTransition} from "@react-spring/web";
@@ -36,7 +36,6 @@ import {UserInfoEntity} from "../models/entity/user_info_entity.ts";
 import {People} from "@icon-park/react";
 import {AcademicNavComponent} from "../components/academic/academic_nav_component.tsx";
 import {AcademicDashboard} from "./academic/academic_dashboard.tsx";
-import {AcademicClass} from "./academic/academic_class.tsx";
 import {AcademicCourse} from "./academic/academic_course.tsx";
 import {AcademicSchedule} from "./academic/academic_schedule.tsx";
 import {AcademicTeacher} from "./academic/academic_teacher.tsx";
@@ -51,6 +50,14 @@ import cookie from "react-cookies";
 import {message} from "antd";
 import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
 import {academicRouteConfig} from "../models/config/academic_route_config";
+import {AdministrativeClass} from "./academic/academic_administrative_class.tsx";
+import {AdministrativeClassAdd} from "./academic/administrative_class/class_add.tsx";
+import {AdministrativeClassEdit} from "./academic/administrative_class/class_edit.tsx";
+import { GetCurrentAcademicAffairsAPI } from "../apis/academic_affairs_api.ts";
+import { setCurrentAcademicAffairs, setDepartmentInfo } from "../stores/academic_affairs_store.ts";
+import { AcademicAffairsEntity } from "../models/entity/academic_affairs_entity.ts";
+import { GetDepartmentAPI } from "../apis/department_api.ts";
+import { DepartmentEntity } from "../models/entity/department_entity.ts";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -60,8 +67,50 @@ import {academicRouteConfig} from "../models/config/academic_route_config";
 export function BaseAcademic(): JSX.Element {
     const site = useSelector((state: { site: SiteInfoEntity }) => state.site);
     const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
+    const academicAffairs = useSelector((state: { academicAffairs: { 
+        currentAcademicAffairs: AcademicAffairsEntity | null, 
+        departmentInfo: DepartmentEntity | null,
+        loaded: boolean,
+        departmentLoaded: boolean
+    } }) => state.academicAffairs);
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // 获取当前学术事务信息
+    useEffect(() => {
+        const fetchAcademicAffairs = async () => {
+            try {
+                const response = await GetCurrentAcademicAffairsAPI();
+                if (response && response.code === 200 && response.data) {
+                    dispatch(setCurrentAcademicAffairs(response.data));
+                    
+                    // 获取部门信息
+                    if (response.data.department) {
+                        try {
+                            const departmentResponse = await GetDepartmentAPI(response.data.department);
+                            if (departmentResponse && departmentResponse.code === 200 && departmentResponse.data) {
+                                dispatch(setDepartmentInfo(departmentResponse.data));
+                            } else {
+                                console.error("获取部门信息失败:", departmentResponse?.message);
+                            }
+                        } catch (error) {
+                            console.error("获取部门信息出错:", error);
+                        }
+                    }
+                } else {
+                    console.error("获取学术事务信息失败:", response?.message);
+                }
+            } catch (error) {
+                console.error("获取学术事务信息出错:", error);
+            }
+        };
+
+        // 如果还没加载过学术事务信息，则进行加载
+        if (!academicAffairs.loaded) {
+            fetchAcademicAffairs();
+        }
+    }, [dispatch, academicAffairs.loaded]);
 
     useEffect(() => {
         if (getUser.loading) {
@@ -145,10 +194,12 @@ export function BaseAcademic(): JSX.Element {
             </animated.div>
             <div className="w-full flex flex-col flex-1">
                 <animated.div style={topFade} className="w-full bg-base-100 px-6 py-4 shadow-sm flex justify-between items-center z-10 bg-gradient-to-r from-base-100 to-secondary/10">
-                    <div className="breadcrumbs text-sm">
-                        <ul>
-                            {useBreadcrumbs("/academic", academicRouteConfig)}
-                        </ul>
+                    <div className="flex items-center space-x-4">
+                        <div className="breadcrumbs text-sm">
+                            <ul>
+                                {useBreadcrumbs("/academic", academicRouteConfig)}
+                            </ul>
+                        </div>
                     </div>
                     <div className="flex items-center space-x-3">
                         <div className="dropdown dropdown-end">
@@ -179,7 +230,9 @@ export function BaseAcademic(): JSX.Element {
                         <animated.div style={{...style, flex: 1}}>
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AcademicDashboard site={site}/>}/>
-                                <Route path="/class" element={<AcademicClass site={site}/>}/>
+                                <Route path="/administrative-class" element={<AdministrativeClass site={site}/>}/>
+                                <Route path="/administrative-class/add" element={<AdministrativeClassAdd site={site}/>}/>
+                                <Route path="/administrative-class/edit/:id" element={<AdministrativeClassEdit site={site}/>}/>
                                 <Route path="/course" element={<AcademicCourse site={site}/>}/>
                                 <Route path="/course/add" element={<AcademicCourseAdd site={site}/>}/>
                                 <Route path="/course/edit/:courseId" element={<AcademicCourseEdit site={site}/>}/>
