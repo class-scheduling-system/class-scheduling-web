@@ -198,7 +198,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
     return (
         <div className="space-y-6 w-full">
             {/* 顶部导航 */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between bg-base-100 p-4 rounded-lg shadow-sm border border-base-200">
                 <div className="flex items-center space-x-3">
                     <button 
                         className="btn btn-sm btn-outline" 
@@ -219,8 +219,9 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                         取消
                     </button>
                     <button 
+                        type="submit"
+                        form="courseEditForm"
                         className="btn btn-sm btn-primary" 
-                        onClick={handleSubmit}
                         disabled={submitting}
                     >
                         {submitting ? <span className="loading loading-spinner loading-sm"></span> : <CheckOne />}
@@ -230,20 +231,19 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
             </div>
 
             {loading ? (
-                <div className="text-center py-8">
-                    <span className="loading loading-spinner loading-lg"></span>
-                    <p>加载中...</p>
+                <div className="text-center py-8 bg-base-100 rounded-lg shadow-sm border border-base-200">
+                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <p className="mt-4 text-base-content/70">加载中...</p>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+                <form id="courseEditForm" onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
                     {/* 课程信息卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-primary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <Book theme="outline" size="20" className="text-primary"/>
-                                <h2 className="card-title text-lg m-0">课程基本信息</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-primary/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <Book theme="outline" size="20" className="text-primary"/>
+                            <h2 className="card-title text-lg m-0">课程基本信息</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* 课程代码 */}
                                 <div className="form-control w-full">
@@ -254,7 +254,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="id"
                                         placeholder="请输入课程代码，如CS101" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         value={formData.id}
                                         onChange={handleInputChange}
@@ -270,7 +270,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="name"
                                         placeholder="请输入课程名称" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         value={formData.name}
                                         onChange={handleInputChange}
@@ -286,7 +286,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="english_name"
                                         placeholder="请输入课程英文名称" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.english_name || ""}
                                         onChange={handleInputChange}
                                     />
@@ -298,7 +298,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         <span className="label-text font-medium">所属院系<span className="text-error ml-1">*</span></span>
                                     </label>
                                     <select 
-                                        className="select select-bordered w-full" 
+                                        className="select select-bordered w-full focus:select-primary" 
                                         name="department"
                                         required
                                         value={formData.department}
@@ -319,7 +319,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         <span className="label-text font-medium">课程类型<span className="text-error ml-1">*</span></span>
                                     </label>
                                     <select 
-                                        className="select select-bordered w-full" 
+                                        className="select select-bordered w-full focus:select-primary" 
                                         name="type"
                                         required
                                         value={formData.type}
@@ -343,7 +343,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="credit"
                                         placeholder="请输入学分" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         min="0"
                                         step="0.5"
@@ -369,13 +369,12 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                     </div>
 
                     {/* 课时信息卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-secondary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <School theme="outline" size="20" className="text-secondary"/>
-                                <h2 className="card-title text-lg m-0">课时设置</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-secondary/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <School theme="outline" size="20" className="text-secondary"/>
+                            <h2 className="card-title text-lg m-0">课时设置</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* 周课时 */}
                                 <div className="form-control w-full">
@@ -386,7 +385,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="week_hours"
                                         placeholder="请输入周课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         min="0"
                                         value={formData.week_hours}
@@ -395,8 +394,13 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                 </div>
 
                                 {/* 总课时 */}
-                                <div className="flex items-center bg-base-200 p-4 rounded-lg">
-                                    <span className="text-lg font-semibold">总课时: {calculateTotalHours()}</span>
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">总课时</span>
+                                    </label>
+                                    <div className="flex items-center bg-secondary/5 p-3 rounded-lg border border-secondary/20 h-12 input w-full">
+                                        <span className="font-semibold text-secondary">{calculateTotalHours()}</span>
+                                    </div>
                                 </div>
 
                                 {/* 理论课时 */}
@@ -408,7 +412,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="theory_hours"
                                         placeholder="请输入理论课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.theory_hours}
                                         onChange={handleInputChange}
@@ -424,7 +428,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="experiment_hours"
                                         placeholder="请输入实验课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.experiment_hours}
                                         onChange={handleInputChange}
@@ -440,7 +444,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="practice_hours"
                                         placeholder="请输入实践课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.practice_hours}
                                         onChange={handleInputChange}
@@ -456,7 +460,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="computer_hours"
                                         placeholder="请输入上机课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.computer_hours}
                                         onChange={handleInputChange}
@@ -472,7 +476,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="number" 
                                         name="other_hours"
                                         placeholder="请输入其他课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.other_hours}
                                         onChange={handleInputChange}
@@ -483,13 +487,12 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                     </div>
 
                     {/* 教室需求卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-accent/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <School theme="outline" size="20" className="text-accent"/>
-                                <h2 className="card-title text-lg m-0">教室需求</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-accent/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <School theme="outline" size="20" className="text-accent"/>
+                            <h2 className="card-title text-lg m-0">教室需求</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* 理论教室类型 */}
                                 <div className="form-control w-full">
@@ -500,7 +503,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="theory_classroom_type"
                                         placeholder="请输入理论教室类型需求" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.theory_classroom_type || ""}
                                         onChange={handleInputChange}
                                     />
@@ -515,7 +518,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="experiment_classroom_type"
                                         placeholder="请输入实验教室类型需求" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.experiment_classroom_type || ""}
                                         onChange={handleInputChange}
                                     />
@@ -530,7 +533,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="practice_classroom_type"
                                         placeholder="请输入实践教室类型需求" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.practice_classroom_type || ""}
                                         onChange={handleInputChange}
                                     />
@@ -545,7 +548,7 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                                         type="text" 
                                         name="computer_classroom_type"
                                         placeholder="请输入上机教室类型需求" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.computer_classroom_type || ""}
                                         onChange={handleInputChange}
                                     />
@@ -555,19 +558,18 @@ export function AcademicCourseEdit({ site }: Readonly<{ site: SiteInfoEntity }>)
                     </div>
 
                     {/* 备注信息卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-info/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <School theme="outline" size="20" className="text-info"/>
-                                <h2 className="card-title text-lg m-0">备注信息</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-info/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <School theme="outline" size="20" className="text-info"/>
+                            <h2 className="card-title text-lg m-0">备注信息</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="form-control w-full">
                                 <label className="label">
                                     <span className="label-text font-medium">课程描述</span>
                                 </label>
                                 <textarea 
-                                    className="textarea textarea-bordered h-24"
+                                    className="textarea textarea-bordered h-24 focus:textarea-primary"
                                     name="description"
                                     placeholder="请输入课程描述"
                                     value={formData.description || ""}

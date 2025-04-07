@@ -171,7 +171,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
     return (
         <div className="space-y-6 w-full">
             {/* 顶部导航 */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between bg-base-100 p-4 rounded-lg shadow-sm border border-base-200">
                 <div className="flex items-center space-x-3">
                     <button 
                         className="btn btn-sm btn-outline" 
@@ -192,8 +192,9 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                         取消
                     </button>
                     <button 
+                        type="submit"
+                        form="courseAddForm"
                         className="btn btn-sm btn-primary" 
-                        onClick={handleSubmit}
                         disabled={submitting}
                     >
                         {submitting ? <span className="loading loading-spinner loading-sm"></span> : <CheckOne />}
@@ -203,20 +204,19 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
             </div>
 
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-12">
+                <div className="flex flex-col items-center justify-center py-12 bg-base-100 rounded-lg shadow-sm border border-base-200">
                     <span className="loading loading-spinner loading-lg text-primary"></span>
-                    <p className="mt-4 text-gray-500">加载部门数据中...</p>
+                    <p className="mt-4 text-base-content/70">加载部门数据中...</p>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form id="courseAddForm" onSubmit={handleSubmit} className="space-y-6">
                     {/* 课程基本信息卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-primary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <Book theme="outline" size="20" className="text-primary"/>
-                                <h2 className="card-title text-lg m-0">课程基本信息</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-primary/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <Book theme="outline" size="20" className="text-primary"/>
+                            <h2 className="card-title text-lg m-0">课程基本信息</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* 课程代码 */}
                                 <div className="form-control w-full">
@@ -227,7 +227,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="text" 
                                         name="id"
                                         placeholder="请输入课程代码，如CS101" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         value={formData.id}
                                         onChange={handleInputChange}
@@ -243,7 +243,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="text" 
                                         name="name"
                                         placeholder="请输入课程名称" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         value={formData.name}
                                         onChange={handleInputChange}
@@ -259,7 +259,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="text" 
                                         name="english_name"
                                         placeholder="请输入课程英文名称" 
-                                        className="input input-bordered w-full"
+                                        className="input input-bordered w-full focus:input-primary"
                                         value={formData.english_name || ""}
                                         onChange={handleInputChange}
                                     />
@@ -271,7 +271,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         <span className="label-text font-medium">所属院系<span className="text-error ml-1">*</span></span>
                                     </label>
                                     <select 
-                                        className="select select-bordered w-full" 
+                                        className="select select-bordered w-full focus:select-primary" 
                                         name="department"
                                         required
                                         value={formData.department}
@@ -292,7 +292,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         <span className="label-text font-medium">课程类型<span className="text-error ml-1">*</span></span>
                                     </label>
                                     <select 
-                                        className="select select-bordered w-full" 
+                                        className="select select-bordered w-full focus:select-primary" 
                                         name="type"
                                         required
                                         value={formData.type}
@@ -316,7 +316,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="credit"
                                         placeholder="请输入学分" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         min="0"
                                         step="0.5"
@@ -334,7 +334,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="week_hours"
                                         placeholder="请输入周课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         required
                                         min="0"
                                         value={formData.week_hours}
@@ -359,13 +359,12 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                     </div>
 
                     {/* 课程学时信息卡片 */}
-                    <div className="card bg-base-100 shadow-sm border border-base-200">
-                        <div className="card-body">
-                            <div className="bg-secondary/10 p-4 flex items-center space-x-2 -mx-4 -mt-4 mb-4 rounded-t-box">
-                                <School theme="outline" size="20" className="text-secondary"/>
-                                <h2 className="card-title text-lg m-0">课程学时信息</h2>
-                            </div>
-
+                    <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
+                        <div className="bg-secondary/10 p-4 flex items-center space-x-2 rounded-t-box">
+                            <School theme="outline" size="20" className="text-secondary"/>
+                            <h2 className="card-title text-lg m-0">课程学时信息</h2>
+                        </div>
+                        <div className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {/* 理论课时 */}
                                 <div className="form-control w-full">
@@ -376,7 +375,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="theory_hours"
                                         placeholder="请输入理论课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.theory_hours}
                                         onChange={handleInputChange}
@@ -392,7 +391,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="experiment_hours"
                                         placeholder="请输入实验课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.experiment_hours}
                                         onChange={handleInputChange}
@@ -408,7 +407,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="practice_hours"
                                         placeholder="请输入实践课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.practice_hours}
                                         onChange={handleInputChange}
@@ -424,7 +423,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="computer_hours"
                                         placeholder="请输入上机课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.computer_hours}
                                         onChange={handleInputChange}
@@ -440,7 +439,7 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                         type="number" 
                                         name="other_hours"
                                         placeholder="请输入其他课时" 
-                                        className="input input-bordered w-full" 
+                                        className="input input-bordered w-full focus:input-primary" 
                                         min="0"
                                         value={formData.other_hours}
                                         onChange={handleInputChange}
@@ -452,37 +451,15 @@ export function AcademicCourseAdd({ site }: Readonly<{ site: SiteInfoEntity }>) 
                                     <label className="label">
                                         <span className="label-text font-medium">总课时</span>
                                     </label>
-                                    <input 
-                                        type="number" 
-                                        className="input input-bordered w-full bg-base-200" 
-                                        value={calculateTotalHours()}
-                                        disabled
-                                    />
+                                    <div className="flex items-center bg-secondary/5 p-3 rounded-lg border border-secondary/20 h-12 input w-full">
+                                        <span className="font-semibold text-secondary">{calculateTotalHours()}</span>
+                                    </div>
                                     <label className="label">
                                         <span className="label-text-alt text-base-content/70">总课时会根据上方各类课时自动计算</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* 底部按钮 */}
-                    <div className="flex justify-end space-x-2 mt-6">
-                        <button 
-                            type="button" 
-                            className="btn btn-outline" 
-                            onClick={() => navigate("/academic/course")}
-                        >
-                            <CloseOne />取消
-                        </button>
-                        <button 
-                            type="submit" 
-                            className="btn btn-primary"
-                            disabled={submitting}
-                        >
-                            {submitting ? <span className="loading loading-spinner loading-sm"></span> : <CheckOne />}
-                            保存
-                        </button>
                     </div>
                 </form>
             )}
