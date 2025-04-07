@@ -28,6 +28,8 @@ import { AdministrativeClassEntity } from "../../../models/entity/administrative
 import { useSelector } from "react-redux";
 import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
 import { MajorListDTO } from "../../../models/dto/major_list_dto";
+import { GetGradeListAPI } from "../../../apis/grade_api";
+import { GradeEntity } from "../../../models/entity/grade_entity";
 
 /**
  * # 教务行政班编辑页面
@@ -44,6 +46,7 @@ export function AdministrativeClassEdit() {
     const [majors, setMajors] = useState<MajorEntity[]>([]);
     const [teachers, setTeachers] = useState<TeacherEntity[]>([]);
     const [students, setStudents] = useState<StudentEntity[]>([]);
+    const [grades, setGrades] = useState<GradeEntity[]>([]);
     const [classEntity, setClassEntity] = useState<AdministrativeClassEntity | null>(null);
 
     // 获取当前教务权限信息
@@ -55,7 +58,7 @@ export function AdministrativeClassEdit() {
         class_name: "",
         department_uuid: academicAffairs.currentAcademicAffairs?.department ?? "",
         major_uuid: "",
-        grade_uuid: "2023",
+        grade_uuid: "",
         student_count: 0,
         counselor_uuid: "",
         monitor_uuid: "",
@@ -204,6 +207,26 @@ export function AdministrativeClassEdit() {
 
         fetchStudents();
     }, [id]);
+
+    // 获取年级列表
+    useEffect(() => {
+        const fetchGrades = async () => {
+            try {
+                const response = await GetGradeListAPI();
+                if (response && response.output === "Success" && response.data) {
+                    const gradeData = response.data as GradeEntity[];
+                    setGrades(gradeData);
+                } else {
+                    message.error((response && response.error_message) || "获取年级列表失败");
+                }
+            } catch (error) {
+                console.error("获取年级数据失败:", error);
+                message.error("获取年级数据失败，请检查网络连接");
+            }
+        };
+
+        fetchGrades();
+    }, []);
 
     // 提交表单
     const handleSubmit = async (e: React.FormEvent) => {
@@ -389,6 +412,32 @@ export function AdministrativeClassEdit() {
                                     {formData.department_uuid && majors.length === 0 && (
                                         <label className="label">
                                             <span className="label-text-alt text-warning">当前院系下暂无专业，请先添加专业</span>
+                                        </label>
+                                    )}
+                                </div>
+
+                                {/* 年级 */}
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-medium">年级<span className="text-error ml-1">*</span></span>
+                                    </label>
+                                    <select 
+                                        name="grade_uuid"
+                                        className="select select-bordered w-full focus:select-primary" 
+                                        required
+                                        value={formData.grade_uuid}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="" disabled>请选择年级</option>
+                                        {grades.map(grade => (
+                                            <option key={grade.grade_uuid} value={grade.grade_uuid}>
+                                                {grade.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {grades.length === 0 && (
+                                        <label className="label">
+                                            <span className="label-text-alt text-warning">暂无可用年级数据，请先添加年级</span>
                                         </label>
                                     )}
                                 </div>

@@ -38,7 +38,8 @@ import {
     UserPositioning,
     WatchOne,
     Classroom,
-    Calendar
+    Calendar,
+    BookOne
 } from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
@@ -78,6 +79,9 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"学期管理"} icon={<Calendar theme="outline" size="18"/>}
                                        match={"semester"}
                                        path={"/admin/semester"}/>
+                <AdminNavLinkComponent title={"年级管理"} icon={<BookOne theme="outline" size="18"/>}
+                                       match={"grade"}
+                                       path={"/admin/grade"}/>
                 <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
                                        match={"department"}
                                        path={"/admin/department"}/>

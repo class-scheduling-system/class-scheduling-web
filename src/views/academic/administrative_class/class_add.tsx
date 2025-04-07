@@ -25,6 +25,8 @@ import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_sear
 import { useSelector } from "react-redux";
 import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
 import { MajorListDTO } from "../../../models/dto/major_list_dto";
+import { GetGradeListAPI } from "../../../apis/grade_api";
+import { GradeEntity } from "../../../models/entity/grade_entity";
 
 /**
  * # 教务行政班添加页面
@@ -38,6 +40,7 @@ export function AdministrativeClassAdd() {
     const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
     const [majors, setMajors] = useState<MajorEntity[]>([]);
     const [teachers, setTeachers] = useState<TeacherEntity[]>([]);
+    const [grades, setGrades] = useState<GradeEntity[]>([]);
 
     // 获取当前教务权限信息
     const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
@@ -48,7 +51,7 @@ export function AdministrativeClassAdd() {
         class_name: "",
         department_uuid: academicAffairs.currentAcademicAffairs?.department ?? "",
         major_uuid: "",
-        grade_uuid: "2023", // 由于没有年级相关API，直接使用固定值
+        grade_uuid: "", // 年级选择，默认为空
         student_count: 0,
         counselor_uuid: "",
         monitor_uuid: "",
@@ -140,6 +143,36 @@ export function AdministrativeClassAdd() {
         };
 
         fetchTeachers();
+    }, []);
+
+    // 获取年级列表
+    useEffect(() => {
+        const fetchGrades = async () => {
+            try {
+                const response = await GetGradeListAPI();
+                // 确保 response 存在且返回成功，同时 data 不为空
+                if (response && response.output === "Success" && response.data) {
+                    // 设置年级列表
+                    const gradeData = response.data as GradeEntity[];
+                    setGrades(gradeData);
+                    // 如果有年级数据，默认选择第一个
+                    if (gradeData.length > 0) {
+                        setFormData(prev => ({
+                            ...prev,
+                            grade_uuid: gradeData[0].grade_uuid
+                        }));
+                    }
+                } else {
+                    // 处理获取失败或没有数据的情况
+                    message.error((response && response.error_message) || "获取年级列表失败");
+                }
+            } catch (error) {
+                console.error("获取年级数据失败:", error);
+                message.error("获取年级数据失败，请检查网络连接");
+            }
+        };
+
+        fetchGrades();
     }, []);
 
     // 提交表单
@@ -321,15 +354,25 @@ export function AdministrativeClassAdd() {
                                 <label className="label">
                                     <span className="label-text">年级 <span className="text-error">*</span></span>
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     name="grade_uuid"
-                                    placeholder="请输入年级 (例如: 2023)"
-                                    className="input input-bordered w-full"
+                                    className="select select-bordered w-full"
                                     value={formData.grade_uuid}
                                     onChange={handleInputChange}
                                     required
-                                />
+                                >
+                                    <option value="">请选择年级</option>
+                                    {grades.map(grade => (
+                                        <option key={grade.grade_uuid} value={grade.grade_uuid}>
+                                            {grade.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {grades.length === 0 && (
+                                    <label className="label">
+                                        <span className="label-text-alt text-error">暂无可用年级数据</span>
+                                    </label>
+                                )}
                             </div>
 
                             <div className="form-control">
