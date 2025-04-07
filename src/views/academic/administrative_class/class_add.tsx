@@ -8,8 +8,8 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { 
-  ArrowLeft, CheckOne, CloseOne
+import {
+    ArrowLeft, CheckOne, CloseOne
 } from "@icon-park/react";
 import { useNavigate } from "react-router";
 import { message } from "antd";
@@ -96,12 +96,12 @@ export function AdministrativeClassAdd() {
         const fetchMajors = async () => {
             try {
                 const params: MajorListDTO = {};
-                
+
                 // 使用教务权限关联的部门获取专业
                 if (academicAffairs.loaded && academicAffairs.currentAcademicAffairs?.department) {
                     params.department = academicAffairs.currentAcademicAffairs.department;
                 }
-                
+
                 const response = await GetMajorListAPI(params);
                 if (response?.output === "Success" && response.data) {
                     setMajors(response.data);
@@ -126,7 +126,7 @@ export function AdministrativeClassAdd() {
                     size: 100, // 获取足够多的教师以供选择
                     is_desc: true
                 };
-                
+
                 const response = await GetTeacherListAPI(params);
                 if (response?.output === "Success" && response.data) {
                     setTeachers(response.data.records || []);
@@ -146,7 +146,7 @@ export function AdministrativeClassAdd() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        
+
         try {
             const response = await CreateAdministrativeClassAPI(formData);
             if (response?.output === "Success") {
@@ -166,7 +166,7 @@ export function AdministrativeClassAdd() {
     // 处理输入框变化
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        
+
         if (type === 'number') {
             setFormData({
                 ...formData,
@@ -193,8 +193,8 @@ export function AdministrativeClassAdd() {
             {/* 顶部导航 */}
             <div className="flex items-center justify-between bg-base-100 p-4 rounded-lg shadow-sm border border-base-200">
                 <div className="flex items-center space-x-3">
-                    <button 
-                        className="btn btn-sm btn-outline" 
+                    <button
+                        className="btn btn-sm btn-outline"
                         onClick={() => navigate("/academic/administrative-class")}
                     >
                         <ArrowLeft />
@@ -202,19 +202,19 @@ export function AdministrativeClassAdd() {
                     </button>
                     <h2 className="text-2xl font-bold">添加行政班</h2>
                 </div>
-                
+
                 <div className="flex gap-2">
-                    <button 
-                        className="btn btn-sm btn-error" 
+                    <button
+                        className="btn btn-sm btn-error"
                         onClick={() => navigate("/academic/administrative-class")}
                     >
                         <CloseOne />
                         取消
                     </button>
-                    <button 
+                    <button
                         type="submit"
                         form="classAddForm"
-                        className="btn btn-sm btn-primary" 
+                        className="btn btn-sm btn-primary"
                         disabled={submitting}
                     >
                         <CheckOne />
@@ -222,7 +222,7 @@ export function AdministrativeClassAdd() {
                     </button>
                 </div>
             </div>
-            
+
             {/* 表单区域 */}
             <div className="bg-base-100 rounded-lg shadow-sm border border-base-200 p-6">
                 <form id="classAddForm" onSubmit={handleSubmit} className="space-y-6">
@@ -230,47 +230,47 @@ export function AdministrativeClassAdd() {
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">基本信息</h3>
                         <div className="divider my-2"></div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">班级编码 <span className="text-error">*</span></span>
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="class_code"
                                     placeholder="请输入班级编码"
-                                    className="input input-bordered w-full" 
+                                    className="input input-bordered w-full"
                                     value={formData.class_code}
                                     onChange={handleInputChange}
                                     required
                                 />
                             </div>
-                            
+
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">班级名称 <span className="text-error">*</span></span>
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="class_name"
                                     placeholder="请输入班级名称"
-                                    className="input input-bordered w-full" 
+                                    className="input input-bordered w-full"
                                     value={formData.class_name}
                                     onChange={handleInputChange}
                                     required
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">所属院系 <span className="text-error">*</span></span>
                                 </label>
-                                <select 
+                                <select
                                     name="department_uuid"
-                                    className="select select-bordered w-full" 
+                                    className="select select-bordered w-full"
                                     value={formData.department_uuid}
                                     onChange={handleInputChange}
                                     required
@@ -278,8 +278,8 @@ export function AdministrativeClassAdd() {
                                     <option value="">请选择院系</option>
                                     {departments.map(dept => (
                                         // 如果有教务权限关联的部门，默认选中
-                                        <option 
-                                            key={dept.department_uuid} 
+                                        <option
+                                            key={dept.department_uuid}
                                             value={dept.department_uuid}
                                             selected={academicAffairs.currentAcademicAffairs?.department === dept.department_uuid}
                                         >
@@ -288,14 +288,14 @@ export function AdministrativeClassAdd() {
                                     ))}
                                 </select>
                             </div>
-                            
+
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">所属专业 <span className="text-error">*</span></span>
                                 </label>
-                                <select 
+                                <select
                                     name="major_uuid"
-                                    className="select select-bordered w-full" 
+                                    className="select select-bordered w-full"
                                     value={formData.major_uuid}
                                     onChange={handleInputChange}
                                     required
@@ -315,77 +315,61 @@ export function AdministrativeClassAdd() {
                                 )}
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">年级 <span className="text-error">*</span></span>
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="grade_uuid"
                                     placeholder="请输入年级 (例如: 2023)"
-                                    className="input input-bordered w-full" 
+                                    className="input input-bordered w-full"
                                     value={formData.grade_uuid}
                                     onChange={handleInputChange}
                                     required
                                 />
                             </div>
-                            
+
                             <div className="form-control">
                                 <label className="label">
-                                    <span className="label-text">学生人数 <span className="text-error">*</span></span>
+                                    <span className="label-text">辅导员</span>
                                 </label>
-                                <input 
-                                    type="number" 
-                                    name="student_count"
-                                    placeholder="请输入学生人数"
-                                    className="input input-bordered w-full" 
-                                    value={formData.student_count}
+                                <select
+                                    name="counselor_uuid"
+                                    className="select select-bordered w-full"
+                                    value={formData.counselor_uuid}
                                     onChange={handleInputChange}
-                                    min="0"
-                                    required
-                                />
+                                >
+                                    <option value="">请选择辅导员</option>
+                                    {teachers.map(teacher => (
+                                        <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
+                                            {teacher.name || '未命名'}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
-                        
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text">辅导员</span>
-                            </label>
-                            <select 
-                                name="counselor_uuid"
-                                className="select select-bordered w-full" 
-                                value={formData.counselor_uuid}
-                                onChange={handleInputChange}
-                            >
-                                <option value="">请选择辅导员</option>
-                                {teachers.map(teacher => (
-                                    <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                                        {teacher.name || '未命名'}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        
+
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">班级描述</span>
                             </label>
-                            <textarea 
+                            <textarea
                                 name="description"
                                 placeholder="请输入班级描述"
-                                className="textarea textarea-bordered h-24" 
+                                className="textarea textarea-bordered h-24"
                                 value={formData.description}
                                 onChange={handleInputChange}
                             />
                         </div>
-                        
+
                         <div className="form-control">
                             <label className="label cursor-pointer justify-start gap-2">
-                                <input 
-                                    type="checkbox" 
-                                    className="toggle toggle-primary" 
+                                <input
+                                    type="checkbox"
+                                    className="toggle toggle-primary"
                                     checked={formData.is_enabled}
                                     onChange={handleSwitchChange}
                                 />

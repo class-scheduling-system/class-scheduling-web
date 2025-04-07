@@ -22,9 +22,8 @@ import { MajorEntity } from "../../../models/entity/major_entity";
 import { GetTeacherListAPI } from "../../../apis/teacher_api";
 import { TeacherEntity } from "../../../models/entity/teacher_entity";
 import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_search_dto";
-import { GetStudentPageAPI } from "../../../apis/student_api";
+import { GetStudentListAPI } from "../../../apis/student_api";
 import { StudentEntity } from "../../../models/entity/student_entity";
-import { PageStudentSearchDTO } from "../../../models/dto/page/page_student_search_dto";
 import { AdministrativeClassEntity } from "../../../models/entity/administrative_class_entity";
 import { useSelector } from "react-redux";
 import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
@@ -56,7 +55,7 @@ export function AdministrativeClassEdit() {
         class_name: "",
         department_uuid: academicAffairs.currentAcademicAffairs?.department ?? "",
         major_uuid: "",
-        grade_uuid: "2023", // 由于没有年级相关API，直接使用固定值
+        grade_uuid: "2023",
         student_count: 0,
         counselor_uuid: "",
         monitor_uuid: "",
@@ -183,17 +182,17 @@ export function AdministrativeClassEdit() {
     // 获取学生列表（用于选择班长）
     useEffect(() => {
         const fetchStudents = async () => {
+            if (!id) return;
+            
             try {
-                const params: PageStudentSearchDTO = {
-                    page: 1,
-                    size: 100, // 获取足够多的学生以供选择
-                    is_desc: true,
-                    is_graduated: false  // 添加缺少的参数
+                // 只使用当前行政班UUID获取学生
+                const params = {
+                    administrative_class_uuid: id
                 };
                 
-                const response = await GetStudentPageAPI(params);
+                const response = await GetStudentListAPI(params);
                 if (response?.output === "Success" && response.data) {
-                    setStudents(response.data.records || []);
+                    setStudents(response.data || []);
                 } else {
                     message.error(response?.error_message || "获取学生列表失败");
                 }
@@ -204,7 +203,7 @@ export function AdministrativeClassEdit() {
         };
 
         fetchStudents();
-    }, []);
+    }, [id]);
 
     // 提交表单
     const handleSubmit = async (e: React.FormEvent) => {
@@ -392,24 +391,6 @@ export function AdministrativeClassEdit() {
                                             <span className="label-text-alt text-warning">当前院系下暂无专业，请先添加专业</span>
                                         </label>
                                     )}
-                                </div>
-
-                                {/* 学生人数（禁用） */}
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-medium">学生人数<span className="text-error ml-1">*</span></span>
-                                        <span className="label-text-alt text-warning">教务无法修改人数</span>
-                                    </label>
-                                    <input 
-                                        type="number" 
-                                        name="student_count"
-                                        placeholder="请输入班级人数" 
-                                        className="input input-bordered w-full focus:input-primary bg-base-200" 
-                                        required
-                                        min="0"
-                                        value={formData.student_count}
-                                        disabled
-                                    />
                                 </div>
 
                                 {/* 辅导员 */}

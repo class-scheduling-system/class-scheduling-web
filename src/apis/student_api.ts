@@ -5,6 +5,10 @@ import { StudentEntity } from "../models/entity/student_entity";
 import { BaseResponse } from "../models/base_response";
 import { StudentDTO } from "../models/dto/student_dto";
 import { DisableEntity } from "../models/entity/diable_entity";
+import { APIResponse } from "../models/api/api_response";
+import { PageDataOutput } from "../models/api/page_data_output";
+import { API_PREFIX } from "../utils/api_prefix";
+import { Http } from "../utils/http";
 
 /**
  * # 获取学生分页列表
@@ -116,11 +120,33 @@ const EditStudentAPI = async (student_uuid: string, data: StudentDTO): Promise<B
     )
 }
 
+/**
+ * # 获取学生列表API（不分页）
+ * > 根据部门（院系）和行政班获取简单的学生列表
+ * 
+ * @param params 查询参数 {department_uuid?: string, administrative_class_uuid?: string}
+ * @returns 学生列表
+ */
+const GetStudentListAPI = async (params?: {
+    department_uuid?: string;
+    administrative_class_uuid?: string;
+}): Promise<BaseResponse<StudentEntity[]> | undefined> => {
+    return BaseApi<BaseResponse<StudentEntity[]> >(
+        MethodType.GET,
+        "/api/v1/students/list",
+        null,
+        params || null,
+        null,
+        { "Authorization": `Bearer ${GetAuthorizationToken()}` }
+    )
+}
+
 export {
     GetStudentPageAPI,
     GetStudentAPI,
     CreateStudentAPI,
     DisableStudentAPI,
     DeleteStudentAPI,
-    EditStudentAPI
+    EditStudentAPI,
+    GetStudentListAPI
 };

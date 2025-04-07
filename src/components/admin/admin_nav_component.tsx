@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -37,7 +37,8 @@ import {
     User,
     UserPositioning,
     WatchOne,
-    Classroom
+    Classroom,
+    Calendar
 } from "@icon-park/react";
 import {JSX} from "react";
 import {AdminNavLinkComponent} from "./admin_nav_link_component.tsx";
@@ -74,6 +75,9 @@ export function AdminNavComponent(): JSX.Element {
                 <AdminNavLinkComponent title={"教室管理"} icon={<Classroom theme="outline" size="18"/>}
                                        match={"classroom"}
                                        path={"/admin/classroom"}/>
+                <AdminNavLinkComponent title={"学期管理"} icon={<Calendar theme="outline" size="18"/>}
+                                       match={"semester"}
+                                       path={"/admin/semester"}/>
                 <AdminNavLinkComponent title={"部门管理"} icon={<BranchOne theme="outline" size="18"/>}
                                        match={"department"}
                                        path={"/admin/department"}/>

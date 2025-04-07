@@ -62,6 +62,7 @@ import { AdminJvmMonitor } from "./admin/admin_jvm_monitor";
 import { AdminClassroomAddPage } from "./admin/classroom/classroom_add.tsx";
 import { AdminClassroomEditPage } from "./admin/classroom/classroom_edit.tsx";
 import { AdminClassroom } from "./admin/admin_classroom.tsx";
+import { AdminSemester } from "./admin/admin_semester.tsx";
 
 // 导入AI聊天组件
 import {AiChatComponent} from "../components/ai/ai_chat_component.tsx";
@@ -212,6 +213,7 @@ export function BaseAdmin(): JSX.Element {
                                 <Route path="/classroom" element={<AdminClassroom site={site} />} />
                                 <Route path="/classroom/add" element={<AdminClassroomAddPage site={site} />} />
                                 <Route path="/classroom/edit/:classroomUuid" element={<AdminClassroomEditPage site={site} />} />
+                                <Route path="/semester" element={<AdminSemester site={site} />} />
                                 <Route path="/system-info" element={<AdminSystemInfo site={site} />} />
                                 <Route path="/jvm-monitor" element={<AdminJvmMonitor site={site} />} />
                                 <Route path="/setting" element={<AdminSetting site={site} />} />
