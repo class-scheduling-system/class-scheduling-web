@@ -31,7 +31,7 @@ import { SiteInfoEntity } from "../../models/entity/site_info_entity";
 import { StudentEntity } from "../../models/entity/student_entity";
 import { UserInfoEntity } from "../../models/entity/user_info_entity";
 import { useSelector } from "react-redux";
-import { Book, Calendar, DocumentFolder, Me, Bookshelf, ExternalTransmission, Message, BuildingOne, School, User } from "@icon-park/react";
+import { Book, Calendar, DocumentFolder, Me, Bookshelf, ExternalTransmission, Message} from "@icon-park/react";
 import { Link } from "react-router";
 import { Skeleton, message } from "antd";
 import { GetClassroomAPI } from "../../apis/classroom_api";
