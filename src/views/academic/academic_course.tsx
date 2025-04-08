@@ -33,11 +33,11 @@ import { useNavigate } from "react-router";
 import { message, Modal, Tooltip } from "antd";
 import { CourseLibraryEntity } from "@/models/entity/course_library_entity";
 import { DeleteCourseAPI, GetCoursePageAPI } from "@/apis/course_api";
-import { PageSearchDTO } from "@/models/dto/page/page_search_dto";
-import { DepartmentEntity } from "@/models/entity/department_entity";
-import { GetDepartmentListAPI } from "@/apis/department_api";
 import { CourseTypeEntity } from "@/models/entity/course_type_entity";
 import { GetCourseTypeListAPI } from "@/apis/course_type_api";
+import { PageCourseSearchDTO } from "@/models/dto/page/page_course_search_dto";
+import { useSelector } from "react-redux";
+import { AcademicAffairsStore } from "@/models/store/academic_affairs_store";
 
 /**
  * # 教务课程管理列表页
@@ -47,7 +47,10 @@ import { GetCourseTypeListAPI } from "@/apis/course_type_api";
  * @returns 课程管理列表页面组件
  */
 export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
+    const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
+
     const navigate = useNavigate();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -55,7 +58,6 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
     const [courses, setCourses] = useState<CourseLibraryEntity[]>([]);
-    const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
     const [courseTypes, setCourseTypes] = useState<CourseTypeEntity[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<CourseLibraryEntity | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -81,24 +83,6 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
         document.title = `课程管理 | ${site.name ?? "Frontleaves Technology"}`;
     }, [site.name]);
 
-    // 获取部门列表
-    useEffect(() => {
-        const fetchDepartments = async () => {
-            try {
-                const response = await GetDepartmentListAPI();
-                if (response?.output === "Success" && response.data) {
-                    setDepartments(response.data);
-                } else {
-                    message.error(response?.error_message || "获取部门列表失败");
-                }
-            } catch (error) {
-                console.error("获取部门数据失败:", error);
-            }
-        };
-
-        fetchDepartments();
-    }, []);
-
     // 获取课程类型列表
     useEffect(() => {
         const fetchCourseTypes = async () => {
@@ -117,28 +101,17 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
         fetchCourseTypes();
     }, []);
 
-    // 获取部门名称的函数
-    const getDepartmentName = (departmentUuid: string): string => {
-        const department = departments.find(dept => dept.department_uuid === departmentUuid);
-        return department ? department.department_name || '未知部门' : '未知部门';
-    };
-
-    // 获取课程类型名称的函数
-    const getCourseTypeName = (courseTypeUuid: string): string => {
-        const courseType = courseTypes.find(type => type.course_type_uuid === courseTypeUuid);
-        return courseType ? courseType.name || '未知类型' : '未知类型';
-    };
-
     // 获取课程数据
     useEffect(() => {
         const fetchCourses = async () => {
             setLoading(true);
             try {
-                const params: PageSearchDTO = {
+                const params: PageCourseSearchDTO = {
                     page: currentPage,
                     size: itemsPerPage,
                     keyword: searchTerm || undefined,
                     is_desc: isDescending,
+                    department_uuid: academicAffairs.currentAcademicAffairs?.department ,
                 };
 
                 const response = await GetCoursePageAPI(params);
@@ -156,8 +129,10 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
             }
         };
 
-        fetchCourses();
-    }, [currentPage, itemsPerPage, searchTerm, isDescending]);
+        if (academicAffairs.currentAcademicAffairs?.department) {
+            fetchCourses();
+        }
+    }, [currentPage, itemsPerPage, searchTerm, isDescending, academicAffairs.currentAcademicAffairs?.department]);
 
     // 处理删除课程
     const handleDelete = async () => {
@@ -262,10 +237,9 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                         <th>课程代码</th>
                                         <th>课程名称</th>
                                         <th>学分</th>
-                                        <th>所属院系</th>
                                         <th>课程类型</th>
                                         <th>状态</th>
-                                        <th>操作</th>
+                                        <th className="text-end">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -278,14 +252,13 @@ export function AcademicCourse({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                                 </Tooltip>
                                             </td>
                                             <td>{course.credit}</td>
-                                            <td>{getDepartmentName(course.department)}</td>
-                                            <td>{getCourseTypeName(course.type)}</td>
+                                            <td>{courseTypes.find(type => type.course_type_uuid === course.type)?.name}</td>
                                             <td>
                                                 <div className={`badge ${course.is_enabled ? 'badge-success' : 'badge-error'}`}>
                                                     {course.is_enabled ? '启用' : '禁用'}
                                                 </div>
                                             </td>
-                                            <td className="space-x-1">
+                                            <td className="space-x-1 text-end">
                                                 <button 
                                                     className="btn btn-xs btn-primary" 
                                                     title="查看详情"

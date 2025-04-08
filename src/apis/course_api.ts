@@ -30,7 +30,7 @@ import { BaseApi, GetAuthorizationToken, MethodType } from "../assets/ts/base_ap
 import { BaseResponse } from "../models/base_response";
 import { BatchAddCourseDTO } from "../models/dto/batch_add_course_dto";
 import { CourseLibraryDTO } from "../models/dto/course_library_dto";
-import { PageSearchDTO } from "../models/dto/page/page_search_dto";
+import { PageCourseSearchDTO } from "../models/dto/page/page_course_search_dto";
 import { BatchAddCourseEntity } from "../models/entity/batch_add_course_entity";
 import { CourseLibraryEntity } from "../models/entity/course_library_entity";
 import { CourseLibraryLiteEntity } from "../models/entity/course_library_lite_entity";
@@ -59,10 +59,10 @@ const GetCourseAPI = async (courseUuid: string): Promise<BaseResponse<CourseLibr
  * # 获取课程库分页信息
  * > 本接口用于获取课程库分页信息，用于获取课程库分页信息。
  *
- * @param data 分页查询参数
+ * @param data 分页查询参数，包含部门UUID过滤条件
  * @returns 课程库分页信息
  */
-const GetCoursePageAPI = async (data: PageSearchDTO): Promise<BaseResponse<PageEntity<CourseLibraryEntity>> | undefined> => {
+const GetCoursePageAPI = async (data: PageCourseSearchDTO): Promise<BaseResponse<PageEntity<CourseLibraryEntity>> | undefined> => {
     return BaseApi<BaseResponse<PageEntity<CourseLibraryEntity>>>(
         MethodType.GET,
         "/api/v1/course/page",

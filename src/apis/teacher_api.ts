@@ -26,12 +26,13 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseResponse} from "../models/base_response.ts";
-import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
-import {PageEntity} from "../models/entity/page_entity.ts";
-import {TeacherEntity} from "../models/entity/teacher_entity.ts";
-import {PageTeacherSearchDTO} from "../models/dto/page/page_teacher_search_dto.ts";
-import {TeacherDTO} from "../models/dto/teacher_dto.ts";
+import { BaseResponse } from "../models/base_response.ts";
+import { BaseApi, GetAuthorizationToken, MethodType } from "../assets/ts/base_api.ts";
+import { PageEntity } from "../models/entity/page_entity.ts";
+import { TeacherEntity } from "../models/entity/teacher_entity.ts";
+import { PageTeacherSearchDTO } from "../models/dto/page/page_teacher_search_dto.ts";
+import { TeacherDTO } from "../models/dto/teacher_dto.ts";
+import { TeacherLiteEntity } from "@/models/entity/teacher_lite_entity.ts";
 
 /**
  * # 获取教师列表
@@ -40,17 +41,34 @@ import {TeacherDTO} from "../models/dto/teacher_dto.ts";
  * @returns {Promise<BaseResponse<Page<TeacherEntity>> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse<PageEntity<TeacherEntity>>  | undefined> => {
+const GetTeacherPageAPI = async (data: PageTeacherSearchDTO): Promise<BaseResponse<PageEntity<TeacherEntity>> | undefined> => {
     return BaseApi<BaseResponse<PageEntity<TeacherEntity>>>(
         MethodType.GET,
         "/api/v1/teacher/page",
         null,
         data,
         null,
-        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+        { Authorization: `Bearer ${GetAuthorizationToken()}` },
     )
 }
 
+/**
+ * # 获取教师列表
+ * > 该函数用于通过API请求获取教师列表。它利用了Bearer令牌认证方式来确保安全地访问教师数据。
+ *
+ * @returns {Promise<BaseResponse<TeacherLiteEntity[]> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
+ * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
+ */
+const GetTeacherListAPI = async (department_uuid?: string, teacher_type_uuid?: string): Promise<BaseResponse<TeacherLiteEntity[]> | undefined> => {
+    return BaseApi<BaseResponse<TeacherLiteEntity[]>>(
+        MethodType.GET,
+        "/api/v1/teacher/list",
+        null,
+        { department_uuid, teacher_type_uuid },
+        null,
+        { Authorization: `Bearer ${GetAuthorizationToken()}` },
+    );
+}
 
 /**
  * # 增加教师
@@ -59,7 +77,7 @@ const GetTeacherListAPI = async (data:PageTeacherSearchDTO):Promise<BaseResponse
  * @returns {Promise<BaseResponse<UserInfoEntity> | undefined>} - 返回一个Promise，解析为包含教师信息的BaseResponse对象或undefined，如果请求失败或没有有效响应。
  * @throws {Error} 当网络请求过程中遇到问题时抛出异常。
  */
-const AddTeacherAPI = async (data:TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
+const AddTeacherAPI = async (data: TeacherDTO): Promise<BaseResponse<TeacherEntity> | undefined> => {
     return BaseApi<BaseResponse<TeacherEntity>>(
         MethodType.POST,
         "/api/v1/teacher",
@@ -115,9 +133,10 @@ const EditTeacherAPI = async (teacher_uuid: string, data: TeacherDTO): Promise<B
     );
 };
 
-export{
-    GetTeacherListAPI,
+export {
+    GetTeacherPageAPI,
     AddTeacherAPI,
     DeleteTeacherAPI,
-    EditTeacherAPI
+    EditTeacherAPI,
+    GetTeacherListAPI
 }

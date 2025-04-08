@@ -20,8 +20,7 @@ import { DepartmentEntity } from "../../../models/entity/department_entity";
 import { GetMajorListAPI } from "../../../apis/major_api";
 import { MajorEntity } from "../../../models/entity/major_entity";
 import { GetTeacherListAPI } from "../../../apis/teacher_api";
-import { TeacherEntity } from "../../../models/entity/teacher_entity";
-import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_search_dto";
+import { TeacherLiteEntity } from "../../../models/entity/teacher_lite_entity";
 import { useSelector } from "react-redux";
 import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
 import { MajorListDTO } from "../../../models/dto/major_list_dto";
@@ -39,7 +38,7 @@ export function AdministrativeClassAdd() {
     const [submitting, setSubmitting] = useState(false);
     const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
     const [majors, setMajors] = useState<MajorEntity[]>([]);
-    const [teachers, setTeachers] = useState<TeacherEntity[]>([]);
+    const [teachers, setTeachers] = useState<TeacherLiteEntity[]>([]);
     const [grades, setGrades] = useState<GradeEntity[]>([]);
 
     // 获取当前教务权限信息
@@ -124,15 +123,9 @@ export function AdministrativeClassAdd() {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const params: PageTeacherSearchDTO = {
-                    page: 1,
-                    size: 100, // 获取足够多的教师以供选择
-                    is_desc: true
-                };
-
-                const response = await GetTeacherListAPI(params);
+                const response = await GetTeacherListAPI();
                 if (response?.output === "Success" && response.data) {
-                    setTeachers(response.data.records || []);
+                    setTeachers(response.data);
                 } else {
                     message.error(response?.error_message || "获取教师列表失败");
                 }
@@ -388,7 +381,7 @@ export function AdministrativeClassAdd() {
                                     <option value="">请选择辅导员</option>
                                     {teachers.map(teacher => (
                                         <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                                            {teacher.name || '未命名'}
+                                            {teacher.teacher_name || '未命名'}
                                         </option>
                                     ))}
                                 </select>

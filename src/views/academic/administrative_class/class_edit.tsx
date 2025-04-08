@@ -20,8 +20,7 @@ import { DepartmentEntity } from "../../../models/entity/department_entity";
 import { GetMajorListAPI } from "../../../apis/major_api";
 import { MajorEntity } from "../../../models/entity/major_entity";
 import { GetTeacherListAPI } from "../../../apis/teacher_api";
-import { TeacherEntity } from "../../../models/entity/teacher_entity";
-import { PageTeacherSearchDTO } from "../../../models/dto/page/page_teacher_search_dto";
+import { TeacherLiteEntity } from "../../../models/entity/teacher_lite_entity";
 import { GetStudentListAPI } from "../../../apis/student_api";
 import { StudentEntity } from "../../../models/entity/student_entity";
 import { AdministrativeClassEntity } from "../../../models/entity/administrative_class_entity";
@@ -44,7 +43,7 @@ export function AdministrativeClassEdit() {
     const [loading, setLoading] = useState(true);
     const [departments, setDepartments] = useState<DepartmentEntity[]>([]);
     const [majors, setMajors] = useState<MajorEntity[]>([]);
-    const [teachers, setTeachers] = useState<TeacherEntity[]>([]);
+    const [teachers, setTeachers] = useState<TeacherLiteEntity[]>([]);
     const [students, setStudents] = useState<StudentEntity[]>([]);
     const [grades, setGrades] = useState<GradeEntity[]>([]);
     const [classEntity, setClassEntity] = useState<AdministrativeClassEntity | null>(null);
@@ -161,15 +160,9 @@ export function AdministrativeClassEdit() {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const params: PageTeacherSearchDTO = {
-                    page: 1,
-                    size: 100, // 获取足够多的教师以供选择
-                    is_desc: true
-                };
-                
-                const response = await GetTeacherListAPI(params);
+                const response = await GetTeacherListAPI();
                 if (response?.output === "Success" && response.data) {
-                    setTeachers(response.data.records || []);
+                    setTeachers(response.data);
                 } else {
                     message.error(response?.error_message || "获取教师列表失败");
                 }
@@ -227,6 +220,12 @@ export function AdministrativeClassEdit() {
 
         fetchGrades();
     }, []);
+
+    // 获取教师名称函数
+    const getTeacherName = (uuid: string) => {
+        const teacher = teachers.find((teacher) => teacher.teacher_uuid === uuid);
+        return teacher ? teacher.teacher_name : "";
+    };
 
     // 提交表单
     const handleSubmit = async (e: React.FormEvent) => {
@@ -456,7 +455,7 @@ export function AdministrativeClassEdit() {
                                         <option value="">请选择辅导员</option>
                                         {teachers.map(teacher => (
                                             <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                                                {teacher.name || '未命名'}
+                                                {getTeacherName(teacher.teacher_uuid)}
                                             </option>
                                         ))}
                                     </select>

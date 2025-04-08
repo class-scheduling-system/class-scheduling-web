@@ -20,6 +20,10 @@ import {MajorEntity} from "@/models/entity/major_entity.ts";
 import {GetMajorListAPI} from "@/apis/major_api.ts";
 import {useNavigate} from "react-router";
 import { AcademicAdministrativeClassDeleteDialog } from "@/components/academic/academic_administrative_class_delete_dialog";
+import { GradeEntity } from "@/models/entity/grade_entity.ts";
+import { GetGradeListAPI } from "@/apis/grade_api.ts";
+import { GetTeacherListAPI } from "@/apis/teacher_api.ts";
+import { TeacherLiteEntity } from "@/models/entity/teacher_lite_entity.ts";
 
 export function AdministrativeClass({site}: Readonly<{
     site: SiteInfoEntity
@@ -38,6 +42,8 @@ export function AdministrativeClass({site}: Readonly<{
     const [dialogDelete, setDialogDelete] = useState<boolean>(false);
     const [selectedClass, setSelectedClass] = useState<AdministrativeClassEntity | null>(null);
     const [refreshFlag, setRefreshFlag] = useState(0);
+    const [grades, setGrades] = useState<GradeEntity[]>([]);
+    const [teachers, setTeachers] = useState<TeacherLiteEntity[]>([]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -83,9 +89,37 @@ export function AdministrativeClass({site}: Readonly<{
         }
     };
 
+    // 获取年级列表
+    const fetchGrades = async () => {
+        try {
+            const response = await GetGradeListAPI();
+            if (response?.data) {
+                setGrades(response.data);
+            }
+        } catch (error) {
+            console.error('获取年级列表失败:', error);
+            message.error('获取年级列表失败');
+        }
+    };
+
+    // 获取教师列表
+    const fetchTeachers = async () => {
+        try {
+            const response = await GetTeacherListAPI();
+            if (response?.data) {
+                setTeachers(response.data);
+            }
+        } catch (error) {
+            console.error('获取教师列表失败:', error);
+            message.error('获取教师列表失败');
+        }
+    };
+
     useEffect(() => {
         fetchDepartments();
         fetchMajors();
+        fetchGrades();
+        fetchTeachers();
     }, []);
 
     useEffect(() => {
@@ -138,6 +172,18 @@ export function AdministrativeClass({site}: Readonly<{
     const getMajorName = (majorUuid: string) => {
         const major = majors.find(m => m.major_uuid === majorUuid);
         return major?.major_name || '-';
+    };
+
+    // 获取年级名称
+    const getGradeName = (gradeUuid: string) => {
+        const grade = grades.find(g => g.grade_uuid === gradeUuid);
+        return grade?.name || '-';
+    };
+
+    // 获取班主任/辅导员名称
+    const getTeacherName = (teacherUuid: string) => {
+        const teacher = teachers.find(t => t.teacher_uuid === teacherUuid);
+        return teacher?.teacher_name || '-';
     };
 
     // 打开删除确认对话框
@@ -197,8 +243,8 @@ export function AdministrativeClass({site}: Readonly<{
                                     <th>行政班名称</th>
                                     <th>所属院系</th>
                                     <th>所属专业</th>
-                                    <th>学生人数</th>
-                                    <th>创建时间</th>
+                                    <th>年级</th>
+                                    <th>班主任</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -219,8 +265,8 @@ export function AdministrativeClass({site}: Readonly<{
                                             <td>{cls.class_name}</td>
                                             <td>{getDepartmentName(cls.department_uuid)}</td>
                                             <td>{getMajorName(cls.major_uuid)}</td>
-                                            <td>{cls.student_count}</td>
-                                            <td>{cls.created_at ? new Date(cls.created_at * 1000).toLocaleString() : '-'}</td>
+                                            <td>{getGradeName(cls.grade_uuid)}</td>
+                                            <td>{getTeacherName(cls.counselor_uuid)}</td>
                                             <td className="space-x-1">
                                                 <button className="btn btn-xs btn-primary" title="查看">
                                                     <PreviewOpen theme="outline" size="16" />

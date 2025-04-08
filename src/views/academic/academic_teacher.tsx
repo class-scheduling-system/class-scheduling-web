@@ -11,7 +11,7 @@ import {
     Refresh,
     Search
 } from "@icon-park/react";
-import { GetTeacherListAPI } from "../../apis/teacher_api.ts";
+import { GetTeacherPageAPI } from "../../apis/teacher_api.ts";
 import { message } from "antd";
 import { PageEntity } from "../../models/entity/page_entity.ts";
 import { TeacherEntity } from "../../models/entity/teacher_entity.ts";
@@ -27,6 +27,7 @@ import { TeacherTypeEntity } from "../../models/entity/teacher_type_entity.ts";
 import { GetTeacherTypeSimpleListAPI } from "../../apis/teacher_type_api.ts";
 import { LabelComponent } from "../../components/label_component.tsx";
 import { DepartmentEntity } from "../../models/entity/department_entity.ts";
+import { AcademicAffairsStore } from "../../models/store/academic_affairs_store.ts";
 
 
 export function AcademicTeacher({ site }: Readonly<{
@@ -35,6 +36,7 @@ export function AcademicTeacher({ site }: Readonly<{
     const inputFocus = useRef<HTMLInputElement | null>(null);
     const navigate = useNavigate();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
+    const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
 
     const [teacherList, setTeacherList] = useState<PageEntity<TeacherEntity>>({
         records: new Array(5).fill({}) as TeacherEntity[],
@@ -54,7 +56,7 @@ export function AcademicTeacher({ site }: Readonly<{
         page: 1,
         size: 20,
         is_desc: true,
-        department: '',
+        department: academicAffairs.currentAcademicAffairs?.department,
         status: '',
         name: ''
     } as PageTeacherSearchDTO);
@@ -132,7 +134,11 @@ export function AcademicTeacher({ site }: Readonly<{
     // 获取教师列表并获取对应的部门信息和教师类型信息
     useEffect(() => {
         const fetchTeacherList = async () => {
-            const getResp = await GetTeacherListAPI(searchRequest);
+            setSearchRequest({
+                ...searchRequest,
+                department: academicAffairs.currentAcademicAffairs?.department
+            });
+            const getResp = await GetTeacherPageAPI(searchRequest);
             if (getResp?.output === "Success") {
                 const teachers = getResp.data!.records;
                 setTeacherList({
@@ -147,7 +153,7 @@ export function AcademicTeacher({ site }: Readonly<{
             }
         };
         fetchTeacherList().then();
-    }, [searchRequest, departmentList, teacherTypeList, refreshFlag]);
+    }, [departmentList, teacherTypeList, refreshFlag, academicAffairs.currentAcademicAffairs?.department]);
 
     useEffect(() => {
         // 当对话框关闭时，刷新表格数据
@@ -412,8 +418,6 @@ export function AcademicTeacher({ site }: Readonly<{
                                                 <th>职称</th>
                                                 <th>状态</th>
                                                 <th>教师类型</th>
-                                                <th>联系方式</th>
-                                                <th>邮箱</th>
                                                 <th className={"text-end"}>操作</th>
                                             </tr>
                                         </thead>
@@ -438,8 +442,6 @@ export function AcademicTeacher({ site }: Readonly<{
                                                         ) : renderTeacherStatus(teacher.status!)}
                                                     </td>
                                                     <td>{teacherTypeList.filter(ty => ty.teacher_type_uuid === teacher.type)[0]?.type_name || '未知教师类型'}</td>
-                                                    <td>{teacher.phone}</td>
-                                                    <td>{teacher.email}</td>
                                                     <td className={"grid justify-end text-nowrap"}>
                                                         <div className="join">
                                                             <button

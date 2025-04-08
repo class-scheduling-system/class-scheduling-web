@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { animated, useTransition } from "@react-spring/web";
 import { message } from "antd";
 import { CardComponent } from "../../components/card_component.tsx";
-import { Add, Delete, Editor, Eyes, Newlybuild, Search } from "@icon-park/react";
+import { Add, Delete, Editor, Eyes, Search } from "@icon-park/react";
 import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
 import { AdminGradeAddDialog } from "../../components/admin/grade/admin_grade_add_dialog.tsx";
 import { AdminGradeDeleteDialog } from "../../components/admin/grade/admin_grade_delete_dialog.tsx";
@@ -295,15 +295,11 @@ export function AdminGrade({site}: Readonly<{ site: SiteInfoEntity }>): JSX.Elem
                                 <kbd className="kbd kbd-sm">K</kbd>
                             </label>
                         </div>
-                        <div className={"grid grid-cols-2 gap-3"}>
+                        <div className={"grid grid-cols-1 gap-3"}>
                             <button onClick={() => setDialogAdd(true)}
                                   className="transition shadow btn btn-outline btn-primary">
                                 <Add theme="outline" size="16"/>
                                 <span>添加</span>
-                            </button>
-                            <button className="transition shadow btn btn-outline btn-secondary">
-                                <Newlybuild theme="outline" size="16"/>
-                                <span>批量导入</span>
                             </button>
                         </div>
                     </div>
