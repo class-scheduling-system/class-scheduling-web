@@ -35,11 +35,13 @@ import { animated, useSpring, useTransition } from "@react-spring/web";
 import { AdminNotFound } from "./404/medium_page_not_found";
 import cookie from "react-cookies";
 import { message } from "antd";
-import { useBreadcrumbs } from "../hooks/use_breadcrumbs";
-import { studentRouteConfig } from "../models/config/student_route_config";
 import { StudentNavComponent } from "../components/student/student_nav_component";
 import { StudentDashboard } from "./student/student_dashboard";
-import { People } from "@icon-park/react";
+import { StudentSchedule } from "./student/student_schedule";
+import { StudentCourse } from "./student/student_course";
+import { StudentExam } from "./student/student_exam";
+import { StudentGrade } from "./student/student_grade";
+import { StudentNotification } from "./student/student_notification";
 
 /**
  * 生成一个学生控制台组件。
@@ -132,7 +134,11 @@ export function BaseStudent(): JSX.Element {
                     <animated.div style={{ ...style, height: '100%' }}>
                         <Routes location={item}>
                             <Route path="/dashboard" element={<StudentDashboard site={site} />} />
-                            {/* 其他学生相关页面路由将在此处添加 */}
+                            <Route path="/schedule" element={<StudentSchedule />} />
+                            <Route path="/course" element={<StudentCourse />} />
+                            <Route path="/exam" element={<StudentExam />} />
+                            <Route path="/grade" element={<StudentGrade />} />
+                            <Route path="/notification" element={<StudentNotification />} />
                             <Route path="/*" element={<AdminNotFound />} />
                         </Routes>
                     </animated.div>

@@ -26,308 +26,255 @@
  * --------------------------------------------------------------------------------
  */
 
-import { JSX, useEffect, useState } from "react";
-import { SiteInfoEntity } from "../../models/entity/site_info_entity";
-import { StudentEntity } from "../../models/entity/student_entity";
-import { UserInfoEntity } from "../../models/entity/user_info_entity";
-import { useSelector } from "react-redux";
-import { Book, Calendar, DocumentFolder, Me, Bookshelf, ExternalTransmission, Message} from "@icon-park/react";
-import { Link } from "react-router";
-import { Skeleton, message } from "antd";
-import { GetClassroomAPI } from "../../apis/classroom_api";
-import { GetAllAdministrativeClassListAPI } from "../../apis/administrative_class_api";
-import { GetDepartmentAPI } from "../../apis/department_api";
-import { GetMajorInfoAPI } from "../../apis/major_api";
-import { ClassroomInfoEntity } from "../../models/entity/classroom_info_entity";
-import { AdministrativeClassEntity } from "../../models/entity/administrative_class_entity";
-import { DepartmentEntity } from "../../models/entity/department_entity";
-import { MajorEntity } from "../../models/entity/major_entity";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router';
+import { SiteInfoEntity } from '../../models/entity/site_info_entity';
+import { useSelector } from 'react-redux';
+import { UserInfoEntity } from '../../models/entity/user_info_entity';
+import { CardComponent } from '../../components/card_component';
+import {
+  Book, Calendar, Time, User, Message, 
+  Dashboard, School, Certificate, Star
+} from '@icon-park/react';
 
 /**
- * 快速访问卡片组件
- */
-function QuickAccessCard({ icon, title, description, link }: {
-    icon: JSX.Element;
-    title: string;
-    description: string;
-    link: string;
-}): JSX.Element {
-    return (
-        <Link to={link} className="card bg-base-100 shadow-sm hover:shadow-md transition-all">
-            <div className="card-body p-4">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg text-primary">
-                        {icon}
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="card-title text-base font-semibold">{title}</h3>
-                        <p className="text-sm text-base-content/70">{description}</p>
-                    </div>
-                </div>
-            </div>
-        </Link>
-    );
-}
-
-/**
- * 通知卡片组件
- */
-function NotificationCard({ title, date, content, isNew = false }: {
-    title: string;
-    date: string;
-    content: string;
-    isNew?: boolean;
-}): JSX.Element {
-    return (
-        <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-200">
-            <div className="card-body p-4">
-                <div className="flex justify-between items-start">
-                    <h3 className="card-title text-base font-semibold flex items-center gap-2">
-                        {title}
-                        {isNew && <span className="badge badge-sm badge-primary">新</span>}
-                    </h3>
-                    <span className="text-xs text-base-content/50">{date}</span>
-                </div>
-                <p className="text-sm text-base-content/70 line-clamp-2">{content}</p>
-            </div>
-        </div>
-    );
-}
-
-/**
- * 学生仪表盘页面组件
+ * 学生仪表盘页面
  * 
  * @param site 站点信息
  * @returns 学生仪表盘页面
  */
-export function StudentDashboard({ site }: Readonly<{ site: SiteInfoEntity }>): JSX.Element {
-    const [loading, setLoading] = useState<boolean>(true);
-    const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
-    const student = getUser.student as StudentEntity;
-    
-    // 新增状态管理
-    const [classroom, setClassroom] = useState<ClassroomInfoEntity | null>(null);
-    const [administrativeClass, setAdministrativeClass] = useState<AdministrativeClassEntity | null>(null);
-    const [department, setDepartment] = useState<DepartmentEntity | null>(null);
-    const [major, setMajor] = useState<MajorEntity | null>(null);
-    const [dataLoading, setDataLoading] = useState<boolean>(true);
+export function StudentDashboard({ site }: Readonly<{ site?: SiteInfoEntity }>): React.ReactElement {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
 
-    // 获取教室信息
-    const fetchClassroomInfo = async () => {
-        try {
-            // 获取所有行政班级
-            if (student?.clazz) {
-                const response = await GetAllAdministrativeClassListAPI();
-                if (response?.output === "Success" && response.data) {
-                    // 查找学生所在的行政班级
-                    const adminClass = response.data.find(c => c.administrative_class_uuid === student.clazz);
-                    if (adminClass) {
-                        setAdministrativeClass(adminClass);
-                        
-                        // 假设我们有某种方式获取班级关联的教室ID
-                        // 这里使用假设的教室ID，实际中需要根据后端数据结构调整
-                        // 如果没有与班级关联的教室UUID，这里可以跳过或使用其他方式获取
-                        if (adminClass.administrative_class_uuid) {
-                            // 这里简单演示，假设用班级ID作为教室ID获取，实际中需要调整
-                            const classroomResp = await GetClassroomAPI(adminClass.administrative_class_uuid);
-                            if (classroomResp?.output === "Success" && classroomResp.data) {
-                                setClassroom(classroomResp.data);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("获取教室信息失败", error);
-            message.error("获取教室信息失败");
-        }
+  // 页面标题
+  useEffect(() => {
+    document.title = `学生仪表盘 | ${site?.name ?? "Frontleaves Technology"}`;
+  }, [site?.name]);
+
+  // 更新当前时间
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
     };
+  }, []);
 
-    // 获取院系信息
-    const fetchDepartmentInfo = async () => {
-        try {
-            if (student?.department) {
-                const response = await GetDepartmentAPI(student.department);
-                if (response?.output === "Success" && response.data) {
-                    setDepartment(response.data);
-                }
-            }
-        } catch (error) {
-            console.error("获取院系信息失败", error);
-            message.error("获取院系信息失败");
-        }
-    };
+  // 格式化时间
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
-    // 获取专业信息
-    const fetchMajorInfo = async () => {
-        try {
-            if (student?.major) {
-                const response = await GetMajorInfoAPI(student.major);
-                if (response?.output === "Success" && response.data) {
-                    setMajor(response.data);
-                }
-            }
-        } catch (error) {
-            console.error("获取专业信息失败", error);
-            message.error("获取专业信息失败");
-        }
-    };
+  // 格式化日期
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const weekDay = weekDays[date.getDay()];
+    return `${year}年${month}月${day}日 ${weekDay}`;
+  };
 
-    // 加载所有数据
-    const loadAllData = async () => {
-        setDataLoading(true);
-        try {
-            await Promise.all([
-                fetchClassroomInfo(),
-                fetchDepartmentInfo(),
-                fetchMajorInfo()
-            ]);
-        } finally {
-            setDataLoading(false);
-        }
-    };
+  // 模拟快捷入口数据
+  const quickLinks = [
+    { name: '课程表', path: '/student/schedule', icon: <Calendar theme="filled" size="32" fill="#3b82f6" /> },
+    { name: '选课', path: '/student/course', icon: <Book theme="filled" size="32" fill="#10b981" /> },
+    { name: '考试', path: '/student/exam', icon: <School theme="filled" size="32" fill="#f59e0b" /> },
+    { name: '成绩', path: '/student/grade', icon: <Certificate theme="filled" size="32" fill="#8b5cf6" /> },
+    { name: '通知', path: '/student/notification', icon: <Message theme="filled" size="32" fill="#ef4444" /> }
+  ];
 
-    useEffect(() => {
-        document.title = `学生首页 | ${site.name ?? "Frontleaves Technology"}`;
+  // 模拟待办事项数据
+  const todoItems = [
+    { id: 1, title: '高等数学作业', description: '完成第五章习题', deadline: '2023-06-15', status: 'pending' },
+    { id: 2, title: '数据结构实验', description: '二叉树的实现与应用', deadline: '2023-06-17', status: 'pending' },
+    { id: 3, title: '英语听力练习', description: '完成Unit 3的听力练习', deadline: '2023-06-14', status: 'completed' }
+  ];
+
+  // 模拟日程安排数据
+  const todayClasses = [
+    { id: 1, name: '高等数学', time: '08:00-09:40', location: '教学楼A301', teacher: '张教授' },
+    { id: 2, name: '数据结构', time: '10:00-11:40', location: '教学楼B204', teacher: '李教授' },
+    { id: 3, name: '大学英语', time: '14:00-15:40', location: '外语楼C102', teacher: '王教授' }
+  ];
+
+  // 模拟公告数据
+  const announcements = [
+    { id: 1, title: '关于2023-2024学年第二学期选课的通知', date: '2023-06-10', priority: 'high' },
+    { id: 2, title: '期末考试安排已发布', date: '2023-06-08', priority: 'medium' },
+    { id: 3, title: '图书馆开放时间调整', date: '2023-06-05', priority: 'low' }
+  ];
+
+  // 获取通知优先级样式
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return <span className="badge badge-error">重要</span>;
+      case 'medium':
+        return <span className="badge badge-warning">普通</span>;
+      case 'low':
+        return <span className="badge badge-info">一般</span>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* 欢迎区域和时间 */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
+        <div className="welcome-section">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary-content flex items-center gap-2">
+            <Dashboard theme="outline" size="28" className="text-primary" />
+            <span>学生仪表盘</span>
+          </h1>
+          <p className="text-base-content/70 mt-2 text-lg">
+            欢迎回来，<span className="font-medium text-primary">{getUser.user?.name ?? "同学"}</span>
+          </p>
+        </div>
         
-        // 模拟加载
-        const timer = setTimeout(() => {
-            setLoading(false);
-            // 当基本数据加载完成后，获取更多详细信息
-            if (student) {
-                loadAllData();
-            }
-        }, 1000);
-        
-        return () => clearTimeout(timer);
-    }, [site.name, student]);
+        <div className="bg-base-200/60 rounded-lg p-4 flex flex-col md:flex-row items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Calendar theme="outline" size="20" className="text-primary" />
+            <span className="text-sm md:text-base">{formatDate(currentTime)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Time theme="outline" size="20" className="text-secondary" />
+            <span className="font-mono text-sm md:text-base">{formatTime(currentTime)}</span>
+          </div>
+        </div>
+      </div>
 
-    return (
-        <div className="p-6 max-w-7xl mx-auto">
-            {/* 欢迎信息 */}
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-primary-content">
-                    欢迎回来，{loading ? <Skeleton.Button active size="small" /> : getUser.user?.name ?? "同学"}
-                </h1>
-                <p className="text-base-content/70 mt-2">
-                    今天是{new Date().toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
+      {/* 快速入口区 */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        {quickLinks.map((link, index) => (
+          <Link 
+            key={index} 
+            to={link.path} 
+            className="bg-base-100 hover:bg-base-200/80 transition-colors rounded-lg border border-base-300 shadow-sm hover:shadow-md p-4 flex flex-col items-center justify-center gap-3"
+          >
+            <div className="bg-base-200/50 w-16 h-16 rounded-full flex items-center justify-center">
+              {link.icon}
             </div>
+            <span className="text-base font-medium">{link.name}</span>
+          </Link>
+        ))}
+      </div>
 
-            {/* 个人信息卡 */}
-            <div className="card bg-base-100 shadow-md mb-8 overflow-hidden">
-                <div className="bg-gradient-to-r from-primary to-secondary p-1"></div>
-                <div className="card-body">
-                    {loading ? (
-                        <Skeleton active paragraph={{ rows: 4 }} />
-                    ) : (
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <div className="flex flex-col space-y-2">
-                                <span className="text-sm text-base-content/60">姓名</span>
-                                <span className="font-semibold">{getUser.user?.name ?? "未知"}</span>
-                                <span className="text-sm text-base-content/60">学号</span>
-                                <span className="font-semibold">{student?.id ?? "未分配"}</span>
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                                <span className="text-sm text-base-content/60">学院</span>
-                                <span className="font-semibold">{department?.department_name ?? student?.department ?? "未知"}</span>
-                                <span className="text-sm text-base-content/60">专业</span>
-                                <span className="font-semibold">{major?.major_name ?? student?.major ?? "未知"}</span>
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                                <span className="text-sm text-base-content/60">班级</span>
-                                <span className="font-semibold">{administrativeClass?.class_name ?? student?.clazz ?? "未知"}</span>
-                                <span className="text-sm text-base-content/60">学籍状态</span>
-                                <span className="font-semibold">
-                                    {student?.status === 0 ? (
-                                        <span className="text-success">在读</span>
-                                    ) : student?.status === 1 ? (
-                                        <span className="text-warning">已毕业</span>
-                                    ) : (
-                                        <span className="text-error">未注册</span>
-                                    )}
-                                </span>
-                            </div>
-                        </div>
-                    )}
+      {/* 主要内容区 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 今日课程 */}
+        <CardComponent col={3} howScreenFull="lg" className="order-2 lg:order-1">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Calendar theme="outline" size="18" className="text-primary" />
+              <span>今日课程</span>
+            </h2>
+            <Link to="/student/schedule" className="text-sm text-primary hover:underline">查看全部</Link>
+          </div>
+
+          <div className="space-y-4">
+            {todayClasses.length > 0 ? (
+              todayClasses.map(cls => (
+                <div key={cls.id} className="bg-base-200/40 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div className="font-medium">{cls.name}</div>
+                    <div className="font-mono text-sm">{cls.time}</div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-sm text-base-content/70">
+                    <div className="flex items-center gap-1">
+                      <User theme="outline" size="14" />
+                      <span>{cls.teacher}</span>
+                    </div>
+                    <div>{cls.location}</div>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-base-content/50">
+                <Calendar theme="outline" size="48" />
+                <p className="mt-2">今日无课程安排</p>
+              </div>
+            )}
+          </div>
+        </CardComponent>
+
+        {/* 中间区域：待办事项 */}
+        <CardComponent col={3} howScreenFull="lg" className="order-1 lg:order-2">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Star theme="outline" size="18" className="text-primary" />
+              <span>学习动态</span>
+            </h2>
+          </div>
+
+          <div className="relative">
+            <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-base-100 to-transparent"></div>
+            
+            <div className="max-h-[320px] overflow-y-auto pr-2 py-2" style={{ scrollbarWidth: 'thin' }}>
+              <div className="relative border-l-2 border-primary/30 pl-4 pb-6 space-y-6">
+                <div className="absolute top-0 left-0 bottom-0 w-0.5 bg-primary/20"></div>
+                
+                {todoItems.map(item => (
+                  <div 
+                    key={item.id} 
+                    className={`relative ${item.status === 'completed' ? 'opacity-60' : ''}`}
+                  >
+                    <div className="absolute -left-[18px] top-0 w-3 h-3 rounded-full bg-primary"></div>
+                    <div className={`bg-base-200/40 rounded-lg p-4 border-l-2 ${item.status === 'completed' ? 'border-success' : 'border-primary'}`}>
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium">{item.title}</h3>
+                        <span className={`text-xs ${item.status === 'completed' ? 'badge badge-success' : 'badge badge-primary'}`}>
+                          {item.status === 'completed' ? '已完成' : '待完成'}
+                        </span>
+                      </div>
+                      <p className="text-sm mt-1 text-base-content/70">{item.description}</p>
+                      <div className="mt-2 text-xs text-base-content/60">
+                        截止日期: {item.deadline}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="absolute -left-[18px] bottom-0 w-3 h-3 rounded-full bg-base-300"></div>
+              </div>
             </div>
             
-            {/* 快速访问卡片 */}
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Bookshelf theme="outline" size="22" />
-                <span>快速访问</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <QuickAccessCard
-                    icon={<Calendar theme="outline" size="24" />}
-                    title="我的课表"
-                    description="查看本周及未来的课程安排"
-                    link="/student/schedule"
-                />
-                <QuickAccessCard
-                    icon={<Book theme="outline" size="24" />}
-                    title="选课中心"
-                    description="浏览可选课程并进行选课"
-                    link="/student/course"
-                />
-                <QuickAccessCard
-                    icon={<ExternalTransmission theme="outline" size="24" />}
-                    title="考试安排"
-                    description="查看即将到来的考试信息"
-                    link="/student/exam"
-                />
-                <QuickAccessCard
-                    icon={<DocumentFolder theme="outline" size="24" />}
-                    title="成绩查询"
-                    description="查看历史学期的成绩单"
-                    link="/student/grade"
-                />
-                <QuickAccessCard
-                    icon={<Message theme="outline" size="24" />}
-                    title="通知公告"
-                    description="查看系统和教务处的最新通知"
-                    link="/student/notification"
-                />
-                <QuickAccessCard
-                    icon={<Me theme="outline" size="24" />}
-                    title="个人信息"
-                    description="查看和修改个人基本信息"
-                    link="/student/profile"
-                />
-            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-base-100 to-transparent"></div>
+          </div>
+        </CardComponent>
 
-            {/* 通知公告 */}
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Message theme="outline" size="22" />
-                <span>最新通知</span>
+        {/* 通知公告 */}
+        <CardComponent col={3} howScreenFull="lg" className="order-3">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Message theme="outline" size="18" className="text-primary" />
+              <span>通知公告</span>
             </h2>
-            {loading ? (
-                <div className="space-y-4">
-                    <Skeleton active paragraph={{ rows: 2 }} />
-                    <Skeleton active paragraph={{ rows: 2 }} />
-                    <Skeleton active paragraph={{ rows: 2 }} />
+            <Link to="/student/notification" className="text-sm text-primary hover:underline">查看全部</Link>
+          </div>
+
+          <div className="space-y-3">
+            {announcements.map(announcement => (
+              <div key={announcement.id} className="bg-base-200/40 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="font-medium">{announcement.title}</div>
+                  {getPriorityBadge(announcement.priority)}
                 </div>
-            ) : (
-                <div className="grid gap-4">
-                    <NotificationCard
-                        title="2023-2024学年第二学期选课通知"
-                        date="2024-05-15"
-                        content="亲爱的同学们，2023-2024学年第二学期的选课将于5月20日开始，请各位同学及时登录选课系统进行选课。选课分为两个阶段：预选阶段（5月20日-5月25日）和正选阶段（5月26日-5月30日）。"
-                        isNew={true}
-                    />
-                    <NotificationCard
-                        title="关于调整期末考试时间的通知"
-                        date="2024-05-10"
-                        content="因教学楼维修工作，原定于6月15日进行的《数据结构》期末考试调整至6月18日下午14:00-16:00，考试地点不变。请相关同学周知。"
-                    />
-                    <NotificationCard
-                        title="2024年暑期实习报名通知"
-                        date="2024-05-05"
-                        content="2024年暑期实习报名现已开始，有意向参加暑期实习的同学请于5月15日前向辅导员提交报名表。本次实习合作企业包括：阿里巴巴、腾讯、华为等知名企业。"
-                    />
+                <div className="mt-2 text-xs text-base-content/70">
+                  发布时间: {announcement.date}
                 </div>
-            )}
-        </div>
-    );
+              </div>
+            ))}
+          </div>
+        </CardComponent>
+      </div>
+    </div>
+  );
 } 
