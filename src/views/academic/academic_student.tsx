@@ -26,6 +26,11 @@ import { StudentEntity } from "../../models/entity/student_entity";
 import { GetStudentPageAPI } from "../../apis/student_api";
 import { PageStudentSearchDTO } from "../../models/dto/page/page_student_search_dto";
 import { AcademicDeleteStudentDialog } from "../../components/academic/academic_student_delete_dialog";
+import { GetMajorListAPI } from "../../apis/major_api";
+import { GetAllAdministrativeClassListAPI } from "../../apis/administrative_class_api";
+import { MajorEntity } from "../../models/entity/major_entity";
+import { AdministrativeClassEntity } from "../../models/entity/administrative_class_entity";
+import { AcademicAffairsStore } from "@/models/store/academic_affairs_store.ts";
 
 export function AcademicStudent({ site }: Readonly<{
     site: SiteInfoEntity
@@ -33,6 +38,7 @@ export function AcademicStudent({ site }: Readonly<{
     const inputFocus = useRef<HTMLInputElement | null>(null);
     const navigate = useNavigate();
     const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
+    const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
 
     const [studentList, setStudentList] = useState<PageEntity<StudentEntity>>({
         records: new Array(5).fill({}) as StudentEntity[],
@@ -46,11 +52,21 @@ export function AcademicStudent({ site }: Readonly<{
         size: 20,
         is_desc: true,
         is_graduated: false,
-        name: undefined
+        name: undefined,
+        status: undefined,
+        id: undefined,
+        class: undefined
     });
 
+    // 用于存储部门、专业和班级的数据
+    const [majors, setMajors] = useState<MajorEntity[]>([]);
+    const [classes, setClasses] = useState<AdministrativeClassEntity[]>([]);
+
     const [nameSearch, setNameSearch] = useState<string>("");
+    const [idSearch, setIdSearch] = useState<string>("");
     const [statusSearch, setStatusSearch] = useState<string>("");
+    const [departmentSearch, setDepartmentSearch] = useState<string>("");
+    const [classSearch, setClassSearch] = useState<string>("");
     const isFirstRender = useRef(true);
 
     const [loading, setLoading] = useState(true);
@@ -58,6 +74,44 @@ export function AcademicStudent({ site }: Readonly<{
     const [deleteStudentUuid, setDeleteStudentUuid] = useState("");
     const [showStats, setShowStats] = useState(false);
     const [refreshFlag, setRefreshFlag] = useState(0);
+
+    // 获取部门、专业和班级数据
+    useEffect(() => {
+        const fetchMetadata = async () => {
+            try {
+                // 获取专业数据
+                const majorResponse = await GetMajorListAPI();
+                if (majorResponse?.output === "Success" && majorResponse.data) {
+                    setMajors(majorResponse.data);
+                }
+
+                // 获取班级数据
+                const classResponse = await GetAllAdministrativeClassListAPI();
+                if (classResponse?.output === "Success" && classResponse.data) {
+                    setClasses(classResponse.data);
+                }
+            } catch (error) {
+                console.error("获取元数据失败:", error);
+                message.error("获取元数据失败，部分信息可能无法正确显示");
+            }
+        };
+
+        fetchMetadata();
+    }, []);
+
+    // 根据UUID获取专业名称
+    const getMajorName = (uuid?: string) => {
+        if (!uuid) return "-";
+        const major = majors.find(m => m.major_uuid === uuid);
+        return major?.major_name || "-";
+    };
+
+    // 根据UUID获取班级名称
+    const getClassName = (uuid?: string) => {
+        if (!uuid) return "-";
+        const classInfo = classes.find(c => c.administrative_class_uuid === uuid);
+        return classInfo?.class_name || "-";
+    };
 
     // 键盘快捷键
     useEffect(() => {
@@ -83,6 +137,10 @@ export function AcademicStudent({ site }: Readonly<{
     useEffect(() => {
         const fetchStudentList = async () => {
             setLoading(true);
+            setSearchRequest({
+                ...searchRequest,
+                department_uuid: academicAffairs.currentAcademicAffairs?.department
+            });
             const getResp = await GetStudentPageAPI(searchRequest);
             if (getResp?.output === "Success") {
                 const students = getResp.data!.records;
@@ -97,7 +155,7 @@ export function AcademicStudent({ site }: Readonly<{
             setLoading(false);
         };
         fetchStudentList().then();
-    }, [searchRequest, refreshFlag]);
+    }, [refreshFlag, academicAffairs.currentAcademicAffairs?.department]);
 
     // 搜索防抖动
     useEffect(() => {
@@ -112,11 +170,15 @@ export function AcademicStudent({ site }: Readonly<{
                 ...searchRequest,
                 page: 1,
                 name: nameSearch || undefined,
-                is_graduated: statusSearch === "1" ? true : false
+                id: idSearch || undefined,
+                class: classSearch || undefined,
+                status: statusSearch || undefined,
+                department_uuid: departmentSearch || undefined,
+                is_graduated: statusSearch === "1" // 已注册状态视为是否已毕业
             });
         }, 500);
         return () => clearTimeout(timer);
-    }, [nameSearch, statusSearch]);
+    }, [nameSearch, statusSearch, idSearch, departmentSearch, classSearch]);
 
     useEffect(() => {
         // 当对话框关闭时，刷新表格数据
@@ -140,9 +202,9 @@ export function AcademicStudent({ site }: Readonly<{
     const studentStats = {
         total: studentList.total || 0,
         byStatus: {
-            active: studentList.records.filter(s => s.grade).length,
-            inactive: studentList.records.filter(s => !s.grade).length,
-            unregistered: studentList.records.filter(s => !s.user_uuid).length
+            active: studentList.records.filter(s => s.status === 0).length,
+            graduated: studentList.records.filter(s => s.status === 1).length,
+            unregistered: studentList.records.filter(s => s.status === 2).length
         }
     };
 
@@ -216,13 +278,21 @@ export function AcademicStudent({ site }: Readonly<{
 
     // 处理编辑学生
     const handleEditStudent = (student: StudentEntity) => {
+        if (!student.student_uuid) {
+            message.error("无法获取学生ID，请重试");
+            return;
+        }
         navigate(`/academic/student/edit/${student.student_uuid}`, {
             state: { studentInfo: student }
         });
     };
 
     // 处理删除学生
-    const handleDeleteStudent = (studentUuid: string) => {
+    const handleDeleteStudent = (studentUuid: string | undefined) => {
+        if (!studentUuid) {
+            message.error("无法获取学生ID，请重试");
+            return;
+        }
         setDeleteStudentUuid(studentUuid);
         setDialogDelete(true);
     };
@@ -233,20 +303,31 @@ export function AcademicStudent({ site }: Readonly<{
             ...searchRequest,
             page: 1,
             name: nameSearch || undefined,
-            is_graduated: statusSearch === "1" ? true : false
+            id: idSearch || undefined,
+            class: classSearch || undefined,
+            status: statusSearch || undefined,
+            department_uuid: departmentSearch || undefined,
+            is_graduated: statusSearch === "1" // 已注册状态视为是否已毕业
         });
     };
 
     // 处理重置
     const handleReset = () => {
         setNameSearch('');
+        setIdSearch('');
         setStatusSearch('');
+        setDepartmentSearch('');
+        setClassSearch('');
         setSearchRequest({
             page: 1,
             size: 20,
             is_desc: true,
             is_graduated: false,
-            name: undefined
+            name: undefined,
+            id: undefined,
+            class: undefined,
+            status: undefined,
+            department_uuid: undefined
         });
     };
 
@@ -301,7 +382,7 @@ export function AcademicStudent({ site }: Readonly<{
                                                     <p className="text-xs font-medium text-nowrap text-warning-content">未注册</p>
                                                 </div>
                                                 <div className={"card bg-error/25 border border-error border-dashed card-lg rounded-md shadow-sm items-center justify-center w-12 p-2"}>
-                                                    <div className="font-bold text-lg text-error-content">{studentStats.byStatus.inactive}</div>
+                                                    <div className="font-bold text-lg text-error-content">{studentStats.byStatus.graduated}</div>
                                                     <p className="text-xs font-medium text-nowrap text-error-content">已毕业</p>
                                                 </div>
                                             </div>
@@ -327,25 +408,21 @@ export function AcademicStudent({ site }: Readonly<{
                                                 <th>学号</th>
                                                 <th>姓名</th>
                                                 <th>性别</th>
+                                                <th>专业</th>
                                                 <th>班级</th>
                                                 <th>状态</th>
-                                                <th>联系方式</th>
-                                                <th>邮箱</th>
                                                 <th className={"text-end"}>操作</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {studentList.records.map((student) => (
                                                 <tr key={student.student_uuid} className="transition hover:bg-base-200">
-                                                    <td className={"text-nowrap font-bold"}>{student.id}</td>
-                                                    <td className={"text-nowrap"}>{student.name}</td>
+                                                    <td className={"text-nowrap font-bold"}>{student.id || '未分配'}</td>
+                                                    <td className={"text-nowrap"}>{student.name || '未命名'}</td>
                                                     <td>{student.gender === 1 ? '女' : '男'}</td>
-                                                    <td className={"text-nowrap"}>{student.clazz}</td>
-                                                    <td>
-                                                        {renderStudentStatus(student)}
-                                                    </td>
-                                                    <td>{student.department}</td>
-                                                    <td>{student.major}</td>
+                                                    <td>{getMajorName(student.major)}</td>
+                                                    <td className={"text-nowrap"}>{getClassName(student.clazz)}</td>
+                                                    <td>{renderStudentStatus(student)}</td>
                                                     <td className={"grid justify-end text-nowrap"}>
                                                         <div className="join">
                                                             <button
@@ -355,7 +432,7 @@ export function AcademicStudent({ site }: Readonly<{
                                                                 <span>编辑</span>
                                                             </button>
                                                             <button
-                                                                onClick={() => handleDeleteStudent(student.student_uuid!)}
+                                                                onClick={() => handleDeleteStudent(student.student_uuid)}
                                                                 className="join-item btn btn-sm btn-soft btn-error inline-flex">
                                                                 <Delete theme="outline" size="12" />
                                                                 <span>删除</span>
@@ -411,6 +488,7 @@ export function AcademicStudent({ site }: Readonly<{
                             </h2>
 
                             <div className="grid gap-1 grid-cols-2">
+                                {/* 姓名搜索 */}
                                 <div className="w-full col-span-full">
                                     <label className="input input-sm transition flex items-center w-full validator">
                                         <Me theme="outline" size="14" />
@@ -430,6 +508,48 @@ export function AcademicStudent({ site }: Readonly<{
                                         )}
                                     </label>
                                 </div>
+                                
+                                {/* 学号搜索 */}
+                                <div className="w-full col-span-full">
+                                    <label className="input input-sm transition flex items-center w-full validator">
+                                        <Me theme="outline" size="14" />
+                                        <input type="text"
+                                            value={idSearch}
+                                            onChange={(e) => setIdSearch(e.target.value)}
+                                            className="grow ps-1"
+                                            placeholder="学生学号" />
+                                        {idSearch && (
+                                            <button
+                                                className="transition hover:bg-error/45 rounded-md p-1.5"
+                                                onClick={() => setIdSearch('')}
+                                            >
+                                                <Delete theme="outline" size="12" className={"transition text-black hover:text-error-content"} />
+                                            </button>
+                                        )}
+                                    </label>
+                                </div>
+
+                                {/* 班级搜索 */}
+                                <div className="w-full col-span-full">
+                                    <label className="input input-sm transition flex items-center w-full validator">
+                                        <Me theme="outline" size="14" />
+                                        <input type="text"
+                                            value={classSearch}
+                                            onChange={(e) => setClassSearch(e.target.value)}
+                                            className="grow ps-1"
+                                            placeholder="班级名称" />
+                                        {classSearch && (
+                                            <button
+                                                className="transition hover:bg-error/45 rounded-md p-1.5"
+                                                onClick={() => setClassSearch('')}
+                                            >
+                                                <Delete theme="outline" size="12" className={"transition text-black hover:text-error-content"} />
+                                            </button>
+                                        )}
+                                    </label>
+                                </div>
+
+                                {/* 状态筛选 */}
                                 <div className="w-full col-span-full">
                                     <label className="select select-sm transition flex items-center w-full validator">
                                         <select
@@ -438,9 +558,9 @@ export function AcademicStudent({ site }: Readonly<{
                                             onChange={(e) => setStatusSearch(e.target.value)}
                                         >
                                             <option value="">请选择学生状态</option>
-                                            <option value="0">未注册</option>
-                                            <option value="1">已注册</option>
-                                            <option value="2">已停用</option>
+                                            <option value="0">在读</option>
+                                            <option value="1">已毕业</option>
+                                            <option value="2">未注册</option>
                                         </select>
                                     </label>
                                 </div>

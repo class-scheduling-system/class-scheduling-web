@@ -17,6 +17,12 @@ export function AcademicDeleteStudentDialog({ show, emit, studentUuid }: Readonl
     }, [show]);
 
     const handleDelete = async () => {
+        if (!studentUuid) {
+            message.error("学生ID不能为空");
+            emit(false);
+            return;
+        }
+        
         try {
             setLoading(true);
             const deleteResp = await DeleteStudentAPI(studentUuid);
@@ -45,7 +51,7 @@ export function AcademicDeleteStudentDialog({ show, emit, studentUuid }: Readonl
                 <div className="modal-action">
                     <button
                         className="btn btn-error"
-                        disabled={loading}
+                        disabled={loading || !studentUuid}
                         onClick={handleDelete}
                     >
                         {loading ? <span className="loading loading-spinner"></span> : null}
