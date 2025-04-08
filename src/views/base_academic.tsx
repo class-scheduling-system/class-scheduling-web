@@ -231,8 +231,8 @@ export function BaseAcademic(): JSX.Element {
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<AcademicDashboard site={site}/>}/>
                                 <Route path="/administrative-class" element={<AdministrativeClass site={site}/>}/>
-                                <Route path="/administrative-class/add" element={<AdministrativeClassAdd site={site}/>}/>
-                                <Route path="/administrative-class/edit/:id" element={<AdministrativeClassEdit site={site}/>}/>
+                                <Route path="/administrative-class/add" element={<AdministrativeClassAdd/>}/>
+                                <Route path="/administrative-class/edit/:id" element={<AdministrativeClassEdit/>}/>
                                 <Route path="/course" element={<AcademicCourse site={site}/>}/>
                                 <Route path="/course/add" element={<AcademicCourseAdd site={site}/>}/>
                                 <Route path="/course/edit/:courseId" element={<AcademicCourseEdit site={site}/>}/>

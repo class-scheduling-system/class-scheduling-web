@@ -226,7 +226,7 @@ export function BaseAdmin(): JSX.Element {
                 </animated.div>
             </div>
             {/* AI聊天组件 */}
-            <AiChatComponent />～
+            <AiChatComponent />
         </animated.div>
     );
 }
