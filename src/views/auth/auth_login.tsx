@@ -87,6 +87,9 @@ export function AuthLogin(): JSX.Element {
                     case "教师":
                         navigate("/teacher/dashboard");
                         break;
+                    case "学生":
+                        navigate("/student/dashboard");
+                        break;
                     default:
                         navigate("/register");
                         break;

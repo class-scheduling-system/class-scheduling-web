@@ -5,10 +5,6 @@ import { StudentEntity } from "../models/entity/student_entity";
 import { BaseResponse } from "../models/base_response";
 import { StudentDTO } from "../models/dto/student_dto";
 import { DisableEntity } from "../models/entity/diable_entity";
-import { APIResponse } from "../models/api/api_response";
-import { PageDataOutput } from "../models/api/page_data_output";
-import { API_PREFIX } from "../utils/api_prefix";
-import { Http } from "../utils/http";
 
 /**
  * # 获取学生分页列表

@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -42,6 +42,7 @@ import {PageNotFound} from "./views/404/page_not_found.tsx";
 import {BaseAcademic} from "./views/base_academic.tsx";
 import {BaseUser} from "./views/base_user.tsx";
 import {BaseTeacher} from "./views/base_teacher.tsx";
+import {BaseStudent} from "./views/base_student.tsx";
 
 /**
  * # Index
@@ -90,6 +91,9 @@ export function Index(): JSX.Element {
                             case "教师":
                                 navigate("/teacher/dashboard");
                                 break;
+                            case "学生":
+                                navigate("/student/dashboard");
+                                break;
                             default:
                                 break;
                         }
@@ -115,6 +119,7 @@ export function Index(): JSX.Element {
                 <Route path={"/academic/*"} element={<BaseAcademic/>}/>
                 <Route path={"/user/*"} element={<BaseUser/>}/>
                 <Route path={"/teacher/*"} element={<BaseTeacher/>}/>
+                <Route path={"/student/*"} element={<BaseStudent/>}/>
                 <Route path={"/*"} element={<PageNotFound/>}/>
             </Routes>
         </>
