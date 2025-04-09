@@ -59,6 +59,7 @@ import { setCurrentAcademicAffairs, setDepartmentInfo } from "../stores/academic
 import { AcademicAffairsEntity } from "../models/entity/academic_affairs_entity.ts";
 import { GetDepartmentAPI } from "../apis/department_api.ts";
 import { DepartmentEntity } from "../models/entity/department_entity.ts";
+import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -251,6 +252,8 @@ export function BaseAcademic(): JSX.Element {
                     ))}
                 </animated.div>
             </div>
+            {/* AI聊天组件 */}
+            <AiChatComponent />
         </animated.div>
     );
 }

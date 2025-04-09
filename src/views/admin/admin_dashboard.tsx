@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -28,24 +28,27 @@
 
 import {useEffect, useState} from 'react';
 import {SiteInfoEntity} from '../../models/entity/site_info_entity';
-import {BuildingTwo, People, Setting, User} from "@icon-park/react";
-import {GetUserListAPI} from '../../apis/user_api';
-import {GetBuildingPageAPI} from '../../apis/building_api';
-import {GetRoleListAPI} from '../../apis/role_api';
+import {BuildingTwo, People, School, User} from "@icon-park/react";
 import {UserInfoEntity} from "../../models/entity/user_info_entity.ts";
 import {useSelector} from "react-redux";
+import {GetAdminDashboardAPI} from "../../apis/statistics_api.ts";
+import {AdminDashboardEntity} from "../../models/entity/admin_dashboard_entity.ts";
 
 export function AdminDashboard({ site }: Readonly<{
     site: SiteInfoEntity
 }>) {
     const getUser = useSelector((state: { user: UserInfoEntity }) => state.user);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [summary, setSummary] = useState({
-        userCount: 0,
-        activeUserCount: 0,
-        buildingCount: 0,
-        roleCount: 0
+    const [summary, setSummary] = useState<AdminDashboardEntity>({
+        user_count: 0,
+        building_count: 0,
+        teacher_count: 0,
+        student_count: 0,
+        campus_count: 0,
+        request_log_list: []
     });
+    const [requestLogCurrentPage, setRequestLogCurrentPage] = useState(1);
+    const requestLogPageSize = 20;
 
     // 更新当前时间
     useEffect(() => {
@@ -62,16 +65,10 @@ export function AdminDashboard({ site }: Readonly<{
 
     useEffect(() => {
         const fetchSummaryData = async () => {
-            const userResp = await GetUserListAPI({ page: 1, size: 1 });
-            const buildingResp = await GetBuildingPageAPI({ page: 1, size: 1 });
-            const roleResp = await GetRoleListAPI({ page: 1, size: 1 });
-
-            setSummary({
-                userCount: userResp?.data?.total || 0,
-                activeUserCount: userResp?.data?.records.filter(u => u.user!.status).length || 0,
-                buildingCount: buildingResp?.data?.total || 0,
-                roleCount: roleResp?.data?.total || 0
-            });
+            const resp = await GetAdminDashboardAPI();
+            if (resp?.data) {
+                setSummary(resp.data);
+            }
         };
 
         fetchSummaryData().then();
@@ -88,17 +85,17 @@ export function AdminDashboard({ site }: Readonly<{
         return '晚上好';
     };
 
-    const statistics = {
-        systemLogs: [
-            { id: 1, type: '用户登录', user: '管理员1', time: '2024-03-15 10:30:45' },
-            { id: 2, type: '系统配置', user: '管理员2', time: '2024-03-15 11:15:22' },
-            { id: 3, type: '权限变更', user: '管理员3', time: '2024-03-15 14:45:11' }
-        ],
-        recentOperations: [
-            { id: 1, action: '新增用户', details: '张三', operator: '管理员1', time: '2024-03-15 09:20:33' },
-            { id: 2, action: '修改角色权限', details: '教师角色', operator: '管理员2', time: '2024-03-15 13:45:17' },
-            { id: 3, action: '删除建筑', details: '教学楼A', operator: '管理员3', time: '2024-03-15 16:10:05' }
-        ]
+    // 格式化时间戳
+    const formatTimestamp = (timestamp: number) => {
+        const date = new Date(timestamp);
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
     };
 
     return (
@@ -134,13 +131,13 @@ export function AdminDashboard({ site }: Readonly<{
             </div>
 
             {/* 统计卡片 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-content/15">
                     <div className="card-body p-4">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h2 className="text-xl font-semibold">用户总数</h2>
-                                <p className="text-3xl font-bold text-primary mt-2">{summary.userCount}</p>
+                                <p className="text-3xl font-bold text-primary mt-2">{summary.user_count}</p>
                             </div>
                             <div className="bg-blue-100 p-3 rounded-lg">
                                 <User theme="outline" size="24" className="text-blue-500" />
@@ -149,27 +146,12 @@ export function AdminDashboard({ site }: Readonly<{
                     </div>
                 </div>
 
-                {/* 其他卡片保持不变 */}
-                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-content/15">
                     <div className="card-body p-4">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h2 className="text-xl font-semibold">活跃用户</h2>
-                                <p className="text-3xl font-bold text-secondary mt-2">{summary.activeUserCount}</p>
-                            </div>
-                            <div className="bg-green-100 p-3 rounded-lg">
-                                <People theme="outline" size="24" className="text-green-500" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-                    <div className="card-body p-4">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-xl font-semibold">建筑数量</h2>
-                                <p className="text-3xl font-bold text-accent mt-2">{summary.buildingCount}</p>
+                                <h2 className="text-xl font-semibold">建筑总数</h2>
+                                <p className="text-3xl font-bold text-accent mt-2">{summary.building_count}</p>
                             </div>
                             <div className="bg-purple-100 p-3 rounded-lg">
                                 <BuildingTwo theme="outline" size="24" className="text-purple-500" />
@@ -178,73 +160,108 @@ export function AdminDashboard({ site }: Readonly<{
                     </div>
                 </div>
 
-                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-content/15">
                     <div className="card-body p-4">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h2 className="text-xl font-semibold">角色数量</h2>
-                                <p className="text-3xl font-bold text-info mt-2">{summary.roleCount}</p>
+                                <h2 className="text-xl font-semibold">校区总数</h2>
+                                <p className="text-3xl font-bold text-info mt-2">{summary.campus_count}</p>
                             </div>
                             <div className="bg-orange-100 p-3 rounded-lg">
-                                <Setting theme="outline" size="24" className="text-orange-500" />
+                                <School theme="outline" size="24" className="text-orange-500" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* 系统日志 */}
-            <div className="card bg-base-100 shadow-md overflow-hidden">
-                <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">系统日志</h2>
-                    <div className="overflow-x-auto overflow-hidden">
-                        <table className="table table-zebra">
-                            <thead>
-                                <tr>
-                                    <th>日志类型</th>
-                                    <th>操作用户</th>
-                                    <th>操作时间</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {statistics.systemLogs.map(log => (
-                                    <tr key={log.id}>
-                                        <td>{log.type}</td>
-                                        <td>{log.user}</td>
-                                        <td>{log.time}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {/* 学生和教师卡片 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-content/15">
+                    <div className="card-body p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-xl font-semibold">教师总数</h2>
+                                <p className="text-3xl font-bold text-secondary mt-2">{summary.teacher_count}</p>
+                            </div>
+                            <div className="bg-green-100 p-3 rounded-lg">
+                                <People theme="outline" size="24" className="text-green-500" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-content/15">
+                    <div className="card-body p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-xl font-semibold">学生总数</h2>
+                                <p className="text-3xl font-bold text-warning mt-2">{summary.student_count}</p>
+                            </div>
+                            <div className="bg-yellow-100 p-3 rounded-lg">
+                                <People theme="outline" size="24" className="text-yellow-500" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* 最近操作 */}
-            <div className="card bg-base-100 shadow-md overflow-hidden">
+            {/* 请求日志 */}
+            <div className="card card-md bg-base-100 shadow-md overflow-hidden border border-base-content/15">
                 <div className="card-body">
-                    <h2 className="card-title flex items-center gap-2">最近操作</h2>
+                    <h2 className="card-title flex items-center gap-2">请求日志</h2>
                     <div className="overflow-x-auto overflow-hidden">
                         <table className="table table-zebra">
                             <thead>
                                 <tr>
-                                    <th>操作</th>
-                                    <th>详情</th>
-                                    <th>操作人</th>
-                                    <th>时间</th>
+                                    <th>请求方法</th>
+                                    <th>请求URL</th>
+                                    <th>响应状态</th>
+                                    <th>执行时间</th>
+                                    <th>请求时间</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {statistics.recentOperations.map(operation => (
-                                    <tr key={operation.id}>
-                                        <td>{operation.action}</td>
-                                        <td>{operation.details}</td>
-                                        <td>{operation.operator}</td>
-                                        <td>{operation.time}</td>
-                                    </tr>
-                                ))}
+                                {summary && summary.request_log_list
+                                    .slice((requestLogCurrentPage - 1) * requestLogPageSize, requestLogCurrentPage * requestLogPageSize)
+                                    .map(log => (
+                                        <tr key={log.request_log_uuid}>
+                                            <td>{log.request_method}</td>
+                                            <td>{log.request_url}</td>
+                                            <td>
+                                                <span className={`badge ${log.response_code >= 400 ? 'badge-error' : 'badge-success'}`}>
+                                                    {log.response_code}
+                                                </span>
+                                            </td>
+                                            <td>{log.execution_time}ms</td>
+                                            <td>{formatTimestamp(log.request_time)}</td>
+                                        </tr>
+                                    ))}
                             </tbody>
                         </table>
+                        {summary && summary.request_log_list.length > requestLogPageSize && (
+                            <div className="flex justify-center mt-4">
+                                <div className="join">
+                                    <button
+                                        className="join-item btn btn-sm"
+                                        onClick={() => setRequestLogCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={requestLogCurrentPage === 1}
+                                    >
+                                        « 上一页
+                                    </button>
+                                    <button className="join-item btn btn-sm disabled:bg-base-200 disabled:text-base-content/50" disabled>
+                                        第 {requestLogCurrentPage} / {Math.ceil(summary.request_log_list.length / requestLogPageSize)} 页
+                                    </button>
+                                    <button
+                                        className="join-item btn btn-sm"
+                                        onClick={() => setRequestLogCurrentPage(prev => Math.min(prev + 1, Math.ceil(summary.request_log_list.length / requestLogPageSize)))}
+                                        disabled={requestLogCurrentPage === Math.ceil(summary.request_log_list.length / requestLogPageSize)}
+                                    >
+                                        下一页 »
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

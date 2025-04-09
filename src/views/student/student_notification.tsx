@@ -26,555 +26,376 @@
  * --------------------------------------------------------------------------------
  */
 
-import { JSX, useEffect, useState } from "react";
-import { SiteInfoEntity } from "../../models/entity/site_info_entity";
-import { Skeleton, message, Modal, Tabs, Badge, Empty, Tag } from "antd";
-import { Remind, Refresh, Search, Close, Message, Right } from "@icon-park/react";
-import { CardComponent } from "../../components/card_component";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/zh-cn";
+import React, { useState, useEffect } from 'react';
+import { CardComponent } from '../../components/card_component';
+import { Check, Delete, Time, Refresh, CloseSmall } from '@icon-park/react';
 
-// 配置 dayjs
-dayjs.extend(relativeTime);
-dayjs.locale("zh-cn");
-
-// 通知信息类型
+// 通知类型定义
 interface NotificationInfo {
-    id: string;
-    title: string;
-    content: string;
-    type: "system" | "course" | "exam" | "grade";
-    priority: "high" | "medium" | "low";
-    isRead: boolean;
-    createTime: string;
-    sender: string;
+  id: string;
+  title: string;
+  content: string;
+  time: string;
+  type: 'system' | 'course' | 'exam' | 'other';
+  read: boolean;
 }
 
-// 通知优先级颜色映射
-const notificationPriorityColors: Record<string, string> = {
-    "high": "bg-error/10 border-error/30 text-error hover:bg-error/20",
-    "medium": "bg-warning/10 border-warning/30 text-warning hover:bg-warning/20",
-    "low": "bg-info/10 border-info/30 text-info hover:bg-info/20"
+// 模拟通知数据
+const mockNotifications: NotificationInfo[] = [
+  { 
+    id: '1', 
+    title: '系统维护通知', 
+    content: '亲爱的用户，我们将于2023年10月15日凌晨2:00-4:00进行系统维护，届时选课系统将暂时无法使用。请您提前安排好相关事务，由此给您带来的不便，敬请谅解。如有疑问，请联系系统管理员。', 
+    time: '2023-10-10 09:00', 
+    type: 'system',
+    read: false
+  },
+  { 
+    id: '2', 
+    title: '选课开始通知', 
+    content: '2023-2024学年第一学期选课将于下周一（9月4日）上午10点开始，请各位同学提前查看可选课程并做好选课准备。本次选课采用"先到先得"原则，请尽早完成选课。选课有问题请咨询教务处。', 
+    time: '2023-09-01 15:30', 
+    type: 'course',
+    read: false
+  },
+  { 
+    id: '3', 
+    title: '期末考试安排', 
+    content: '2023-2024学年第一学期期末考试将于2024年1月15日开始，请各位同学查看考试安排表，做好复习准备。考试时请携带学生证和考试用品，不要迟到，祝大家考试顺利！', 
+    time: '2023-12-20 10:15', 
+    type: 'exam',
+    read: true
+  },
+  { 
+    id: '4', 
+    title: '奖学金申请通知', 
+    content: '2023-2024学年奖学金申请现已开始，请符合条件的同学于10月30日前提交申请材料。申请表可在学生事务中心网站下载，如有疑问请咨询学生工作处。', 
+    time: '2023-10-05 14:00', 
+    type: 'other',
+    read: true
+  },
+];
+
+// 通知类型映射表
+const typeColorMap = {
+  system: 'badge-secondary',
+  course: 'badge-primary',
+  exam: 'badge-warning',
+  other: 'badge-success'
 };
 
-// 通知类型颜色映射
-const notificationTypeColors: Record<string, string> = {
-    "system": "bg-neutral/10 border-neutral/30 text-neutral hover:bg-neutral/20",
-    "course": "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20",
-    "exam": "bg-warning/10 border-warning/30 text-warning hover:bg-warning/20",
-    "grade": "bg-success/10 border-success/30 text-success hover:bg-success/20"
+const typeNameMap = {
+  system: '系统',
+  course: '课程',
+  exam: '考试',
+  other: '其他'
 };
 
-// 获取通知优先级对应的颜色样式
-const getNotificationPriorityStyle = (priority: string): string => {
-    return notificationPriorityColors[priority] || "";
-};
+export const StudentNotification: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [notifications, setNotifications] = useState<NotificationInfo[]>([]);
+  const [currentNotification, setCurrentNotification] = useState<NotificationInfo | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
 
-// 获取通知类型对应的颜色样式
-const getNotificationTypeStyle = (type: string): string => {
-    return notificationTypeColors[type] || "";
-};
-
-/**
- * 学生通知页面组件
- * 
- * @param site 站点信息
- * @returns 学生通知页面
- */
-export function StudentNotification({ site }: Readonly<{ site?: SiteInfoEntity }>): JSX.Element {
-    const [loading, setLoading] = useState<boolean>(true);
-    const [notifications, setNotifications] = useState<NotificationInfo[]>([]);
-    const [searchKeyword, setSearchKeyword] = useState<string>("");
-    const [activeTab, setActiveTab] = useState<string>("all");
-    const [selectedNotification, setSelectedNotification] = useState<NotificationInfo | null>(null);
-    const [notificationDetailVisible, setNotificationDetailVisible] = useState<boolean>(false);
-
-    // 加载通知数据
-    useEffect(() => {
-        setLoading(true);
-        
-        // 模拟加载通知数据
-        setTimeout(() => {
-            // 模拟通知数据
-            const mockNotifications: NotificationInfo[] = [
-                {
-                    id: "1",
-                    title: "选课通知：2024春季学期选课开始",
-                    content: "亲爱的同学：\n\n2024春季学期选课将于2024年1月1日开始，请在规定时间内完成选课。选课注意事项如下：\n\n1. 请仔细阅读选课指南\n2. 注意课程冲突\n3. 按时完成选课\n\n如有问题请联系教务处。",
-                    type: "course",
-                    priority: "high",
-                    isRead: false,
-                    createTime: "2023-12-25T10:00:00",
-                    sender: "教务处"
-                },
-                {
-                    id: "2",
-                    title: "期末考试安排已发布",
-                    content: "2023-2024学年第一学期期末考试安排已发布，请登录教务系统查看具体安排。请注意：\n\n1. 考试时间和地点\n2. 携带证件\n3. 遵守考试纪律",
-                    type: "exam",
-                    priority: "high",
-                    isRead: true,
-                    createTime: "2023-12-20T14:30:00",
-                    sender: "教务处"
-                },
-                {
-                    id: "3",
-                    title: "系统维护通知",
-                    content: "系统将于本周六凌晨2:00-4:00进行例行维护，期间所有服务暂停使用。给您带来的不便敬请谅解。",
-                    type: "system",
-                    priority: "medium",
-                    isRead: false,
-                    createTime: "2023-12-18T09:15:00",
-                    sender: "系统管理员"
-                },
-                {
-                    id: "4",
-                    title: "期中成绩已公布",
-                    content: "2023-2024学年第一学期期中考试成绩已公布，请登录教务系统查看。如对成绩有疑问，请在一周内联系任课教师。",
-                    type: "grade",
-                    priority: "medium",
-                    isRead: true,
-                    createTime: "2023-11-15T16:45:00",
-                    sender: "教务处"
-                }
-            ];
-            
-            setNotifications(mockNotifications);
-            setLoading(false);
-        }, 1000);
-    }, []);
-
-    // 设置页面标题
-    useEffect(() => {
-        document.title = `通知中心 | ${site?.name ?? "Frontleaves Technology"}`;
-    }, [site?.name]);
-
-    // 刷新通知
-    const handleRefresh = () => {
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            message.success("通知已刷新");
-        }, 1000);
+  useEffect(() => {
+    // 设置文档标题
+    document.title = '通知中心 - 学生选课系统';
+    
+    // 模拟加载数据
+    const fetchData = async () => {
+      // 在实际应用中，这里应该调用API获取通知数据
+      // const response = await GetNotificationsAPI();
+      // if (response?.code === 200) {
+      //   setNotifications(response.data);
+      // }
+      
+      // 使用模拟数据
+      setTimeout(() => {
+        setNotifications(mockNotifications);
+        setLoading(false);
+      }, 1000);
     };
-
-    // 查看通知详情
-    const handleViewNotification = (notification: NotificationInfo) => {
-        setSelectedNotification(notification);
-        setNotificationDetailVisible(true);
-
-        // 标记为已读
-        if (!notification.isRead) {
-            setNotifications(prevNotifications =>
-                prevNotifications.map(n =>
-                    n.id === notification.id ? { ...n, isRead: true } : n
-                )
-            );
-        }
-    };
-
-    // 获取通知类型标签
-    const getNotificationTypeTag = (type: string) => {
-        switch (type) {
-            case "system":
-                return <span className="badge badge-neutral">系统</span>;
-            case "course":
-                return <span className="badge badge-primary">选课</span>;
-            case "exam":
-                return <span className="badge badge-warning">考试</span>;
-            case "grade":
-                return <span className="badge badge-success">成绩</span>;
-            default:
-                return <span className="badge">其他</span>;
-        }
-    };
-
-    // 获取通知优先级标签
-    const getNotificationPriorityTag = (priority: string) => {
-        switch (priority) {
-            case "high":
-                return <span className="badge badge-error">重要</span>;
-            case "medium":
-                return <span className="badge badge-warning">普通</span>;
-            case "low":
-                return <span className="badge badge-info">低</span>;
-            default:
-                return null;
-        }
-    };
-
-    // 筛选通知
-    const getFilteredNotifications = () => {
-        return notifications.filter(notification => {
-            const matchKeyword = searchKeyword === "" ||
-                notification.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-                notification.content.toLowerCase().includes(searchKeyword.toLowerCase());
-            
-            const matchType = activeTab === "all" || notification.type === activeTab;
-            
-            return matchKeyword && matchType;
-        });
-    };
-
-    // 获取未读通知数量
-    const getUnreadCount = (type: string = "all") => {
-        return notifications.filter(n => 
-            !n.isRead && (type === "all" || n.type === type)
-        ).length;
-    };
-
-    return (
-        <div className="p-6 max-w-7xl mx-auto">
-            {/* 标题和操作区 */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div className="flex items-center gap-3">
-                    <h1 className="text-2xl md:text-3xl font-bold text-primary-content flex items-center gap-2">
-                        <Remind theme="outline" size="24" className="text-primary" />
-                        <span>通知中心</span>
-                    </h1>
-                    {getUnreadCount() > 0 && (
-                        <Badge count={getUnreadCount()} className="animate-pulse" />
-                    )}
-                </div>
-                
-                <button 
-                    className="btn btn-sm md:btn-md btn-primary btn-outline flex items-center gap-1"
-                    onClick={handleRefresh}
-                    disabled={loading}
-                >
-                    <Refresh theme="outline" size="16" />
-                    <span className="hidden md:inline">刷新</span>
-                </button>
-            </div>
-
-            {/* 统计卡片 */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <CardComponent className="bg-primary/10 border-primary/20">
-                    <div className="p-4 flex justify-between items-center">
-                        <div>
-                            <div className="text-sm text-base-content/70">全部通知</div>
-                            <div className="text-2xl font-bold text-primary mt-1">{notifications.length}</div>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                            <Message theme="outline" size="20" className="text-primary" />
-                        </div>
-                    </div>
-                </CardComponent>
-                
-                <CardComponent className="bg-error/10 border-error/20">
-                    <div className="p-4 flex justify-between items-center">
-                        <div>
-                            <div className="text-sm text-base-content/70">未读通知</div>
-                            <div className="text-2xl font-bold text-error mt-1">{getUnreadCount()}</div>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-error/20 flex items-center justify-center">
-                            <Remind theme="outline" size="20" className="text-error" />
-                        </div>
-                    </div>
-                </CardComponent>
-                
-                <CardComponent className="bg-warning/10 border-warning/20">
-                    <div className="p-4 flex justify-between items-center">
-                        <div>
-                            <div className="text-sm text-base-content/70">重要通知</div>
-                            <div className="text-2xl font-bold text-warning mt-1">
-                                {notifications.filter(n => n.priority === "high").length}
-                            </div>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-warning">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                    </div>
-                </CardComponent>
-                
-                <CardComponent className="bg-success/10 border-success/20">
-                    <div className="p-4 flex justify-between items-center">
-                        <div>
-                            <div className="text-sm text-base-content/70">已读通知</div>
-                            <div className="text-2xl font-bold text-success mt-1">
-                                {notifications.filter(n => n.isRead).length}
-                            </div>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-success">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-                </CardComponent>
-            </div>
-
-            {/* 通知搜索和列表 */}
-            <CardComponent>
-                {loading ? (
-                    <div className="p-8">
-                        <Skeleton active paragraph={{ rows: 10 }} />
-                    </div>
-                ) : (
-                    <div>
-                        <div className="p-4 border-b">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1 form-control">
-                                    <label className="input input-bordered flex items-center gap-2">
-                                        <Search theme="outline" size="16" />
-                                        <input 
-                                            type="text" 
-                                            className="grow" 
-                                            placeholder="搜索通知标题或内容"
-                                            value={searchKeyword}
-                                            onChange={(e) => setSearchKeyword(e.target.value)}
-                                        />
-                                        {searchKeyword && (
-                                            <button 
-                                                className="btn btn-ghost btn-xs" 
-                                                onClick={() => setSearchKeyword("")}
-                                            >
-                                                <Close theme="outline" size="14" />
-                                            </button>
-                                        )}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <Tabs
-                            defaultActiveKey="all"
-                            activeKey={activeTab}
-                            onChange={setActiveTab}
-                            type="card"
-                            className="px-2 pt-2"
-                            items={[
-                                {
-                                    key: 'all',
-                                    label: (
-                                        <Badge count={getUnreadCount("all")} showZero={false}>
-                                            全部
-                                        </Badge>
-                                    ),
-                                    children: (
-                                        <NotificationList 
-                                            notifications={getFilteredNotifications()}
-                                            onViewNotification={handleViewNotification}
-                                            getNotificationTypeTag={getNotificationTypeTag}
-                                            getNotificationPriorityTag={getNotificationPriorityTag}
-                                            getNotificationTypeStyle={getNotificationTypeStyle}
-                                            getNotificationPriorityStyle={getNotificationPriorityStyle}
-                                        />
-                                    ),
-                                },
-                                {
-                                    key: 'system',
-                                    label: (
-                                        <Badge count={getUnreadCount("system")} showZero={false}>
-                                            系统通知
-                                        </Badge>
-                                    ),
-                                    children: (
-                                        <NotificationList 
-                                            notifications={getFilteredNotifications()}
-                                            onViewNotification={handleViewNotification}
-                                            getNotificationTypeTag={getNotificationTypeTag}
-                                            getNotificationPriorityTag={getNotificationPriorityTag}
-                                            getNotificationTypeStyle={getNotificationTypeStyle}
-                                            getNotificationPriorityStyle={getNotificationPriorityStyle}
-                                        />
-                                    ),
-                                },
-                                {
-                                    key: 'course',
-                                    label: (
-                                        <Badge count={getUnreadCount("course")} showZero={false}>
-                                            选课通知
-                                        </Badge>
-                                    ),
-                                    children: (
-                                        <NotificationList 
-                                            notifications={getFilteredNotifications()}
-                                            onViewNotification={handleViewNotification}
-                                            getNotificationTypeTag={getNotificationTypeTag}
-                                            getNotificationPriorityTag={getNotificationPriorityTag}
-                                            getNotificationTypeStyle={getNotificationTypeStyle}
-                                            getNotificationPriorityStyle={getNotificationPriorityStyle}
-                                        />
-                                    ),
-                                },
-                                {
-                                    key: 'exam',
-                                    label: (
-                                        <Badge count={getUnreadCount("exam")} showZero={false}>
-                                            考试通知
-                                        </Badge>
-                                    ),
-                                    children: (
-                                        <NotificationList 
-                                            notifications={getFilteredNotifications()}
-                                            onViewNotification={handleViewNotification}
-                                            getNotificationTypeTag={getNotificationTypeTag}
-                                            getNotificationPriorityTag={getNotificationPriorityTag}
-                                            getNotificationTypeStyle={getNotificationTypeStyle}
-                                            getNotificationPriorityStyle={getNotificationPriorityStyle}
-                                        />
-                                    ),
-                                },
-                                {
-                                    key: 'grade',
-                                    label: (
-                                        <Badge count={getUnreadCount("grade")} showZero={false}>
-                                            成绩通知
-                                        </Badge>
-                                    ),
-                                    children: (
-                                        <NotificationList 
-                                            notifications={getFilteredNotifications()}
-                                            onViewNotification={handleViewNotification}
-                                            getNotificationTypeTag={getNotificationTypeTag}
-                                            getNotificationPriorityTag={getNotificationPriorityTag}
-                                            getNotificationTypeStyle={getNotificationTypeStyle}
-                                            getNotificationPriorityStyle={getNotificationPriorityStyle}
-                                        />
-                                    ),
-                                },
-                            ]}
-                        />
-                    </div>
-                )}
-            </CardComponent>
-
-            {/* 通知详情模态框 */}
-            <Modal
-                title={
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg">{selectedNotification?.title}</span>
-                        {selectedNotification && (
-                            <>
-                                {getNotificationTypeTag(selectedNotification.type)}
-                                {getNotificationPriorityTag(selectedNotification.priority)}
-                            </>
-                        )}
-                    </div>
-                }
-                open={notificationDetailVisible}
-                onCancel={() => setNotificationDetailVisible(false)}
-                footer={null}
-                width={600}
-            >
-                {selectedNotification && (
-                    <div className="space-y-4">
-                        <div className="flex justify-between text-sm text-base-content/70 p-3 bg-base-200/50 rounded-lg">
-                            <div className="flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                <span>{selectedNotification.sender}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                                <span>{dayjs(selectedNotification.createTime).format("YYYY-MM-DD HH:mm:ss")}</span>
-                            </div>
-                        </div>
-                        
-                        <div className={`p-4 rounded-lg whitespace-pre-wrap leading-relaxed ${
-                            selectedNotification.priority === "high" 
-                                ? "bg-error/5 border border-error/20" 
-                                : selectedNotification.priority === "medium"
-                                    ? "bg-warning/5 border border-warning/20"
-                                    : "bg-base-200/30"
-                        }`}>
-                            {selectedNotification.content}
-                        </div>
-                        
-                        <div className="flex justify-end pt-4">
-                            <button 
-                                className="btn btn-primary"
-                                onClick={() => setNotificationDetailVisible(false)}
-                            >
-                                关闭
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </Modal>
-        </div>
-    );
-}
-
-/**
- * 通知列表组件
- */
-function NotificationList({ 
-    notifications,
-    onViewNotification,
-    getNotificationTypeTag,
-    getNotificationPriorityTag,
-    getNotificationTypeStyle,
-    getNotificationPriorityStyle
-}: { 
-    notifications: NotificationInfo[],
-    onViewNotification: (notification: NotificationInfo) => void,
-    getNotificationTypeTag: (type: string) => JSX.Element,
-    getNotificationPriorityTag: (priority: string) => JSX.Element,
-    getNotificationTypeStyle: (type: string) => string,
-    getNotificationPriorityStyle: (priority: string) => string
-}): JSX.Element {
-    if (notifications.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-12">
-                <Empty description="暂无通知" />
-            </div>
-        );
+    
+    fetchData();
+  }, []);
+  
+  // 处理查看通知详情
+  const handleViewNotification = (notification: NotificationInfo) => {
+    setCurrentNotification(notification);
+    setIsModalVisible(true);
+    
+    // 如果通知未读，标记为已读
+    if (!notification.read) {
+      handleMarkAsRead(notification.id);
     }
-
-    return (
-        <div className="divide-y">
-            {notifications.map((notification) => (
-                <div 
-                    key={notification.id}
-                    className={`p-4 hover:bg-base-200 cursor-pointer transition-colors ${
-                        !notification.isRead ? `${getNotificationPriorityStyle(notification.priority)}` : ''
-                    }`}
-                    onClick={() => onViewNotification(notification)}
-                >
-                    <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className={`text-lg ${!notification.isRead ? 'font-bold' : ''}`}>
-                                    {notification.title}
-                                </h3>
-                                {!notification.isRead && (
-                                    <Tag color="processing" className="animate-pulse">新</Tag>
-                                )}
-                                {getNotificationTypeTag(notification.type)}
-                                {getNotificationPriorityTag(notification.priority)}
-                            </div>
-                            <p className="text-sm text-base-content/70 line-clamp-2 mb-2">
-                                {notification.content}
-                            </p>
-                            <div className="flex justify-between items-center">
-                                <div className="text-xs text-base-content/50">
-                                    <span className="inline-block mr-2">来自: {notification.sender}</span>
-                                </div>
-                                <button className="btn btn-ghost btn-xs">
-                                    查看详情
-                                    <Right theme="outline" size="12" />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="text-sm text-base-content/50 whitespace-nowrap">
-                            {dayjs(notification.createTime).fromNow()}
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
+  };
+  
+  // 处理标记通知为已读
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      )
     );
-} 
+    
+    // 在实际应用中，应该调用API更新通知状态
+    // await MarkNotificationAsReadAPI(id);
+    
+    // 显示成功提示
+    const messageElement = document.createElement('div');
+    messageElement.className = 'toast toast-top toast-center';
+    messageElement.innerHTML = `
+      <div class="alert alert-success">
+        <span>通知已标记为已读</span>
+      </div>
+    `;
+    document.body.appendChild(messageElement);
+    setTimeout(() => document.body.removeChild(messageElement), 2000);
+  };
+  
+  // 处理删除通知
+  const handleDeleteNotification = (id: string) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.filter(notification => notification.id !== id)
+    );
+    
+    // 在实际应用中，应该调用API删除通知
+    // await DeleteNotificationAPI(id);
+    
+    // 显示成功提示
+    const messageElement = document.createElement('div');
+    messageElement.className = 'toast toast-top toast-center';
+    messageElement.innerHTML = `
+      <div class="alert alert-success">
+        <span>通知已删除</span>
+      </div>
+    `;
+    document.body.appendChild(messageElement);
+    setTimeout(() => document.body.removeChild(messageElement), 2000);
+  };
+  
+  // 处理标记所有通知为已读
+  const handleMarkAllAsRead = () => {
+    setNotifications(prevNotifications => 
+      prevNotifications.map(notification => ({ ...notification, read: true }))
+    );
+    
+    // 在实际应用中，应该调用API批量更新通知状态
+    // await MarkAllNotificationsAsReadAPI();
+    
+    // 显示成功提示
+    const messageElement = document.createElement('div');
+    messageElement.className = 'toast toast-top toast-center';
+    messageElement.innerHTML = `
+      <div class="alert alert-success">
+        <span>所有通知已标记为已读</span>
+      </div>
+    `;
+    document.body.appendChild(messageElement);
+    setTimeout(() => document.body.removeChild(messageElement), 2000);
+  };
+  
+  // 筛选通知
+  const filteredNotifications = notifications.filter(notification => {
+    if (filter === 'unread') return !notification.read;
+    if (filter === 'read') return notification.read;
+    return true;
+  });
+  
+  // 未读通知数量
+  const unreadCount = notifications.filter(notification => !notification.read).length;
+
+  return (
+    <div className="container mx-auto p-4">
+      <CardComponent>
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              <span className="text-xl font-bold">通知中心</span>
+              {unreadCount > 0 && (
+                <div className="badge badge-primary">{unreadCount}</div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button 
+                className="btn btn-primary btn-sm gap-1"
+                onClick={handleMarkAllAsRead}
+                disabled={unreadCount === 0}
+              >
+                <Check theme="outline" size="18" />
+                全部已读
+              </button>
+              <div className="join">
+                <button 
+                  onClick={() => setFilter('all')} 
+                  className={`btn btn-sm join-item ${filter === 'all' ? 'btn-active' : ''}`}
+                >
+                  全部
+                </button>
+                <button 
+                  onClick={() => setFilter('unread')} 
+                  className={`btn btn-sm join-item ${filter === 'unread' ? 'btn-active' : ''}`}
+                >
+                  未读
+                </button>
+                <button 
+                  onClick={() => setFilter('read')} 
+                  className={`btn btn-sm join-item ${filter === 'read' ? 'btn-active' : ''}`}
+                >
+                  已读
+                </button>
+              </div>
+              <button 
+                className="btn btn-outline btn-sm" 
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    setNotifications(mockNotifications);
+                    setLoading(false);
+                  }, 1000);
+                }}
+              >
+                <Refresh theme="outline" size="18" />
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-4">
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="w-3/4">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-1/2"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse mb-1 w-full"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredNotifications.length > 0 ? (
+            <div className="space-y-4">
+              {filteredNotifications.map(notification => (
+                <div 
+                  key={notification.id} 
+                  className={`border rounded-lg p-4 hover:bg-base-200 transition-colors cursor-pointer ${!notification.read ? 'bg-primary/5 border-primary/20' : ''}`}
+                  onClick={() => handleViewNotification(notification)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`badge ${typeColorMap[notification.type]}`}>{typeNameMap[notification.type]}</span>
+                        <h3 className="text-lg font-semibold">{notification.title}</h3>
+                        {!notification.read && (
+                          <span className="badge badge-primary">新</span>
+                        )}
+                      </div>
+                      <p className="text-gray-600 mt-1 line-clamp-2">{notification.content}</p>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <button 
+                        className="btn btn-ghost btn-xs btn-circle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkAsRead(notification.id);
+                        }}
+                        disabled={notification.read}
+                      >
+                        <Check theme="outline" size="16" />
+                      </button>
+                      <button 
+                        className="btn btn-ghost btn-xs btn-circle text-error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNotification(notification.id);
+                        }}
+                      >
+                        <Delete theme="outline" size="16" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 mt-2">
+                    <Time theme="outline" size="14" className="mr-1" />
+                    <span>{notification.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto text-gray-400 mb-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              <p className="text-gray-500">暂无通知</p>
+            </div>
+          )}
+        </div>
+      </CardComponent>
+      
+      {isModalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-base-100 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="text-xl font-bold">{currentNotification?.title}</h3>
+              <button 
+                className="btn btn-ghost btn-sm btn-circle"
+                onClick={() => setIsModalVisible(false)}
+              >
+                <CloseSmall theme="outline" size="20" />
+              </button>
+            </div>
+            
+            {currentNotification && (
+              <div className="p-6">
+                <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+                  <span className={`badge ${typeColorMap[currentNotification.type]}`}>
+                    {typeNameMap[currentNotification.type]}
+                  </span>
+                  <span className="ml-auto flex items-center gap-1">
+                    <Time theme="outline" size="14" />
+                    {currentNotification.time}
+                  </span>
+                </div>
+                <div className="whitespace-pre-line mb-6">{currentNotification.content}</div>
+                
+                <div className="flex justify-end gap-2 mt-4">
+                  <button 
+                    className="btn btn-error btn-sm"
+                    onClick={() => {
+                      if (currentNotification) {
+                        handleDeleteNotification(currentNotification.id);
+                        setIsModalVisible(false);
+                      }
+                    }}
+                  >
+                    <Delete theme="outline" size="16" />
+                    删除
+                  </button>
+                  <button 
+                    className="btn btn-sm"
+                    onClick={() => setIsModalVisible(false)}
+                  >
+                    关闭
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default StudentNotification; 

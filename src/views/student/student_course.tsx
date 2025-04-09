@@ -53,7 +53,7 @@ interface CourseInfo {
   type: '必修' | '选修' | '通识';
 }
 
-const StudentCourse: React.FC = () => {
+export function StudentCourse() {
   // 使用状态管理页面数据和UI状态
   const [loading, setLoading] = useState<boolean>(true);
   const [semesters, setSemesters] = useState<{ id: string; name: string }[]>([]);
@@ -73,10 +73,15 @@ const StudentCourse: React.FC = () => {
     // 获取学期列表
     GetSemesterListAPI()
       .then((result) => {
-        if (result.code === 200 && result.data) {
-          setSemesters(result.data);
-          if (result.data.length > 0) {
-            setCurrentSemester(result.data[0].id);
+        if (result?.code === 200 && result.data) {
+          // 确保类型匹配
+          const formattedData = result.data.map((semester: { semester_uuid: string; name: string }) => ({
+            id: semester.semester_uuid, // 假设 semester_uuid 是正确的 id
+            name: semester.name
+          }));
+          setSemesters(formattedData);
+          if (formattedData.length > 0) {
+            setCurrentSemester(formattedData[0].id);
           }
         } else {
           message.error('获取学期列表失败');
@@ -474,7 +479,7 @@ const StudentCourse: React.FC = () => {
                 setIsModalVisible(false);
               }
             }}
-            disabled={currentCourse?.enrolled >= (currentCourse?.capacity || 0) && !selectionStatus[currentCourse?.id || '']}
+            disabled={currentCourse ? (currentCourse.enrolled >= (currentCourse.capacity || 0) && !selectionStatus[currentCourse.id]) : true}
           >
             {selectionStatus[currentCourse?.id || ''] ? '取消选择' : '选择课程'}
           </button>

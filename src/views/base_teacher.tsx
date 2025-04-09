@@ -40,6 +40,7 @@ import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
 import {teacherRouteConfig} from "../models/config/teacher_route_config";
 import {TeacherNavComponent} from "../components/teacher/teacher_nav_component.tsx";
 import {TeacherDashboard} from "./teacher/teacher_dashboard.tsx";
+import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
 
 /**
  * 生成一个教师控制台组件。
@@ -174,6 +175,8 @@ export function BaseTeacher(): JSX.Element {
                     ))}
                 </animated.div>
             </div>
+            {/* AI聊天组件 */}
+            <AiChatComponent />
         </animated.div>
     );
 } 
