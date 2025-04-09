@@ -26,6 +26,8 @@
  * --------------------------------------------------------------------------------
  */
 
+import { Left, Right, SortFour } from "@icon-park/react";
+
 export function PaginationComponent({
   currentPage,
   totalPages,
@@ -85,25 +87,34 @@ export function PaginationComponent({
   };
 
   return (
-    <div className="flex justify-center mt-4">
-      <div className="join">
+    <div className="flex justify-between items-center p-3 bg-base-100 border-t border-base-200">
+      <div className="text-sm text-base-content/70">
+        共 {totalPages} 页，当前第 {currentPage} 页
+      </div>
+      
+      <div className="join shadow-sm">
         <button
-          className="btn btn-sm join-item"
+          className="btn btn-sm join-item btn-ghost hover:bg-base-200"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          上一页
+          <Left theme="outline" size="16" />
+          <span className="hidden sm:inline ml-1">上一页</span>
         </button>
 
         {getPageNumbers().map((number, index) => 
           number === -1 ? (
-            <button key={`ellipsis-${index}`} className="join-item btn btn-sm btn-disabled">
+            <button key={`ellipsis-${index}`} className="join-item btn btn-sm btn-ghost btn-disabled">
               ...
             </button>
           ) : (
             <button
               key={number}
-              className={`join-item btn btn-sm ${currentPage === number ? 'btn-active' : ''}`}
+              className={`join-item btn btn-sm ${
+                currentPage === number 
+                ? 'btn-primary text-white' 
+                : 'btn-ghost hover:bg-base-200'
+              }`}
               onClick={() => onPageChange(number)}
             >
               {number}
@@ -112,15 +123,18 @@ export function PaginationComponent({
         )}
 
         <button
-          className="btn btn-sm join-item"
+          className="btn btn-sm join-item btn-ghost hover:bg-base-200"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || totalPages === 0}
         >
-          下一页
+          <span className="hidden sm:inline mr-1">下一页</span>
+          <Right theme="outline" size="16" />
         </button>
 
+        <div className="divider divider-horizontal mx-1 h-6 my-auto"></div>
+
         <select
-          className="select select-sm join-item border-l-0"
+          className="select select-sm join-item bg-base-100 border border-base-200 focus:outline-none focus:border-primary"
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
         >
@@ -132,12 +146,23 @@ export function PaginationComponent({
         </select>
 
         <button
-          className={`btn btn-sm join-item ${isDescending ? 'btn-active' : ''}`}
+          className={`btn btn-sm join-item tooltip tooltip-left ${
+            isDescending 
+            ? 'btn-ghost bg-base-200 hover:bg-base-300' 
+            : 'btn-ghost hover:bg-base-200'
+          }`}
           onClick={() => onSortDirectionChange(!isDescending)}
-          title={isDescending ? "当前为降序" : "当前为升序"}
+          data-tip={isDescending ? "当前为降序" : "当前为升序"}
         >
-          {isDescending ? "↓" : "↑"}
+          <SortFour theme="outline" size="16" className={isDescending ? "rotate-180" : ""} />
         </button>
+      </div>
+      
+      <div className="text-sm text-base-content/70">
+        {totalPages === 0 
+          ? "暂无数据" 
+          : `共 ${totalPages * itemsPerPage} 条数据`
+        }
       </div>
     </div>
   );

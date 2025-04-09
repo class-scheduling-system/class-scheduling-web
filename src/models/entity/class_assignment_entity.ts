@@ -26,144 +26,158 @@
  * --------------------------------------------------------------------------------
  */
 
-import { ClassAssignmentEntity } from "./class_assignment_entity";
+/**
+ * # 排课分配实体类
+ * 
+ * 用于表示排课分配信息的实体类
+ */
 
 /**
- * 课程安排实体
+ * 课程时间DTO
  */
-export type ScheduleEntity = {
+export type ClassTimeDTO = {
+    day_of_week: number;
+    period_start: number;
+    period_end: number;
+    week_numbers: number[];
+};
+
+/**
+ * 教学班分配实体
+ */
+export type ClassAssignmentEntity = {
     /**
-     * 课程安排ID
+     * 排课分配UUID
      */
-    id: number;
+    class_assignment_uuid: string;
     
     /**
-     * 课程名称
+     * 学期UUID
      */
-    course: string;
+    semester_uuid: string;
     
     /**
-     * 授课教师
+     * 课程UUID
      */
-    teacher: string;
+    course_uuid: string;
     
     /**
-     * 教室
+     * 教师UUID
      */
-    classroom: string;
+    teacher_uuid: string;
+    
+    /**
+     * 校区UUID
+     */
+    campus_uuid?: string;
+    
+    /**
+     * 教学楼UUID
+     */
+    building_uuid?: string;
+    
+    /**
+     * 教室UUID
+     */
+    classroom_uuid: string;
+    
+    /**
+     * 教学班UUID
+     */
+    teaching_class_uuid?: string;
+    
+    /**
+     * 教学班组成
+     */
+    teaching_class_composition: string;
+    
+    /**
+     * 课程归属
+     */
+    course_ownership: string;
+    
+    /**
+     * 教学班名称
+     */
+    teaching_class_name: string;
+    
+    /**
+     * 学时类型
+     */
+    credit_hour_type: string;
+    
+    /**
+     * 教学学时
+     */
+    teaching_hours: number;
+    
+    /**
+     * 已排学时
+     */
+    scheduled_hours: number;
+    
+    /**
+     * 总学时
+     */
+    total_hours: number;
+    
+    /**
+     * 排课优先级
+     */
+    scheduling_priority: number;
+    
+    /**
+     * 班级人数
+     */
+    class_size: number;
+    
+    /**
+     * 教学校区
+     */
+    teaching_campus: string;
     
     /**
      * 上课时间
      */
-    time: string;
+    class_time: string;
     
     /**
-     * 班级
+     * 连堂课节数
      */
-    class: string;
+    consecutive_sessions: number;
     
     /**
-     * 学期
+     * 教室类型
      */
-    semester: string;
+    classroom_type: string;
     
     /**
-     * 原始数据
+     * 指定教室
      */
-    rawData?: ClassAssignmentEntity;
+    designated_classroom: string;
+    
+    /**
+     * 指定教学楼
+     */
+    designated_teaching_building: string;
+    
+    /**
+     * 指定时间
+     */
+    specified_time: string;
+    
+    /**
+     * 创建时间
+     */
+    created_at: number;
+    
+    /**
+     * 更新时间
+     */
+    updated_at: number;
+    
+    /**
+     * 课程时间DTO
+     */
+    class_time_dto?: ClassTimeDTO[];
 };
-
-/**
- * 教室实体
- */
-export type ClassroomEntity = {
-    /**
-     * 教室ID
-     */
-    id: number;
-    
-    /**
-     * 教室名称
-     */
-    name: string;
-    
-    /**
-     * 所属教学楼
-     */
-    building: string;
-    
-    /**
-     * 容量
-     */
-    capacity: number;
-    
-    /**
-     * 设施
-     */
-    facilities: string;
-    
-    /**
-     * 状态
-     */
-    status: string;
-};
-
-/**
- * 课程表单元格实体
- */
-export type ScheduleGridCell = {
-    /**
-     * 课程ID
-     */
-    id?: number;
-    
-    /**
-     * 课程名称
-     */
-    courseName?: string;
-    
-    /**
-     * 教师姓名
-     */
-    teacherName?: string;
-    
-    /**
-     * 教室
-     */
-    classroom?: string;
-    
-    /**
-     * 行跨度（用于连堂课）
-     */
-    rowSpan?: number;
-    
-    /**
-     * 是否被上一行连堂课占用
-     */
-    isOccupied?: boolean;
-    
-    /**
-     * 周次信息
-     */
-    weekInfo?: string;
-};
-
-/**
- * 课程表实体
- */
-export type ScheduleGridEntity = {
-    /**
-     * 行信息（代表时间段）
-     */
-    rows: string[];
-    
-    /**
-     * 列信息（代表星期）
-     */
-    columns: string[];
-    
-    /**
-     * 课程表数据
-     */
-    grid: ScheduleGridCell[][];
-}; 

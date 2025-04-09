@@ -26,144 +26,151 @@
  * --------------------------------------------------------------------------------
  */
 
-import { ClassAssignmentEntity } from "./class_assignment_entity";
-
 /**
- * 课程安排实体
+ * # 排课分配DTO
+ * 
+ * 用于请求创建排课分配的数据传输对象
  */
-export type ScheduleEntity = {
+export type ClassAssignmentDTO = {
     /**
-     * 课程安排ID
+     * 学期UUID
      */
-    id: number;
+    semester_uuid: string;
     
     /**
-     * 课程名称
+     * 课程UUID
      */
-    course: string;
+    course_uuid: string;
     
     /**
-     * 授课教师
+     * 教师UUID
      */
-    teacher: string;
+    teacher_uuid: string;
     
     /**
-     * 教室
+     * 教室UUID
      */
-    classroom: string;
+    classroom_uuid: string;
+    
+    /**
+     * 教学班组成
+     */
+    teaching_class_composition: string;
+    
+    /**
+     * 课程归属
+     */
+    course_ownership: string;
+    
+    /**
+     * 教学班名称
+     */
+    teaching_class_name: string;
+    
+    /**
+     * 学时类型
+     */
+    credit_hour_type: string;
+    
+    /**
+     * 教学学时
+     */
+    teaching_hours: number;
+    
+    /**
+     * 已排学时
+     */
+    scheduled_hours: number;
+    
+    /**
+     * 总学时
+     */
+    total_hours: number;
+    
+    /**
+     * 排课优先级
+     */
+    scheduling_priority: number;
+    
+    /**
+     * 班级人数
+     */
+    class_size: number;
+    
+    /**
+     * 教学校区
+     */
+    teaching_campus: string;
     
     /**
      * 上课时间
      */
-    time: string;
+    class_time: string;
     
     /**
-     * 班级
+     * 连堂课节数
      */
-    class: string;
+    consecutive_sessions: number;
     
     /**
-     * 学期
+     * 教室类型
      */
-    semester: string;
+    classroom_type: string;
     
     /**
-     * 原始数据
+     * 指定教室
      */
-    rawData?: ClassAssignmentEntity;
-};
+    designated_classroom: string;
+    
+    /**
+     * 指定教学楼
+     */
+    designated_teaching_building: string;
+    
+    /**
+     * 指定时间
+     */
+    specified_time: string;
+}
 
 /**
- * 教室实体
+ * # 排课调整DTO
+ * 
+ * 用于调整排课分配的数据传输对象
  */
-export type ClassroomEntity = {
+export type AdjustmentDTO = {
     /**
-     * 教室ID
+     * 排课分配UUID
      */
-    id: number;
+    class_assignment_uuid: string;
     
     /**
-     * 教室名称
+     * 教室UUID
      */
-    name: string;
+    classroom_uuid?: string;
     
     /**
-     * 所属教学楼
+     * 教师UUID
      */
-    building: string;
+    teacher_uuid?: string;
     
     /**
-     * 容量
+     * 上课时间
      */
-    capacity: number;
+    class_time?: string;
     
     /**
-     * 设施
+     * 连堂课节数
      */
-    facilities: string;
+    consecutive_sessions?: number;
     
     /**
-     * 状态
+     * 排课优先级
      */
-    status: string;
-};
-
-/**
- * 课程表单元格实体
- */
-export type ScheduleGridCell = {
-    /**
-     * 课程ID
-     */
-    id?: number;
+    scheduling_priority?: number;
     
     /**
-     * 课程名称
+     * 调整原因
      */
-    courseName?: string;
-    
-    /**
-     * 教师姓名
-     */
-    teacherName?: string;
-    
-    /**
-     * 教室
-     */
-    classroom?: string;
-    
-    /**
-     * 行跨度（用于连堂课）
-     */
-    rowSpan?: number;
-    
-    /**
-     * 是否被上一行连堂课占用
-     */
-    isOccupied?: boolean;
-    
-    /**
-     * 周次信息
-     */
-    weekInfo?: string;
-};
-
-/**
- * 课程表实体
- */
-export type ScheduleGridEntity = {
-    /**
-     * 行信息（代表时间段）
-     */
-    rows: string[];
-    
-    /**
-     * 列信息（代表星期）
-     */
-    columns: string[];
-    
-    /**
-     * 课程表数据
-     */
-    grid: ScheduleGridCell[][];
-}; 
+    reason: string;
+} 

@@ -33,7 +33,6 @@ import { UserInfoEntity } from "../models/entity/user_info_entity";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 import { animated, useSpring, useTransition } from "@react-spring/web";
 import { AdminNotFound } from "./404/medium_page_not_found";
-import cookie from "react-cookies";
 import { message } from "antd";
 import { StudentNavComponent } from "../components/student/student_nav_component";
 import { StudentDashboard } from "./student/student_dashboard";

@@ -37,11 +37,26 @@ import {
 import { ScheduleListComponent } from "../../components/academic/schedule/schedule_list_component.tsx";
 import { PaginationComponent } from "../../components/academic/schedule/pagination_component.tsx";
 import { ScheduleGridComponent } from "../../components/academic/schedule/schedule_grid_component.tsx";
-import { Breadcrumb, BreadcrumbItem } from "../../components/breadcrumb_component";
 import { message } from "antd";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useNavigate } from "react-router";
 import { TimetableComponent } from "../../components/academic/schedule/timetable_component";
+import { GetClassAssignmentPageAPI } from "../../apis/class_assignment_api";
+import { ClassAssignmentEntity } from "../../models/entity/class_assignment_entity";
+import { GetSemesterListAPI } from "../../apis/semester_api";
+import { SemesterEntity } from "../../models/entity/semester_entity";
+import { GetAllAdministrativeClassListAPI } from "../../apis/administrative_class_api";
+import { AdministrativeClassEntity } from "../../models/entity/administrative_class_entity";
+import { GetClassroomListAPI } from "../../apis/classroom_api";
+import { ClassroomLiteEntity } from "../../models/entity/classroom_lite_entity";
+import { GetTeacherListAPI } from "../../apis/teacher_api";
+import { TeacherLiteEntity } from "../../models/entity/teacher_lite_entity";
+import { GetCourseListAPI } from "../../apis/course_api";
+import { GetCampusListAPI } from "../../apis/campus_api";
+import { GetBuildingListAPI } from "../../apis/building_api";
+import { GetTeachingClassListAPI } from "../../apis/teaching_class_api";
+import { TeachingClassLiteEntity } from "../../models/entity/teaching_class_entity";
+import { BuildingLiteEntity } from "../../models/entity/building_lite_entity";
+import { CampusEntity } from "../../models/entity/campus_entity";
+import { CourseLibraryLiteEntity } from "../../models/entity/course_library_lite_entity";
 
 /**
  * # 排课管理组件
@@ -60,29 +75,44 @@ export function AcademicSchedule({site}: Readonly<{
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isDescending, setIsDescending] = useState(true);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState(false);
     
     // 视图状态
     const [viewMode, setViewMode] = useState<"list" | "grid" | "timetable">("list");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [selectedSchedule, setSelectedSchedule] = useState<ScheduleEntity | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<{type: string, value: string} | null>(null);
+    
+    // API数据状态
+    const [classAssignments, setClassAssignments] = useState<ClassAssignmentEntity[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [selectedSemester, setSelectedSemester] = useState(""); // 可以设置为默认值或从API获取
+    const [semesters, setSemesters] = useState<SemesterEntity[]>([]);
+    const [loadingSemesters, setLoadingSemesters] = useState(false);
+    
+    // 添加新状态
+    const [administrativeClasses, setAdministrativeClasses] = useState<AdministrativeClassEntity[]>([]);
+    const [selectedClass, setSelectedClass] = useState("");
+    const [loadingClasses, setLoadingClasses] = useState(false);
+    
+    const [classrooms, setClassrooms] = useState<ClassroomLiteEntity[]>([]);
+    const [selectedClassroom, setSelectedClassroom] = useState("");
+    const [loadingClassrooms, setLoadingClassrooms] = useState(false);
+    
+    const [teachers, setTeachers] = useState<TeacherLiteEntity[]>([]);
+    const [selectedTeacher, setSelectedTeacher] = useState("");
+    const [loadingTeachers, setLoadingTeachers] = useState(false);
     
     // 搜索引用
     const inputFocus = useRef<HTMLInputElement>(null);
     
-    // 模拟数据 - 实际应用中应该通过API获取
-    const [schedules] = useState<ScheduleEntity[]>([
-        { id: 1, course: "计算机导论", teacher: "张教授", classroom: "主教101", time: "周一 1-2节", class: "计科2101", semester: "2024-2025-2" },
-        { id: 2, course: "数据结构", teacher: "李教授", classroom: "主教102", time: "周一 3-4节", class: "计科2101", semester: "2024-2025-2" },
-        { id: 3, course: "算法设计", teacher: "王教授", classroom: "主教103", time: "周二 1-2节", class: "软工2102", semester: "2024-2025-2" },
-        { id: 4, course: "操作系统", teacher: "刘教授", classroom: "主教201", time: "周二 3-4节", class: "软工2102", semester: "2024-2025-2" },
-        { id: 5, course: "数据库系统", teacher: "陈教授", classroom: "主教202", time: "周三 1-2节", class: "计科2101", semester: "2024-2025-2" },
-        { id: 6, course: "计算机网络", teacher: "张教授", classroom: "主教203", time: "周三 3-4节", class: "软工2102", semester: "2024-2025-2" },
-        { id: 7, course: "软件工程", teacher: "吴教授", classroom: "主教301", time: "周四 1-2节", class: "计科2101", semester: "2024-2025-2" },
-        { id: 8, course: "人工智能", teacher: "赵教授", classroom: "主教302", time: "周四 3-4节", class: "软工2102", semester: "2024-2025-2" }
-    ]);
+    // 添加新的列表状态
+    const [courseList, setCourseList] = useState<CourseLibraryLiteEntity[]>([]);
+    const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
+    const [campusList, setCampusList] = useState<CampusEntity[]>([]);
+    
+    // 在state声明中添加教学班相关状态
+    const [teachingClasses, setTeachingClasses] = useState<TeachingClassLiteEntity[]>([]);
+    const [selectedTeachingClass, setSelectedTeachingClass] = useState<string>("");
+    const [loadingTeachingClasses, setLoadingTeachingClasses] = useState<boolean>(false);
     
     // 设置页面标题
     useEffect(() => {
@@ -104,10 +134,357 @@ export function AcademicSchedule({site}: Readonly<{
         };
     }, []);
     
+    // 加载学期数据
+    const loadSemesters = async () => {
+        try {
+            setLoadingSemesters(true);
+            const response = await GetSemesterListAPI();
+            
+            console.log("学期数据响应:", response);
+            
+            if (response && response.output === "Success" && response.data) {
+                console.log("设置学期数据:", response.data);
+                setSemesters(response.data);
+                
+                // 如果有学期数据且未选择学期，则默认选择第一个启用的学期
+                if (response.data.length > 0 && !selectedSemester) {
+                    const enabledSemesters = response.data.filter(sem => sem.is_enabled);
+                    if (enabledSemesters.length > 0) {
+                        setSelectedSemester(enabledSemesters[0].semester_uuid);
+                    } else {
+                        setSelectedSemester(response.data[0].semester_uuid);
+                    }
+                }
+            } else {
+                message.error("获取学期数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载学期数据出错", error);
+            message.error("加载学期数据出错");
+        } finally {
+            setLoadingSemesters(false);
+        }
+    };
+    
+    // 加载行政班级数据
+    const loadAdministrativeClasses = async () => {
+        try {
+            setLoadingClasses(true);
+            const response = await GetAllAdministrativeClassListAPI();
+            
+            console.log("班级数据响应:", response);
+            
+            if (response && response.output === "Success" && response.data) {
+                console.log("设置班级数据:", response.data);
+                setAdministrativeClasses(response.data);
+            } else {
+                message.error("获取班级数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载班级数据出错", error);
+            message.error("加载班级数据出错");
+        } finally {
+            setLoadingClasses(false);
+        }
+    };
+    
+    // 加载教室数据
+    const loadClassrooms = async () => {
+        try {
+            setLoadingClassrooms(true);
+            const response = await GetClassroomListAPI();
+            
+            console.log("教室数据响应:", response);
+            
+            if (response && response.output === "Success" && response.data) {
+                console.log("设置教室数据:", response.data);
+                setClassrooms(response.data);
+            } else {
+                message.error("获取教室数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载教室数据出错", error);
+            message.error("加载教室数据出错");
+        } finally {
+            setLoadingClassrooms(false);
+        }
+    };
+    
+    // 加载教师数据
+    const loadTeachers = async () => {
+        try {
+            setLoadingTeachers(true);
+            const response = await GetTeacherListAPI();
+            
+            console.log("教师数据响应:", response);
+            
+            if (response && response.output === "Success" && response.data) {
+                console.log("设置教师数据:", response.data);
+                setTeachers(response.data);
+            } else {
+                message.error("获取教师数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载教师数据出错", error);
+            message.error("加载教师数据出错");
+        } finally {
+            setLoadingTeachers(false);
+        }
+    };
+    
+    // 加载课程数据
+    const loadCourses = async () => {
+        try {
+            const response = await GetCourseListAPI();
+            
+            if (response && response.output === "Success" && response.data) {
+                setCourseList(response.data);
+            } else {
+                message.error("获取课程数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载课程数据出错", error);
+            message.error("加载课程数据出错");
+        }
+    };
+    
+    // 加载教学楼数据
+    const loadBuildings = async () => {
+        try {
+            const response = await GetBuildingListAPI();
+            
+            if (response && response.output === "Success" && response.data) {
+                setBuildingList(response.data);
+            } else {
+                message.error("获取教学楼数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载教学楼数据出错", error);
+            message.error("加载教学楼数据出错");
+        }
+    };
+    
+    // 加载校区数据
+    const loadCampuses = async () => {
+        try {
+            const response = await GetCampusListAPI();
+            
+            if (response && response.output === "Success" && response.data) {
+                setCampusList(response.data);
+            } else {
+                message.error("获取校区数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载校区数据出错", error);
+            message.error("加载校区数据出错");
+        }
+    };
+    
+    // 添加加载教学班数据的函数
+    const loadTeachingClasses = async () => {
+        if (!selectedSemester) return;
+        
+        try {
+            setLoadingTeachingClasses(true);
+            const response = await GetTeachingClassListAPI({
+                semester_uuid: selectedSemester,
+                is_enabled: true
+            });
+            
+            console.log("教学班数据响应:", response);
+            
+            if (response && response.output === "Success" && response.data) {
+                console.log("设置教学班数据:", response.data);
+                setTeachingClasses(response.data);
+            } else {
+                message.error("获取教学班数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载教学班数据出错", error);
+            message.error("加载教学班数据出错");
+        } finally {
+            setLoadingTeachingClasses(false);
+        }
+    };
+    
+    // 初始化加载所有下拉数据
+    useEffect(() => {
+        loadSemesters();
+        loadAdministrativeClasses();
+        loadClassrooms();
+        loadTeachers();
+        loadCourses();
+        loadBuildings();
+        loadCampuses();
+    }, []);
+    
+    // 在 useEffect 中添加对学期变更的监听，加载对应的教学班
+    useEffect(() => {
+        if (selectedSemester) {
+            loadTeachingClasses();
+        }
+    }, [selectedSemester]);
+    
+    // 加载排课分配数据
+    const loadClassAssignments = async () => {
+        if (!selectedSemester) return;
+        
+        try {
+            setLoading(true);
+            const params = {
+                page: currentPage,
+                size: itemsPerPage,
+                semester_uuid: selectedSemester,
+                administrative_class_uuid: selectedClass || undefined,
+                classroom_uuid: selectedClassroom || undefined,
+                teacher_uuid: selectedTeacher || undefined,
+                teaching_class_uuid: selectedTeachingClass || undefined
+            };
+            
+            const response = await GetClassAssignmentPageAPI(params);
+            
+            if (response && response.output === "Success" && response.data) {
+                setClassAssignments(response.data.records);
+                setTotalPages(Math.ceil(response.data.total / itemsPerPage));
+            } else {
+                message.error("获取排课数据失败：" + (response?.error_message || "未知错误"));
+            }
+        } catch (error) {
+            console.error("加载排课数据出错", error);
+            message.error("加载排课数据出错");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // 当依赖项变化时重新加载数据
+    useEffect(() => {
+        if (selectedSemester) {
+            loadClassAssignments();
+        }
+    }, [currentPage, itemsPerPage, selectedSemester, selectedClass, selectedClassroom, selectedTeacher, selectedTeachingClass]);
+    
+    // 将API数据转换为组件所需的ScheduleEntity类型
+    const convertAssignmentsToSchedules = (): ScheduleEntity[] => {
+        if (!classAssignments || classAssignments.length === 0) {
+            return [];
+        }
+        
+        return classAssignments.map(assignment => {
+            if (!assignment) return {} as ScheduleEntity;
+            
+            // 获取课程名称
+            let courseName = `课程${assignment.course_uuid?.substring(0, 6) || "未知"}`;
+            const foundCourse = courseList.find((c: CourseLibraryLiteEntity) => c.course_library_uuid === assignment.course_uuid);
+            if (foundCourse) {
+                courseName = foundCourse.name || courseName;
+            }
+            
+            // 获取教师姓名
+            let teacherName = `教师${assignment.teacher_uuid?.substring(0, 6) || "未知"}`;
+            if (assignment.teacher_uuid) {
+                const foundTeacher = teachers.find(t => t.teacher_uuid === assignment.teacher_uuid);
+                if (foundTeacher) {
+                    teacherName = foundTeacher.teacher_name || teacherName;
+                }
+            }
+            
+            // 获取教室名称
+            let classroomName = `教室${assignment.classroom_uuid?.substring(0, 6) || "未指定"}`;
+            if (assignment.classroom_uuid) {
+                const foundClassroom = classrooms.find(c => c.classroom_uuid === assignment.classroom_uuid);
+                if (foundClassroom && foundClassroom.name) {
+                    classroomName = foundClassroom.name;
+                }
+            }
+            
+            // 获取教学楼名称
+            let buildingName = "";
+            if (assignment.building_uuid) {
+                const foundBuilding = buildingList.find(b => b.building_uuid === assignment.building_uuid);
+                if (foundBuilding) {
+                    buildingName = foundBuilding.building_name || "";
+                }
+            }
+            
+            // 获取校区名称
+            let campusName = "";
+            if (assignment.campus_uuid) {
+                const foundCampus = campusList.find(c => c.campus_uuid === assignment.campus_uuid);
+                if (foundCampus) {
+                    campusName = foundCampus.campus_name || "";
+                }
+            }
+            
+            // 处理时间信息
+            let timeDescription = "";
+            if (assignment.class_time_dto && Array.isArray(assignment.class_time_dto)) {
+                timeDescription = assignment.class_time_dto.map(time => {
+                    // 转换星期几 (1-7 对应周一至周日)
+                    const dayMap = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+                    const day = dayMap[time.day_of_week - 1] || "未知";
+                    
+                    // 获取节次信息
+                    const periods = `${time.period_start}-${time.period_end}节`;
+                    
+                    // 获取周次信息
+                    let weeks = "";
+                    if (time.week_numbers && time.week_numbers.length > 0) {
+                        if (time.week_numbers.length > 5) {
+                            weeks = `第${time.week_numbers[0]}-${time.week_numbers[time.week_numbers.length-1]}周`;
+                        } else {
+                            weeks = `第${time.week_numbers.join(',')}周`;
+                        }
+                    }
+                    
+                    return `${day} ${periods} ${weeks}`;
+                }).join('、');
+            } else if (assignment.specified_time) {
+                timeDescription = `指定时间: ${assignment.specified_time}`;
+            } else {
+                timeDescription = "未排时间";
+            }
+            
+            // 获取教学班名称
+            let className = assignment.teaching_class_name || `教学班${assignment.teaching_class_uuid?.substring(0, 6) || "未知"}`;
+            
+            // 如果没有教学班名称，尝试从教学班列表中查找
+            if (assignment.teaching_class_uuid && teachingClasses.length > 0) {
+                const foundTeachingClass = teachingClasses.find(tc => tc.teaching_class_uuid === assignment.teaching_class_uuid);
+                if (foundTeachingClass) {
+                    className = foundTeachingClass.teaching_class_name;
+                }
+            }
+            
+            // 获取学期名称
+            let semesterName = `学期${assignment.semester_uuid?.substring(0, 6) || "未知"}`;
+            if (assignment.semester_uuid) {
+                const foundSemester = semesters.find(s => s.semester_uuid === assignment.semester_uuid);
+                if (foundSemester) {
+                    semesterName = foundSemester.name;
+                }
+            }
+            
+            // 创建格式化后的地点信息
+            const location = classroomName + (buildingName ? ` (${buildingName})` : "") + (campusName ? ` [${campusName}]` : "");
+            
+            return {
+                id: parseInt(assignment.class_assignment_uuid?.substring(0, 8) || "0", 16),
+                course: courseName,
+                teacher: teacherName,
+                classroom: location,
+                time: timeDescription,
+                class: className,
+                semester: semesterName,
+                rawData: assignment
+            };
+        }).filter(Boolean);
+    };
+    
     // 模拟二维课程表数据
     const generateScheduleGrid = (filterType: string, filterValue: string): ScheduleGridEntity => {
         // 定义行（节次）和列（星期）
-        const rows = ["第1节", "第2节", "第3节", "第4节", "第5节", "第6节", "第7节", "第8节"];
+        const rows = ["第1节", "第2节", "第3节", "第4节", "第5节", "第6节", "第7节", "第8节", "第9节", "第10节", "第11节", "第12节"];
         const columns = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
         
         // 初始化空网格
@@ -120,7 +497,9 @@ export function AcademicSchedule({site}: Readonly<{
         }
         
         // 根据筛选条件填充网格数据
-        const filteredSchedules = schedules.filter(schedule => {
+        const filteredSchedules = convertAssignmentsToSchedules().filter(schedule => {
+            if (!schedule) return false;
+            
             if (filterType === "class") {
                 return schedule.class === filterValue;
             } else if (filterType === "teacher") {
@@ -131,36 +510,47 @@ export function AcademicSchedule({site}: Readonly<{
             return false;
         });
         
+        // 如果没有数据，返回空网格
+        if (filteredSchedules.length === 0) {
+            return { rows, columns, grid };
+        }
+        
         // 填充课程数据到网格
         filteredSchedules.forEach(schedule => {
-            // 解析时间信息，例如："周一 1-2节"
-            const dayMatch = schedule.time.match(/周(一|二|三|四|五|六|日)/);
-            const periodMatch = schedule.time.match(/(\d+)-(\d+)节/);
+            if (!schedule || !schedule.rawData || !schedule.rawData.class_time_dto) return;
             
-            if (dayMatch && periodMatch) {
-                const dayMap: {[key: string]: number} = {
-                    "一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6
-                };
-                const day = dayMap[dayMatch[1]];
-                const startPeriod = parseInt(periodMatch[1]) - 1;
-                const endPeriod = parseInt(periodMatch[2]) - 1;
+            // 处理每个时间段
+            schedule.rawData.class_time_dto.forEach(timeSlot => {
+                const dayIndex = timeSlot.day_of_week - 1; // 转换为0-6
+                const startPeriod = timeSlot.period_start - 1; // 转换为0-based索引
+                const endPeriod = timeSlot.period_end - 1;
                 
-                // 填充第一个单元格
-                grid[startPeriod][day] = {
-                    id: schedule.id,
-                    courseName: schedule.course,
-                    teacherName: schedule.teacher,
-                    classroom: schedule.classroom,
-                    rowSpan: endPeriod - startPeriod + 1
-                };
-                
-                // 标记被连堂课占用的单元格
-                for (let i = startPeriod + 1; i <= endPeriod; i++) {
-                    grid[i][day] = {
-                        isOccupied: true
+                // 检查索引是否在有效范围内
+                if (dayIndex >= 0 && dayIndex < columns.length && 
+                    startPeriod >= 0 && startPeriod < rows.length &&
+                    endPeriod >= 0 && endPeriod < rows.length) {
+                    
+                    // 填充第一个单元格
+                    grid[startPeriod][dayIndex] = {
+                        id: schedule.id,
+                        courseName: schedule.course,
+                        teacherName: schedule.teacher,
+                        classroom: schedule.classroom,
+                        rowSpan: endPeriod - startPeriod + 1,
+                        weekInfo: timeSlot.week_numbers && timeSlot.week_numbers.length > 0 ? 
+                            `第${timeSlot.week_numbers[0]}-${timeSlot.week_numbers[timeSlot.week_numbers.length-1]}周` : ""
                     };
+                    
+                    // 标记被连堂课占用的单元格
+                    for (let i = startPeriod + 1; i <= endPeriod; i++) {
+                        if (i < rows.length) {
+                            grid[i][dayIndex] = {
+                                isOccupied: true
+                            };
+                        }
+                    }
                 }
-            }
+            });
         });
         
         return { rows, columns, grid };
@@ -168,12 +558,13 @@ export function AcademicSchedule({site}: Readonly<{
     
     // 基于搜索词筛选数据
     const getFilteredSchedules = () => {
-        return schedules.filter(schedule => 
-            schedule.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            schedule.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            schedule.classroom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            schedule.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            schedule.semester.toLowerCase().includes(searchTerm.toLowerCase())
+        const convertedSchedules = convertAssignmentsToSchedules();
+        return convertedSchedules.filter(schedule => 
+            (schedule.course?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (schedule.teacher?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (schedule.classroom?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (schedule.class?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (schedule.semester?.toLowerCase() || "").includes(searchTerm.toLowerCase())
         );
     };
     
@@ -185,25 +576,20 @@ export function AcademicSchedule({site}: Readonly<{
     
     // 获取当前页数据
     const getCurrentPageSchedules = () => {
-        const sortedData = getSortedSchedules();
-        const indexOfLastItem = currentPage * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-        return sortedData.slice(indexOfFirstItem, indexOfLastItem);
-    };
-    
-    // 计算总页数
-    const getTotalPages = () => {
-        return Math.ceil(getFilteredSchedules().length / itemsPerPage);
+        return getSortedSchedules();
     };
     
     // 重置筛选条件
     const handleReset = () => {
         setSearchTerm("");
         setCurrentPage(1);
+        setSelectedClass("");
+        setSelectedClassroom("");
+        setSelectedTeacher("");
+        setSelectedTeachingClass("");
         
         if (viewMode === "grid") {
             setViewMode("list");
-            setSelectedSchedule(null);
             setSelectedFilter(null);
         }
     };
@@ -211,7 +597,6 @@ export function AcademicSchedule({site}: Readonly<{
     // 视图切换处理
     const handleViewScheduleGrid = (schedule: ScheduleEntity, filterType: string) => {
         setViewMode("grid");
-        setSelectedSchedule(schedule);
         
         let filterValue = "";
         if (filterType === "class") {
@@ -228,7 +613,6 @@ export function AcademicSchedule({site}: Readonly<{
     // 返回列表视图
     const handleBackToList = () => {
         setViewMode("list");
-        setSelectedSchedule(null);
         setSelectedFilter(null);
     };
     
@@ -238,79 +622,103 @@ export function AcademicSchedule({site}: Readonly<{
             return { rows: [], columns: [], grid: [] };
         }
         
+        // 检查是否有转换后的课程表数据
+        const schedules = convertAssignmentsToSchedules();
+        if (!schedules || schedules.length === 0) {
+            // 如果没有数据，返回默认的空网格
+            return { 
+                rows: ["第1节", "第2节", "第3节", "第4节", "第5节", "第6节", "第7节", "第8节", "第9节", "第10节", "第11节", "第12节"], 
+                columns: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+                grid: [] 
+            };
+        }
+        
         return generateScheduleGrid(selectedFilter.type, selectedFilter.value);
     };
     
     // 添加排课
     const handleAddSchedule = () => {
         message.info("添加排课功能待实现");
-        // 实际应用中应该跳转到添加排课页面
-        // navigate("/academic/schedule/add");
     };
     
     // 编辑排课
     const handleEditSchedule = (schedule: ScheduleEntity) => {
         message.info(`编辑排课：${schedule.course}`);
-        // 实际应用中应该跳转到编辑排课页面
-        // navigate(`/academic/schedule/edit/${schedule.id}`);
     };
     
     // 复制排课
     const handleCopySchedule = (schedule: ScheduleEntity) => {
         message.info(`复制排课：${schedule.course}`);
-        // 实际应用中应该显示复制排课对话框或跳转到复制排课页面
     };
     
     // 删除排课
     const handleDeleteSchedule = (schedule: ScheduleEntity) => {
         message.info(`删除排课：${schedule.course}`);
-        // 实际应用中应该显示确认删除对话框
+    };
+    
+    // 获取学期名称
+    const getSemesterName = (uuid: string): string => {
+        const semester = semesters.find(sem => sem.semester_uuid === uuid);
+        return semester ? semester.name : "未知学期";
     };
     
     // 渲染页面内容
     return (
         <div className="space-y-4 w-full">
-            <Breadcrumb>
-                <BreadcrumbItem href="/academic">教务中心</BreadcrumbItem>
-                <BreadcrumbItem active>排课管理</BreadcrumbItem>
-                {viewMode === "grid" && selectedFilter && (
-                    <BreadcrumbItem active>
-                        {selectedFilter.type === "class" && "班级课表"}
-                        {selectedFilter.type === "teacher" && "教师课表"}
-                        {selectedFilter.type === "classroom" && "教室课表"}
-                    </BreadcrumbItem>
-                )}
-                {viewMode === "timetable" && (
-                    <BreadcrumbItem active>课程总表</BreadcrumbItem>
-                )}
-            </Breadcrumb>
+            {viewMode === "list" && (
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <Schedule theme="outline" size="24" />
+                        排课管理
+                    </h1>
+                    
+                    <div className="flex gap-2">
+                        <button 
+                            className="btn btn-outline btn-sm"
+                            onClick={() => setViewMode("timetable")}
+                        >
+                            查看课程表
+                        </button>
+                        <button 
+                            className="btn btn-primary btn-sm flex items-center gap-1"
+                            onClick={handleAddSchedule}
+                        >
+                            <AddOne theme="outline" size="16" />
+                            <span>添加排课</span>
+                        </button>
+                    </div>
+                </div>
+            )}
             
             {viewMode === "list" ? (
                 <>
                     <div className="flex flex-col lg:flex-row gap-4">
                         {/* 左侧筛选区 */}
-                        <div className="lg:w-72 w-full">
-                            <div className="card bg-base-100 shadow-sm">
-                                <div className="card-body gap-4">
-                                    <h3 className="text-lg font-medium">排课筛选</h3>
+                        <div className="lg:w-80 w-full">
+                            <div className="card bg-base-100 shadow-xl border border-base-200 rounded-xl overflow-hidden">
+                                <div className="card-body p-5">
+                                    <h3 className="text-lg font-semibold flex items-center gap-2 pb-2 border-b border-base-200">
+                                        <Search theme="outline" size="20" />
+                                        排课筛选
+                                    </h3>
                                     
                                     {/* 搜索框 */}
-                                    <div className="relative">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                    <div className="relative mt-4">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary">
                                             <Search theme="outline" size="18" />
                                         </div>
                                         <input
                                             ref={inputFocus}
                                             type="text"
-                                            placeholder="搜索排课..."
-                                            className="input input-bordered w-full pl-10 pr-16"
+                                            placeholder="搜索排课内容..."
+                                            className="input input-bordered input-primary w-full pl-10 pr-16 focus:ring-2 focus:ring-primary/20 transition-all"
                                             value={searchTerm}
                                             onChange={(e) => {
                                                 setSearchTerm(e.target.value);
                                                 setCurrentPage(1);
                                             }}
                                         />
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center opacity-70">
                                             <kbd className="kbd kbd-sm">Ctrl</kbd>
                                             <span className="mx-1">+</span>
                                             <kbd className="kbd kbd-sm">K</kbd>
@@ -319,40 +727,165 @@ export function AcademicSchedule({site}: Readonly<{
                                     
                                     {/* 重置按钮 */}
                                     <button 
-                                        className="btn btn-outline btn-sm w-full"
+                                        className="btn btn-outline btn-sm w-full mt-3 hover:bg-base-200 transition-all"
                                         onClick={handleReset}
                                     >
-                                        重置筛选
+                                        重置所有筛选条件
                                     </button>
                                     
-                                    {/* 筛选条件列表 - 实际应用中可以添加更多筛选条件 */}
-                                    <div className="space-y-2 mt-2">
-                                        <h4 className="text-sm font-medium">学期</h4>
-                                        <select className="select select-bordered w-full">
-                                            <option value="">所有学期</option>
-                                            <option value="2024-2025-2">2024-2025学年第2学期</option>
-                                            <option value="2024-2025-1">2024-2025学年第1学期</option>
-                                        </select>
-                                        
-                                        <h4 className="text-sm font-medium mt-4">班级</h4>
-                                        <select className="select select-bordered w-full">
-                                            <option value="">所有班级</option>
-                                            <option value="计科2101">计科2101</option>
-                                            <option value="软工2102">软工2102</option>
-                                        </select>
-                                        
-                                        {/* 课程表视图按钮 */}
-                                        <div className="mt-6">
-                                            <button 
-                                                className="btn btn-primary w-full"
-                                                onClick={() => {
-                                                    // 直接切换到课程表视图模式
-                                                    setViewMode("timetable");
-                                                }}
+                                    {/* 筛选条件列表 */}
+                                    <div className="divider my-2"></div>
+                                    
+                                    <div className="space-y-4 mt-1">
+                                        <div className="filter-group">
+                                            <label className="text-sm font-medium flex items-center gap-1.5 mb-1.5 text-primary">
+                                                <div className="w-1 h-4 bg-primary rounded-full"></div>
+                                                学期选择
+                                            </label>
+                                            <select 
+                                                className="select select-bordered w-full hover:border-primary focus:border-primary transition-colors"
+                                                value={selectedSemester}
+                                                onChange={(e) => setSelectedSemester(e.target.value)}
+                                                disabled={loadingSemesters}
                                             >
-                                                查看课程表视图
-                                            </button>
+                                                {semesters.map(semester => (
+                                                    <option 
+                                                        key={semester.semester_uuid} 
+                                                        value={semester.semester_uuid}
+                                                    >
+                                                        {semester.name} {semester.is_enabled ? "(启用中)" : ""}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {loadingSemesters && (
+                                                <div className="text-xs text-base-content/70 mt-1 flex items-center">
+                                                    <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                    加载学期数据中...
+                                                </div>
+                                            )}
                                         </div>
+                                        
+                                        <div className="filter-group">
+                                            <label className="text-sm font-medium flex items-center gap-1.5 mb-1.5 text-primary">
+                                                <div className="w-1 h-4 bg-primary rounded-full"></div>
+                                                教学班选择
+                                            </label>
+                                            <select 
+                                                className="select select-bordered w-full hover:border-primary focus:border-primary transition-colors"
+                                                value={selectedTeachingClass}
+                                                onChange={(e) => setSelectedTeachingClass(e.target.value)}
+                                                disabled={loadingTeachingClasses || !selectedSemester}
+                                            >
+                                                <option value="">选择教学班</option>
+                                                {teachingClasses.map((teachingClass) => (
+                                                    <option 
+                                                        key={teachingClass.teaching_class_uuid} 
+                                                        value={teachingClass.teaching_class_uuid}
+                                                    >
+                                                        {teachingClass.teaching_class_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {loadingTeachingClasses && (
+                                                <div className="text-xs text-base-content/70 mt-1 flex items-center">
+                                                    <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                    加载教学班数据中...
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="filter-group">
+                                            <label className="text-sm font-medium flex items-center gap-1.5 mb-1.5 text-primary">
+                                                <div className="w-1 h-4 bg-primary rounded-full"></div>
+                                                班级选择
+                                            </label>
+                                            <select 
+                                                className="select select-bordered w-full hover:border-primary focus:border-primary transition-colors"
+                                                value={selectedClass}
+                                                onChange={(e) => setSelectedClass(e.target.value)}
+                                                disabled={loadingClasses}
+                                            >
+                                                <option value="">所有班级</option>
+                                                {administrativeClasses.map(cls => (
+                                                    <option 
+                                                        key={cls.administrative_class_uuid} 
+                                                        value={cls.administrative_class_uuid}
+                                                    >
+                                                        {cls.class_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {loadingClasses && (
+                                                <div className="text-xs text-base-content/70 mt-1 flex items-center">
+                                                    <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                    加载班级数据中...
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="filter-group">
+                                            <label className="text-sm font-medium flex items-center gap-1.5 mb-1.5 text-primary">
+                                                <div className="w-1 h-4 bg-primary rounded-full"></div>
+                                                教室选择
+                                            </label>
+                                            <select 
+                                                className="select select-bordered w-full hover:border-primary focus:border-primary transition-colors"
+                                                value={selectedClassroom}
+                                                onChange={(e) => setSelectedClassroom(e.target.value)}
+                                                disabled={loadingClassrooms}
+                                            >
+                                                <option value="">所有教室</option>
+                                                {classrooms.map(room => (
+                                                    <option 
+                                                        key={room.classroom_uuid} 
+                                                        value={room.classroom_uuid}
+                                                    >
+                                                        {room.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {loadingClassrooms && (
+                                                <div className="text-xs text-base-content/70 mt-1 flex items-center">
+                                                    <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                    加载教室数据中...
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="filter-group">
+                                            <label className="text-sm font-medium flex items-center gap-1.5 mb-1.5 text-primary">
+                                                <div className="w-1 h-4 bg-primary rounded-full"></div>
+                                                教师选择
+                                            </label>
+                                            <select 
+                                                className="select select-bordered w-full hover:border-primary focus:border-primary transition-colors"
+                                                value={selectedTeacher}
+                                                onChange={(e) => setSelectedTeacher(e.target.value)}
+                                                disabled={loadingTeachers}
+                                            >
+                                                <option value="">所有教师</option>
+                                                {teachers.map(teacher => (
+                                                    <option 
+                                                        key={teacher.teacher_uuid} 
+                                                        value={teacher.teacher_uuid}
+                                                    >
+                                                        {teacher.teacher_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {loadingTeachers && (
+                                                <div className="text-xs text-base-content/70 mt-1 flex items-center">
+                                                    <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                    加载教师数据中...
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="divider my-2"></div>
+                                    
+                                    <div className="text-xs text-base-content/60 bg-base-200/50 p-2 rounded-md">
+                                        <p>选择筛选条件后系统将自动加载符合条件的排课数据</p>
                                     </div>
                                 </div>
                             </div>
@@ -360,21 +893,6 @@ export function AcademicSchedule({site}: Readonly<{
                         
                         {/* 右侧内容区 */}
                         <div className="flex-1 flex flex-col gap-4">
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-2xl font-bold flex items-center gap-2">
-                                    <Schedule theme="outline" size="24" />
-                                    排课管理
-                                </h1>
-                                
-                                <button 
-                                    className="btn btn-primary flex items-center gap-1"
-                                    onClick={handleAddSchedule}
-                                >
-                                    <AddOne theme="outline" size="18" />
-                                    <span>添加排课</span>
-                                </button>
-                            </div>
-                            
                             <ScheduleListComponent
                                 schedules={getCurrentPageSchedules()}
                                 loading={loading}
@@ -386,7 +904,7 @@ export function AcademicSchedule({site}: Readonly<{
                             
                             <PaginationComponent
                                 currentPage={currentPage}
-                                totalPages={getTotalPages()}
+                                totalPages={totalPages}
                                 isDescending={isDescending}
                                 itemsPerPage={itemsPerPage}
                                 onPageChange={setCurrentPage}
@@ -419,6 +937,7 @@ export function AcademicSchedule({site}: Readonly<{
                                     {selectedFilter.type === "classroom" && `${selectedFilter.value} 排课表`}
                                 </>
                             )}
+                            {selectedSemester && ` (${getSemesterName(selectedSemester)})`}
                         </h1>
                         
                         <div className="w-32"></div> {/* 占位元素，保持标题居中 */}
@@ -431,7 +950,7 @@ export function AcademicSchedule({site}: Readonly<{
                     />
                 </>
             ) : (
-                // 新增的课程表二维视图
+                // 课程表二维视图
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
                         <button
@@ -444,6 +963,7 @@ export function AcademicSchedule({site}: Readonly<{
                         
                         <h1 className="text-2xl font-bold">
                             课程安排表
+                            {selectedSemester && ` (${getSemesterName(selectedSemester)})`}
                         </h1>
                         
                         <div className="w-32"></div> {/* 占位元素，保持标题居中 */}

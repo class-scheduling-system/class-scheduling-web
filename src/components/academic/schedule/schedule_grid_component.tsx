@@ -102,6 +102,9 @@ export function ScheduleGridComponent({
                             <div className="font-medium">{cell.courseName}</div>
                             {cell.teacherName && <div className="text-sm">{cell.teacherName}</div>}
                             {cell.classroom && <div className="text-xs opacity-80">{cell.classroom}</div>}
+                            {cell.weekInfo && (
+                              <div className="week-info text-xs opacity-70 line-clamp-1">{cell.weekInfo}</div>
+                            )}
                           </div>
                         ) : (
                           <div className="p-4"></div>

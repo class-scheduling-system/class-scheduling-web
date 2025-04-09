@@ -27,7 +27,7 @@
  */
 
 import { CardComponent } from "../../card_component";
-import { Copy, Delete, EditTwo, PreviewOpen } from "@icon-park/react";
+import { Copy, Delete, EditTwo, PreviewOpen, Schedule, BookOne, User, School } from "@icon-park/react";
 import { ScheduleEntity } from "../../../models/entity/schedule_entity";
 
 export function ScheduleListComponent({
@@ -45,94 +45,119 @@ export function ScheduleListComponent({
   onDelete?: (schedule: ScheduleEntity) => void;
   loading?: boolean;
 }) {
-  
+
   if (loading) {
     return (
-      <CardComponent padding={0} className="flex-1 flex overflow-auto">
-        <div className="flex h-full justify-center items-center">
-          <span className="loading loading-bars loading-lg"></span>
+      <CardComponent padding={0} className="flex-1 shadow-md border border-base-200 rounded-xl overflow-hidden">
+        <div className="flex h-[600px] justify-center items-center">
+          <div className="flex flex-col items-center gap-3">
+            <span className="loading loading-spinner text-primary loading-lg"></span>
+            <p className="text-sm text-base-content/70">数据加载中...</p>
+          </div>
         </div>
       </CardComponent>
     );
   }
-  
+
   return (
-    <CardComponent padding={0} className="flex-1 flex overflow-auto">
-      <div className="overflow-x-auto overflow-y-auto w-full">
-        <table className="table table-zebra">
-          <thead className="sticky top-0 bg-base-100 z-10">
+    <div className="overflow-x-auto overflow-y-auto w-full">
+      <table className="table w-full">
+        <thead className="sticky top-0 bg-base-100 z-10 shadow-sm">
+          <tr className="bg-base-200 rounded-t-lg overflow-hidden">
+            <th className="font-semibold text-base-content/80">课程名称</th>
+            <th className="font-semibold text-base-content/80">授课教师</th>
+            <th className="font-semibold text-base-content/80">教室</th>
+            <th className="font-semibold text-base-content/80">教学班</th>
+            <th className="font-semibold text-base-content/80 text-end">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {schedules.length === 0 ? (
             <tr>
-              <th>课程名称</th>
-              <th>授课教师</th>
-              <th>教室</th>
-              <th>时间</th>
-              <th>班级</th>
-              <th>学期</th>
-              <th>操作</th>
+              <td colSpan={6} className="text-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-20 h-20 bg-base-200/50 rounded-full flex items-center justify-center">
+                    <Schedule theme="outline" size="32" className="text-base-content/40" />
+                  </div>
+                  <div className="text-base-content/60 text-lg">暂无排课数据</div>
+                  <div className="text-sm text-base-content/40 max-w-md text-center">
+                    请尝试调整筛选条件或添加新的排课信息
+                  </div>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {schedules.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="text-center py-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-base-content/60">暂无数据</div>
+          ) : (
+            schedules.map((schedule) => (
+              <tr key={schedule.id} className="hover:bg-base-100/50 transition-colors duration-200">
+                <td className="font-medium text-primary whitespace-nowrap py-2 px-2">
+                  <div className="flex items-center gap-1">
+                    <BookOne theme="outline" size="16" className="text-primary flex-shrink-0" />
+                    <span className="truncate max-w-[100px]" title={schedule.course}>{schedule.course}</span>
                   </div>
                 </td>
-              </tr>
-            ) : (
-              schedules.map((schedule) => (
-                <tr key={schedule.id} className="hover transition">
-                  <td>{schedule.course}</td>
-                  <td>{schedule.teacher}</td>
-                  <td>{schedule.classroom}</td>
-                  <td>{schedule.time}</td>
-                  <td>{schedule.class}</td>
-                  <td>{schedule.semester}</td>
-                  <td className="space-x-1">
+                <td className="whitespace-nowrap py-2 px-2">
+                  <div className="flex items-center gap-1">
+                    <User theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
+                    <span className="truncate max-w-[80px]" title={schedule.teacher}>{schedule.teacher}</span>
+                  </div>
+                </td>
+                <td className="whitespace-nowrap py-2 px-2">
+                  <div className="flex items-center gap-1" title={schedule.classroom}>
+                    <School theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
+                    <span className="truncate max-w-[120px]">{schedule.classroom}</span>
+                  </div>
+                </td>
+                <td className="whitespace-nowrap py-2 px-2">
+                  <div className="flex items-center gap-1">
+                    <BookOne theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
+                    <span className="truncate max-w-[80px]" title={schedule.class}>{schedule.class}</span>
+                  </div>
+                </td>
+                <td className="py-2 px-1 text-end">
+                  <div className="flex justify-end gap-0">
                     {onView && (
-                      <button 
-                        className="btn btn-xs btn-primary" 
-                        title="查看"
+                      <button
+                        className="btn btn-xs btn-ghost hover:btn-primary tooltip tooltip-left p-0 h-6 w-6 min-h-0"
+                        data-tip="查看课表"
                         onClick={() => onView(schedule)}
                       >
-                        <PreviewOpen theme="outline" size="16" />
+                        <PreviewOpen theme="outline" size="14" />
                       </button>
                     )}
                     {onEdit && (
-                      <button 
-                        className="btn btn-xs btn-warning" 
-                        title="编辑"
+                      <button
+                        className="btn btn-xs btn-ghost hover:btn-warning tooltip tooltip-left p-0 h-6 w-6 min-h-0"
+                        data-tip="编辑排课"
                         onClick={() => onEdit(schedule)}
                       >
-                        <EditTwo theme="outline" size="16" />
+                        <EditTwo theme="outline" size="14" />
                       </button>
                     )}
                     {onCopy && (
-                      <button 
-                        className="btn btn-xs btn-info" 
-                        title="复制"
+                      <button
+                        className="btn btn-xs btn-ghost hover:btn-info tooltip tooltip-left p-0 h-6 w-6 min-h-0"
+                        data-tip="复制排课"
                         onClick={() => onCopy(schedule)}
                       >
-                        <Copy theme="outline" size="16" />
+                        <Copy theme="outline" size="14" />
                       </button>
                     )}
                     {onDelete && (
-                      <button 
-                        className="btn btn-xs btn-error" 
-                        title="删除"
+                      <button
+                        className="btn btn-xs btn-ghost hover:btn-error tooltip tooltip-left p-0 h-6 w-6 min-h-0"
+                        data-tip="删除排课"
                         onClick={() => onDelete(schedule)}
                       >
-                        <Delete theme="outline" size="16" />
+                        <Delete theme="outline" size="14" />
                       </button>
                     )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </CardComponent>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
   );
-} 
+}

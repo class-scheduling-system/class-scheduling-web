@@ -26,144 +26,54 @@
  * --------------------------------------------------------------------------------
  */
 
-import { ClassAssignmentEntity } from "./class_assignment_entity";
-
 /**
- * 课程安排实体
+ * # 教学班DTO
+ * 
+ * > 用于创建或更新教学班的数据传输对象
  */
-export type ScheduleEntity = {
+export type TeachingClassDTO = {
     /**
-     * 课程安排ID
+     * 教学班UUID（更新时需要）
      */
-    id: number;
-    
+    teaching_class_uuid?: string;
     /**
-     * 课程名称
+     * 学期UUID
      */
-    course: string;
-    
+    semester_uuid: string;
     /**
-     * 授课教师
+     * 课程UUID
      */
-    teacher: string;
-    
+    course_uuid: string;
     /**
-     * 教室
+     * 教学班编号
      */
-    classroom: string;
-    
+    teaching_class_code: string;
     /**
-     * 上课时间
+     * 教学班名称
      */
-    time: string;
-    
+    teaching_class_name: string;
     /**
-     * 班级
+     * 行政班级字符串，多个行政班级用逗号分隔
      */
-    class: string;
-    
+    administrative_classes: string;
     /**
-     * 学期
+     * 是否为行政班
      */
-    semester: string;
-    
+    is_administrative: boolean;
     /**
-     * 原始数据
+     * 班级人数
      */
-    rawData?: ClassAssignmentEntity;
-};
-
-/**
- * 教室实体
- */
-export type ClassroomEntity = {
+    class_size: number;
     /**
-     * 教室ID
+     * 课程所属部门UUID
      */
-    id: number;
-    
+    course_department_uuid: string;
     /**
-     * 教室名称
+     * 描述
      */
-    name: string;
-    
+    description?: string;
     /**
-     * 所属教学楼
+     * 是否启用
      */
-    building: string;
-    
-    /**
-     * 容量
-     */
-    capacity: number;
-    
-    /**
-     * 设施
-     */
-    facilities: string;
-    
-    /**
-     * 状态
-     */
-    status: string;
-};
-
-/**
- * 课程表单元格实体
- */
-export type ScheduleGridCell = {
-    /**
-     * 课程ID
-     */
-    id?: number;
-    
-    /**
-     * 课程名称
-     */
-    courseName?: string;
-    
-    /**
-     * 教师姓名
-     */
-    teacherName?: string;
-    
-    /**
-     * 教室
-     */
-    classroom?: string;
-    
-    /**
-     * 行跨度（用于连堂课）
-     */
-    rowSpan?: number;
-    
-    /**
-     * 是否被上一行连堂课占用
-     */
-    isOccupied?: boolean;
-    
-    /**
-     * 周次信息
-     */
-    weekInfo?: string;
-};
-
-/**
- * 课程表实体
- */
-export type ScheduleGridEntity = {
-    /**
-     * 行信息（代表时间段）
-     */
-    rows: string[];
-    
-    /**
-     * 列信息（代表星期）
-     */
-    columns: string[];
-    
-    /**
-     * 课程表数据
-     */
-    grid: ScheduleGridCell[][];
+    is_enabled: boolean;
 }; 
