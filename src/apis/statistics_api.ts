@@ -29,6 +29,7 @@
 import {BaseApi, GetAuthorizationToken, MethodType} from "../assets/ts/base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {AdminDashboardEntity} from "../models/entity/admin_dashboard_entity.ts";
+import { AcademicDashboardEntity } from '../models/entity/academic_dashboard_entity';
 
 /**
  * # 获取管理员仪表盘统计数据
@@ -48,6 +49,23 @@ const GetAdminDashboardAPI = async (): Promise<BaseResponse<AdminDashboardEntity
     )
 }
 
+/**
+ * 获取教务仪表盘统计数据
+ * 
+ * @returns {Promise<BaseResponse<AcademicDashboardEntity> | undefined>} - 返回一个Promise，解析为包含教务仪表盘统计数据的BaseResponse对象
+ */
+const GetAcademicDashboardAPI = async (): Promise<BaseResponse<AcademicDashboardEntity> | undefined> => {
+    return BaseApi<BaseResponse<AcademicDashboardEntity>>(
+        MethodType.GET,
+        "/api/v1/statistics/academic-dashboard",
+        null,
+        null,
+        null,
+        {Authorization: `Bearer ${GetAuthorizationToken()}`},
+    )
+}
+
 export {
     GetAdminDashboardAPI,
+    GetAcademicDashboardAPI,
 } 
