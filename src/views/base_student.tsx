@@ -113,20 +113,13 @@ export function BaseStudent(): JSX.Element {
         config: { tension: 150, friction: 26 },
     });
 
-    // 用户登出
-    async function userLogout() {
-        cookie.remove("token", { path: '/' });
-        cookie.remove("refresh_token", { path: '/' });
-        message.success("已退出登录");
-        navigate("/auth/login");
-    }
-
     return (
         <animated.div style={fade} className="h-lvh flex flex-col bg-gradient-to-br from-primary-50 to-base-100">
             {/* 顶部导航 */}
             <animated.div style={topFade} className="sticky top-0 z-30">
                 <StudentNavComponent />
             </animated.div>
+            
 
             {/* 主要内容区 */}
             <animated.div style={bottomFade} className="flex-1">

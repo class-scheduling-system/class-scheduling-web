@@ -154,7 +154,7 @@ export function BaseTeacher(): JSX.Element {
                             </button>
                             <ul className="dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 border border-gray-200 rounded-md w-52 mt-2">
                                 <li>
-                                    <Link to={"/teacher/profile"}>个人信息</Link>
+                                    <Link to={"/user/profile"}>个人信息</Link>
                                 </li>
                                 <li>
                                     <button onClick={userLogout} className="text-error">

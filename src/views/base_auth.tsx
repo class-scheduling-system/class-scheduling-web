@@ -119,7 +119,7 @@ export function BaseAuth(): JSX.Element {
                         <animated.div style={style} className={"w-full h-full"}>
                             <Routes location={item}>
                                 <Route path={"/login"} element={<AuthLogin/>}/>
-                                <Route path={"/register"} element={<AuthRegister/>}/>
+                                <Route path={"/register/:type/:student_id"} element={<AuthRegister/>}/>
                                 <Route path={"/alter-password"} element={<AuthAlterPassword/>}/>
                                 <Route path={"/forget-password"} element={<AuthForgetPassword/>}/>
                                 <Route path={"/*"} element={<SimplePageNotFoundHasButton/>}/>

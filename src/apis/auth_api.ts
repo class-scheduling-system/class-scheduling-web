@@ -9,7 +9,7 @@
  *
  * 版权所有 (c) 2022-2025 锋楪技术团队。保留所有权利。
  *
- * 本软件是“按原样”提供的，没有任何形式的明示或暗示的保证，包括但不限于
+ * 本软件是"按原样"提供的，没有任何形式的明示或暗示的保证，包括但不限于
  * 对适销性、特定用途的适用性和非侵权性的暗示保证。在任何情况下，
  * 作者或版权持有人均不承担因软件或软件的使用或其他交易而产生的、
  * 由此引起的或以任何方式与此软件有关的任何索赔、损害或其他责任。
@@ -50,6 +50,33 @@ const AuthLoginAPI = async (data: AuthLoginDTO): Promise<BaseResponse<UserLoginE
     );
 }
 
+/**
+ * # AuthRegisterAPI
+ * > 该函数用于处理用户注册请求，通过向指定的后端接口发送包含用户注册信息的数据包，完成用户的初始化注册流程。
+ *
+ * @param data - {{ type: boolean, user: string, name: string, new_password: string, email: string, phone: string }} 用户提供的注册信息，包括用户类型、用户名、姓名、新密码、邮箱和手机号等。
+ * @returns {Promise<BaseResponse<void> | undefined>} - 返回一个 Promise 对象，解析为 BaseResponse<void> 类型或者 undefined。表示注册操作的结果。
+ * @throws 当网络请求失败、服务器响应异常或传入参数不符合要求时，可能会抛出错误。
+ */
+const AuthRegisterAPI = async (data: { 
+    type: boolean, 
+    user: string, 
+    name: string, 
+    new_password: string, 
+    email: string, 
+    phone: string 
+}): Promise<BaseResponse<void> | undefined> => {
+    return BaseApi<BaseResponse<void>>(
+        MethodType.POST,
+        "/api/v1/auth/registered",
+        data,
+        null,
+        null,
+        null
+    );
+}
+
 export {
-    AuthLoginAPI
+    AuthLoginAPI,
+    AuthRegisterAPI
 }

@@ -62,7 +62,12 @@ export function AuthLogin(): JSX.Element {
         if (getResp?.output === "Success") {
             if (getResp.data!.initialization) {
                 message.success(`登录成功`);
-                navigate("/auth/register");
+                // 根据密码确认是否是老师还是学生
+                if (getResp.data!.teacher) {
+                    navigate("/auth/register/teacher/" + getResp.data!.teacher?.id);
+                } else {
+                    navigate("/auth/register/student/" + getResp.data!.student?.id);
+                }
             } else {
                 message.success(`你好 ${getResp.data!.user?.name}，欢迎回来！`);
                 cookie.save("token", getResp.data!.token!.token, {

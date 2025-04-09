@@ -849,15 +849,15 @@ export function TeacherCourseSchedule({ site }: Readonly<{ site?: SiteInfoEntity
     return (
         <div className="p-6 max-w-7xl mx-auto">
             {/* 标题和操作区 */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-primary-content flex items-center gap-2">
+            <div className="bg-blue-100 p-3 rounded-lg flex flex-wrap justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-primary-content flex items-center gap-2 mb-2 sm:mb-0">
                     <Calendar theme="outline" size="24" className="text-primary" />
                     <span>教师课程表</span>
                 </h1>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <select 
-                        className="select select-bordered select-sm md:select-md"
+                        className="select select-bordered select-sm"
                         value={currentSemester}
                         onChange={(e) => handleSemesterChange(e.target.value)}
                         disabled={loading || semesters.length === 0}
@@ -874,7 +874,7 @@ export function TeacherCourseSchedule({ site }: Readonly<{ site?: SiteInfoEntity
                     </select>
                     
                     <button 
-                        className="btn btn-sm md:btn-md btn-primary btn-outline flex items-center gap-1"
+                        className="btn btn-sm btn-primary btn-outline"
                         onClick={handleRefresh}
                         disabled={loading}
                     >
@@ -882,21 +882,21 @@ export function TeacherCourseSchedule({ site }: Readonly<{ site?: SiteInfoEntity
                         <span className="hidden md:inline">刷新</span>
                     </button>
 
-                    <div className="btn-group">
+                    <div className="join">
                         <button 
-                            className={`btn btn-sm md:btn-md ${viewMode === 'grid' ? 'btn-active' : ''}`}
+                            className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-active' : ''}`}
                             onClick={() => setViewMode('grid')}
                         >
                             网格视图
                         </button>
                         <button 
-                            className={`btn btn-sm md:btn-md ${viewMode === 'list' ? 'btn-active' : ''}`}
+                            className={`join-item btn btn-sm ${viewMode === 'list' ? 'btn-active' : ''}`}
                             onClick={() => setViewMode('list')}
                         >
                             列表视图
                         </button>
                         <button 
-                            className={`btn btn-sm md:btn-md ${viewMode === 'table' ? 'btn-active' : ''}`}
+                            className={`join-item btn btn-sm ${viewMode === 'table' ? 'btn-active' : ''}`}
                             onClick={() => setViewMode('table')}
                         >
                             表格视图
