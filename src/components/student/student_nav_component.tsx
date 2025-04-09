@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { useSelector } from "react-redux";
 import { SiteInfoEntity } from "../../models/entity/site_info_entity";
 import { Book, Calendar, ChartPie, DocumentFolder, ExternalTransmission, Message, Me } from "@icon-park/react";
@@ -46,17 +46,15 @@ function StudentNavLinkComponent({ title, icon, path }: {
     path: string;
 }): JSX.Element {
     return (
-        <NavLink 
+        <Link 
             to={path} 
-            className={({ isActive }) => 
-                `btn btn-ghost btn-md rounded-lg ${isActive ? 'bg-primary/10 text-primary' : 'text-base-content'}`
-            }
+            className={`btn btn-ghost btn-md rounded-lg text-base-content hover:bg-primary/10`}
         >
             <div className="flex items-center gap-2">
                 {icon}
                 <span>{title}</span>
             </div>
-        </NavLink>
+        </Link>
     );
 }
 
@@ -132,7 +130,7 @@ export function StudentNavComponent(): JSX.Element {
                 <StudentNavLinkComponent 
                     title="个人信息" 
                     icon={<Me theme="outline" size="18" />} 
-                    path="/student/profile" 
+                    path="/user/profile" 
                 />
             </div>
         </div>

@@ -30,18 +30,18 @@ import { JSX, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { SiteInfoEntity } from "../models/entity/site_info_entity";
 import { UserInfoEntity } from "../models/entity/user_info_entity";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router";
+import { Route, Routes, useLocation, useNavigate } from "react-router";
 import { animated, useSpring, useTransition } from "@react-spring/web";
 import { AdminNotFound } from "./404/medium_page_not_found";
 import cookie from "react-cookies";
 import { message } from "antd";
 import { StudentNavComponent } from "../components/student/student_nav_component";
 import { StudentDashboard } from "./student/student_dashboard";
-import { StudentSchedule } from "./student/student_schedule";
 import { StudentCourse } from "./student/student_course";
 import { StudentExam } from "./student/student_exam";
 import { StudentGrade } from "./student/student_grade";
 import { StudentNotification } from "./student/student_notification";
+import { StudentCourseSchedule } from "./student/student_course_schedule";
 
 /**
  * 生成一个学生控制台组件。
@@ -134,7 +134,7 @@ export function BaseStudent(): JSX.Element {
                     <animated.div style={{ ...style, height: '100%' }}>
                         <Routes location={item}>
                             <Route path="/dashboard" element={<StudentDashboard site={site} />} />
-                            <Route path="/schedule" element={<StudentSchedule />} />
+                            <Route path="/schedule" element={<StudentCourseSchedule />} />
                             <Route path="/course" element={<StudentCourse />} />
                             <Route path="/exam" element={<StudentExam />} />
                             <Route path="/grade" element={<StudentGrade />} />
