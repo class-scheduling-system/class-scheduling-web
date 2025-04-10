@@ -45,7 +45,7 @@ export function AdminDashboard({ site }: Readonly<{
         teacher_count: 0,
         student_count: 0,
         campus_count: 0,
-        request_log_list: []
+        request_logs: []
     });
     const [requestLogCurrentPage, setRequestLogCurrentPage] = useState(1);
     const requestLogPageSize = 20;
@@ -65,9 +65,27 @@ export function AdminDashboard({ site }: Readonly<{
 
     useEffect(() => {
         const fetchSummaryData = async () => {
-            const resp = await GetAdminDashboardAPI();
-            if (resp?.data) {
-                setSummary(resp.data);
+            try {
+                const resp = await GetAdminDashboardAPI();
+                if (resp?.data) {
+                    // 确保 request_log_list 始终是数组
+                    const data = {
+                        ...resp.data,
+                        request_log_list: resp.data.request_logs || []
+                    };
+                    setSummary(data);
+                }
+            } catch (error) {
+                console.error("获取管理员仪表盘数据失败", error);
+                // 在发生错误时设置默认值
+                setSummary({
+                    user_count: 0,
+                    building_count: 0,
+                    teacher_count: 0,
+                    student_count: 0,
+                    campus_count: 0,
+                    request_logs: []
+                });
             }
         };
 
@@ -222,24 +240,31 @@ export function AdminDashboard({ site }: Readonly<{
                                 </tr>
                             </thead>
                             <tbody>
-                                {summary && summary.request_log_list
-                                    .slice((requestLogCurrentPage - 1) * requestLogPageSize, requestLogCurrentPage * requestLogPageSize)
-                                    .map(log => (
-                                        <tr key={log.request_log_uuid}>
-                                            <td>{log.request_method}</td>
-                                            <td>{log.request_url}</td>
-                                            <td>
-                                                <span className={`badge ${log.response_code >= 400 ? 'badge-error' : 'badge-success'}`}>
-                                                    {log.response_code}
-                                                </span>
-                                            </td>
-                                            <td>{log.execution_time}ms</td>
-                                            <td>{formatTimestamp(log.request_time)}</td>
+                                {summary && summary.request_logs && summary.request_logs.length > 0
+                                    ? summary.request_logs
+                                        .slice((requestLogCurrentPage - 1) * requestLogPageSize, requestLogCurrentPage * requestLogPageSize)
+                                        .map(log => (
+                                            <tr key={log.request_log_uuid}>
+                                                <td>{log.request_method}</td>
+                                                <td>{log.request_url}</td>
+                                                <td>
+                                                    <span className={`badge ${log.response_code >= 400 ? 'badge-error' : 'badge-success'}`}>
+                                                        {log.response_code}
+                                                    </span>
+                                                </td>
+                                                <td>{log.execution_time}ms</td>
+                                                <td>{formatTimestamp(log.request_time)}</td>
+                                            </tr>
+                                        ))
+                                    : (
+                                        <tr>
+                                            <td colSpan={5} className="text-center py-4">暂无请求日志数据</td>
                                         </tr>
-                                    ))}
+                                    )
+                                }
                             </tbody>
                         </table>
-                        {summary && summary.request_log_list.length > requestLogPageSize && (
+                        {summary && summary.request_logs && summary.request_logs.length > requestLogPageSize && (
                             <div className="flex justify-center mt-4">
                                 <div className="join">
                                     <button
@@ -250,12 +275,12 @@ export function AdminDashboard({ site }: Readonly<{
                                         « 上一页
                                     </button>
                                     <button className="join-item btn btn-sm disabled:bg-base-200 disabled:text-base-content/50" disabled>
-                                        第 {requestLogCurrentPage} / {Math.ceil(summary.request_log_list.length / requestLogPageSize)} 页
+                                        第 {requestLogCurrentPage} / {Math.ceil(summary.request_logs.length / requestLogPageSize)} 页
                                     </button>
                                     <button
                                         className="join-item btn btn-sm"
-                                        onClick={() => setRequestLogCurrentPage(prev => Math.min(prev + 1, Math.ceil(summary.request_log_list.length / requestLogPageSize)))}
-                                        disabled={requestLogCurrentPage === Math.ceil(summary.request_log_list.length / requestLogPageSize)}
+                                        onClick={() => setRequestLogCurrentPage(prev => Math.min(prev + 1, Math.ceil(summary.request_logs.length / requestLogPageSize)))}
+                                        disabled={requestLogCurrentPage === Math.ceil(summary.request_logs.length / requestLogPageSize)}
                                     >
                                         下一页 »
                                     </button>

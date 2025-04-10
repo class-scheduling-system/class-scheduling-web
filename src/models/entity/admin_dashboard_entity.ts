@@ -66,5 +66,5 @@ export type AdminDashboardEntity = {
     /**
      * 请求日志列表
      */
-    request_log_list: RequestLogEntity[];
+    request_logs: RequestLogEntity[];
 } 
