@@ -49,6 +49,7 @@ export function AdminSemesterAddDialog({show, emit, requestRefresh}: Readonly<{
 }>): JSX.Element {
     const [data, setData] = useState<SemesterDTO>({
         name: "",
+        code: "",
         description: "",
         start_date: 0,
         end_date: 0,
@@ -91,13 +92,13 @@ export function AdminSemesterAddDialog({show, emit, requestRefresh}: Readonly<{
         event.preventDefault();
         
         // 验证日期选择
-        if (!startDate || !endDate) {
-            message.error("请选择开始和结束日期");
+        if (!startDate) {
+            message.error("请选择开始日期");
             return;
         }
         
         // 验证开始日期早于结束日期
-        if (startDate.isAfter(endDate)) {
+        if (endDate && startDate.isAfter(endDate)) {
             message.error("开始日期必须早于结束日期");
             return;
         }
@@ -106,7 +107,7 @@ export function AdminSemesterAddDialog({show, emit, requestRefresh}: Readonly<{
         const updatedData = {
             ...data,
             start_date: startDate.valueOf(),
-            end_date: endDate.valueOf()
+            end_date: endDate?.valueOf() || 0
         };
         
         const getResp = await CreateSemesterAPI(updatedData);
@@ -155,7 +156,19 @@ export function AdminSemesterAddDialog({show, emit, requestRefresh}: Readonly<{
                             type="text" className="input w-full validator" placeholder="2023-2024学年第一学期" required/>
                         <p className="fieldset-label hidden validator-hint">学期名称不能为空</p>
                     </fieldset>
-                    
+
+                    <fieldset className="flex flex-col">
+                        <legend className="flex items-center space-x-1 mb-1">
+                            <Pencil theme="outline" size="16"/>
+                            <span>学期代码</span>
+                        </legend>
+                        <input
+                            onChange={(e) => setData({...data, code: e.target.value})}
+                            value={data.code}
+                            type="text" className="input w-full validator" placeholder="2023202401" required/>
+                        <p className="fieldset-label hidden validator-hint">学期代码不能为空</p>
+                    </fieldset>
+
                     <fieldset className="flex flex-col">
                         <legend className="flex items-center space-x-1 mb-1">
                             <Notes theme="outline" size="16"/>
@@ -194,7 +207,6 @@ export function AdminSemesterAddDialog({show, emit, requestRefresh}: Readonly<{
                             value={endDate}
                             onChange={(date) => setEndDate(date)}
                             format="YYYY-MM-DD"
-                            required
                         />
                         <p className="fieldset-label hidden validator-hint">请选择结束日期</p>
                     </fieldset>

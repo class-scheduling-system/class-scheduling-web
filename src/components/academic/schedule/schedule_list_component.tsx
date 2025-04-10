@@ -92,25 +92,25 @@ export function ScheduleListComponent({
                 <td className="font-medium text-primary whitespace-nowrap py-2 px-2">
                   <div className="flex items-center gap-1">
                     <BookOne theme="outline" size="16" className="text-primary flex-shrink-0" />
-                    <span className="truncate max-w-[100px]" title={schedule.course}>{schedule.course}</span>
+                    <span className="truncate" title={schedule.course}>{schedule.course}</span>
                   </div>
                 </td>
                 <td className="whitespace-nowrap py-2 px-2">
                   <div className="flex items-center gap-1">
                     <User theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
-                    <span className="truncate max-w-[80px]" title={schedule.teacher}>{schedule.teacher}</span>
+                    <span className="truncate" title={schedule.teacher}>{schedule.teacher}</span>
                   </div>
                 </td>
                 <td className="whitespace-nowrap py-2 px-2">
                   <div className="flex items-center gap-1" title={schedule.classroom}>
                     <School theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
-                    <span className="truncate max-w-[120px]">{schedule.classroom}</span>
+                    <span className="truncate">{schedule.classroom}</span>
                   </div>
                 </td>
                 <td className="whitespace-nowrap py-2 px-2">
                   <div className="flex items-center gap-1">
                     <BookOne theme="outline" size="16" className="text-base-content/70 flex-shrink-0" />
-                    <span className="truncate max-w-[80px]" title={schedule.class}>{schedule.class}</span>
+                    <span className="truncate" title={schedule.class}>{schedule.class}</span>
                   </div>
                 </td>
                 <td className="py-2 px-1 text-end">

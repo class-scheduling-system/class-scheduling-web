@@ -55,7 +55,7 @@ import { GetTeachingClassListAPI } from "../../apis/teaching_class_api";
 import { TeachingClassLiteEntity } from "../../models/entity/teaching_class_entity";
 import { BuildingLiteEntity } from "../../models/entity/building_lite_entity";
 import { CampusEntity } from "../../models/entity/campus_entity";
-import { CourseLibraryLiteEntity } from "../../models/entity/course_library_lite_entity";
+import { CourseLibraryEntity } from "../../models/entity/course_library_entity";
 import { useNavigate } from "react-router";
 
 /**
@@ -80,7 +80,7 @@ export function AcademicSchedule({site}: Readonly<{
     
     // 视图状态
     const [viewMode, setViewMode] = useState<"list" | "grid" | "timetable">("list");
-    
+
     const [selectedFilter, setSelectedFilter] = useState<{type: string, value: string} | null>(null);
     
     // API数据状态
@@ -107,7 +107,7 @@ export function AcademicSchedule({site}: Readonly<{
     const inputFocus = useRef<HTMLInputElement>(null);
     
     // 添加新的列表状态
-    const [courseList, setCourseList] = useState<CourseLibraryLiteEntity[]>([]);
+    const [courseList, setCourseList] = useState<CourseLibraryEntity[]>([]);
     const [buildingList, setBuildingList] = useState<BuildingLiteEntity[]>([]);
     const [campusList, setCampusList] = useState<CampusEntity[]>([]);
     
@@ -377,7 +377,7 @@ export function AcademicSchedule({site}: Readonly<{
             
             // 获取课程名称
             let courseName = `课程${assignment.course_uuid?.substring(0, 6) || "未知"}`;
-            const foundCourse = courseList.find((c: CourseLibraryLiteEntity) => c.course_library_uuid === assignment.course_uuid);
+            const foundCourse = courseList.find((c: CourseLibraryEntity) => c.course_library_uuid === assignment.course_uuid);
             if (foundCourse) {
                 courseName = foundCourse.name || courseName;
             }

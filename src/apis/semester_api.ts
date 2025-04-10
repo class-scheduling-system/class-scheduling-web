@@ -59,7 +59,7 @@ const GetSemesterListAPI = async (): Promise<BaseResponse<SemesterEntity[]> | un
 const GetSemesterAPI = async (semester_uuid: string): Promise<BaseResponse<SemesterEntity> | undefined> => {
     return BaseApi<BaseResponse<SemesterEntity>>(
         MethodType.GET,
-        `/api/v1/semester/`,
+        `/api/v1/semester`,
         null,
         null,
         semester_uuid,
@@ -77,7 +77,7 @@ const GetSemesterAPI = async (semester_uuid: string): Promise<BaseResponse<Semes
 const CreateSemesterAPI = async (data: SemesterDTO): Promise<BaseResponse<void> | undefined> => {
     return BaseApi<BaseResponse<void>>(
         MethodType.POST,
-        `/api/v1/semester/`,
+        `/api/v1/semester`,
         data,
         null,
         null,
@@ -96,7 +96,7 @@ const CreateSemesterAPI = async (data: SemesterDTO): Promise<BaseResponse<void> 
 const UpdateSemesterAPI = async (semester_uuid: string, data: SemesterDTO): Promise<BaseResponse<void> | undefined> => {
     return BaseApi<BaseResponse<void>>(
         MethodType.PUT,
-        `/api/v1/semester/`,
+        `/api/v1/semester`,
         data,
         null,
         semester_uuid,
@@ -114,7 +114,7 @@ const UpdateSemesterAPI = async (semester_uuid: string, data: SemesterDTO): Prom
 const DeleteSemesterAPI = async (semester_uuid: string): Promise<BaseResponse<void> | undefined> => {
     return BaseApi<BaseResponse<void>>(
         MethodType.DELETE,
-        `/api/v1/semester/`,
+        `/api/v1/semester`,
         null,
         null,
         semester_uuid,

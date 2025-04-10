@@ -9,7 +9,8 @@ import {
     Me,
     MoreApp,
     Refresh,
-    Search
+    Search,
+    Like
 } from "@icon-park/react";
 import { GetTeacherPageAPI } from "../../apis/teacher_api.ts";
 import { message } from "antd";
@@ -614,6 +615,13 @@ export function AcademicTeacher({ site }: Readonly<{
                             >
                                 <AddOne theme="outline" size="14" />
                                 添加教师
+                            </button>
+                            <button
+                                onClick={() => navigate('/academic/teacher/preference')}
+                                className="btn btn-sm btn-secondary w-full flex items-center justify-center gap-2"
+                            >
+                                <Like theme="outline" size="14" />
+                                课程偏好管理
                             </button>
                             {showStats ? (
                                 <button

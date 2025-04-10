@@ -14,6 +14,8 @@
 export type SemesterDTO = {
     /** 学期名称 */
     name: string;
+    /** 学期代码 */
+    code: string;
     /** 学期描述 */
     description?: string;
     /** 开始日期时间戳（毫秒） */

@@ -26,13 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-import { Book, Calendar, Dashboard, Hexagonal, People, Schedule, School, User } from "@icon-park/react";
+import { Book, Dashboard, Hexagonal, Schedule, School, User, Like, UserBusiness, TreasureChest } from "@icon-park/react";
 import { JSX } from "react";
 import { AcademicNavLinkComponent } from "./academic_nav_link_component.tsx";
 import { useSelector } from "react-redux";
 import { AcademicAffairsStore } from "@/models/store/academic_affairs_store.ts";
 import { LabelComponent } from "../label_component.tsx";
-
 /**
  * 生成教务管理导航组件。
  *
@@ -42,13 +41,13 @@ export function AcademicNavComponent(): JSX.Element {
     const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
 
     return (
-        <div className={"flex flex-col"}>
+        <div className={"flex flex-col overflow-hidden h-full"}>
             <div className={"px-4 py-8 text-center w-full"}>
                 <h1 className={"text-2xl font-bold text-primary"}>教务管理系统</h1>
                 <div className="divider divider-primary"></div>
                 {academicAffairs.currentAcademicAffairs && (
                     <div className="mt-2 text-sm text-center flex flex-col items-center">
-                        <LabelComponent type="secondary" style="badge-outline" text={
+                        <LabelComponent type="secondary" style="badge-soft" text={
                             academicAffairs.departmentLoaded && academicAffairs.departmentInfo
                                 ? academicAffairs.departmentInfo.department_name
                                 : academicAffairs.currentAcademicAffairs.department
@@ -56,28 +55,35 @@ export function AcademicNavComponent(): JSX.Element {
                     </div>
                 )}
             </div>
-            <div className={"px-4 grid gap-2"}>
-                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">主要模块</h2>
+            <div className={"px-4 grid gap-2 overflow-y-auto h-full pb-6"}>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">主要模块</h2>
                 <AcademicNavLinkComponent title={"教务看板"} icon={<Dashboard theme="outline" size="16" />}
                     path={"/academic/dashboard"} />
+
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">排课管理</h2>
+                <AcademicNavLinkComponent title={"排课管理"} icon={<Schedule theme="outline" size="16" />}
+                    path={"/academic/schedule"} />
+
+                
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">人员管理</h2>
+                <AcademicNavLinkComponent title={"教师管理"} icon={<UserBusiness theme="outline" size="16" />}
+                    path={"/academic/teacher"} />
+                <AcademicNavLinkComponent title={"教师偏好"} icon={<Like theme="outline" size="16" />}
+                    path={"/academic/teacher/preference"} />
+                <AcademicNavLinkComponent title={"教师课程资格"} icon={<TreasureChest theme="outline" size="16" />}
+                    path={"/academic/teacher/course-qualification"} />
+                <AcademicNavLinkComponent title={"学生管理"} icon={<User theme="outline" size="16" />}
+                    path={"/academic/student"} />
+
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">教务处理</h2>
                 <AcademicNavLinkComponent title={"行政班管理"} icon={<School theme="outline" size="16" />}
                     path={"/academic/administrative-class"} />
                 <AcademicNavLinkComponent title={"课程管理"} icon={<Book theme="outline" size="16" />}
                     path={"/academic/course"} />
-                <AcademicNavLinkComponent title={"排课管理"} icon={<Schedule theme="outline" size="16" />}
-                    path={"/academic/schedule"} />
-                <AcademicNavLinkComponent title={"教师管理"} icon={<People theme="outline" size="16" />}
-                    path={"/academic/teacher"} />
-                <AcademicNavLinkComponent title={"学生管理"} icon={<User theme="outline" size="16" />}
-                    path={"/academic/student"} />
 
-                <div className="divider my-2"></div>
-
-                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 mb-1">其他功能</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">考试管理</h2>
                 <AcademicNavLinkComponent title={"考试管理"} icon={<Hexagonal theme="outline" size="16" />}
                     path={"/academic/exam"} />
-                <AcademicNavLinkComponent title={"学期管理"} icon={<Calendar theme="outline" size="16" />}
-                    path={"/academic/semester"} />
             </div>
         </div>
     );

@@ -46,7 +46,7 @@ export type TeacherPreferenceDTO = {
   day_of_week: number;
 
   /**
-   * 时间段（1-5，代表第几节课）
+   * 时间段（1-12，代表第几节课）
    */
   time_slot: number;
 

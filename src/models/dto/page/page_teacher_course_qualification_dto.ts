@@ -27,52 +27,51 @@
  */
 
 /**
- * # 教师课程偏好实体类
- * > 该类用于表示教师对课程的偏好设置，包括时间段偏好、教室偏好等信息
+ * 教师课程资格分页数据传输对象
  */
-export type TeacherPreferenceEntity = {
-    /**
-     * 偏好UUID
-     */
-    preference_uuid: string;
+export type PageTeacherCourseQualificationDTO = {
+  /**
+   * 页码，默认为1
+   */
+  page: number;
+  
+  /**
+   * 每页大小，默认为20
+   */
+  size: number;
+  
+  /**
+   * 是否降序排序，默认为true
+   */
+  is_desc: boolean;
+  
+  /**
+   * 教师UUID，可选参数
+   */
+  teacher_uuid?: string;
+  
+  /**
+   * 课程UUID，可选参数
+   */
+  course_uuid?: string;
 
-    /**
-     * 教师UUID
-     */
-    teacher_uuid: string;
-
-    /**
-     * 学期UUID
-     */
-    semester_uuid: string;
-
-    /**
-     * 星期几（1-7，1代表周一）
-     */
-    day_of_week: number;
-
-    /**
-     * 时间段（1-12，代表第几节课）
-     */
-    time_slot: number;
-
-    /**
-     * 偏好级别（1-5，1代表最不喜欢，5代表最喜欢）
-     */
-    preference_level: number;
-
-    /**
-     * 原因说明
-     */
-    reason?: string;
-
-    /**
-     * 创建时间（Unix时间戳，毫秒）
-     */
-    created_at: number;
-
-    /**
-     * 更新时间（Unix时间戳，毫秒）
-     */
-    updated_at: number;
+  /**
+   * 部门UUID，可选参数
+   */
+  department_uuid?: string;
+  
+  /**
+   * 资格等级，可选参数
+   */
+  qualification_level?: number;
+  
+  /**
+   * 是否主讲教师，可选参数
+   */
+  is_primary?: boolean;
+  
+  /**
+   * 状态，可选参数
+   */
+  status?: number;
 } 

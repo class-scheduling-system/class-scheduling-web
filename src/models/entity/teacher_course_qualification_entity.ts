@@ -27,52 +27,78 @@
  */
 
 /**
- * # 教师课程偏好实体类
- * > 该类用于表示教师对课程的偏好设置，包括时间段偏好、教室偏好等信息
+ * 教师课程资格实体
+ * 
+ * 从后端返回的教师课程资格信息
  */
-export type TeacherPreferenceEntity = {
-    /**
-     * 偏好UUID
-     */
-    preference_uuid: string;
-
-    /**
-     * 教师UUID
-     */
-    teacher_uuid: string;
-
-    /**
-     * 学期UUID
-     */
-    semester_uuid: string;
-
-    /**
-     * 星期几（1-7，1代表周一）
-     */
-    day_of_week: number;
-
-    /**
-     * 时间段（1-12，代表第几节课）
-     */
-    time_slot: number;
-
-    /**
-     * 偏好级别（1-5，1代表最不喜欢，5代表最喜欢）
-     */
-    preference_level: number;
-
-    /**
-     * 原因说明
-     */
-    reason?: string;
-
-    /**
-     * 创建时间（Unix时间戳，毫秒）
-     */
-    created_at: number;
-
-    /**
-     * 更新时间（Unix时间戳，毫秒）
-     */
-    updated_at: number;
+export interface TeacherCourseQualificationEntity {
+  /**
+   * 资格主键
+   */
+  qualification_uuid: string;
+  
+  /**
+   * 教师主键
+   */
+  teacher_uuid: string;
+  
+  /**
+   * 教师姓名
+   */
+  teacher_name: string;
+  
+  /**
+   * 课程主键
+   */
+  course_uuid: string;
+  
+  /**
+   * 课程名称
+   */
+  course_name: string;
+  
+  /**
+   * 资格等级 1:初级 2:中级 3:高级
+   */
+  qualification_level: number;
+  
+  /**
+   * 是否主讲教师
+   */
+  is_primary: boolean;
+  
+  /**
+   * 教授年限
+   */
+  teach_years: number;
+  
+  /**
+   * 状态 0:待审核 1:已审核 2:已驳回
+   */
+  status: number;
+  
+  /**
+   * 备注说明
+   */
+  remarks: string;
+  
+  /**
+   * A审核人
+   */
+  approved_by: string;
+  
+  /**
+   * 审核时间
+   */
+  approved_at: number;
+  
+  /**
+   * 创建时间
+   */
+  created_at: number;
+  
+  /**
+   * 更新时间
+   */
+  updated_at: number;
 } 

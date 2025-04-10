@@ -33,7 +33,6 @@ import { CourseLibraryDTO } from "../models/dto/course_library_dto";
 import { PageCourseSearchDTO } from "../models/dto/page/page_course_search_dto";
 import { BatchAddCourseEntity } from "../models/entity/batch_add_course_entity";
 import { CourseLibraryEntity } from "../models/entity/course_library_entity";
-import { CourseLibraryLiteEntity } from "../models/entity/course_library_lite_entity";
 import { FileEntity } from "../models/entity/file_entity";
 import { PageEntity } from "../models/entity/page_entity";
 

@@ -61,6 +61,8 @@ import { GetDepartmentAPI } from "../apis/department_api.ts";
 import { DepartmentEntity } from "../models/entity/department_entity.ts";
 import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
 import { AutomaticScheduling } from "./academic/schedule/automatic_scheduling.tsx";
+import { AcademicTeacherPreference } from "./academic/academic_teacher_preference.tsx";
+import { AcademicTeacherCourseQualification } from "./academic/academic_teacher_course_qualification.tsx";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -245,6 +247,8 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>
+                                <Route path="/teacher/preference" element={<AcademicTeacherPreference site={site}/>}/>
+                                <Route path="/teacher/course-qualification" element={<AcademicTeacherCourseQualification site={site}/>}/>
                                 <Route path="/student" element={<AcademicStudent site={site}/>}/>
                                 <Route path="/student/add" element={<AcademicAddStudent site={site}/>}/>
                                 <Route path="/student/edit/:studentId" element={<AcademicEditStudent site={site}/>}/>
