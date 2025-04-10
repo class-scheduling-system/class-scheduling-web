@@ -38,7 +38,6 @@ import { ScheduleListComponent } from "../../components/academic/schedule/schedu
 import { PaginationComponent } from "../../components/academic/schedule/pagination_component.tsx";
 import { ScheduleGridComponent } from "../../components/academic/schedule/schedule_grid_component.tsx";
 import { message } from "antd";
-import { TimetableComponent } from "../../components/academic/schedule/timetable_component";
 import { GetClassAssignmentPageAPI } from "../../apis/class_assignment_api";
 import { ClassAssignmentEntity } from "../../models/entity/class_assignment_entity";
 import { GetSemesterListAPI } from "../../apis/semester_api";
@@ -57,6 +56,7 @@ import { TeachingClassLiteEntity } from "../../models/entity/teaching_class_enti
 import { BuildingLiteEntity } from "../../models/entity/building_lite_entity";
 import { CampusEntity } from "../../models/entity/campus_entity";
 import { CourseLibraryLiteEntity } from "../../models/entity/course_library_lite_entity";
+import { useNavigate } from "react-router";
 
 /**
  * # 排课管理组件
@@ -69,6 +69,7 @@ import { CourseLibraryLiteEntity } from "../../models/entity/course_library_lite
 export function AcademicSchedule({site}: Readonly<{
     site: SiteInfoEntity
 }>) {
+    const navigate = useNavigate();
     
     // 基础状态
     const [searchTerm, setSearchTerm] = useState("");
@@ -79,6 +80,7 @@ export function AcademicSchedule({site}: Readonly<{
     
     // 视图状态
     const [viewMode, setViewMode] = useState<"list" | "grid" | "timetable">("list");
+    
     const [selectedFilter, setSelectedFilter] = useState<{type: string, value: string} | null>(null);
     
     // API数据状态
@@ -529,26 +531,26 @@ export function AcademicSchedule({site}: Readonly<{
                 if (dayIndex >= 0 && dayIndex < columns.length && 
                     startPeriod >= 0 && startPeriod < rows.length &&
                     endPeriod >= 0 && endPeriod < rows.length) {
-                    
-                    // 填充第一个单元格
+                
+                // 填充第一个单元格
                     grid[startPeriod][dayIndex] = {
-                        id: schedule.id,
-                        courseName: schedule.course,
-                        teacherName: schedule.teacher,
-                        classroom: schedule.classroom,
+                    id: schedule.id,
+                    courseName: schedule.course,
+                    teacherName: schedule.teacher,
+                    classroom: schedule.classroom,
                         rowSpan: endPeriod - startPeriod + 1,
                         weekInfo: timeSlot.week_numbers && timeSlot.week_numbers.length > 0 ? 
                             `第${timeSlot.week_numbers[0]}-${timeSlot.week_numbers[timeSlot.week_numbers.length-1]}周` : ""
-                    };
-                    
-                    // 标记被连堂课占用的单元格
-                    for (let i = startPeriod + 1; i <= endPeriod; i++) {
+                };
+                
+                // 标记被连堂课占用的单元格
+                for (let i = startPeriod + 1; i <= endPeriod; i++) {
                         if (i < rows.length) {
                             grid[i][dayIndex] = {
-                                isOccupied: true
-                            };
-                        }
-                    }
+                        isOccupied: true
+                    };
+                }
+            }
                 }
             });
         });
@@ -674,17 +676,18 @@ export function AcademicSchedule({site}: Readonly<{
                     
                     <div className="flex gap-2">
                         <button 
-                            className="btn btn-outline btn-sm"
-                            onClick={() => setViewMode("timetable")}
-                        >
-                            查看课程表
-                        </button>
-                        <button 
                             className="btn btn-primary btn-sm flex items-center gap-1"
                             onClick={handleAddSchedule}
                         >
                             <AddOne theme="outline" size="16" />
                             <span>添加排课</span>
+                        </button>
+                        <button 
+                            className="btn btn-accent btn-sm flex items-center gap-1"
+                            onClick={() => navigate("/academic/schedule/automatic")}
+                        >
+                            <Schedule theme="outline" size="16" />
+                            <span>自动排课</span>
                         </button>
                     </div>
                 </div>
@@ -785,7 +788,7 @@ export function AcademicSchedule({site}: Readonly<{
                                                         {teachingClass.teaching_class_name}
                                                     </option>
                                                 ))}
-                                            </select>
+                                        </select>
                                             {loadingTeachingClasses && (
                                                 <div className="text-xs text-base-content/70 mt-1 flex items-center">
                                                     <span className="loading loading-spinner loading-xs mr-1"></span>
@@ -805,7 +808,7 @@ export function AcademicSchedule({site}: Readonly<{
                                                 onChange={(e) => setSelectedClass(e.target.value)}
                                                 disabled={loadingClasses}
                                             >
-                                                <option value="">所有班级</option>
+                                            <option value="">所有班级</option>
                                                 {administrativeClasses.map(cls => (
                                                     <option 
                                                         key={cls.administrative_class_uuid} 
@@ -843,7 +846,7 @@ export function AcademicSchedule({site}: Readonly<{
                                                         {room.name}
                                                     </option>
                                                 ))}
-                                            </select>
+                                        </select>
                                             {loadingClassrooms && (
                                                 <div className="text-xs text-base-content/70 mt-1 flex items-center">
                                                     <span className="loading loading-spinner loading-xs mr-1"></span>
@@ -949,37 +952,7 @@ export function AcademicSchedule({site}: Readonly<{
                         onCellClick={(cell) => console.log("点击课程:", cell)}
                     />
                 </>
-            ) : (
-                // 课程表二维视图
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <button
-                            className="btn btn-sm btn-ghost flex items-center gap-1"
-                            onClick={() => setViewMode("list")}
-                        >
-                            <ArrowLeft theme="outline" size="16" />
-                            <span>返回列表</span>
-                        </button>
-                        
-                        <h1 className="text-2xl font-bold">
-                            课程安排表
-                            {selectedSemester && ` (${getSemesterName(selectedSemester)})`}
-                        </h1>
-                        
-                        <div className="w-32"></div> {/* 占位元素，保持标题居中 */}
-                    </div>
-                    
-                    <TimetableComponent 
-                        initialViewType="class"
-                        initialClasses={
-                            searchTerm && (searchTerm.includes("计科") || searchTerm.includes("软工")) 
-                                ? [searchTerm] 
-                                : []
-                        }
-                        onBack={() => setViewMode("list")}
-                    />
-                </div>
-            )}
+            ) : null}
         </div>
     );
 }

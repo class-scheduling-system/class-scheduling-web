@@ -187,15 +187,17 @@ const GetAdministrativeClassListStudentAPI = async (param: PageAdministrativeCla
 /**
  * # 获取所有行政班级列表(不分页)
  * > 该接口用于获取所有行政班级的简单列表，常用于下拉选择框等场景.
+ * > 可以传入筛选条件，例如 department_uuid 和 is_enabled，支持按院系筛选和是否启用筛选
  *
+ * @param filters 筛选条件对象 (可选)，例如 { department_uuid: "xxx", is_enabled: true }
  * @returns 所有行政班级列表
  */
-const GetAllAdministrativeClassListAPI = async (): Promise<BaseResponse<AdministrativeClassEntity[]> | undefined> => {
+const GetAllAdministrativeClassListAPI = async (filters?: Record<string, unknown>): Promise<BaseResponse<AdministrativeClassEntity[]> | undefined> => {
     return BaseApi<BaseResponse<AdministrativeClassEntity[]>>(
         MethodType.GET,
         "/api/v1/administrative-class/list/all",
         null,
-        null,
+        filters || null,
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
     );

@@ -60,6 +60,7 @@ import { AcademicAffairsEntity } from "../models/entity/academic_affairs_entity.
 import { GetDepartmentAPI } from "../apis/department_api.ts";
 import { DepartmentEntity } from "../models/entity/department_entity.ts";
 import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
+import { AutomaticScheduling } from "./academic/schedule/automatic_scheduling.tsx";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -240,6 +241,7 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/course/edit/:courseId" element={<AcademicCourseEdit site={site}/>}/>
                                 <Route path="/course/view/:courseId" element={<AcademicCourseView site={site}/>}/>
                                 <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
+                                <Route path="/schedule/automatic" element={<AutomaticScheduling site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>

@@ -90,7 +90,7 @@ const GetCourseListAPI = async (
     courseTypeUuid?: string,
     courseNatureUuid?: string,
     courseDepartmentUuid?: string
-): Promise<BaseResponse<CourseLibraryLiteEntity[]> | undefined> => {
+): Promise<BaseResponse<CourseLibraryEntity[]> | undefined> => {
     const params: Record<string, string> = {};
     
     if (courseCategoryUuid) params.course_category_uuid = courseCategoryUuid;
@@ -99,7 +99,7 @@ const GetCourseListAPI = async (
     if (courseNatureUuid) params.course_nature_uuid = courseNatureUuid;
     if (courseDepartmentUuid) params.course_department_uuid = courseDepartmentUuid;
 
-    return BaseApi<BaseResponse<CourseLibraryLiteEntity[]>>(
+    return BaseApi<BaseResponse<CourseLibraryEntity[]>>(
         MethodType.GET,
         "/api/v1/course/list",
         null,

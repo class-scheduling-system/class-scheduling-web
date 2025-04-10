@@ -66,8 +66,8 @@ export function AdminDashboard({ site }: Readonly<{
     useEffect(() => {
         const fetchSummaryData = async () => {
             try {
-                const resp = await GetAdminDashboardAPI();
-                if (resp?.data) {
+            const resp = await GetAdminDashboardAPI();
+            if (resp?.data) {
                     // 确保 request_log_list 始终是数组
                     const data = {
                         ...resp.data,
@@ -242,19 +242,19 @@ export function AdminDashboard({ site }: Readonly<{
                             <tbody>
                                 {summary && summary.request_logs && summary.request_logs.length > 0
                                     ? summary.request_logs
-                                        .slice((requestLogCurrentPage - 1) * requestLogPageSize, requestLogCurrentPage * requestLogPageSize)
-                                        .map(log => (
-                                            <tr key={log.request_log_uuid}>
-                                                <td>{log.request_method}</td>
-                                                <td>{log.request_url}</td>
-                                                <td>
-                                                    <span className={`badge ${log.response_code >= 400 ? 'badge-error' : 'badge-success'}`}>
-                                                        {log.response_code}
-                                                    </span>
-                                                </td>
-                                                <td>{log.execution_time}ms</td>
-                                                <td>{formatTimestamp(log.request_time)}</td>
-                                            </tr>
+                                    .slice((requestLogCurrentPage - 1) * requestLogPageSize, requestLogCurrentPage * requestLogPageSize)
+                                    .map(log => (
+                                        <tr key={log.request_log_uuid}>
+                                            <td>{log.request_method}</td>
+                                            <td>{log.request_url}</td>
+                                            <td>
+                                                <span className={`badge ${log.response_code >= 400 ? 'badge-error' : 'badge-success'}`}>
+                                                    {log.response_code}
+                                                </span>
+                                            </td>
+                                            <td>{log.execution_time}ms</td>
+                                            <td>{formatTimestamp(log.request_time)}</td>
+                                        </tr>
                                         ))
                                     : (
                                         <tr>
