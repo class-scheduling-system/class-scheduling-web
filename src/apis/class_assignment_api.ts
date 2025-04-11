@@ -32,6 +32,7 @@ import { AdjustmentDTO, ClassAssignmentDTO } from "../models/dto/class_assignmen
 import { PageClassAssignmentSearchDTO } from "../models/dto/page/page_class_assignment_search_dto";
 import { ClassAssignmentEntity } from "../models/entity/class_assignment_entity";
 import { PageEntity } from "../models/entity/page_entity";
+import { SchedulingConflictDTO } from "../models/dto/scheduling_conflict_dto";
 
 /**
  * # 获取排课分配信息
@@ -109,11 +110,11 @@ const GetClassAssignmentListAPI = async (
  * # 添加排课分配
  * > 本接口用于添加新的排课分配
  * 
- * @param data 排课分配信息
- * @returns 操作结果
+ * @param data 排课分配信息，请确保字段与后端ClassAssignmentVO规范一致
+ * @returns 如果有冲突，返回冲突列表；否则返回空数组
  */
-const AddClassAssignmentAPI = async (data: ClassAssignmentDTO): Promise<BaseResponse<void> | undefined> => {
-    return BaseApi<BaseResponse<void>>(
+const AddClassAssignmentAPI = async (data: ClassAssignmentDTO): Promise<BaseResponse<SchedulingConflictDTO[]> | undefined> => {
+    return BaseApi<BaseResponse<SchedulingConflictDTO[]>>(
         MethodType.POST,
         "/api/v1/class-assignments",
         data as Record<string, unknown>,
@@ -125,16 +126,16 @@ const AddClassAssignmentAPI = async (data: ClassAssignmentDTO): Promise<BaseResp
 
 /**
  * # 更新排课分配
- * > 本接口用于调整排课安排
+ * > 本接口用于更新排课信息
  * 
- * @param data 排课调整信息
+ * @param adjustmentData 排课调整数据，直接遵循 AdjustmentDTO 结构
  * @returns 操作结果
  */
-const UpdateClassAssignmentAPI = async (data: AdjustmentDTO): Promise<BaseResponse<void> | undefined> => {
+const UpdateClassAssignmentAPI = async (adjustmentData: AdjustmentDTO): Promise<BaseResponse<void> | undefined> => {
     return BaseApi<BaseResponse<void>>(
         MethodType.PUT,
         "/api/v1/class-assignments",
-        data as Record<string, unknown>,
+        adjustmentData as Record<string, unknown>,
         null,
         null,
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
@@ -165,5 +166,6 @@ export {
     GetClassAssignmentListAPI,
     AddClassAssignmentAPI,
     UpdateClassAssignmentAPI,
-    DeleteClassAssignmentAPI
+    DeleteClassAssignmentAPI,
+    GetClassAssignmentAPI as GetClassAssignmentDetailAPI
 }; 

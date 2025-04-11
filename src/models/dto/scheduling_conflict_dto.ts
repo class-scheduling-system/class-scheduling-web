@@ -27,29 +27,35 @@
  */
 
 /**
- * # 排课分配实体类
- * 
- * 用于表示排课分配信息的实体类
+ * # 冲突时间DTO
  */
-
-/**
- * 课程时间DTO
- */
-export type ClassTimeDTO = {
-    day_of_week: number;
-    period_start: number;
-    period_end: number;
-    week_numbers: number[];
+export type ConflictTimeDTO = {
+    /**
+     * 冲突发生的周次
+     */
+    week: number;
+    
+    /**
+     * 冲突发生的星期几
+     */
+    day: number;
+    
+    /**
+     * 冲突发生的节次
+     */
+    period: number;
 };
 
 /**
- * 教学班分配实体
+ * # 排课冲突DTO
+ * 
+ * 用于表示排课过程中产生的冲突信息
  */
-export type ClassAssignmentEntity = {
+export type SchedulingConflictDTO = {
     /**
-     * 排课分配UUID
+     * 冲突记录UUID
      */
-    class_assignment_uuid: string;
+    conflict_uuid: string;
     
     /**
      * 学期UUID
@@ -57,114 +63,57 @@ export type ClassAssignmentEntity = {
     semester_uuid: string;
     
     /**
-     * 课程UUID
+     * 第一个冲突排课UUID
      */
-    course_uuid: string;
+    first_assignment_uuid: string;
     
     /**
-     * 教师UUID
+     * 第二个冲突排课UUID
      */
-    teacher_uuid: string;
+    second_assignment_uuid: string;
     
     /**
-     * 校区UUID
+     * 冲突类型
+     * 1-教师冲突，2-教室冲突，3-班级冲突
      */
-    campus_uuid?: string;
+    conflict_type: number;
     
     /**
-     * 教学楼UUID
+     * 冲突时间
      */
-    building_uuid?: string;
+    conflict_time: ConflictTimeDTO;
     
     /**
-     * 教室UUID
+     * 冲突描述
      */
-    classroom_uuid: string;
+    description: string;
     
     /**
-     * 教学班UUID
+     * 解决状态
+     * 0-未解决，1-已解决
      */
-    teaching_class_uuid?: string;
+    resolution_status: number;
     
     /**
-     * 教学班组成
+     * 解决方法
+     * 0-未解决，1-调整第一项，2-调整第二项，3-两项都调整，4-忽略冲突
      */
-    teaching_class_composition: string;
+    resolution_method: number;
     
     /**
-     * 课程归属
+     * 解决说明
      */
-    course_ownership: string;
+    resolution_notes: string;
     
     /**
-     * 教学班名称
+     * 解决人
      */
-    teaching_class_name: string;
+    resolved_by: string;
     
     /**
-     * 学时类型
+     * 解决时间
      */
-    credit_hour_type: string;
-    
-    /**
-     * 教学学时
-     */
-    teaching_hours: number;
-    
-    /**
-     * 已排学时
-     */
-    scheduled_hours: number;
-    
-    /**
-     * 总学时
-     */
-    total_hours: number;
-    
-    /**
-     * 排课优先级
-     */
-    scheduling_priority: number;
-    
-    /**
-     * 班级人数
-     */
-    class_size: number;
-    
-    /**
-     * 教学校区
-     */
-    teaching_campus: string;
-    
-    /**
-     * 上课时间（描述性文本）
-     */
-    class_time_description: string;
-    
-    /**
-     * 连堂课节数
-     */
-    consecutive_sessions: number;
-    
-    /**
-     * 教室类型
-     */
-    classroom_type: string;
-    
-    /**
-     * 指定教室
-     */
-    designated_classroom: string;
-    
-    /**
-     * 指定教学楼
-     */
-    designated_teaching_building: string;
-    
-    /**
-     * 指定时间
-     */
-    specified_time: string;
+    resolved_at: number;
     
     /**
      * 创建时间
@@ -175,9 +124,4 @@ export type ClassAssignmentEntity = {
      * 更新时间
      */
     updated_at: number;
-    
-    /**
-     * 课程时间DTO
-     */
-    class_time_dto?: ClassTimeDTO[];
-};
+}; 

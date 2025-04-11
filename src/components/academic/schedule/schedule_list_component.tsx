@@ -27,21 +27,19 @@
  */
 
 import { CardComponent } from "../../card_component";
-import { Copy, Delete, EditTwo, PreviewOpen, Schedule, BookOne, User, School } from "@icon-park/react";
+import { Delete, EditTwo, PreviewOpen, Schedule, BookOne, User, School } from "@icon-park/react";
 import { ScheduleEntity } from "../../../models/entity/schedule_entity";
 
 export function ScheduleListComponent({
   schedules,
   onView,
   onEdit,
-  onCopy,
   onDelete,
   loading
 }: {
   schedules: ScheduleEntity[];
   onView?: (schedule: ScheduleEntity) => void;
   onEdit?: (schedule: ScheduleEntity) => void;
-  onCopy?: (schedule: ScheduleEntity) => void;
   onDelete?: (schedule: ScheduleEntity) => void;
   loading?: boolean;
 }) {
@@ -131,15 +129,6 @@ export function ScheduleListComponent({
                         onClick={() => onEdit(schedule)}
                       >
                         <EditTwo theme="outline" size="14" />
-                      </button>
-                    )}
-                    {onCopy && (
-                      <button
-                        className="btn btn-xs btn-ghost hover:btn-info tooltip tooltip-left p-0 h-6 w-6 min-h-0"
-                        data-tip="复制排课"
-                        onClick={() => onCopy(schedule)}
-                      >
-                        <Copy theme="outline" size="14" />
                       </button>
                     )}
                     {onDelete && (

@@ -37,8 +37,8 @@ import {
 import { ScheduleListComponent } from "../../components/academic/schedule/schedule_list_component.tsx";
 import { PaginationComponent } from "../../components/academic/schedule/pagination_component.tsx";
 import { ScheduleGridComponent } from "../../components/academic/schedule/schedule_grid_component.tsx";
-import { message } from "antd";
-import { GetClassAssignmentPageAPI } from "../../apis/class_assignment_api";
+import { message, Modal } from "antd";
+import { GetClassAssignmentPageAPI, DeleteClassAssignmentAPI } from "../../apis/class_assignment_api";
 import { ClassAssignmentEntity } from "../../models/entity/class_assignment_entity";
 import { GetSemesterListAPI } from "../../apis/semester_api";
 import { SemesterEntity } from "../../models/entity/semester_entity";
@@ -640,22 +640,48 @@ export function AcademicSchedule({site}: Readonly<{
     
     // 添加排课
     const handleAddSchedule = () => {
-        message.info("添加排课功能待实现");
+        navigate("/academic/schedule/add");
     };
     
     // 编辑排课
     const handleEditSchedule = (schedule: ScheduleEntity) => {
-        message.info(`编辑排课：${schedule.course}`);
-    };
-    
-    // 复制排课
-    const handleCopySchedule = (schedule: ScheduleEntity) => {
-        message.info(`复制排课：${schedule.course}`);
+        if (schedule.rawData && schedule.rawData.class_assignment_uuid) {
+            navigate(`/academic/schedule/edit/${schedule.rawData.class_assignment_uuid}`);
+        } else {
+            message.error("无法获取排课ID，编辑失败");
+        }
     };
     
     // 删除排课
     const handleDeleteSchedule = (schedule: ScheduleEntity) => {
-        message.info(`删除排课：${schedule.course}`);
+        if (!schedule.rawData || !schedule.rawData.class_assignment_uuid) {
+            message.error("无法获取排课ID，删除失败");
+            return;
+        }
+        
+        Modal.confirm({
+            title: "删除确认",
+            content: `确定要删除"${schedule.course}"的排课记录吗？此操作不可恢复。`,
+            okText: "删除",
+            okType: "danger",
+            cancelText: "取消",
+            onOk: async () => {
+                try {
+                    const response = await DeleteClassAssignmentAPI(schedule.rawData!.class_assignment_uuid);
+                    
+                    if (response && response.output === "Success") {
+                        message.success("删除排课成功！");
+                        // 刷新数据
+                        loadClassAssignments();
+                    } else {
+                        message.error(response?.error_message || "删除排课失败");
+                    }
+                } catch (error) {
+                    console.error("删除排课失败", error);
+                    message.error("删除排课失败");
+                }
+            }
+        });
     };
     
     // 获取学期名称
@@ -901,7 +927,6 @@ export function AcademicSchedule({site}: Readonly<{
                                 loading={loading}
                                 onView={(schedule) => handleViewScheduleGrid(schedule, "class")}
                                 onEdit={handleEditSchedule}
-                                onCopy={handleCopySchedule}
                                 onDelete={handleDeleteSchedule}
                             />
                             

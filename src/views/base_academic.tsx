@@ -59,10 +59,13 @@ import { setCurrentAcademicAffairs, setDepartmentInfo } from "../stores/academic
 import { AcademicAffairsEntity } from "../models/entity/academic_affairs_entity.ts";
 import { GetDepartmentAPI } from "../apis/department_api.ts";
 import { DepartmentEntity } from "../models/entity/department_entity.ts";
-import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
+import { AiChatComponent } from "../components/ai/ai_chat_component";
 import { AutomaticScheduling } from "./academic/schedule/automatic_scheduling.tsx";
 import { AcademicTeacherPreference } from "./academic/academic_teacher_preference.tsx";
 import { AcademicTeacherCourseQualification } from "./academic/academic_teacher_course_qualification.tsx";
+import { ScheduleEdit } from "./academic/schedule/schedule_edit.tsx";
+import { ScheduleAdd } from "./academic/schedule/schedule_add";
+import { Aside } from "../components/aside/aside";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -244,6 +247,8 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/course/view/:courseId" element={<AcademicCourseView site={site}/>}/>
                                 <Route path="/schedule" element={<AcademicSchedule site={site}/>}/>
                                 <Route path="/schedule/automatic" element={<AutomaticScheduling site={site}/>}/>
+                                <Route path="/schedule/edit/:id" element={<ScheduleEdit site={site}/>}/>
+                                <Route path="/schedule/add" element={<ScheduleAdd site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>

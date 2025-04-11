@@ -27,6 +27,33 @@
  */
 
 /**
+ * # 课程时间安排DTO
+ * 
+ * 用于表示课程的时间安排
+ */
+export type ClassTimeDTO = {
+    /**
+     * 星期几 (例如，1代表周一, 2代表周二)
+     */
+    day_of_week: number;
+    
+    /**
+     * 开始节次
+     */
+    period_start: number;
+    
+    /**
+     * 结束节次
+     */
+    period_end: number;
+    
+    /**
+     * 周次列表，例如 [1, 2, 3, 4, 5] 表示第1-5周
+     */
+    week_numbers: number[];
+}
+
+/**
  * # 排课分配DTO
  * 
  * 用于请求创建排课分配的数据传输对象
@@ -53,9 +80,9 @@ export type ClassAssignmentDTO = {
     classroom_uuid: string;
     
     /**
-     * 教学班组成
+     * 教学班UUID
      */
-    teaching_class_composition: string;
+    teaching_class_uuid: string;
     
     /**
      * 课程归属
@@ -66,6 +93,16 @@ export type ClassAssignmentDTO = {
      * 教学班名称
      */
     teaching_class_name: string;
+    
+    /**
+     * 行政班级UUID列表
+     */
+    administrative_class_uuids?: string[];
+    
+    /**
+     * 学生数量
+     */
+    student_count?: number;
     
     /**
      * 学时类型
@@ -93,11 +130,6 @@ export type ClassAssignmentDTO = {
     scheduling_priority: number;
     
     /**
-     * 班级人数
-     */
-    class_size: number;
-    
-    /**
      * 教学校区
      */
     teaching_campus: string;
@@ -105,7 +137,7 @@ export type ClassAssignmentDTO = {
     /**
      * 上课时间
      */
-    class_time: string;
+    class_time: ClassTimeDTO[];
     
     /**
      * 连堂课节数
@@ -113,24 +145,79 @@ export type ClassAssignmentDTO = {
     consecutive_sessions: number;
     
     /**
-     * 教室类型
+     * 指定时间（可选）
      */
-    classroom_type: string;
+    specified_time?: string;
     
     /**
-     * 指定教室
+     * 备注（可选）
      */
-    designated_classroom: string;
+    remarks?: string;
+}
+
+/**
+ * # 排课调整详情DTO
+ */
+export type AdjustmentDetailsDTO = {
+    /**
+     * 新教室ID（可选）
+     */
+    classroom_id?: string;
     
     /**
-     * 指定教学楼
+     * 新教师ID（可选）
      */
-    designated_teaching_building: string;
+    teacher_id?: string;
     
     /**
-     * 指定时间
+     * 新时间安排（可选）
      */
-    specified_time: string;
+    class_time?: ClassTimeDTO[];
+    
+    /**
+     * 连堂节数（可选）
+     */
+    consecutive_sessions?: number;
+    
+    /**
+     * 排课优先级（可选）
+     */
+    scheduling_priority?: number;
+}
+
+/**
+ * # 教学班调整DTO
+ */
+export type AdjustTeachingClassDTO = {
+    /**
+     * 教学班UUID
+     */
+    teaching_class_uuid: string;
+    
+    /**
+     * 教学班编号（可选）
+     */
+    teaching_class_code?: string;
+    
+    /**
+     * 教学班名称（可选）
+     */
+    teaching_class_name?: string;
+    
+    /**
+     * 行政班级UUID（可选）
+     */
+    administrative_class_uuids?: string[];
+    
+    /**
+     * 实际学生人数（可选）
+     */
+    actual_student_count?: number;
+    
+    /**
+     * 描述（可选）
+     */
+    description?: string;
 }
 
 /**
@@ -140,37 +227,27 @@ export type ClassAssignmentDTO = {
  */
 export type AdjustmentDTO = {
     /**
-     * 排课分配UUID
+     * 排课分配ID
      */
-    class_assignment_uuid: string;
+    assignment_id: string;
     
     /**
-     * 教室UUID
+     * 具体的调整内容
      */
-    classroom_uuid?: string;
+    adjustments: AdjustmentDetailsDTO;
     
     /**
-     * 教师UUID
+     * 教学班调整
      */
-    teacher_uuid?: string;
+    adjust_teaching_class: AdjustTeachingClassDTO;
     
     /**
-     * 上课时间
+     * 是否忽略可能产生的冲突，默认false
      */
-    class_time?: string;
+    ignore_conflicts?: boolean;
     
     /**
-     * 连堂课节数
+     * 调整原因（可选）
      */
-    consecutive_sessions?: number;
-    
-    /**
-     * 排课优先级
-     */
-    scheduling_priority?: number;
-    
-    /**
-     * 调整原因
-     */
-    reason: string;
+    reason?: string;
 } 
