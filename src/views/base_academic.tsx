@@ -59,13 +59,13 @@ import { setCurrentAcademicAffairs, setDepartmentInfo } from "../stores/academic
 import { AcademicAffairsEntity } from "../models/entity/academic_affairs_entity.ts";
 import { GetDepartmentAPI } from "../apis/department_api.ts";
 import { DepartmentEntity } from "../models/entity/department_entity.ts";
-import { AiChatComponent } from "../components/ai/ai_chat_component";
 import { AutomaticScheduling } from "./academic/schedule/automatic_scheduling.tsx";
 import { AcademicTeacherPreference } from "./academic/academic_teacher_preference.tsx";
 import { AcademicTeacherCourseQualification } from "./academic/academic_teacher_course_qualification.tsx";
 import { ScheduleEdit } from "./academic/schedule/schedule_edit.tsx";
 import { ScheduleAdd } from "./academic/schedule/schedule_add";
-import { Aside } from "../components/aside/aside";
+import { AcademicAddTeacherCourseQualification } from "./academic/teacher/course_qualification/add_qualification.tsx";
+import { AcademicEditTeacherCourseQualification } from "./academic/teacher/course_qualification/edit_qualification.tsx";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -252,8 +252,10 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>
-                                <Route path="/teacher/preference" element={<AcademicTeacherPreference site={site}/>}/>
-                                <Route path="/teacher/course-qualification" element={<AcademicTeacherCourseQualification site={site}/>}/>
+                                <Route path="/teacher-preference" element={<AcademicTeacherPreference site={site}/>}/>
+                                <Route path="/teacher-course-qualification" element={<AcademicTeacherCourseQualification site={site}/>}/>
+                                <Route path="/teacher-course-qualification/add" element={<AcademicAddTeacherCourseQualification site={site}/>}/>
+                                <Route path="/teacher-course-qualification/edit/:qualificationId" element={<AcademicEditTeacherCourseQualification site={site}/>}/>
                                 <Route path="/student" element={<AcademicStudent site={site}/>}/>
                                 <Route path="/student/add" element={<AcademicAddStudent site={site}/>}/>
                                 <Route path="/student/edit/:studentId" element={<AcademicEditStudent site={site}/>}/>
@@ -263,8 +265,6 @@ export function BaseAcademic(): JSX.Element {
                     ))}
                 </animated.div>
             </div>
-            {/* AI聊天组件 */}
-            <AiChatComponent />
         </animated.div>
     );
 }

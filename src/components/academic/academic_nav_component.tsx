@@ -69,9 +69,9 @@ export function AcademicNavComponent(): JSX.Element {
                 <AcademicNavLinkComponent title={"教师管理"} icon={<UserBusiness theme="outline" size="16" />}
                     path={"/academic/teacher"} />
                 <AcademicNavLinkComponent title={"教师偏好"} icon={<Like theme="outline" size="16" />}
-                    path={"/academic/teacher/preference"} />
+                    path={"/academic/teacher-preference"} />
                 <AcademicNavLinkComponent title={"教师课程资格"} icon={<TreasureChest theme="outline" size="16" />}
-                    path={"/academic/teacher/course-qualification"} />
+                    path={"/academic/teacher-course-qualification"} />
                 <AcademicNavLinkComponent title={"学生管理"} icon={<User theme="outline" size="16" />}
                     path={"/academic/student"} />
 

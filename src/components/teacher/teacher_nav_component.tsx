@@ -32,8 +32,7 @@ import {SiteInfoEntity} from "../../models/entity/site_info_entity.ts";
 import {
     Calendar,
     Dashboard,
-    School,
-    Book,
+    TreasureChest,
     User
 } from "@icon-park/react";
 import {TeacherNavLinkComponent} from "./teacher_nav_link_component.tsx";
@@ -65,10 +64,10 @@ export function TeacherNavComponent(): JSX.Element {
                                        path={"/teacher/dashboard"}/>
                 <TeacherNavLinkComponent title={"课程表"} icon={<Calendar theme="outline" size="16"/>}
                                        path={"/teacher/schedule"}/>
-                <TeacherNavLinkComponent title={"课程管理"} icon={<Book theme="outline" size="16"/>}
-                                       path={"/teacher/course"}/>
-                <TeacherNavLinkComponent title={"班级管理"} icon={<School theme="outline" size="16"/>}
-                                       path={"/teacher/class"}/>
+                <TeacherNavLinkComponent title={"课程偏好"} icon={<Calendar theme="outline" size="16"/>}
+                                       path={"/teacher/preference"}/>
+                <TeacherNavLinkComponent title={"课程资格"} icon={<TreasureChest theme="outline" size="16"/>}
+                                       path={"/teacher/qualification"}/>
 
                 <div className="h-px my-4 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 

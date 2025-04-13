@@ -29,11 +29,12 @@
 /**
  * 教师端路由配置
  */
-export const teacherRouteConfig = {
-    "/teacher": "教师端",
-    "/teacher/dashboard": "工作台",
-    "/teacher/schedule": "课程表",
-    "/teacher/course": "课程管理",
-    "/teacher/class": "班级管理",
-    "/teacher/profile": "个人信息"
+export const teacherRouteConfig: Record<string, string> = {
+    "dashboard": "工作台",
+    "schedule": "课程表",
+    "preference": "授课偏好",
+    "qualification": "课程资格",
+    "course": "课程管理",
+    "class": "班级管理",
+    "profile": "个人信息"
 }; 

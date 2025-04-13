@@ -52,7 +52,7 @@ export function AcademicNavLinkComponent({title, icon, path}: Readonly<{
      * @return {string} 如果当前路径与给定的路由匹配，则返回表示激活状态的CSS类名；否则，返回表示非激活状态的CSS类名。
      */
     function selectedRoute(route: string): string {
-        if (location.pathname === route) {
+        if (location.pathname === route || location.pathname === route + "/add" || location.pathname === route + "/edit") {
             return "bg-primary text-white shadow-md";
         } else {
             return "hover:bg-primary-content hover:text-primary hover:shadow-md transition-all";

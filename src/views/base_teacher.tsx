@@ -40,8 +40,9 @@ import {useBreadcrumbs} from "../hooks/use_breadcrumbs.tsx";
 import {teacherRouteConfig} from "../models/config/teacher_route_config";
 import {TeacherNavComponent} from "../components/teacher/teacher_nav_component.tsx";
 import {TeacherDashboard} from "./teacher/teacher_dashboard.tsx";
-import { AiChatComponent } from "@/components/ai/ai_chat_component.tsx";
 import TeacherCourseSchedule from "./teacher/teacher_course_schedule.tsx";
+import TeacherPreference from "./teacher/teacher_preference.tsx";
+import TeacherCourseQualification from "./teacher/teacher_course_qualification.tsx";
 
 /**
  * 生成一个教师控制台组件。
@@ -171,14 +172,14 @@ export function BaseTeacher(): JSX.Element {
                             <Routes location={item}>
                                 <Route path="/dashboard" element={<TeacherDashboard site={site}/>}/>
                                 <Route path="/schedule" element={<TeacherCourseSchedule/>}/>
+                                <Route path="/preference" element={<TeacherPreference />}/>
+                                <Route path="/qualification" element={<TeacherCourseQualification />}/>
                                 <Route path="/*" element={<AdminNotFound/>}/>
                             </Routes>
                         </animated.div>
                     ))}
                 </animated.div>
             </div>
-            {/* AI聊天组件 */}
-            <AiChatComponent />
         </animated.div>
     );
 } 

@@ -8,6 +8,8 @@ export const academicRouteConfig: Record<string, string> = {
     'course': '课程管理',
     'schedule': '排课管理',
     'teacher': '教师管理',
+    'teacher-course-qualification': '教师课程资格',
+    'teacher-preference': '教师授课偏好',
     'student': '学生管理',
     'exam': '考试管理'
 };

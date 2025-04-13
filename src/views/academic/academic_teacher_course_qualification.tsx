@@ -21,7 +21,7 @@ import { Button, Empty, message, Modal, Pagination, Skeleton } from "antd";
 import { PageEntity } from "../../models/entity/page_entity.ts";
 import { TeacherCourseQualificationEntity } from "../../models/entity/teacher_course_qualification_entity.ts";
 import { animated, useTransition } from "@react-spring/web";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { PageTeacherCourseQualificationDTO } from "../../models/dto/page/page_teacher_course_qualification_dto.ts";
 import { useSelector } from "react-redux";
 import { CurrentInfoStore } from "../../models/store/current_info_store.ts";
@@ -37,8 +37,12 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
 }>) {
   const inputFocus = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const getCurrent = useSelector((state: { current: CurrentInfoStore }) => state.current);
   const academicAffairs = useSelector((state: { academicAffairs: AcademicAffairsStore }) => state.academicAffairs);
+
+  // 记录之前的路径
+  const prevPathRef = useRef<string>(location.pathname);
 
   // 教师课程资格列表状态
   const [qualificationList, setQualificationList] = useState<PageEntity<TeacherCourseQualificationEntity>>({
@@ -89,6 +93,9 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
   
   // 统计显示状态
   const [showStats, setShowStats] = useState(false);
+  
+  // 添加刷新标志，用于触发列表重新加载
+  const [refreshFlag, setRefreshFlag] = useState<number>(0);
 
   // 页面加载过渡动画
   const transitionSearch = useTransition(loading ?? 0, {
@@ -195,7 +202,7 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
     if (academicAffairs.currentAcademicAffairs?.department) {
       fetchQualificationList().then();
     }
-  }, [academicAffairs.currentAcademicAffairs?.department]);
+  }, [academicAffairs.currentAcademicAffairs?.department, searchRequest, refreshFlag]);
 
   // 当对话框关闭时刷新数据
   useEffect(() => {
@@ -262,6 +269,8 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
       if (deleteResp?.output === "Success") {
         message.success("删除教师课程资格成功");
         setDialogDelete(false);
+        // 刷新列表
+        setRefreshFlag(prev => prev + 1);
       } else {
         message.error(deleteResp?.error_message ?? "删除教师课程资格失败");
       }
@@ -285,6 +294,8 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
       if (approveResp?.output === "Success") {
         message.success(approveStatus === 1 ? "审核通过成功" : "驳回申请成功");
         setDialogApprove(false);
+        // 刷新列表
+        setRefreshFlag(prev => prev + 1);
       } else {
         message.error(approveResp?.error_message ?? "审核操作失败");
       }
@@ -306,6 +317,19 @@ export function AcademicTeacherCourseQualification({ site }: Readonly<{
     setApproveStatus(initialStatus);
     setDialogApprove(true);
   };
+
+  // 当用户从添加或编辑页面返回到列表页面时刷新数据
+  useEffect(() => {
+    // 如果当前路径是列表页面，且之前路径是添加或编辑页面，则刷新数据
+    if (location.pathname === "/academic/teacher-course-qualification" && 
+        (prevPathRef.current.includes("/academic/teacher-course-qualification/add") || 
+         prevPathRef.current.includes("/academic/teacher-course-qualification/edit/"))) {
+      setRefreshFlag(prev => prev + 1);
+    }
+    
+    // 更新之前的路径
+    prevPathRef.current = location.pathname;
+  }, [location.pathname]);
 
   // 渲染资格等级文本
   const renderQualificationLevel = (level: number) => {
