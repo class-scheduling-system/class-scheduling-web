@@ -58,6 +58,7 @@ export interface ScheduleFormContext {
   setFormErrors: (errors: { [key: string]: string } | ((prev: { [key: string]: string }) => { [key: string]: string })) => void;
   setTimeSlots: (slots: ScheduleTimeSlot[] | ((prev: ScheduleTimeSlot[]) => ScheduleTimeSlot[])) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  resetFormData: (newData: Partial<ScheduleFormData>, newTimeSlots?: ScheduleTimeSlot[]) => boolean;
 }
 
 // 冲突处理上下文类型

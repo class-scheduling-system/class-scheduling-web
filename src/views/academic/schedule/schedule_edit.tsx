@@ -32,6 +32,7 @@ import { AcademicAffairsStore } from "../../../models/store/academic_affairs_sto
 import { AdjustmentDTO, ClassAssignmentDTO } from "../../../models/dto/class_assignment_dto";
 import { GetCreditHourTypeListAPI } from "../../../apis/credit_hour_type_api";
 import { CreditHourTypeEntity } from "../../../models/entity/credit_hour_type_entity";
+import { AiDialogComponent } from "../../../components/academic/schedule/edit/ai_dialog_component";
 
 interface ScheduleTimeSlot {
   day_of_week: number;
@@ -59,6 +60,31 @@ interface ScheduleFormData {
   administrative_class_uuids?: string[];
   student_count?: number;
   is_elective?: boolean;
+}
+
+// AI响应数据类型
+interface AIResponse {
+  semester_uuid?: string;
+  course_uuid?: string;
+  teacher_uuid?: string;
+  classroom_uuid?: string;
+  course_ownership?: string;
+  teaching_class_name?: string;
+  administrative_class_uuids?: string[];
+  student_count?: number;
+  credit_hour_type?: string;
+  teaching_hours?: number;
+  scheduled_hours?: number;
+  total_hours?: number;
+  scheduling_priority?: number;
+  teaching_campus?: string;
+  class_time?: Array<{
+    day_of_week: number;
+    period_start: number;
+    period_end: number;
+    week_numbers: number[];
+  }>;
+  consecutive_sessions?: number;
 }
 
 export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
@@ -91,6 +117,9 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [timeSlots, setTimeSlots] = useState<ScheduleTimeSlot[]>([]);
+  
+  // 用于触发表单重新渲染
+  const [formRefreshKey, setFormRefreshKey] = useState(0);
 
   // 加载状态
   const [loading, setLoading] = useState(false);
@@ -126,6 +155,50 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
       loadTeachingClasses(semesterUuid);
     }
   }, [formData.semester_uuid]);
+  
+  // 处理从AI组件接收到的数据
+  const handleAiDataReceived = (aiData: AIResponse): void => {
+    console.log('编辑页面：从AI接收到数据，准备更新表单:', aiData);
+    
+    // 记录数据字段和时间段
+    const dataKeys = Object.keys(aiData);
+    console.log(`收到数据包含 ${dataKeys.length} 个字段:`, dataKeys);
+    if (aiData.class_time) {
+      console.log(`包含 ${aiData.class_time.length} 个时间段`);
+    }
+    
+    // 创建表单更新对象
+    const updatedFormData = { ...formData };
+    
+    // 更新表单字段 - 只更新AI调整建议中的字段
+    // 对于关键标识字段（如semester_uuid）不进行覆盖，避免修改已有数据的关键信息
+    if (aiData.teacher_uuid) updatedFormData.teacher_uuid = aiData.teacher_uuid;
+    if (aiData.classroom_uuid) updatedFormData.classroom_uuid = aiData.classroom_uuid;
+    
+    // 可以更新的非关键字段
+    if (aiData.scheduling_priority !== undefined) updatedFormData.scheduling_priority = aiData.scheduling_priority;
+    if (aiData.consecutive_sessions !== undefined) updatedFormData.consecutive_sessions = aiData.consecutive_sessions;
+    
+    // 更新选课信息，如果AI提供了这些信息
+    if (aiData.administrative_class_uuids) updatedFormData.administrative_class_uuids = aiData.administrative_class_uuids;
+    if (aiData.student_count !== undefined) updatedFormData.student_count = aiData.student_count;
+    
+    // 更新表单数据
+    setFormData(updatedFormData);
+    
+    // 如果有时间段数据，更新时间段
+    if (aiData.class_time && aiData.class_time.length > 0) {
+      console.log('更新时间段数据:', aiData.class_time);
+      setTimeSlots(aiData.class_time);
+    }
+    
+    // 增加表单刷新键，触发重新渲染
+    setFormRefreshKey(prev => prev + 1);
+    console.log(`表单刷新键已更新: ${formRefreshKey} -> ${formRefreshKey + 1}`);
+    
+    // 显示提示信息
+    message.success('已应用AI排课调整建议，请检查并确认');
+  };
 
   // 加载学时类型列表
   const loadCreditHourTypes = async () => {
@@ -569,342 +642,367 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
 
   return (
     <div className="container mx-auto">
-      <div className="card shadow-xl bg-base-100">
-        <div className="card-body">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="card-title text-2xl flex items-center gap-2">
-              <Schedule theme="outline" size="24" />
-              {isEditMode ? "编辑排课" : "添加排课"}
-            </h2>
-            <button
-              type="button"
-              className="btn btn-sm btn-ghost flex items-center gap-1"
-              onClick={() => navigate("/academic/schedule")}
-            >
-              <ArrowLeft theme="outline" size="18" />
-              返回列表
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-          ) : (
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                {/* 学期选择 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">学期<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="semester_uuid"
-                    className={`select select-bordered w-full ${formErrors.semester_uuid ? 'select-error' : ''}`}
-                    value={formData.semester_uuid}
-                    onChange={handleSemesterChange}
-                  >
-                    <option value="" disabled>请选择学期</option>
-                    {semesters.map(sem => (
-                      <option key={sem.semester_uuid} value={sem.semester_uuid}>
-                        {sem.name}{sem.is_enabled ? " (启用中)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.semester_uuid && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.semester_uuid}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 教学班选择 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">教学班<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="teaching_class_uuid"
-                    className={`select select-bordered w-full ${formErrors.teaching_class_uuid ? 'select-error' : ''}`}
-                    value={formData.teaching_class_uuid || ""}
-                    onChange={handleInputChange}
-                  >
-                    <option value="" disabled>请选择教学班</option>
-                    {teachingClasses.map(cls => (
-                      <option key={cls.teaching_class_uuid} value={cls.teaching_class_uuid}>
-                        {cls.teaching_class_name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.teaching_class_uuid && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.teaching_class_uuid}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 教师选择 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">授课教师<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="teacher_uuid"
-                    className={`select select-bordered w-full ${formErrors.teacher_uuid ? 'select-error' : ''}`}
-                    value={formData.teacher_uuid}
-                    onChange={handleInputChange}
-                  >
-                    <option value="" disabled>请选择授课教师</option>
-                    {teachers.map(teacher => (
-                      <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
-                        {teacher.teacher_name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.teacher_uuid && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.teacher_uuid}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 课程选择 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">课程<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="course_uuid"
-                    className={`select select-bordered w-full ${formErrors.course_uuid ? 'select-error' : ''}`}
-                    value={formData.course_uuid}
-                    onChange={handleInputChange}
-                  >
-                    <option value="" disabled>请选择课程</option>
-                    {courses.map(course => (
-                      <option key={course.course_library_uuid} value={course.course_library_uuid}>
-                        {course.name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.course_uuid && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.course_uuid}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 教室选择 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">教室<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="classroom_uuid"
-                    className={`select select-bordered w-full ${formErrors.classroom_uuid ? 'select-error' : ''}`}
-                    value={formData.classroom_uuid}
-                    onChange={handleClassroomChange}
-                  >
-                    <option value="" disabled>请选择教室</option>
-                    {classrooms.map(room => (
-                      <option key={room.classroom_uuid} value={room.classroom_uuid}>
-                        {room.name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.classroom_uuid && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.classroom_uuid}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 学时类型 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">学时类型<span className="text-error">*</span></span>
-                  </label>
-                  <select
-                    name="credit_hour_type"
-                    className={`select select-bordered w-full ${formErrors.credit_hour_type ? 'select-error' : ''}`}
-                    value={formData.credit_hour_type}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">请选择学时类型</option>
-                    {creditHourTypes.map(type => (
-                      <option key={type.credit_hour_type_uuid} value={type.credit_hour_type_uuid}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.credit_hour_type && (
-                    <label className="label">
-                      <span className="label-text-alt text-error">{formErrors.credit_hour_type}</span>
-                    </label>
-                  )}
-                </div>
-
-                {/* 必修/选修课显示（不可选） */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">课程类型</span>
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <div className="badge badge-lg font-normal p-3">
-                      {formData.is_elective ? "选修课" : "必修课"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 移除所有选修课/必修课的相关输入字段，不再显示人数和行政班级选择 */}
-              </div>
-
-              {/* 备注 */}
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">备注</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered w-full"
-                  placeholder="请输入排课备注信息..."
-                  rows={2}
-                  name="remarks"
-                  value={formData.remarks || ""}
-                  onChange={handleInputChange}
-                ></textarea>
-              </div>
-
-              {/* 时间段配置 */}
-              <div className="border border-base-300 rounded-lg p-4 mt-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Calendar theme="outline" size="20" />
-                    排课时间段
-                  </h3>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddTimeSlot}
-                  >
-                    <Plus theme="outline" size="16" />
-                    添加时间段
-                  </button>
-                </div>
-
-                {timeSlots.length === 0 ? (
-                  <div className="text-center text-base-content/60 py-8">
-                    <p>请添加排课时间段</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {timeSlots.map((slot, index) => (
-                      <div key={index} className="border border-base-200 rounded-lg p-4 bg-base-100/50">
-                        <div className="flex justify-between items-center mb-3">
-                          <h4 className="font-medium">时间段 #{index + 1}</h4>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-error"
-                            onClick={() => handleRemoveTimeSlot(index)}
-                          >
-                            <Delete theme="outline" size="16" />
-                            删除
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* 星期 */}
-                          <div className="form-control">
-                            <label className="label">
-                              <span className="label-text">星期</span>
-                            </label>
-                            <select
-                              className="select select-bordered w-full"
-                              value={slot.day_of_week}
-                              onChange={(e) => handleTimeSlotChange(index, 'day_of_week', parseInt(e.target.value))}
-                            >
-                              <option value={1}>周一</option>
-                              <option value={2}>周二</option>
-                              <option value={3}>周三</option>
-                              <option value={4}>周四</option>
-                              <option value={5}>周五</option>
-                              <option value={6}>周六</option>
-                              <option value={7}>周日</option>
-                            </select>
-                          </div>
-
-                          {/* 开始节次 */}
-                          <div className="form-control">
-                            <label className="label">
-                              <span className="label-text">开始节次</span>
-                            </label>
-                            <select
-                              className="select select-bordered w-full"
-                              value={slot.period_start}
-                              onChange={(e) => {
-                                const startValue = parseInt(e.target.value);
-                                handleTimeSlotChange(index, 'period_start', startValue);
-                                if (startValue > slot.period_end) {
-                                  handleTimeSlotChange(index, 'period_end', startValue);
-                                }
-                              }}
-                            >
-                              {Array.from({ length: 12 }, (_, i) => i + 1).map(num => (
-                                <option key={num} value={num}>第{num}节</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* 结束节次 */}
-                          <div className="form-control">
-                            <label className="label">
-                              <span className="label-text">结束节次</span>
-                            </label>
-                            <select
-                              className="select select-bordered w-full"
-                              value={slot.period_end}
-                              onChange={(e) => handleTimeSlotChange(index, 'period_end', parseInt(e.target.value))}
-                            >
-                              {Array.from({ length: 12 }, (_, i) => i + 1)
-                                .filter(num => num >= slot.period_start)
-                                .map(num => (
-                                  <option key={num} value={num}>第{num}节</option>
-                                ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* 周次选择 */}
-                        <div className="mt-4">
-                          <label className="label">
-                            <span className="label-text">授课周次</span>
-                          </label>
-                          {renderWeekSelector(index, slot.week_numbers)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 提交按钮 */}
-              <div className="flex justify-end mt-6 space-x-2">
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* 主表单区域 - 占70%宽度 */}
+        <div className="w-full md:w-[70%]">
+          <div className="card shadow-xl bg-base-100">
+            <div className="card-body">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="card-title text-2xl flex items-center gap-2">
+                  <Schedule theme="outline" size="24" />
+                  {isEditMode ? '编辑排课' : '添加排课'}
+                </h2>
                 <button
                   type="button"
-                  className="btn btn-outline"
+                  className="btn btn-sm btn-ghost flex items-center gap-1"
                   onClick={() => navigate("/academic/schedule")}
                 >
-                  <CloseOne theme="outline" size="18" />
-                  取消
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={submitting}
-                >
-                  <Save theme="outline" size="18" />
-                  {submitting ? '保存中...' : '保存'}
+                  <ArrowLeft theme="outline" size="18" />
+                  返回列表
                 </button>
               </div>
-            </form>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-20">
+                  <span className="loading loading-spinner loading-lg text-primary"></span>
+                </div>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                  {/* 学期和教学班信息 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 学期选择 */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text">学期</span>
+                        <span className="label-text-alt text-error">*</span>
+                      </label>
+                      <select
+                        className={`select select-bordered w-full ${formErrors.semester_uuid ? 'select-error' : ''}`}
+                        name="semester_uuid"
+                        value={formData.semester_uuid}
+                        onChange={handleSemesterChange}
+                        disabled={isEditMode}
+                      >
+                        <option value="">选择学期</option>
+                        {semesters.map(sem => (
+                          <option
+                            key={sem.semester_uuid}
+                            value={sem.semester_uuid}
+                            className={sem.is_enabled ? 'font-bold' : ''}
+                          >
+                            {sem.name} {sem.is_enabled ? '(当前)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {formErrors.semester_uuid && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">{formErrors.semester_uuid}</span>
+                        </label>
+                      )}
+                    </div>
+
+                    {/* 教学班选择（仅编辑模式显示） */}
+                    {isEditMode && (
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">教学班</span>
+                          <span className="label-text-alt text-error">*</span>
+                        </label>
+                        <select
+                          className={`select select-bordered w-full ${formErrors.teaching_class_uuid ? 'select-error' : ''}`}
+                          name="teaching_class_uuid"
+                          value={formData.teaching_class_uuid}
+                          onChange={handleInputChange}
+                          disabled={true}
+                        >
+                          <option value="">选择教学班</option>
+                          {teachingClasses.map(tc => (
+                            <option key={tc.teaching_class_uuid} value={tc.teaching_class_uuid}>
+                              {tc.teaching_class_name}
+                            </option>
+                          ))}
+                        </select>
+                        {formErrors.teaching_class_uuid && (
+                          <label className="label">
+                            <span className="label-text-alt text-error">{formErrors.teaching_class_uuid}</span>
+                          </label>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 教师选择 */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">授课教师<span className="text-error">*</span></span>
+                    </label>
+                    <select
+                      name="teacher_uuid"
+                      className={`select select-bordered w-full ${formErrors.teacher_uuid ? 'select-error' : ''}`}
+                      value={formData.teacher_uuid}
+                      onChange={handleInputChange}
+                    >
+                      <option value="" disabled>请选择授课教师</option>
+                      {teachers.map(teacher => (
+                        <option key={teacher.teacher_uuid} value={teacher.teacher_uuid}>
+                          {teacher.teacher_name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.teacher_uuid && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">{formErrors.teacher_uuid}</span>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* 课程选择 */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">课程<span className="text-error">*</span></span>
+                    </label>
+                    <select
+                      name="course_uuid"
+                      className={`select select-bordered w-full ${formErrors.course_uuid ? 'select-error' : ''}`}
+                      value={formData.course_uuid}
+                      onChange={handleInputChange}
+                    >
+                      <option value="" disabled>请选择课程</option>
+                      {courses.map(course => (
+                        <option key={course.course_library_uuid} value={course.course_library_uuid}>
+                          {course.name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.course_uuid && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">{formErrors.course_uuid}</span>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* 教室选择 */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">教室<span className="text-error">*</span></span>
+                    </label>
+                    <select
+                      name="classroom_uuid"
+                      className={`select select-bordered w-full ${formErrors.classroom_uuid ? 'select-error' : ''}`}
+                      value={formData.classroom_uuid}
+                      onChange={handleClassroomChange}
+                    >
+                      <option value="" disabled>请选择教室</option>
+                      {classrooms.map(room => (
+                        <option key={room.classroom_uuid} value={room.classroom_uuid}>
+                          {room.name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.classroom_uuid && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">{formErrors.classroom_uuid}</span>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* 学时类型 */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">学时类型<span className="text-error">*</span></span>
+                    </label>
+                    <select
+                      name="credit_hour_type"
+                      className={`select select-bordered w-full ${formErrors.credit_hour_type ? 'select-error' : ''}`}
+                      value={formData.credit_hour_type}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">请选择学时类型</option>
+                      {creditHourTypes.map(type => (
+                        <option key={type.credit_hour_type_uuid} value={type.credit_hour_type_uuid}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.credit_hour_type && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">{formErrors.credit_hour_type}</span>
+                      </label>
+                    )}
+                  </div>
+
+                  {/* 必修/选修课显示（不可选） */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">课程类型</span>
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <div className="badge badge-lg font-normal p-3">
+                        {formData.is_elective ? "选修课" : "必修课"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 备注 */}
+                  <div className="form-control mt-4">
+                    <label className="label">
+                      <span className="label-text">备注</span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered w-full"
+                      placeholder="请输入排课备注信息..."
+                      rows={2}
+                      name="remarks"
+                      value={formData.remarks || ""}
+                      onChange={handleInputChange}
+                    ></textarea>
+                  </div>
+
+                  {/* 时间段配置 */}
+                  <div className="border border-base-300 rounded-lg p-4 mt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium flex items-center gap-2">
+                        <Calendar theme="outline" size="20" />
+                        排课时间段
+                      </h3>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={handleAddTimeSlot}
+                      >
+                        <Plus theme="outline" size="16" />
+                        添加时间段
+                      </button>
+                    </div>
+
+                    {timeSlots.length === 0 ? (
+                      <div className="text-center text-base-content/60 py-8">
+                        <p>请添加排课时间段</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {timeSlots.map((slot, index) => (
+                          <div key={index} className="border border-base-200 rounded-lg p-4 bg-base-100/50">
+                            <div className="flex justify-between items-center mb-3">
+                              <h4 className="font-medium">时间段 #{index + 1}</h4>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-error"
+                                onClick={() => handleRemoveTimeSlot(index)}
+                              >
+                                <Delete theme="outline" size="16" />
+                                删除
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* 星期 */}
+                              <div className="form-control">
+                                <label className="label">
+                                  <span className="label-text">星期</span>
+                                </label>
+                                <select
+                                  className="select select-bordered w-full"
+                                  value={slot.day_of_week}
+                                  onChange={(e) => handleTimeSlotChange(index, 'day_of_week', parseInt(e.target.value))}
+                                >
+                                  <option value={1}>周一</option>
+                                  <option value={2}>周二</option>
+                                  <option value={3}>周三</option>
+                                  <option value={4}>周四</option>
+                                  <option value={5}>周五</option>
+                                  <option value={6}>周六</option>
+                                  <option value={7}>周日</option>
+                                </select>
+                              </div>
+
+                              {/* 开始节次 */}
+                              <div className="form-control">
+                                <label className="label">
+                                  <span className="label-text">开始节次</span>
+                                </label>
+                                <select
+                                  className="select select-bordered w-full"
+                                  value={slot.period_start}
+                                  onChange={(e) => {
+                                    const startValue = parseInt(e.target.value);
+                                    handleTimeSlotChange(index, 'period_start', startValue);
+                                    if (startValue > slot.period_end) {
+                                      handleTimeSlotChange(index, 'period_end', startValue);
+                                    }
+                                  }}
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => i + 1).map(num => (
+                                    <option key={num} value={num}>第{num}节</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              {/* 结束节次 */}
+                              <div className="form-control">
+                                <label className="label">
+                                  <span className="label-text">结束节次</span>
+                                </label>
+                                <select
+                                  className="select select-bordered w-full"
+                                  value={slot.period_end}
+                                  onChange={(e) => handleTimeSlotChange(index, 'period_end', parseInt(e.target.value))}
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => i + 1)
+                                    .filter(num => num >= slot.period_start)
+                                    .map(num => (
+                                      <option key={num} value={num}>第{num}节</option>
+                                    ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* 周次选择 */}
+                            <div className="mt-4">
+                              <label className="label">
+                                <span className="label-text">授课周次</span>
+                              </label>
+                              {renderWeekSelector(index, slot.week_numbers)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 提交按钮 */}
+                  <div className="flex justify-end mt-6 space-x-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => navigate("/academic/schedule")}
+                    >
+                      <CloseOne theme="outline" size="18" />
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={submitting}
+                    >
+                      <Save theme="outline" size="18" />
+                      {submitting ? '保存中...' : '保存'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* AI对话组件 - 占30%宽度 */}
+        <div className="w-full md:w-[30%]">
+          {!loading && (
+            <AiDialogComponent 
+              formData={formData}
+              timeSlots={timeSlots}
+              onDataReceived={handleAiDataReceived}
+            />
           )}
         </div>
       </div>

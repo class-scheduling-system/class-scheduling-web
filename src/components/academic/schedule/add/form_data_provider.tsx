@@ -54,6 +54,55 @@ export const FormDataProvider: React.FC<{children: React.ReactNode}> = ({ childr
       });
     }
   };
+  
+  // 重置或替换整个表单数据
+  const resetFormData = (newData: Partial<ScheduleFormData>, newTimeSlots?: ScheduleTimeSlot[]) => {
+    console.log("FormDataProvider：重置表单数据", {
+      fieldsCount: Object.keys(newData).length,
+      fields: Object.keys(newData),
+      timeSlotsCount: newTimeSlots?.length
+    });
+    
+    // 更新表单主体数据
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        ...newData
+      };
+      console.log("FormDataProvider：表单数据已更新", {
+        oldSemester: prev.semester_uuid,
+        newSemester: updated.semester_uuid,
+        oldTeacher: prev.teacher_uuid,
+        newTeacher: updated.teacher_uuid,
+        oldCourse: prev.course_uuid,
+        newCourse: updated.course_uuid
+      });
+      return updated;
+    });
+    
+    // 如果提供了时间段数据，则更新时间段
+    if (newTimeSlots && newTimeSlots.length > 0) {
+      console.log("FormDataProvider：重置时间段数据", {
+        count: newTimeSlots.length,
+        slots: newTimeSlots.map(slot => 
+          `周${slot.day_of_week} 第${slot.period_start}-${slot.period_end}节 共${slot.week_numbers.length}周`
+        )
+      });
+      setTimeSlots(newTimeSlots);
+    } else {
+      console.log("FormDataProvider：未提供时间段数据或时间段为空");
+    }
+    
+    // 清空所有错误
+    setFormErrors({});
+    
+    // 确保下一个渲染周期能看到更新
+    setTimeout(() => {
+      console.log("FormDataProvider：数据重置完成，准备下一个渲染周期");
+    }, 0);
+    
+    return true;
+  };
 
   // 表单上下文值
   const formContextValue: ScheduleFormContext = {
@@ -63,7 +112,8 @@ export const FormDataProvider: React.FC<{children: React.ReactNode}> = ({ childr
     setFormData,
     setFormErrors,
     setTimeSlots,
-    handleInputChange
+    handleInputChange,
+    resetFormData
   };
 
   return (
