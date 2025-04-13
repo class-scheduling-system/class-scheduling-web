@@ -105,7 +105,8 @@ export function AcademicTeacherPreference({ site }: Readonly<{
     // 加载教师列表
     const loadTeacherList = async () => {
         try {
-            const response = await GetTeacherListAPI(academicAffairs.currentAcademicAffairs?.department);
+            // 不传入department_uuid参数，获取所有教师
+            const response = await GetTeacherListAPI();
             if (response && response.code === 200) {
                 setTeacherList(response.data || []);
             } else {
