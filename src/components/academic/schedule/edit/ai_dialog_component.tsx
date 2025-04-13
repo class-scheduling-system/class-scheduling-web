@@ -65,13 +65,6 @@ interface AIResponse {
   consecutive_sessions?: number;
 }
 
-// API返回格式
-interface AIResponseData {
-  output?: string;
-  message?: string;
-  data?: AIResponse | AdjustmentResponse;
-}
-
 // 编辑模式下调整方案的响应格式
 interface AdjustmentResponse {
   assignment_id?: string;
@@ -104,6 +97,7 @@ interface AiDialogComponentProps {
   formData: ScheduleFormData;
   timeSlots: ScheduleTimeSlot[];
   onDataReceived?: (aiData: AIResponse) => void;
+  assignmentUuid?: string;
 }
 
 /**
@@ -114,7 +108,8 @@ interface AiDialogComponentProps {
 export const AiDialogComponent: React.FC<AiDialogComponentProps> = ({ 
   formData, 
   timeSlots, 
-  onDataReceived 
+  onDataReceived,
+  assignmentUuid
 }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
     { role: 'assistant', content: '我是你的排课助手，可以帮助你调整当前排课。请告诉我你的需求，我会给你一些建议。' }
@@ -159,7 +154,8 @@ export const AiDialogComponent: React.FC<AiDialogComponentProps> = ({
         student_count: formData.student_count,
         administrative_class_uuids: formData.administrative_class_uuids,
         class_time: timeSlots,
-        remarks: formData.remarks
+        remarks: formData.remarks,
+        
       };
 
       // 调用手动排课API
@@ -167,131 +163,159 @@ export const AiDialogComponent: React.FC<AiDialogComponentProps> = ({
         structured_data: JSON.stringify(classAssignmentDTO),
         current_semester_uuid: semesterUuid,
         ask: userMessage,
-        edit: true
+        edit: true,
+        schedule_uuid: assignmentUuid || ""
       } as ManualSchedulingDTO);
 
+      console.log("AI响应完整数据:", JSON.stringify(response));
+      
       if (response?.output === "Success" && response.data) {
+        // 记录完整的响应数据以便调试
+        console.log("AI响应data字段:", typeof response.data, response.data);
+        
         // 处理AI回复
         let aiResponse = '抱歉，我无法处理您的请求。';
         let aiData: AIResponse | AdjustmentResponse | undefined;
         
-        // 处理嵌套的JSON字符串响应
         try {
-          // 尝试解析data字符串为JSON对象
-          if (typeof response.data === 'string') {
-            // 添加类型断言确保TypeScript识别response.data为字符串类型
-            const responseDataStr = response.data as string;
-            console.log("AI助手：收到字符串格式响应，尝试解析", 
-              responseDataStr.length > 100 ? responseDataStr.substring(0, 100) + "..." : responseDataStr);
-            const parsedData = JSON.parse(responseDataStr) as AIResponseData;
-            
-            // 提取消息
-            if (parsedData.message) {
-              aiResponse = parsedData.message;
-              console.log("AI助手消息:", aiResponse);
-            }
-            
-            // 提取数据
-            if (parsedData.data) {
-              aiData = parsedData.data;
-              console.log("AI助手：解析JSON成功，收到排课数据", aiData);
-            }
-          } else if (typeof response.data === 'object') {
-            // 直接从对象提取数据
-            const responseObj = response.data as AIResponseData;
-            
-            if (responseObj.message) {
-              aiResponse = responseObj.message;
-            }
-            
-            if (responseObj.data) {
-              aiData = responseObj.data;
-            }
-          }
-        } catch (parseError) {
-          console.error("解析AI响应JSON失败:", parseError);
-          aiResponse = typeof response.data === 'string' ? response.data : '解析AI响应数据失败';
-        }
-        
-        // 将AI回复添加到消息列表
-        setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
-        
-        // 如果有排课数据，传递给父组件
-        if (aiData) {
-          console.log("AI助手：准备处理排课数据", aiData);
+          // 解析响应数据，处理多层嵌套的JSON
+          let parsedData: Record<string, unknown>;
           
-          // 判断是否为调整方案格式
-          if ('adjustments' in aiData) {
-            // 处理调整方案格式的数据
-            const adjustmentData = aiData as AdjustmentResponse;
-            console.log("AI助手：识别到调整方案格式数据", adjustmentData);
-            
-            // 转换为标准AIResponse格式
-            const convertedData: AIResponse = {};
-            
-            // 提取调整信息
-            if (adjustmentData.adjustments) {
-              const adjustments = adjustmentData.adjustments;
-              
-              // 转换教室和教师ID (这里需要根据实际情况调整映射关系)
-              if (adjustments.classroom_id) {
-                convertedData.classroom_uuid = adjustments.classroom_id;
-              }
-              
-              if (adjustments.teacher_id) {
-                convertedData.teacher_uuid = adjustments.teacher_id;
-              }
-              
-              // 转换时间段
-              if (adjustments.class_time && adjustments.class_time.length > 0) {
-                convertedData.class_time = adjustments.class_time;
-              }
-              
-              // 转换其他属性
-              if (adjustments.consecutive_sessions !== undefined) {
-                convertedData.consecutive_sessions = adjustments.consecutive_sessions;
-              }
-              
-              if (adjustments.scheduling_priority !== undefined) {
-                convertedData.scheduling_priority = adjustments.scheduling_priority;
-              }
-            }
-            
-            // 提取教学班信息
-            if (adjustmentData.adjust_teaching_class) {
-              const teachingClass = adjustmentData.adjust_teaching_class;
-              
-              if (teachingClass.teaching_class_name) {
-                convertedData.teaching_class_name = teachingClass.teaching_class_name;
-              }
-              
-              if (teachingClass.administrative_class_uuids) {
-                convertedData.administrative_class_uuids = teachingClass.administrative_class_uuids;
-              }
-              
-              if (teachingClass.actual_student_count !== undefined) {
-                convertedData.student_count = teachingClass.actual_student_count;
-              }
-            }
-            
-            console.log("AI助手：转换后的数据", convertedData);
-            
-            // 通过回调函数将转换后的数据传递给父组件
-            if (onDataReceived && Object.keys(convertedData).length > 0) {
-              onDataReceived(convertedData);
-              message.success('已收到AI排课调整建议并更新表单');
-            } else if (Object.keys(convertedData).length === 0) {
-              message.info('AI没有提供任何可应用的调整建议');
+          // 第一层解析：如果响应的data是字符串，尝试解析为JSON
+          if (typeof response.data === 'string') {
+            try {
+              parsedData = JSON.parse(response.data);
+              console.log("第一层解析成功:", parsedData);
+            } catch (error) {
+              console.error("第一层解析失败:", error);
+              parsedData = { message: response.data };
             }
           } else {
-            // 处理标准AIResponse格式的数据
-            // 通过回调函数将数据传递给父组件
-            if (onDataReceived) {
-              console.log("AI助手：准备通过回调函数传递数据到父组件", aiData);
-              onDataReceived(aiData as AIResponse);
-              message.success('已收到AI排课建议并更新表单');
+            parsedData = response.data as Record<string, unknown>;
+          }
+          
+          // 提取消息内容
+          if (parsedData.message) {
+            aiResponse = parsedData.message as string;
+            console.log("提取到AI消息:", aiResponse);
+          }
+          
+          // 第二层解析：如果parsedData.data存在且是字符串，尝试再次解析
+          if (parsedData.data) {
+            if (typeof parsedData.data === 'string') {
+              try {
+                const nestedData = JSON.parse(parsedData.data as string);
+                console.log("第二层解析成功:", nestedData);
+                console.log("嵌套数据结构:", Object.keys(nestedData));
+                
+                if (nestedData.adjustments) {
+                  console.log("调整内容:", nestedData.adjustments);
+                }
+                
+                if (nestedData.data) {
+                  console.log("嵌套data内容:", nestedData.data);
+                  console.log("嵌套data结构:", Object.keys(nestedData.data));
+                }
+                
+                // 如果嵌套数据有message，优先使用它
+                if (nestedData.message) {
+                  aiResponse = nestedData.message as string;
+                }
+                
+                // 提取调整数据
+                if (nestedData.data) {
+                  aiData = nestedData.data as AIResponse | AdjustmentResponse;
+                } else {
+                  aiData = nestedData as AIResponse | AdjustmentResponse;
+                }
+              } catch (error) {
+                console.error("第二层解析失败:", error);
+                // 修复类型错误
+                if (typeof parsedData.data === 'object') {
+                  aiData = parsedData.data as AIResponse | AdjustmentResponse;
+                } else {
+                  // 如果数据不是对象类型，不赋值给aiData
+                  console.log("无法解析为排课数据:", parsedData.data);
+                }
+              }
+            } else {
+              // 如果parsedData.data不是字符串，直接使用
+              aiData = parsedData.data as AIResponse | AdjustmentResponse;
             }
           }
+          
+          // 将AI回复添加到消息列表
+          setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+          
+          // 记录最终解析出的数据
+          console.log("最终解析出的AI数据:", aiData);
+          
+          // 如果有排课数据，传递给父组件
+          if (aiData && typeof aiData === 'object') {
+            // 判断是否为调整方案格式
+            if ('adjustments' in aiData) {
+              // 处理调整方案格式的数据
+              const adjustmentData = aiData as AdjustmentResponse;
+              console.log("识别到调整方案格式数据:", adjustmentData);
+              
+              // 转换为标准AIResponse格式
+              const convertedData: AIResponse = {};
+              
+              // 提取调整信息
+              if (adjustmentData.adjustments) {
+                const adjustments = adjustmentData.adjustments;
+                
+                // 转换教室和教师ID
+                if (adjustments.classroom_id) {
+                  convertedData.classroom_uuid = adjustments.classroom_id;
+                }
+                
+                if (adjustments.teacher_id) {
+                  convertedData.teacher_uuid = adjustments.teacher_id;
+                }
+                
+                // 转换时间段
+                if (adjustments.class_time && adjustments.class_time.length > 0) {
+                  convertedData.class_time = adjustments.class_time;
+                }
+                
+                // 转换其他属性
+                if (adjustments.consecutive_sessions !== undefined) {
+                  convertedData.consecutive_sessions = adjustments.consecutive_sessions;
+                }
+                
+                if (adjustments.scheduling_priority !== undefined) {
+                  convertedData.scheduling_priority = adjustments.scheduling_priority;
+                }
+              }
+              
+              console.log("转换后的数据:", convertedData);
+              
+              // 通过回调函数将转换后的数据传递给父组件
+              if (onDataReceived && Object.keys(convertedData).length > 0) {
+                onDataReceived(convertedData);
+                message.success('已收到AI排课调整建议，请查看更新后的表单');
+              } else if (Object.keys(convertedData).length === 0) {
+                message.info('AI没有提供任何可应用的调整建议');
+              }
+            } else if ('class_time' in aiData || 'teacher_uuid' in aiData || 'classroom_uuid' in aiData) {
+              // 处理标准AIResponse格式的数据
+              if (onDataReceived) {
+                console.log("传递标准格式数据到父组件:", aiData);
+                onDataReceived(aiData as AIResponse);
+                message.success('已收到AI排课建议，请查看更新后的表单');
+              }
+            } else {
+              console.log("未识别到可用的排课数据结构");
+              message.info('AI提供了回复，但没有可应用的排课调整建议');
+            }
+          } else {
+            console.log("没有解析出有效的排课数据");
+            message.info('AI提供了回复，但没有可应用的排课调整建议');
+          }
+        } catch (error) {
+          console.error("处理AI响应时出错:", error);
+          setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
         }
       } else {
         // 处理错误响应

@@ -7,7 +7,8 @@ import {
   Delete,
   Plus,
   Save,
-  Schedule
+  Schedule,
+  Attention
 } from "@icon-park/react";
 import { message } from "antd";
 import { SiteInfoEntity } from "../../../models/entity/site_info_entity";
@@ -33,6 +34,8 @@ import { AdjustmentDTO, ClassAssignmentDTO } from "../../../models/dto/class_ass
 import { GetCreditHourTypeListAPI } from "../../../apis/credit_hour_type_api";
 import { CreditHourTypeEntity } from "../../../models/entity/credit_hour_type_entity";
 import { AiDialogComponent } from "../../../components/academic/schedule/edit/ai_dialog_component";
+import { GetSimpleConflictListAPI } from "../../../apis/conflict_api";
+import { SchedulingConflictDTO } from "../../../models/dto/scheduling_conflict_dto";
 
 interface ScheduleTimeSlot {
   day_of_week: number;
@@ -124,6 +127,10 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
   // 加载状态
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  // 冲突相关状态
+  const [conflicts, setConflicts] = useState<SchedulingConflictDTO[]>([]);
+  const [loadingConflicts, setLoadingConflicts] = useState(false);
 
   // 下拉选项数据
   const [semesters, setSemesters] = useState<SemesterEntity[]>([]);
@@ -155,6 +162,34 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
       loadTeachingClasses(semesterUuid);
     }
   }, [formData.semester_uuid]);
+  
+  // 监听数据加载，获取冲突列表
+  useEffect(() => {
+    if (isEditMode && id && formData.semester_uuid) {
+      loadConflicts();
+    }
+  }, [isEditMode, id, formData.semester_uuid]);
+  
+  // 加载冲突数据
+  const loadConflicts = async () => {
+    if (!id || !formData.semester_uuid) return;
+    
+    setLoadingConflicts(true);
+    try {
+      const response = await GetSimpleConflictListAPI(formData.semester_uuid);
+      if (response && response.output === "Success" && response.data) {
+        // 过滤出与当前排课相关的冲突（第一排课或第二排课中包含当前排课ID）
+        const relatedConflicts = response.data.filter(
+          conflict => conflict.first_assignment_uuid === id || conflict.second_assignment_uuid === id
+        );
+        setConflicts(relatedConflicts);
+      }
+    } catch (error) {
+      console.error("获取冲突数据失败:", error);
+    } finally {
+      setLoadingConflicts(false);
+    }
+  };
   
   // 处理从AI组件接收到的数据
   const handleAiDataReceived = (aiData: AIResponse): void => {
@@ -652,14 +687,21 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                   <Schedule theme="outline" size="24" />
                   {isEditMode ? '编辑排课' : '添加排课'}
                 </h2>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-ghost flex items-center gap-1"
-                  onClick={() => navigate("/academic/schedule")}
-                >
-                  <ArrowLeft theme="outline" size="18" />
-                  返回列表
-                </button>
+                <div className="flex items-center gap-2">
+                  {isEditMode && id && (
+                    <div className="text-xs text-base-content/60 bg-base-200 px-2 py-1 rounded-md">
+                      排课ID: {id}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost flex items-center gap-1"
+                    onClick={() => navigate("/academic/schedule")}
+                  >
+                    <ArrowLeft theme="outline" size="18" />
+                    返回列表
+                  </button>
+                </div>
               </div>
 
               {loading ? (
@@ -668,6 +710,63 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                 </div>
               ) : (
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                  {/* 相关冲突提示 - 只在有冲突时显示 */}
+                  {isEditMode && !loadingConflicts && conflicts.length > 0 && (
+                    <div className="card bg-base-100 border border-error mb-6 shadow-sm">
+                      <div className="card-body p-4">
+                        <h3 className="card-title text-error flex items-center gap-2 text-lg">
+                          <Attention theme="filled" size="20" fill="#ff4d4f" />
+                          检测到 {conflicts.length} 个排课冲突
+                        </h3>
+                        
+                        <div className="overflow-x-auto mt-2 max-h-64 overflow-y-auto">
+                          <table className="table table-zebra w-full table-sm">
+                            <thead className="sticky top-0 bg-base-100 z-10">
+                              <tr>
+                                <th className="bg-base-100">序号</th>
+                                <th className="bg-base-100">冲突类型</th>
+                                <th className="bg-base-100">冲突时间</th>
+                                <th className="bg-base-100">描述</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {conflicts.map((conflict, index) => (
+                                <tr key={index}>
+                                  <td>{index + 1}</td>
+                                  <td>
+                                    <span className="badge badge-error badge-soft badge-sm text-nowrap">
+                                      {conflict.conflict_type === 1 ? "教师冲突" : 
+                                       conflict.conflict_type === 2 ? "教室冲突" : 
+                                       conflict.conflict_type === 3 ? "学生冲突" : "其他冲突"}
+                                    </span>
+                                  </td>
+                                  <td className="whitespace-nowrap">
+                                    第{conflict.conflict_time.week}周
+                                    周{['一', '二', '三', '四', '五', '六', '日'][conflict.conflict_time.day - 1]}
+                                    第{conflict.conflict_time.period}节
+                                  </td>
+                                  <td>{conflict.description}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                        <div className="text-sm text-error/80 mt-2">
+                          请调整时间段或其他参数以解决冲突
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* 显示冲突加载中状态 */}
+                  {isEditMode && loadingConflicts && (
+                    <div className="flex justify-center items-center py-4 mb-6">
+                      <span className="loading loading-spinner loading-sm mr-2"></span>
+                      <span className="text-sm text-base-content/70">正在检查排课冲突...</span>
+                    </div>
+                  )}
+
                   {/* 学期和教学班信息 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* 学期选择 */}
@@ -1002,6 +1101,7 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
               formData={formData}
               timeSlots={timeSlots}
               onDataReceived={handleAiDataReceived}
+              assignmentUuid={id}
             />
           )}
         </div>

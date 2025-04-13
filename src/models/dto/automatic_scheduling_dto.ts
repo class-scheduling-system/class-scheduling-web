@@ -203,7 +203,7 @@ export type SpecificCourseIdVO = {
     /**
      * 人数，如果是必修课则为班级人数总和
      */
-    number: number;
+    number: number | null;
     
     /**
      * 周学时

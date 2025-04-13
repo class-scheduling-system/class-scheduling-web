@@ -689,16 +689,16 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
         
         // 准备班级ID和人数
         let classIds: string[] = [];
-        let studentNumber = 0;
+        let studentNumber = null;
         
         if (isElectiveCourse) {
             // 选修课使用空数组作为班级ID，并设置人数
             classIds = [];
             studentNumber = newSpecificCourse.number || 0;
         } else {
-            // 必修课使用选择的班级ID列表，人数设为0（后台自动计算）
+            // 必修课使用选择的班级ID列表，人数设置为传入的值，如果未设置则默认为1
             classIds = selectedClasses.map(c => c.uuid);
-            studentNumber = 0; // 后台会根据班级总人数自动计算
+            studentNumber = newSpecificCourse.number || null;
         }
         
         console.log("添加课程:", {

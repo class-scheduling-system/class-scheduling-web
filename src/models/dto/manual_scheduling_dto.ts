@@ -51,4 +51,9 @@ export type ManualSchedulingDTO = {
      * 是否编辑
      */
     edit: boolean;
+
+    /**
+     * 排课UUID
+     */
+    schedule_uuid?: string;
 }; 

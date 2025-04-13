@@ -28,7 +28,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
-import { AddOne, ArrowLeft, Schedule, Search } from "@icon-park/react";
+import { AddOne, ArrowLeft, Attention, Schedule, Search } from "@icon-park/react";
 import { 
   ScheduleEntity, 
   ScheduleGridCell, 
@@ -37,7 +37,7 @@ import {
 import { ScheduleListComponent } from "../../components/academic/schedule/schedule_list_component.tsx";
 import { PaginationComponent } from "../../components/academic/schedule/pagination_component.tsx";
 import { ScheduleGridComponent } from "../../components/academic/schedule/schedule_grid_component.tsx";
-import { message, Modal } from "antd";
+import { message, Modal, Tooltip } from "antd";
 import { GetClassAssignmentPageAPI, DeleteClassAssignmentAPI } from "../../apis/class_assignment_api";
 import { ClassAssignmentEntity } from "../../models/entity/class_assignment_entity";
 import { GetSemesterListAPI } from "../../apis/semester_api";
@@ -57,6 +57,77 @@ import { BuildingLiteEntity } from "../../models/entity/building_lite_entity";
 import { CampusEntity } from "../../models/entity/campus_entity";
 import { CourseLibraryEntity } from "../../models/entity/course_library_entity";
 import { useNavigate } from "react-router";
+import { GetSimpleConflictListAPI } from "../../apis/conflict_api";
+
+/**
+ * 排课冲突指示器组件
+ * 
+ * 显示当前学期的排课冲突数量，点击可导航到冲突列表页面
+ * @param semesterUuid 学期UUID
+ * @returns 冲突指示器组件
+ */
+const ConflictIndicator: React.FC<{ semesterUuid: string }> = ({ semesterUuid }) => {
+    const navigate = useNavigate();
+    const [conflictCount, setConflictCount] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    // 获取未解决的冲突数量
+    useEffect(() => {
+        if (semesterUuid) {
+            fetchConflicts();
+        } else {
+            setConflictCount(0);
+        }
+    }, [semesterUuid]);
+
+    // 获取冲突数据
+    const fetchConflicts = async () => {
+        if (!semesterUuid) return;
+        
+        setLoading(true);
+        try {
+            // 获取未解决的冲突 (resolutionStatus=0)
+            const response = await GetSimpleConflictListAPI(semesterUuid, 0);
+            
+            if (response && response.output === "Success" && response.data) {
+                setConflictCount(response.data.length);
+            }
+        } catch (error) {
+            console.error("获取冲突数据失败", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 导航到冲突列表页面
+    const handleNavigateToConflicts = () => {
+        navigate("/academic/conflicts", { 
+            state: { semesterUuid }
+        });
+    };
+
+    return (
+        <Tooltip 
+            title={semesterUuid ? "查看排课冲突" : "请先选择学期"}
+            placement="bottom"
+        >
+            <button
+                className={`btn btn-sm ${conflictCount > 0 ? 'btn-error' : 'btn-outline'} flex items-center gap-1`}
+                onClick={handleNavigateToConflicts}
+                disabled={!semesterUuid}
+            >
+                <Attention theme="outline" size="16" />
+                <span>
+                    {loading ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                    ) : (
+                        <>冲突 {conflictCount > 0 && <span className="badge badge-sm">{conflictCount}</span>}</>
+                    )}
+                </span>
+            </button>
+        </Tooltip>
+    );
+};
 
 /**
  * # 排课管理组件
@@ -701,6 +772,7 @@ export function AcademicSchedule({site}: Readonly<{
                     </h1>
                     
                     <div className="flex gap-2">
+                        <ConflictIndicator semesterUuid={selectedSemester} />
                         <button 
                             className="btn btn-primary btn-sm flex items-center gap-1"
                             onClick={handleAddSchedule}

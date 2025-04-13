@@ -63,6 +63,8 @@ export function AcademicNavComponent(): JSX.Element {
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">排课管理</h2>
                 <AcademicNavLinkComponent title={"排课管理"} icon={<Schedule theme="outline" size="16" />}
                     path={"/academic/schedule"} />
+                <AcademicNavLinkComponent title={"排课冲突"} icon={<Schedule theme="outline" size="16" />}
+                    path={"/academic/conflicts"} />
 
                 
                 <h2 className="text-xs font-semibold text-gray-500 uppercase pl-2 pt-3 mb-1">人员管理</h2>
