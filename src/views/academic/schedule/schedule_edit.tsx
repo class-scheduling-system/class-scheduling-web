@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo
+} from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -8,7 +12,8 @@ import {
   Plus,
   Save,
   Schedule,
-  Attention
+  Attention,
+  Filter
 } from "@icon-park/react";
 import { message } from "antd";
 import { SiteInfoEntity } from "../../../models/entity/site_info_entity";
@@ -36,6 +41,8 @@ import { CreditHourTypeEntity } from "../../../models/entity/credit_hour_type_en
 import { AiDialogComponent } from "../../../components/academic/schedule/edit/ai_dialog_component";
 import { GetSimpleConflictListAPI } from "../../../apis/conflict_api";
 import { SchedulingConflictDTO } from "../../../models/dto/scheduling_conflict_dto";
+import { HolidayWarningComponent } from "../../../components/academic/schedule/holiday_warning_component";
+import { getDateByWeekAndDay, isHoliday } from "../../../services/holiday_service";
 
 interface ScheduleTimeSlot {
   day_of_week: number;
@@ -131,6 +138,14 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
   // 冲突相关状态
   const [conflicts, setConflicts] = useState<SchedulingConflictDTO[]>([]);
   const [loadingConflicts, setLoadingConflicts] = useState(false);
+  
+  // 节假日检查状态
+  const [holidayConflictDates, setHolidayConflictDates] = useState<string[]>([]);
+  const [showHolidayWarning, setShowHolidayWarning] = useState(false);
+  
+  // 周次过滤器
+  const [weekFilter, setWeekFilter] = useState<number[]>([]);
+  const [filterActive, setFilterActive] = useState(false);
 
   // 下拉选项数据
   const [semesters, setSemesters] = useState<SemesterEntity[]>([]);
@@ -181,7 +196,7 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
         // 过滤出与当前排课相关的冲突（第一排课或第二排课中包含当前排课ID）
         const relatedConflicts = response.data.filter(
           conflict => conflict.first_assignment_uuid === id || conflict.second_assignment_uuid === id
-        );
+        ).filter(conflict => conflict.resolution_status === 0);
         setConflicts(relatedConflicts);
       }
     } catch (error) {
@@ -448,24 +463,128 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
 
   // 添加时间段
   const handleAddTimeSlot = () => {
-    setTimeSlots([
+    const newTimeSlots = [
       ...timeSlots,
       { day_of_week: 1, period_start: 1, period_end: 2, week_numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] }
-    ]);
+    ];
+    setTimeSlots(newTimeSlots);
+    
+    // 添加时间段后立即进行节假日检查
+    setTimeout(() => {
+      checkHolidaysWithTimeSlots(newTimeSlots);
+    }, 0);
   };
-
+  
   // 删除时间段
   const handleRemoveTimeSlot = (index: number) => {
     const newTimeSlots = [...timeSlots];
     newTimeSlots.splice(index, 1);
     setTimeSlots(newTimeSlots);
+    
+    // 删除时间段后立即进行节假日检查
+    setTimeout(() => {
+      checkHolidaysWithTimeSlots(newTimeSlots);
+    }, 0);
   };
-
+  
   // 更新时间段信息
   const handleTimeSlotChange = (index: number, field: keyof ScheduleTimeSlot, value: number | number[]) => {
     const newTimeSlots = [...timeSlots];
     newTimeSlots[index] = { ...newTimeSlots[index], [field]: value };
     setTimeSlots(newTimeSlots);
+    
+    // 更新时间段后立即进行节假日检查，这个会由useEffect触发
+  };
+  
+  // 设置过滤器
+  const applyWeekFilter = (weeks: number[]) => {
+    setWeekFilter(weeks);
+    setFilterActive(weeks.length > 0);
+  };
+  
+  // 清除过滤器
+  const clearFilter = () => {
+    setWeekFilter([]);
+    setFilterActive(false);
+  };
+  
+  // 专门用于检查特定时间槽的节假日冲突
+  const checkHolidaysWithTimeSlots = async (slots: ScheduleTimeSlot[]) => {
+    if (!formData.semester_uuid || slots.length === 0) {
+      setHolidayConflictDates([]);
+      setShowHolidayWarning(false);
+      return;
+    }
+    
+    try {
+      // 获取当前学期信息
+      const semester = semesters.find(sem => sem.semester_uuid === formData.semester_uuid);
+      if (!semester) {
+        console.warn("未找到当前学期信息，UUID:", formData.semester_uuid);
+        setHolidayConflictDates([]);
+        setShowHolidayWarning(false);
+        return;
+      }
+      
+      // 将学期开始日期从时间戳转换为ISO日期字符串 YYYY-MM-DD
+      if (!semester.start_date) {
+        console.warn("学期开始日期为空");
+        setHolidayConflictDates([]);
+        setShowHolidayWarning(false);
+        return;
+      }
+      
+      const semesterStartDate = new Date(semester.start_date).toISOString().split('T')[0];
+      console.log("学期开始日期:", semesterStartDate, "原始时间戳:", semester.start_date);
+      
+      // 获取所有排课日期
+      const allDates: string[] = [];
+      const failedDates: {week: number, day: number, error: string}[] = [];
+      
+      // 检查每个时间段
+      for (const slot of slots) {
+        if (!slot.week_numbers || slot.week_numbers.length === 0) {
+          console.log("跳过无周次数据的时间段:", slot);
+          continue;
+        }
+        
+        // 计算该时间段的每一周对应的具体日期
+        for (const week of slot.week_numbers) {
+          try {
+            console.log(`计算日期: 从${semesterStartDate}开始, 第${week}周星期${slot.day_of_week}`);
+            const date = getDateByWeekAndDay(semesterStartDate, week, slot.day_of_week);
+            console.log(`计算结果: ${date}`);
+            allDates.push(date);
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`计算第${week}周星期${slot.day_of_week}的日期时出错:`, errorMessage);
+            failedDates.push({week, day: slot.day_of_week, error: errorMessage});
+          }
+        }
+      }
+      
+      if (failedDates.length > 0) {
+        console.warn(`有${failedDates.length}个日期计算失败`, failedDates);
+      }
+      
+      console.log("计算出的所有日期:", allDates.length, allDates);
+      
+      // 过滤出与节假日冲突的日期
+      const conflictDates = allDates.filter(date => {
+        const isConflict = isHoliday(date);
+        console.log(`检查日期 ${date} 是否为假期: ${isConflict ? '是' : '否'}`);
+        return isConflict;
+      });
+      console.log("冲突日期:", conflictDates.length, conflictDates);
+      
+      // 设置所有日期供组件显示
+      setHolidayConflictDates(allDates);
+      // 只有在有冲突时才显示警告
+      setShowHolidayWarning(conflictDates.length > 0);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("检查节假日冲突出错:", errorMessage);
+    }
   };
 
   // 表单验证函数
@@ -527,6 +646,90 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
     handleInputChange(e);
     // 移除选修课人数上限的处理逻辑
   };
+  
+  // 监控时间槽变化，检查节假日冲突
+  useEffect(() => {
+    checkHolidays();
+  }, [timeSlots, formData.semester_uuid]);
+  
+  // 检查节假日冲突
+  const checkHolidays = async () => {
+    if (!formData.semester_uuid || timeSlots.length === 0) {
+      setHolidayConflictDates([]);
+      setShowHolidayWarning(false);
+      return;
+    }
+    
+    try {
+      // 获取当前学期信息
+      const semester = semesters.find(sem => sem.semester_uuid === formData.semester_uuid);
+      if (!semester) {
+        console.warn("未找到当前学期信息，UUID:", formData.semester_uuid);
+        setHolidayConflictDates([]);
+        setShowHolidayWarning(false);
+        return;
+      }
+      
+      // 将学期开始日期从时间戳转换为ISO日期字符串 YYYY-MM-DD
+      if (!semester.start_date) {
+        console.warn("学期开始日期为空");
+        setHolidayConflictDates([]);
+        setShowHolidayWarning(false);
+        return;
+      }
+      
+      const semesterStartDate = new Date(semester.start_date).toISOString().split('T')[0];
+      console.log("学期开始日期:", semesterStartDate, "原始时间戳:", semester.start_date);
+      
+      // 获取所有排课日期
+      const allDates: string[] = [];
+      const failedDates: {week: number, day: number, error: string}[] = [];
+      
+      // 检查每个时间段
+      for (const slot of timeSlots) {
+        if (!slot.week_numbers || slot.week_numbers.length === 0) {
+          console.log("跳过无周次数据的时间段:", slot);
+          continue;
+        }
+        
+        // 计算该时间段的每一周对应的具体日期
+        for (const week of slot.week_numbers) {
+          try {
+            console.log(`计算日期: 从${semesterStartDate}开始, 第${week}周星期${slot.day_of_week}`);
+            const date = getDateByWeekAndDay(semesterStartDate, week, slot.day_of_week);
+            console.log(`计算结果: ${date}`);
+            allDates.push(date);
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`计算第${week}周星期${slot.day_of_week}的日期时出错:`, errorMessage);
+            failedDates.push({week, day: slot.day_of_week, error: errorMessage});
+          }
+        }
+      }
+      
+      if (failedDates.length > 0) {
+        console.warn(`有${failedDates.length}个日期计算失败`, failedDates);
+      }
+      
+      console.log("计算出的所有日期:", allDates.length, allDates);
+      
+      // 过滤出与节假日冲突的日期
+      const conflictDates = allDates.filter(date => {
+        const isConflict = isHoliday(date);
+        console.log(`检查日期 ${date} 是否为假期: ${isConflict ? '是' : '否'}`);
+        return isConflict;
+      });
+      console.log("冲突日期:", conflictDates.length, conflictDates);
+      
+      // 设置所有日期供组件显示
+      setHolidayConflictDates(allDates);
+      // 只有在有冲突时才显示警告
+      setShowHolidayWarning(conflictDates.length > 0);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("检查节假日冲突出错:", errorMessage);
+    }
+  };
 
   // 表单提交处理
   const handleSubmit = async () => {
@@ -536,6 +739,14 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
       if (timeSlots.length === 0) {
         message.warning("请至少添加一个时间段");
         return;
+      }
+      
+      // 检查节假日冲突并提示确认
+      const conflictDates = holidayConflictDates.filter(date => isHoliday(date));
+      if (conflictDates.length > 0) {
+        if (!window.confirm(`当前排课时间与法定节假日冲突，确定继续提交吗？\n冲突日期: ${conflictDates.join(', ')}`)) {
+          return;
+        }
       }
       
       setSubmitting(true);
@@ -670,6 +881,91 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
           >
             双周
           </button>
+        </div>
+      </div>
+    );
+  };
+  
+  // 过滤后的时间段
+  const filteredTimeSlots = useMemo(() => {
+    if (!filterActive || weekFilter.length === 0) return timeSlots;
+    
+    return timeSlots.map(slot => {
+      // 过滤周次，只保留在过滤器中的周次
+      const filteredWeeks = slot.week_numbers.filter(week => weekFilter.includes(week));
+      return { ...slot, week_numbers: filteredWeeks };
+    });
+  }, [timeSlots, weekFilter, filterActive]);
+  
+  /**
+   * 周次过滤器选择器组件
+   */
+  const WeekFilterSelector: React.FC<{
+    selectedWeeks: number[];
+    onChange: (weeks: number[]) => void;
+    onClear: () => void;
+  }> = ({ selectedWeeks, onChange, onClear }) => {
+    const allWeeks = Array.from({ length: 20 }, (_, i) => i + 1);
+    
+    const handleWeekClick = (week: number) => {
+      const newSelection = selectedWeeks.includes(week)
+        ? selectedWeeks.filter(w => w !== week)
+        : [...selectedWeeks, week].sort((a, b) => a - b);
+      
+      onChange(newSelection);
+    };
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-1">
+          {allWeeks.map(week => (
+            <button
+              key={week}
+              type="button"
+              className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                selectedWeeks.includes(week)
+                  ? 'bg-secondary text-white'
+                  : 'bg-base-200 hover:bg-base-300'
+              }`}
+              onClick={() => handleWeekClick(week)}
+            >
+              {week}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 justify-between">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="text-xs text-secondary underline"
+              onClick={() => onChange(allWeeks)}
+            >
+              全选
+            </button>
+            <button
+              type="button"
+              className="text-xs text-secondary underline"
+              onClick={onClear}
+            >
+              清空
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="text-xs text-secondary underline"
+              onClick={() => onChange(allWeeks.filter(w => w % 2 === 1))}
+            >
+              单周
+            </button>
+            <button
+              type="button"
+              className="text-xs text-secondary underline"
+              onClick={() => onChange(allWeeks.filter(w => w % 2 === 0))}
+            >
+              双周
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -963,16 +1259,61 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                       <h3 className="text-lg font-medium flex items-center gap-2">
                         <Calendar theme="outline" size="20" />
                         排课时间段
+                        {/* 添加节假日警告指示器 */}
+                        {holidayConflictDates.filter(date => isHoliday(date)).length > 0 && (
+                          <span className="badge badge-warning text-xs px-2 font-medium animate-pulse">
+                            ⚠️ 包含法定节假日
+                          </span>
+                        )}
                       </h3>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        onClick={handleAddTimeSlot}
-                      >
-                        <Plus theme="outline" size="16" />
-                        添加时间段
-                      </button>
+                      <div className="flex gap-2">
+                        <div className="dropdown dropdown-end">
+                          <button 
+                            type="button" 
+                            tabIndex={0} 
+                            className={`btn btn-sm ${filterActive ? 'btn-secondary' : 'btn-outline'}`}
+                          >
+                            <Filter theme="outline" size="16" />
+                            周次过滤
+                            {filterActive && <span className="badge badge-sm badge-secondary ml-1">{weekFilter.length}</span>}
+                          </button>
+                          <div tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-60 mt-1">
+                            <div className="p-2">
+                              <h4 className="font-medium mb-2">选择要显示的周次</h4>
+                              <WeekFilterSelector 
+                                selectedWeeks={weekFilter} 
+                                onChange={applyWeekFilter} 
+                                onClear={clearFilter}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-primary"
+                          onClick={handleAddTimeSlot}
+                        >
+                          <Plus theme="outline" size="16" />
+                          添加时间段
+                        </button>
+                      </div>
                     </div>
+                    
+                    {/* 节假日冲突警告 */}
+                    {showHolidayWarning && (
+                      <div className="mb-4">
+                        <HolidayWarningComponent 
+                          dates={holidayConflictDates} 
+                          onlyShowIfConflict={true}
+                          semesterStartDate={formData.semester_uuid ? 
+                            semesters.find(sem => sem.semester_uuid === formData.semester_uuid)?.start_date ?
+                            new Date(semesters.find(sem => sem.semester_uuid === formData.semester_uuid)!.start_date).toISOString().split('T')[0] : 
+                            undefined : 
+                            undefined
+                          }
+                        />
+                      </div>
+                    )}
 
                     {timeSlots.length === 0 ? (
                       <div className="text-center text-base-content/60 py-8">
@@ -980,14 +1321,17 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {timeSlots.map((slot, index) => (
+                        {(filterActive ? filteredTimeSlots : timeSlots).map((slot, index) => (
                           <div key={index} className="border border-base-200 rounded-lg p-4 bg-base-100/50">
                             <div className="flex justify-between items-center mb-3">
-                              <h4 className="font-medium">时间段 #{index + 1}</h4>
+                              <h4 className="font-medium flex items-center gap-2">
+                                时间段 #{filterActive ? timeSlots.indexOf(slot) + 1 : index + 1}
+                                {filterActive && <span className="badge badge-sm badge-secondary">已过滤</span>}
+                              </h4>
                               <button
                                 type="button"
                                 className="btn btn-sm btn-error"
-                                onClick={() => handleRemoveTimeSlot(index)}
+                                onClick={() => handleRemoveTimeSlot(filterActive ? timeSlots.indexOf(slot) : index)}
                               >
                                 <Delete theme="outline" size="16" />
                                 删除
@@ -1003,7 +1347,7 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                 <select
                                   className="select select-bordered w-full"
                                   value={slot.day_of_week}
-                                  onChange={(e) => handleTimeSlotChange(index, 'day_of_week', parseInt(e.target.value))}
+                                  onChange={(e) => handleTimeSlotChange(filterActive ? timeSlots.indexOf(slot) : index, 'day_of_week', parseInt(e.target.value))}
                                 >
                                   <option value={1}>周一</option>
                                   <option value={2}>周二</option>
@@ -1025,9 +1369,10 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                   value={slot.period_start}
                                   onChange={(e) => {
                                     const startValue = parseInt(e.target.value);
-                                    handleTimeSlotChange(index, 'period_start', startValue);
+                                    const actualIndex = filterActive ? timeSlots.indexOf(slot) : index;
+                                    handleTimeSlotChange(actualIndex, 'period_start', startValue);
                                     if (startValue > slot.period_end) {
-                                      handleTimeSlotChange(index, 'period_end', startValue);
+                                      handleTimeSlotChange(actualIndex, 'period_end', startValue);
                                     }
                                   }}
                                 >
@@ -1045,7 +1390,7 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                                 <select
                                   className="select select-bordered w-full"
                                   value={slot.period_end}
-                                  onChange={(e) => handleTimeSlotChange(index, 'period_end', parseInt(e.target.value))}
+                                  onChange={(e) => handleTimeSlotChange(filterActive ? timeSlots.indexOf(slot) : index, 'period_end', parseInt(e.target.value))}
                                 >
                                   {Array.from({ length: 12 }, (_, i) => i + 1)
                                     .filter(num => num >= slot.period_start)
@@ -1061,10 +1406,22 @@ export function ScheduleEdit({ site }: Readonly<{ site: SiteInfoEntity }>) {
                               <label className="label">
                                 <span className="label-text">授课周次</span>
                               </label>
-                              {renderWeekSelector(index, slot.week_numbers)}
+                              {renderWeekSelector(filterActive ? timeSlots.indexOf(slot) : index, slot.week_numbers)}
                             </div>
                           </div>
                         ))}
+                        
+                        {filterActive && filteredTimeSlots.length === 0 && (
+                          <div className="text-center text-base-content/60 py-8 border border-dashed border-base-300 rounded-lg">
+                            <p>过滤后没有符合条件的时间段</p>
+                            <button 
+                              onClick={clearFilter} 
+                              className="btn btn-xs btn-outline mt-2"
+                            >
+                              清除过滤器
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

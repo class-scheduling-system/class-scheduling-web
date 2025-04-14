@@ -28,7 +28,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SiteInfoEntity } from "../../models/entity/site_info_entity.ts";
-import { AddOne, ArrowLeft, Attention, Schedule, Search } from "@icon-park/react";
+import { AddOne, ArrowLeft, Attention, Schedule, Search, Calendar } from "@icon-park/react";
 import { 
   ScheduleEntity, 
   ScheduleGridCell, 
@@ -37,7 +37,7 @@ import {
 import { ScheduleListComponent } from "../../components/academic/schedule/schedule_list_component.tsx";
 import { PaginationComponent } from "../../components/academic/schedule/pagination_component.tsx";
 import { ScheduleGridComponent } from "../../components/academic/schedule/schedule_grid_component.tsx";
-import { message, Modal, Tooltip } from "antd";
+import { message, Modal, Tooltip, Progress } from "antd";
 import { GetClassAssignmentPageAPI, DeleteClassAssignmentAPI } from "../../apis/class_assignment_api";
 import { ClassAssignmentEntity } from "../../models/entity/class_assignment_entity";
 import { GetSemesterListAPI } from "../../apis/semester_api";
@@ -58,6 +58,8 @@ import { CampusEntity } from "../../models/entity/campus_entity";
 import { CourseLibraryEntity } from "../../models/entity/course_library_entity";
 import { useNavigate } from "react-router";
 import { GetSimpleConflictListAPI } from "../../apis/conflict_api";
+import { GetSchedulingTasksAPI, GetSchedulingTaskStatusAPI } from "../../apis/scheduling_api";
+import { SchedulingTaskStatusEntity } from "../../models/entity/scheduling_task_status_entity";
 
 /**
  * 排课冲突指示器组件
@@ -126,6 +128,254 @@ const ConflictIndicator: React.FC<{ semesterUuid: string }> = ({ semesterUuid })
                 </span>
             </button>
         </Tooltip>
+    );
+};
+
+/**
+ * 自动排课进度指示器组件
+ * 
+ * 显示当前自动排课任务的进度状态
+ * @param semesterUuid 学期UUID
+ * @returns 排课进度指示器组件
+ */
+const SchedulingProgressIndicator: React.FC<{ semesterUuid: string }> = ({ semesterUuid }) => {
+    const navigate = useNavigate();
+    const [taskId, setTaskId] = useState<string | null>(null);
+    const [taskStatus, setTaskStatus] = useState<SchedulingTaskStatusEntity | null>(null);
+    const [showDetails, setShowDetails] = useState<boolean>(false);
+    const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
+    // 获取排课任务
+    useEffect(() => {
+        if (semesterUuid) {
+            checkForRunningTasks();
+        } else {
+            cleanupTask();
+        }
+
+        return () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                setPollingInterval(null);
+            }
+        };
+    }, [semesterUuid]);
+
+    // 清理任务状态
+    const cleanupTask = () => {
+        setTaskId(null);
+        setTaskStatus(null);
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            setPollingInterval(null);
+        }
+    };
+
+    // 获取任务列表
+    const checkForRunningTasks = async () => {
+        try {
+            // 获取任务列表
+            const tasksResponse = await GetSchedulingTasksAPI();
+            
+            if (tasksResponse?.output === "Success" && tasksResponse.data && tasksResponse.data.length > 0) {
+                // 取第一个任务
+                const firstTaskId = tasksResponse.data[0];
+                if (firstTaskId) {
+                    setTaskId(firstTaskId);
+                    const status = await fetchTaskStatus(firstTaskId);
+                    
+                    // 只有当任务正在处理中时，才设置轮询
+                    if (status === "processing") {
+                        startPolling(firstTaskId);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("获取排课任务列表失败", error);
+        }
+    };
+
+    // 获取任务状态
+    const fetchTaskStatus = async (id: string): Promise<string> => {
+        try {
+            const response = await GetSchedulingTaskStatusAPI(id);
+            
+            if (response?.output === "Success" && response.data) {
+                setTaskStatus(response.data);
+                
+                // 如果任务已完成或失败，停止轮询
+                if (response.data.status === "completed" || response.data.status === "failed") {
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        setPollingInterval(null);
+                    }
+                    
+                    // 如果任务已完成，设置定时器在10秒后自动隐藏指示器
+                    if (response.data.status === "completed") {
+                        setTimeout(() => {
+                            setTaskId(null);
+                            setTaskStatus(null);
+                        }, 10000); // 10秒后自动隐藏
+                    }
+                }
+                
+                return response.data.status;
+            }
+        } catch (error) {
+            console.error("获取任务状态失败", error);
+        }
+        
+        return "unknown";
+    };
+
+    // 开始轮询任务状态
+    const startPolling = (id: string) => {
+        // 先清除现有的轮询
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+        }
+        
+        // 设置新的轮询
+        const interval = setInterval(() => {
+            fetchTaskStatus(id);
+        }, 2000);
+        
+        setPollingInterval(interval);
+    };
+
+    // 前往排课任务页面
+    const handleNavigateToScheduling = () => {
+        navigate("/academic/schedule/automatic");
+    };
+
+    // 添加回空检查
+    // 如果没有任务，不显示组件
+    if (!taskId || !taskStatus) {
+        return null;
+    }
+
+    // 获取任务状态颜色
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "processing": return "bg-primary";
+            case "completed": return "bg-success";
+            case "failed": return "bg-error";
+            default: return "bg-accent";
+        }
+    };
+
+    // 获取任务状态文本
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case "processing": return "进行中";
+            case "completed": return "已完成";
+            case "failed": return "失败";
+            default: return "未知";
+        }
+    };
+
+    // 获取处理阶段文本
+    const getStageText = (stage: string | undefined) => {
+        if (!stage) return "准备中";
+        
+        switch (stage) {
+            case "initial_scheduling": return "初始排课";
+            case "conflict_resolution": return "冲突解决";
+            case "optimization": return "优化处理";
+            case "finalization": return "最终确认";
+            default: return stage;
+        }
+    };
+
+    return (
+        <div className="relative">
+            <button
+                className={`btn btn-sm ${taskStatus.status === "processing" ? 'btn-primary' : 
+                            taskStatus.status === "completed" ? 'btn-success' : 
+                            taskStatus.status === "failed" ? 'btn-error' : 'btn-accent'} 
+                           flex items-center gap-1`}
+                onClick={() => setShowDetails(!showDetails)}
+            >
+                <Schedule theme="outline" size="16" />
+                <span>
+                    {taskStatus.status === "processing" ? "排课进行中" : 
+                     taskStatus.status === "completed" ? "排课已完成" : 
+                     taskStatus.status === "failed" ? "排课失败" : "排课状态"}
+                    {taskStatus.status === "processing" && taskStatus.progress > 0 && 
+                      <span className="badge badge-sm ml-1">{taskStatus.progress}%</span>
+                    }
+                </span>
+            </button>
+
+            {showDetails && (
+                <div className="absolute right-0 top-full mt-2 w-80 card bg-base-100 shadow-lg border border-base-300 z-20">
+                    <div className={`card-body p-4 ${getStatusColor(taskStatus.status)}/10`}>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-lg font-bold">自动排课状态</h3>
+                            <span className={`badge ${
+                                taskStatus.status === "processing" ? "badge-primary" : 
+                                taskStatus.status === "completed" ? "badge-success" : 
+                                taskStatus.status === "failed" ? "badge-error" : "badge-accent"
+                            }`}>
+                                {getStatusText(taskStatus.status)}
+                            </span>
+                        </div>
+
+                        {taskStatus.status === "processing" && (
+                            <>
+                                <Progress 
+                                    percent={taskStatus.progress} 
+                                    status="active"
+                                    size="small"
+                                />
+                                <div className="text-sm mt-1">
+                                    <p><span className="font-medium">当前阶段：</span>{getStageText(taskStatus.processing_stage)}</p>
+                                    {taskStatus.estimated_time_remaining !== undefined && (
+                                        <p>
+                                            <span className="font-medium">预计剩余时间：</span>
+                                            约 {Math.floor(taskStatus.estimated_time_remaining / 60)} 分钟 
+                                            {taskStatus.estimated_time_remaining % 60} 秒
+                                        </p>
+                                    )}
+                                </div>
+                            </>
+                        )}
+
+                        {taskStatus.message && (
+                            <div className="mt-1 text-sm">
+                                <p><span className="font-medium">消息：</span>{taskStatus.message}</p>
+                            </div>
+                        )}
+
+                        {taskStatus.conflicts_count && (
+                            <div className="mt-1 text-sm">
+                                <p className="font-medium">冲突统计：</p>
+                                <div className="flex gap-2 mt-1">
+                                    <span className="badge badge-sm">
+                                        教师: {taskStatus.conflicts_count.teacher}
+                                    </span>
+                                    <span className="badge badge-sm">
+                                        教室: {taskStatus.conflicts_count.classroom}
+                                    </span>
+                                    <span className="badge badge-sm">
+                                        班级: {taskStatus.conflicts_count.clazz}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {taskStatus.status !== "completed" && (
+                            <button 
+                                className="btn btn-sm mt-3"
+                                onClick={handleNavigateToScheduling}
+                            >
+                                {taskStatus.status === "failed" ? "查看失败详情" : "查看详情"}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
@@ -772,6 +1022,7 @@ export function AcademicSchedule({site}: Readonly<{
                     </h1>
                     
                     <div className="flex gap-2">
+                        <SchedulingProgressIndicator semesterUuid={selectedSemester} />
                         <ConflictIndicator semesterUuid={selectedSemester} />
                         <button 
                             className="btn btn-primary btn-sm flex items-center gap-1"
@@ -786,6 +1037,13 @@ export function AcademicSchedule({site}: Readonly<{
                         >
                             <Schedule theme="outline" size="16" />
                             <span>自动排课</span>
+                        </button>
+                        <button 
+                            className="btn btn-secondary btn-sm flex items-center gap-1"
+                            onClick={() => navigate("/academic/schedule/grid")}
+                        >
+                            <Calendar theme="outline" size="16" />
+                            <span>排课二维表</span>
                         </button>
                     </div>
                 </div>

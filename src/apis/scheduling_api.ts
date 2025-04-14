@@ -30,6 +30,7 @@ import { BaseApi, GetAuthorizationToken, MethodType } from "../assets/ts/base_ap
 import { BaseResponse } from "../models/base_response";
 import { AutomaticClassSchedulingDTO } from "../models/dto/automatic_scheduling_dto";
 import { SchedulingTaskEntity } from "../models/entity/scheduling_task_entity";
+import { SchedulingTaskStatusEntity } from "../models/entity/scheduling_task_status_entity";
 
 /**
  * # 自动排课
@@ -50,6 +51,44 @@ const AutomaticSchedulingAPI = async (
         {"Authorization": `Bearer ${GetAuthorizationToken()}`},
     );
 };
+
+/**
+ * # 获取排课任务列表
+ * > 本接口用于获取所有排课任务的列表
+ * 
+ * @returns 排课任务ID列表
+ */
+const GetSchedulingTasksAPI = async (): Promise<BaseResponse<string[]> | undefined> => {
+    return BaseApi<BaseResponse<string[]>>(
+        MethodType.GET,
+        "/api/v1/scheduling/tasks",
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`},
+    );
+};
+
+/**
+ * # 获取排课任务状态
+ * > 本接口用于获取指定排课任务的详细状态
+ * 
+ * @param taskId 排课任务ID
+ * @returns 排课任务状态详情
+ */
+const GetSchedulingTaskStatusAPI = async (taskId: string): Promise<BaseResponse<SchedulingTaskStatusEntity> | undefined> => {
+    return BaseApi<BaseResponse<SchedulingTaskStatusEntity>>(
+        MethodType.GET,
+        `/api/v1/scheduling/tasks/${taskId}`,
+        null,
+        null,
+        null,
+        {"Authorization": `Bearer ${GetAuthorizationToken()}`},
+    );
+};
+
 export {
-    AutomaticSchedulingAPI
+    AutomaticSchedulingAPI,
+    GetSchedulingTasksAPI,
+    GetSchedulingTaskStatusAPI
 }; 

@@ -67,6 +67,7 @@ import { ScheduleAdd } from "./academic/schedule/schedule_add";
 import { AcademicAddTeacherCourseQualification } from "./academic/teacher/course_qualification/add_qualification.tsx";
 import { AcademicEditTeacherCourseQualification } from "./academic/teacher/course_qualification/edit_qualification.tsx";
 import { ConflictList } from "./academic/schedule/conflict_list.tsx";
+import {ScheduleGridView} from "./academic/schedule/schedule_grid_view";
 
 /**
  * 生成一个教务管理控制台组件。
@@ -251,6 +252,7 @@ export function BaseAcademic(): JSX.Element {
                                 <Route path="/schedule/edit/:id" element={<ScheduleEdit site={site}/>}/>
                                 <Route path="/schedule/add" element={<ScheduleAdd site={site}/>}/>
                                 <Route path="/conflicts" element={<ConflictList site={site}/>}/>
+                                <Route path="/schedule/grid" element={<ScheduleGridView site={site}/>}/>
                                 <Route path="/teacher" element={<AcademicTeacher site={site}/>}/>
                                 <Route path="/teacher/add" element={<AcademicAddTeacher site={site}/>}/>
                                 <Route path="/teacher/edit/:teacherId" element={<AcademicEditTeacher site={site}/>}/>

@@ -21,11 +21,12 @@ import { GetCourseTypeListAPI } from "../../../apis/course_type_api";
 import { CourseTypeEntity } from "../../../models/entity/course_type_entity";
 import { GetBuildingListAPI } from "../../../apis/building_api";
 import { BuildingLiteEntity } from "../../../models/entity/building_lite_entity";
-import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
 import { GetCourseListAPI } from "../../../apis/course_api";
+import { CourseLibraryEntity } from "../../../models/entity/course_library_entity";
 import { GetAllAdministrativeClassListAPI } from "../../../apis/administrative_class_api";
 import { AdministrativeClassEntity } from "../../../models/entity/administrative_class_entity";
-import { CourseLibraryEntity } from "@/models/entity/course_library_entity";
+import { AcademicAffairsStore } from "../../../models/store/academic_affairs_store";
+import { HolidayWarningComponent, checkHolidayConflicts } from "../../../components/academic/schedule/holiday_warning_component";
 
 /**
  * # 自动排课页面
@@ -51,8 +52,6 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
     const [buildings, setBuildings] = useState<BuildingLiteEntity[]>([]);
     const [courseList, setCourseList] = useState<CourseLibraryEntity[]>([]);
     const [teachingClasses, setTeachingClasses] = useState<AdministrativeClassEntity[]>([]);
-    const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
-    const [taskId, setTaskId] = useState<string | null>(null);
     const { Panel } = Collapse;
     
     // 用于临时存储要添加的优先时间段
@@ -124,6 +123,10 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
             allowed_building_ids: []
         }
     });
+
+    // 节假日检查状态
+    const [holidayConflictDates, setHolidayConflictDates] = useState<string[]>([]);
+    const [showHolidayWarning, setShowHolidayWarning] = useState(false);
 
     // 添加课程类型定义
     interface SpecificCourse {
@@ -324,6 +327,49 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
         fetchCourses();
     }, [formData.department_uuid]);
 
+    // 在合适的useEffect中添加，例如在timeSlots变化时检查
+    useEffect(() => {
+        if (formData.time_preferences.preferred_time_slots.length > 0 && formData.semester_uuid) {
+            checkHolidays();
+        }
+    }, [formData.time_preferences.preferred_time_slots, formData.semester_uuid]);
+    
+    // 添加检查节假日冲突的函数
+    const checkHolidays = () => {
+        if (!formData.semester_uuid || formData.time_preferences.preferred_time_slots.length === 0) {
+            setHolidayConflictDates([]);
+            setShowHolidayWarning(false);
+            return;
+        }
+        
+        try {
+            // 获取当前学期信息
+            const semester = semesters.find(sem => sem.semester_uuid === formData.semester_uuid);
+            if (!semester) {
+                setHolidayConflictDates([]);
+                setShowHolidayWarning(false);
+                return;
+            }
+            
+            // 将学期开始日期从时间戳转换为ISO日期字符串 YYYY-MM-DD
+            const semesterStartDate = new Date(semester.start_date).toISOString().split('T')[0];
+            
+            // 检查节假日冲突
+            const timeSlotData = formData.time_preferences.preferred_time_slots.map(slot => ({
+                day_of_week: slot.day_of_week,
+                week_numbers: slot.week_numbers
+            }));
+            
+            const conflicts = checkHolidayConflicts(semesterStartDate, timeSlotData);
+            const conflictDates = conflicts.map(conflict => conflict.date);
+            
+            setHolidayConflictDates(conflictDates);
+            setShowHolidayWarning(conflictDates.length > 0);
+        } catch (error) {
+            console.error("检查节假日冲突出错:", error);
+        }
+    };
+
     // 提交排课任务
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -357,21 +403,22 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
                 return;
             }
             
+            // 添加节假日冲突检查
+            if (holidayConflictDates.length > 0) {
+                if (!window.confirm(`当前排课时间包含法定节假日，确定继续提交吗？\n冲突日期: ${holidayConflictDates.join(', ')}`)) {
+                    return;
+                }
+            }
+            
             console.log("提交排课请求数据:", submissionData);
             
             const response = await AutomaticSchedulingAPI(submissionData);
             console.log("排课API响应:", response);
             
-            const responseData = response?.data;
-            
-            if (response?.output === "Success" && responseData) {
+            if (response?.output === "Success" && response.data) {
                 message.success("自动排课任务已提交");
-                if (responseData.estimated_time) {
-                    setEstimatedTime(responseData.estimated_time);
-                }
-                if (responseData.task_id) {
-                    setTaskId(responseData.task_id);
-                }
+                
+                // 排课任务提交成功后直接导航到排课管理页面
                 navigate("/academic/schedule");
             } else {
                 message.error(response?.error_message || "排课任务提交失败");
@@ -696,7 +743,7 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
             classIds = [];
             studentNumber = newSpecificCourse.number || 0;
         } else {
-            // 必修课使用选择的班级ID列表，人数设置为传入的值，如果未设置则默认为1
+            // 必修课使用选择的班级ID列表，人数设置为传入的值，如果未设置则默认为null
             classIds = selectedClasses.map(c => c.uuid);
             studentNumber = newSpecificCourse.number || null;
         }
@@ -1548,36 +1595,6 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
                                 </div>
                             </Panel>
                         </Collapse>
-
-                        {/* 任务状态区域 */}
-                        {taskId && (
-                            <div className="card bg-base-100 shadow-sm border border-success overflow-hidden">
-                                <div className="bg-success/10 p-4 flex items-center space-x-2 rounded-t-box">
-                                    <h2 className="card-title text-lg m-0 text-success">排课任务已创建</h2>
-                                </div>
-                                <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="font-medium">任务ID:</p>
-                                            <p className="font-mono bg-base-200 p-2 rounded">{taskId}</p>
-                                        </div>
-                                        {estimatedTime && (
-                                            <div>
-                                                <p className="font-medium">预计完成时间:</p>
-                                                <p className="font-mono bg-base-200 p-2 rounded">
-                                                    约 {Math.floor(estimatedTime / 60)} 分钟 {estimatedTime % 60} 秒
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="mt-4">
-                                        <p className="text-sm text-base-content/70">
-                                            排课任务正在后台处理中，您可以关闭此页面。完成后系统会通知您查看结果。
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                     
                     {/* 右侧基本信息和按钮区域 - 占3份 */}
@@ -1631,6 +1648,11 @@ export function AutomaticScheduling({ site }: Readonly<{ site: SiteInfoEntity }>
                                 </div>
                             </div>
                         </div>
+
+                        {/* 节假日警告组件 */}
+                        {showHolidayWarning && (
+                            <HolidayWarningComponent dates={holidayConflictDates} />
+                        )}
 
                         {/* 提交按钮 */}
                         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
